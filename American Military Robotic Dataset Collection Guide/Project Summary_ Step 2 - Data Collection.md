@@ -136,7 +136,7 @@ The selected datasets provide an excellent foundation for training a robust Auto
 
 ---
 
-**Submitted by:** Manus AI
+**Submitted by:** Brandon Patterson
 
 **Date:** October 10, 2025
 
