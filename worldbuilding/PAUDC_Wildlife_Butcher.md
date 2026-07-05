@@ -143,7 +143,15 @@ offenses escalate Watch Level. The parish scanner app (a free OnWatch filter)
 overlays a green/red outline on any basking reptile, turning identification into a
 tiny skill players actually learn.
 
-## 5. Hooks Into Existing Systems
+## 5. Concept Art
+
+AI-generated concept art (Higgsfield):
+
+- [Barrister crashes YARDCLASH night](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_182405_0ae81f60-a05a-43da-9f9d-4b180ffacb1f.png) — the Pressure Dome break-in world event.
+- [Croc Wrangler contract](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_182408_5ee4a102-2e78-4421-8fa0-264043688f55.png) — pool-party relocation, golden hour.
+- [The General](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_183221_5e71fbed-0de7-44e4-8729-b3c4f5c97182.png) — legendary storm-night boss encounter key art.
+
+## 6. Hooks Into Existing Systems
 
 - **Culinary Academy:** Granny-Approved dishes made with fresh Butcher & Market
   ingredients get a quality-tier head start — hunters and cooks feed one economy.
