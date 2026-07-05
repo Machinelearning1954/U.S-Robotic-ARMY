@@ -61,6 +61,32 @@ our *island* doesn't.
 - **Script Hook V / OpenIV:** legitimate single-player modding tools; useful for
   understanding how GTA structures missions and assets without touching source.
 
+## The mobile track — trained on the 2025 high-graphics mobile wave
+
+The current crop of "realistic graphics" Android/iOS games proves a console look on
+a phone is now table stakes, and they all get there the same few ways. Those
+techniques (generalized — no engine code copied from anyone) become PAUDC's mobile
+requirements:
+
+- **Dynamic resolution + quality presets.** Render scale drops under load and the
+  player gets an explicit HD/SD choice. *Already live in the prototype:* adaptive
+  pixel-ratio stepping plus a new on-screen HD/SD toggle on touch devices.
+- **Aggressive LOD and impostors.** Distant palms, buildings and NPCs become cheap
+  stand-ins; only the district around the player is full-detail. Maps to our
+  streaming-boundary plan in the map layout doc.
+- **Short-session loops.** Top mobile games respect 5-minute sessions. PAUDC mobile
+  leads with the loops that already fit that shape: a croc relocation, one delivery
+  run, one YARDCLASH bout, a Fort Flavor cook.
+- **Touch-first controls, controller optional.** The browser prototype is the
+  testbed — touch buttons and gamepad support graduate with it into the engine build.
+- **Install-size honesty.** The 150 GB flagship spec is PC/console. Mobile ships as
+  **PAUDC: Neon Harbor Mobile** — an 8 GB companion build that streams one district
+  at a time (ferry rides and gates mask the loads) plus the OnWatch companion app
+  (clout feed, recruitment stat, YARDCLASH fight-night viewing) for off-island play.
+
+Engine note: the chosen Path A engine (Godot 4, later UE5) exports to Android/iOS,
+so the mobile track is a build target of the same project, not a second codebase.
+
 ## Decision for this repo
 
 **Path A with Godot 4 is the next rung** (keeps the web-playable pipeline), with
