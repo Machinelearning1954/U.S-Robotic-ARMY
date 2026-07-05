@@ -20,6 +20,15 @@
 | [`PAUDC_Culinary_Academy.md`](PAUDC_Culinary_Academy.md) | The Tichfield Culinary Academy ("Fort Flavor") — cooking school hub, recipe/buff system, the curry goat questline, food economy and events. |
 | [`PAUDC_Wildlife_Butcher.md`](PAUDC_Wildlife_Butcher.md) | Wildlife ecosystem and the Blue Mountain Butcher & Market — stylized capture/processing loop, Butcher skill tree, hygiene minigame, dynamic pricing, black-market risk lever. |
 
+## Playable prototype
+
+[`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a
+self-contained top-down browser prototype (open the file in any browser). Drive the
+amphibious Mudfish Mk-0 around an island whose coastline is traced from the real
+Port Antonio geography (twin harbors, Navy Island, Folly Point — everything on it
+fictional), complete the Open House tour, relocate three crocs, and run the curry
+goat delivery. Keyboard (WASD/arrows + Space) and touch supported.
+
 ## Canon quick facts
 
 - **Install target:** 150 GB, budgeted by asset category.
