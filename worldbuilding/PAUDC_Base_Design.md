@@ -315,7 +315,56 @@ the base's ring-by-ring rank-gated access doubles as a natural streaming boundar
 
 ---
 
-## 10. Content Boundaries (Standing Rules for All Contributors)
+## 10. "YARDCLASH" — Original 1v1 Fighting Minigame
+
+An original arcade-style hand-to-hand fighting game inside PAUDC, inspired by the
+*genre* of classic 2D fighters — original characters, original moves, original name.
+No content is borrowed from any existing fighting game.
+
+### Concept
+Every Friday night, the Crucible's Pressure Dome converts into **the Yard** — a
+raised sparring platform ringed by shipping containers, string lights, and a roaring
+crowd of off-duty soldiers. Matches are official "combatives tournaments" in fiction,
+but the vibe is pure dancehall street party: a selector on the turntables, the crowd
+betting canteen credits, OnWatch drones filming every knockout for the island feed.
+
+### How It Plays
+- **Side-view 1v1 rounds**, best of three, 60-second timer — the camera locks to a
+  classic 2D fighting plane while the 3D crowd reacts around the platform.
+- **Three-layer kit per fighter:** strikes (light/heavy), a grapple/throw layer, and
+  one **"Riddim Move"** — a super that charges as the crowd's hype meter rises.
+  Playing flashy charges it faster than playing safe.
+- **Crowd as a mechanic:** knock an opponent into the container walls and the crowd
+  shoves them back in; win stylishly and the selector switches to your fighter's
+  personal anthem for the next round.
+- **Weather matters:** during Storm Conditions the Dome runs its indoor-rain program —
+  slippery platform, altered footsie spacing, lightning-flash silhouette frames.
+
+### Original Roster (launch eight)
+| Fighter | Style | Riddim Move |
+|---|---|---|
+| **Auntie Blades** Deveraux | Drill-sergeant combatives, punishing counters | "Lights Out Lecture" — parry-into-lecture slam |
+| **Brukfoot** | Dancehall-footwork kickboxer, all rhythm and feints | "Wheel-Up" — rewind-step flurry |
+| **Chef Marlin** | Dockside brawler, jerk-smoke haze mixups | "Scotch Bonnet Special" — burning uppercut |
+| **Sistren Ivy** | DFS analyst, precise pressure-point art | "Signal Lock" — stun-combo that scrambles inputs |
+| **Big Auntie's Loadmaster "Ratchet"** | Cargo-strap grappler | "Turnbuckle" — winch-assisted suplex |
+| **Duppy Ace "Mirage"** | Test-pilot capoeira hybrid, afterimage feints | "Ghost Wing" — cloak-dash cross-up |
+| **The Mudfish** | Engineer tank, slow, armored, wrench normals | "Dry Dock" — ground-quake knockdown |
+| **Kingfisher** *(unlockable)* | Mysterious masked champion from the Numbers Station storyline | "Static Choir" — screen-wide broadcast burst |
+
+### Progression & Rewards
+- Weekly **Yard Rankings** posted beside the Crucible leaderboard; the reigning champ
+  gets a custom entrance (fireworks, anthem, crowd chant) until dethroned.
+- Wins pay cosmetics (fight shorts, wraps, victory dances), canteen credits, and a
+  hidden storyline: beat all eight with no round losses to trigger Kingfisher's
+  challenge cutscene.
+- **PvP and PvE:** fight NPCs on a ladder, or challenge any player in the social hub
+  by throwing a towel at their feet — the classic arcade "challenger approaching"
+  moment, reinvented in open-world form.
+
+---
+
+## 11. Content Boundaries (Standing Rules for All Contributors)
 
 - Everything in PAUDC is **invented for a game**. No real units, real systems, real
   procedures, real security details, or real facility layouts may be referenced or
