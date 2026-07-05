@@ -284,7 +284,38 @@ it stays funny, alive, and a little unhinged.
 
 ---
 
-## 9. Content Boundaries (Standing Rules for All Contributors)
+## 9. Technical Target Spec — 150 GB Install (GTA 6-Scale)
+
+The game targets a **150 GB install footprint** — flagship open-world scale. This is
+a design budget, not just a number: every gigabyte is assigned so the world feels
+dense rather than bloated. Streaming is seamless (no loading screens between zones);
+the base's ring-by-ring rank-gated access doubles as a natural streaming boundary.
+
+### Asset Budget Breakdown
+
+| Category | Budget | What it buys |
+|---|---|---|
+| World geometry & terrain | 32 GB | Full island region, four biome bands, reef-to-peak continuous mesh, destructible storm damage states |
+| Textures & materials | 38 GB | 4K PBR everywhere players linger: wet concrete, sun-bleached paint, rust streaks, rain-beaded glass, jungle foliage layers |
+| Interiors | 14 GB | 80+ enterable PAUDC interiors plus town/civilian interiors, each with unique clutter and story props |
+| Characters & animation | 16 GB | NPC crowd variety (soldiers, families, dockworkers, vendors), facial animation for story cast, drill/parade/dance motion sets |
+| Vehicles | 10 GB | 40+ faction vehicles with full interactive interiors, damage states, storm-weathering variants |
+| Audio | 22 GB | Full radio stations (reggae/dancehall/soca/faction AM), 3D storm ambience, per-zone soundscapes, dialogue in English + Jamaican Patois performances |
+| Cinematics & story | 12 GB | Mocap cutscenes: enlistment ceremony, Maroon Thunder departure, Storm Season beats |
+| VFX & simulation data | 6 GB | Hurricane system, ocean sim states, Skyfence bloom effects, Geo-Core glow volumetrics |
+| **Total** | **150 GB** | |
+
+### Budget Rules
+- **Density over sprawl:** cut square kilometers before cutting interior detail — the
+  GTA 6 lesson is that enterable, hand-dressed spaces sell scale more than empty land.
+- **Audio is not negotiable:** the Caribbean soundscape is the game's identity; the
+  22 GB audio slice is protected in every budget review.
+- **Storm states ship day one:** weather variants of geometry/textures are in-budget,
+  not DLC.
+
+---
+
+## 10. Content Boundaries (Standing Rules for All Contributors)
 
 - Everything in PAUDC is **invented for a game**. No real units, real systems, real
   procedures, real security details, or real facility layouts may be referenced or
