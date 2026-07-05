@@ -364,7 +364,47 @@ betting canteen credits, OnWatch drones filming every knockout for the island fe
 
 ---
 
-## 11. Content Boundaries (Standing Rules for All Contributors)
+## 11. Silver Springs & the Polytech — "The Chromelab"
+
+A ninth district joins the map: **Silver Springs**, a spring-fed valley community in
+the hills southwest of town, invented for this game in the spirit of Portland
+parish's real waterfall-and-spring country. Glass-clear pools step down the valley
+in terraces; at night the underwater lamps make the whole gully glow like a strip
+of neon poured into the hillside. It is deliberately the most beautiful place on
+the island — because it is home to the people whose job is making things beautiful.
+
+### Silver Springs Polytechnic — the tech school
+Sister school to the Tichfield Culinary Academy: where Fort Flavor trains the
+island's cooks, **the Polytech trains its engineers and image-makers.** Students
+split between two wings:
+
+- **The Works** — vehicle tuning, drone rigs, stage/sound engineering for the
+  Strip's venues, and the Mudfish motor pool apprenticeships.
+- **The Chromelab** — the visual-tech wing, and the school's legend. Chromelab
+  students maintain the island's **"Looksmods"**: the lighting rigs, weather
+  simulation, and color-grade profiles that drive everything from the Strip's neon
+  to OnWatch's cinematic broadcast feed. In-world, when the island looks
+  impossibly good, a Chromelab kid did that.
+
+### Gameplay hooks
+- **Chromelab Grade** — a player-facing photo-real display mode (filmic tone
+  mapping, richer lighting, deeper draw). Unlocked in fiction by enrolling at the
+  Polytech; toggled any time. *Already live in the 3D prototype.*
+- **Clip contracts** — Chromelab students commission OnWatch footage ("shoot the
+  regatta at golden hour in Grade"). Clips filmed in Chromelab Grade earn bonus
+  clout, feeding the recruitment world-stat.
+- **Looksmod side-chain** — restore the valley's five terrace lamps after storm
+  damage; each relit terrace visibly upgrades Silver Springs at night.
+- **Cross-school rivalry** — Fort Flavor vs. Polytech at the Friday Fireside:
+  cooks cater, techs light the stage, and the OnWatch poll picks the week's winner.
+
+*Design note: this district was trained on the PC graphics-overhaul modding scene —
+the craft of transforming a game's look through lighting, weather and color grading.
+Techniques generalized; no third-party mod assets, shaders, or code are used.*
+
+---
+
+## 12. Content Boundaries (Standing Rules for All Contributors)
 
 - Everything in PAUDC is **invented for a game**. No real units, real systems, real
   procedures, real security details, or real facility layouts may be referenced or
