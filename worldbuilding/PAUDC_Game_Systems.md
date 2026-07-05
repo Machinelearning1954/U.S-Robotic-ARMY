@@ -358,5 +358,56 @@ into a chore; keeping it *rewarding* makes players seek it out because they want
 to. The curry goat quest matters because the pot is worth carrying — not because a
 meter is empty.
 
+---
+
+## 11. The Field Kit — Loadout System (No Infinite Pockets)
+
+GTA 6 is reported to be replacing the classic "carry the whole armory" model with
+a limited loadout wheel. PAUDC adopts the same design pattern — original take,
+fictional gear — because it makes every choice before a mission matter and it
+feeds our existing systems.
+
+### The Kit Wheel
+Before deploying, the player builds a **Field Kit** at their locker (barracks,
+apartment, or Mudfish trunk). The kit is what the radial wheel holds in the
+field — nothing else comes along:
+
+| Slot | Holds (all fictional/stylized) | Example picks |
+|---|---|---|
+| **Sidearm** | one compact service piece | standard-issue "Peacekeeper" (stylized, sci-fi dressed) |
+| **Primary** | one long tool — combat *or* trade | training rifle prop, net launcher, capture snare |
+| **Thrown** | one pouch | **Dazzler** ("duppy flash") stun-dazzle puck, smoke, chaff foil |
+| **Melee** | one | cutlass (ceremonial pattern), wrench, towel (YARDCLASH challenge item) |
+| **Gadget** | one | scout drone, Duppy Cloak charge, Chromelab camera rig |
+| **Utility** | trade gear | croc snare, cook pot rack, butcher cooler, repair kit |
+| **Pocket** | consumables | two Fort Flavor dishes, energy tea |
+
+- **Swap at lockers, not mid-fight.** Lockers live in every district hub; the
+  Mudfish trunk is a mobile mini-locker with two swap charges per in-game day.
+- **Kits are builds.** Saved presets — "Wrangler", "Cook Run", "Storm Watch",
+  "YARDCLASH Night" — one tap to switch at any locker. Spec-tree perks add slot
+  upgrades (deeper Pocket for cooks, second Utility for butchers).
+- **Weight is felt, not counted.** No encumbrance spreadsheet: heavy Primary
+  picks slightly slow sprint and swim — readable, arcade, honest.
+
+### Hard Knock — the breach mechanic
+The reported GTA 6 flashbang-breach loop, PAUDC-flavored and kept **stylized and
+non-graphic**: during Storm Condition responses, base security runs **Hard
+Knocks** on Barometer Syndicate strongpoints. Player kits a **Dazzler** —
+a fictional stun-dazzle puck that pops like a camera flash and rings like a
+steelpan note. Toss it through the door and the game gives a two-second
+slow-motion entry window where opponents are staggered (hands up, stumbling —
+never gore). It's an arcade timing beat, not a tactics simulator: the room
+layouts are fictional, the procedure is three button presses, and the reward is
+style points on the OnWatch clip, not realism.
+
+- Dazzlers are loud and bright: every use off-mission raises Watch Level.
+- Blue Mountain Butcher stocks a **Gator-Grade Dazzler** variant that also
+  works as a wildlife deterrent — the wrangler's non-lethal panic button.
+
+*Boundary note: slots and gear stay fictional or genre-generic; no real weapon
+models, specs, or tactical procedure are referenced — see the content boundaries
+in the base design doc.*
+
 > All systems above are fictional game mechanics. Tone rule stands: cinematic and
 > playful — power fantasy, not procedure manual.

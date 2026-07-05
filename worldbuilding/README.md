@@ -23,7 +23,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.4**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.5**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -40,7 +40,10 @@ graded splashdown clips pay double clout). v0.4 is the graphics pass: real-time
 soft shadows that follow the player, vertex-animated swell on the sea with live
 specular, a night-sky dome with a visible moon, wet-sand waterline shading, lit
 cottage windows, and a denser palm forest with varied heights — Chromelab Grade now
-defaults ON.
+defaults ON. v0.5 adds true post-processing bloom in Grade mode (neon, beacons
+and pools genuinely glow), twin spotlight headlight cones, denser terrain, and the
+AI-pipeline Mudfish mesh (image-to-3D GLB) that live-loads as the player vehicle
+where the network allows.
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a

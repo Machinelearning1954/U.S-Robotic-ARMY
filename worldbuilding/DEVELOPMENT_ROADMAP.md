@@ -87,6 +87,63 @@ requirements:
 Engine note: the chosen Path A engine (Godot 4, later UE5) exports to Android/iOS,
 so the mobile track is a build target of the same project, not a second codebase.
 
+## The AI asset pipeline — image-to-3D (Hunyuan3D-2.1 class tools)
+
+Open-source image-to-3D generators — headlined by **Tencent Hunyuan3D-2.1**
+(a 3.3B-parameter shape model plus a 2B-parameter PBR texture model that turns a
+single concept image into a textured, production-ready mesh) — collapse the most
+expensive step between our concept art and an engine-ready prop. This is how a
+tiny team fills a 1200 m island with original assets without ripping anyone's.
+
+**The pipeline (concept → engine):**
+
+1. **Concept art** — generate or draw the prop exactly as the art bible describes
+   it (clean silhouette, neutral background, three-quarter view works best).
+2. **Image-to-3D** — run it through an image-to-3D model to get a textured GLB
+   (Hunyuan3D-2.1 self-hosted needs ~10 GB VRAM for shape, ~29 GB with PBR
+   texturing; hosted image-to-3D services do the same step with zero setup).
+3. **Game-ready pass** — retopologize/decimate, bake LODs, add collision, fix
+   scale, re-export. AI meshes are dense and unoptimized out of the box; this
+   step is not optional.
+4. **Engine import** — GLB drops straight into Godot 4 / UE5; wire materials to
+   the engine's PBR pipeline.
+
+**The tool landscape (2026):** the same pipeline runs on any of the current
+image-to-3D generators — pick per asset class rather than marrying one:
+
+| Tool | Type | Best at |
+|---|---|---|
+| **Hunyuan3D-2.1** (Tencent) | open-source, self-hosted | free, PBR paint stage, rivals paid tools; license territory caveat below |
+| **Meshy** | hosted | balanced all-rounder: text/image-to-3D, PBR, topology controls, broad exports |
+| **Tripo** | hosted | cheapest path to game-ready: clean quad topology, auto-rigging, stylized modes |
+| **Rodin / Hyper3D** | hosted | highest-fidelity production assets, least cleanup |
+
+**Where it's allowed to shine:** set dressing and props (market stalls, cook
+pots, fish traps, crates, buoys, furniture) and background filler. **Where it
+isn't:** hero assets — the Mudfish, main cast, YARDCLASH fighters stay
+artist-authored or artist-finished; AI output is a starting block there, never
+the shipped asset.
+
+**License caution (read before shipping):** Hunyuan3D-2.1 ships under the
+*Tencent Hunyuan 3D 2.1 Community License* — commercial use is permitted with
+conditions, but the license expressly **excludes the European Union, United
+Kingdom and South Korea**. A game distributed in those territories cannot rely
+on it there. Practical policy for PAUDC: fine for previz, prototyping and
+internal iteration; before any commercial ship, either replace Hunyuan-derived
+assets with unrestricted ones or clear the territory question with counsel.
+Keep a manifest of which shipped assets came from which generator — same
+provenance discipline as Rule Zero.
+
+**Proven in this repo:** the pipeline's first two stages were run end-to-end for
+the Mudfish Mk-0 using a hosted image-to-3D service (same concept→mesh step
+Hunyuan3D-2.1 performs self-hosted):
+
+- Stage 1, concept art: [Mudfish Mk-0 concept](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_213032_4317ead2-d589-44e0-b322-cd75a6b2c62c.png)
+- Stage 2, textured GLB mesh: [Mudfish Mk-0 GLB](https://d3u0tzju9qaucj.cloudfront.net/7d051b5a-7bfe-49fe-a484-24e7b3a9458a/961aaebb-58f3-4849-a558-55644d6ac9eb.glb)
+- Stage 4, engine import: the 3D prototype (`game/3d.html` v0.5) live-loads this GLB
+  as the player vehicle when the network allows, with the hand-built box jeep as
+  automatic fallback — the pipeline's first asset is literally drivable.
+
 ## Decision for this repo
 
 **Path A with Godot 4 is the next rung** (keeps the web-playable pipeline), with
