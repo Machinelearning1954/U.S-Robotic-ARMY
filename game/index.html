@@ -265,17 +265,23 @@ function draw(){
   const vg=cx.createRadialGradient(vw/2,vh/2,vh*.35,vw/2,vh/2,vh*.9);
   vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(2,10,14,.55)');
   cx.fillStyle=vg;cx.fillRect(0,0,vw,vh);
-  // minimap
-  mx.fillStyle='rgba(4,24,32,.95)';mx.fillRect(0,0,188,128);
+  // minimap (static base pre-rendered once)
+  mx.drawImage(miniBase,0,0);
   mx.save();mx.scale(188/W,128/H);
-  mx.fillStyle='#0e4f56';mx.fillRect(0,0,W,H);
-  coastPath(mx);mx.fillStyle='#143722';mx.fill();
-  mx.fillStyle='#17402a';mx.beginPath();mx.ellipse(NAVY.x,NAVY.y,NAVY.rx,NAVY.ry,-.2,0,7);mx.fill();
-  for(const z of ZONES){mx.fillStyle='rgba(58,245,216,.8)';mx.beginPath();mx.arc(z.x,z.y,16,0,7);mx.fill();}
   if(tgt){mx.fillStyle='#ffb84d';mx.beginPath();mx.arc(tgt.x,tgt.y,26,0,7);mx.fill();}
   mx.fillStyle='#fff';mx.beginPath();mx.arc(player.x,player.y,22,0,7);mx.fill();
   mx.restore();
 }
+// pre-render static minimap base once
+const miniBase=document.createElement('canvas');miniBase.width=188;miniBase.height=128;
+{const g=miniBase.getContext('2d');
+ g.fillStyle='rgba(4,24,32,.95)';g.fillRect(0,0,188,128);
+ g.save();g.scale(188/W,128/H);
+ g.fillStyle='#0e4f56';g.fillRect(0,0,W,H);
+ coastPath(g);g.fillStyle='#143722';g.fill();
+ g.fillStyle='#17402a';g.beginPath();g.ellipse(NAVY.x,NAVY.y,NAVY.rx,NAVY.ry,-.2,0,7);g.fill();
+ for(const z of ZONES){g.fillStyle='rgba(58,245,216,.8)';g.beginPath();g.arc(z.x,z.y,16,0,7);g.fill();}
+ g.restore();}
 say('Welcome to PAUDC. Drive the tour — every district, no rush. (This vehicle floats. You’ll see.)',5e3);
 toast('Port Antonio','Unified Defense Complex');
 requestAnimationFrame(step);

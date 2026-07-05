@@ -42,12 +42,13 @@ const ZONES=[
 ];
 const W2=2400,H2=1600,SC=0.5; // 2D map units -> metres (world 1200x800)
 const mx=v=>(v-W2/2)*SC, mz=v=>(v-H2/2)*SC;
-function coastY(x2){ // 2D y of coastline at 2D x
-  if(x2<=COAST[0][0])return COAST[0][1];
-  for(let i=1;i<COAST.length;i++){const[a,b]=COAST[i-1],[c,d]=COAST[i];
-    if(x2<=c)return b+(d-b)*((x2-a)/((c-a)||1));}
-  return COAST[COAST.length-1][1];
-}
+const COAST_LUT=new Float32Array(2401);
+{let seg=1;
+ for(let x=0;x<=2400;x++){
+   while(seg<COAST.length-1&&x>COAST[seg][0])seg++;
+   const[a,b]=COAST[seg-1],[c,d]=COAST[seg];
+   COAST_LUT[x]=x<=a?b:b+(d-b)*((x-a)/((c-a)||1));}}
+const coastY=x2=>COAST_LUT[Math.max(0,Math.min(2400,x2|0))];
 function navyBump(x2,y2){const dx=(x2-330)/110,dy=(y2-430)/62;const d=1-(dx*dx+dy*dy);return d>0?d*14:0;}
 function height(x,z){ // world metres in, metres up out
   const x2=x/SC+W2/2, y2=z/SC+H2/2;
@@ -68,8 +69,8 @@ function height(x,z){ // world metres in, metres up out
 const isWater=(x,z)=>height(x,z)<0.4;
 // ---------------- renderer / scene ----------------
 const cv=document.getElementById('game');
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance'});
+let pxr=Math.min(devicePixelRatio,1.75);renderer.setPixelRatio(pxr);
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x05131c);
 scene.fog=new THREE.Fog(0x05131c,180,720);
@@ -170,9 +171,13 @@ for(const[id,k]of[['tf','w'],['tb','s'],['tl','a'],['tr','d']]){
 const $=id=>document.getElementById(id);let toastT=0;
 function toast(t){$('toast').textContent=t;$('toast').style.opacity=1;toastT=perf+2800;}
 // ---------------- loop ----------------
-let perf=0,last=0,done=false;
+let perf=0,last=0,done=false,slow=0;
+const CAMT=new THREE.Vector3();
 function tick(t){
   perf=t;const dt=Math.min(0.05,(t-last)/1000||0.016);last=t;
+  // adaptive resolution: sustained slow frames -> step pixel ratio down
+  if(dt>0.04)slow++;else slow=Math.max(0,slow-1);
+  if(slow>90&&pxr>1){pxr=Math.max(1,pxr-0.25);renderer.setPixelRatio(pxr);slow=0;}
   const wet=isWater(P.x,P.z);
   const thr=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?0.6:0);
   const str=(keys.a||keys.arrowleft?1:0)-(keys.d||keys.arrowright?1:0);
@@ -184,9 +189,10 @@ function tick(t){
   jeep.position.set(P.x,y,P.z);jeep.rotation.y=P.a;
   const ahead=height(P.x+Math.cos(P.a)*3,P.z-Math.sin(P.a)*3);
   jeep.rotation.z=wet?0.04*Math.sin(t*0.003):Math.atan2(ahead-gy,3)*0.6;
-  // camera chase
+  // camera chase (reused scratch vector — no per-frame allocation)
   const cd=26,ch=11;
-  camera.position.lerp(new THREE.Vector3(P.x-Math.cos(P.a)*cd,y+ch,P.z+Math.sin(P.a)*cd),1-Math.pow(0.0018,dt));
+  CAMT.set(P.x-Math.cos(P.a)*cd,y+ch,P.z+Math.sin(P.a)*cd);
+  camera.position.lerp(CAMT,1-Math.pow(0.0018,dt));
   camera.lookAt(P.x,y+2.5,P.z);
   // water shimmer + geo core pulse + beacons spin
   water.material.opacity=0.74+0.05*Math.sin(t*0.0016);
