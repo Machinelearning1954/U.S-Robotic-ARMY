@@ -404,7 +404,33 @@ Techniques generalized; no third-party mod assets, shaders, or code are used.*
 
 ---
 
-## 12. Content Boundaries (Standing Rules for All Contributors)
+## 12. Pelican Key — the Florida Chapter
+
+The tenth district answers the genre's oldest postcard: **Pelican Key**, a small
+fictional islet off the northwest coast — PAUDC's original riff on the
+Florida/Gulf-coast fantasy that Vice City and GTA 6's Leonida made iconic.
+*Nothing here is imported from any Rockstar map; the geometry, names and
+businesses are invented for this game* (see Rule Zero in the roadmap — the
+community projects that port real Vice City map data are exactly what this
+project must never do).
+
+- **The look:** a two-street strip of pastel art-deco hotels (flamingo pink,
+  sky blue, key-lime), one buzzing neon sign, airboat docks on the swamp side,
+  pelicans on every piling. Golden-hour postcard by day, neon reflections by
+  night.
+- **In fiction:** a resort settlement grown around an old lighthouse concession.
+  The Barometer Syndicate quietly launders storm-salvage money through its
+  beachfront hotels — the Key is where the campaign's stateside threads surface.
+- **Gameplay:** reachable only by swimming the channel in the Mudfish (the
+  amphibious hull finally pays off), it hosts airboat time trials, the "Neon
+  Regatta" photo contract for Chromelab students, and a YARDCLASH away-night on
+  the hotel rooftop.
+- **In the prototype:** Pelican Key is live as the tenth recon district —
+  its islet, pastel strip and neon sign render offshore northwest.
+
+---
+
+## 13. Content Boundaries (Standing Rules for All Contributors)
 
 - Everything in PAUDC is **invented for a game**. No real units, real systems, real
   procedures, real security details, or real facility layouts may be referenced or
