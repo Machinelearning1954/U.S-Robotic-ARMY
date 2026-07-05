@@ -319,5 +319,44 @@ film the cleanup chaos.
   footage), recruitment (crowd size), and the roster's storylines converge — the
   weekly heartbeat of the base.
 
+---
+
+## 10. Needs — Our Answer to the Hunger/Sleep Debate
+
+The genre-wide question ("should a GTA-style game make you eat and sleep?") gets a
+firm PAUDC ruling: **carrot, never stick.** The cons of survival mechanics are real —
+they slow fast-paced play, frustrate casual players, and fight the freedom-and-chaos
+core of the genre. But the pros (immersion, planning, roleplay) are worth keeping.
+So the default game has **no hunger or fatigue penalties, ever** — only bonuses:
+
+### Well Fed (food = buffs, already canon)
+Eating is always optional and always positive. A Fort Flavor plate, a Food Row
+snack, or a market meal grants **Well Fed**: stamina regen, swim speed, storm
+resistance, or YARDCLASH hype gain depending on the dish (see the Culinary Academy
+doc). Quality tier scales duration — a Granny-Approved curry goat is the best buff
+food in the game. Skip eating entirely and nothing bad happens; you're just not
+buffed.
+
+### Well Rested (sleep = banked bonus)
+Sleeping at your bunk, apartment, or a hotel banks **Well Rested**: +25% faction XP
+for the next 90 real minutes of play, plus a free daily gear repair. It's the
+classic rested-bonus pattern — it rewards players who log off in a bed and punishes
+no one. Sleep is never required and never interrupts anything.
+
+### Field Rations Mode (the opt-in hardcore toggle)
+For roleplay servers and immersion players, an optional toggle adds visible hunger
+and stamina meters with soft consequences (reduced sprint, aim sway — never death,
+never forced interruptions mid-mission). It exists because the debate has two valid
+sides; it defaults **off** because the base game is a power fantasy. **Ironman Tour**
+leaderboards track completions with the toggle on — hardcore players get bragging
+rights instead of making everyone else eat on a timer.
+
+### Why this is the right call for PAUDC specifically
+The food economy is one of this game's hearts — Fort Flavor, the Blue Mountain
+Butcher, Food Row. Making food *mandatory* would turn the island's best content
+into a chore; keeping it *rewarding* makes players seek it out because they want
+to. The curry goat quest matters because the pot is worth carrying — not because a
+meter is empty.
+
 > All systems above are fictional game mechanics. Tone rule stands: cinematic and
 > playful — power fantasy, not procedure manual.
