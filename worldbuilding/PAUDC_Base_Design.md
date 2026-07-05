@@ -217,7 +217,74 @@ All invented, deliberately sci-fi flavored so nothing reads as real-world hardwa
 
 ---
 
-## 8. Content Boundaries (Standing Rules for All Contributors)
+## 8. GTA 6 Design-Language Alignment (Reference Pass)
+
+This section adapts publicly confirmed GTA 6 world-design principles (Leonida's
+multi-biome map, enterable interiors, the social-media-saturated world, interactive
+vehicle interiors, reworked stealth, dynamic hurricanes) into PAUDC's fictional design
+so the base feels native to that generation of open-world game.
+
+### 8.1 Biome Integration — the base as a seam, not an island
+GTA 6's Leonida stitches six distinct biomes into one continuous map. PAUDC follows
+the same rule: it is not a walled-off compound but a **seam between four biomes** —
+reef shallows, harbor town, rainforest ridge, and cloud-misted peaks. Each of the
+seven zones sits in a different biome band, so traversing the base bottom-to-top is
+itself a scenery tour: jet-ski to Ironbeach, jeep up the switchbacks past Palm Line,
+cable car through the mist into The Ear, tunnel into The Vault.
+
+### 8.2 Enterable Interiors — "700 interiors" philosophy
+Following the confirmed density of enterable spaces, PAUDC targets **80+ fully
+enterable interiors** at launch: every barracks common room, the hospital ship's ward
+deck, the Lagoon Club's back kitchen, individual Skyfence control pods, aircraft
+cockpits and the *Maroon Thunder*'s vehicle deck. Rule of thumb: **if a door has a
+handle, it opens.** Interiors are where side stories live — a poker game in a hangar
+office, a conspiracy wall in a DFS analyst's dome pod.
+
+### 8.3 The Social Layer — the base is always filming
+Leonida is a social-media-saturated world, and PAUDC leans in:
+
+- **"OnWatch"** — the in-game fictional social app fills with NPC-posted clips of
+  things the player does on base: a botched obstacle-course run goes viral, a perfect
+  jet landing earns clout, Auntie Blades reaction clips trend island-wide.
+- **Recruitment runs on clout.** The faction's enlistment numbers (a live world stat)
+  rise when players do spectacular, filmable things in public zones — the in-fiction
+  reason the base tolerates showoffs.
+- Base NPCs livestream from the seawall; the open-air cinema plays community-voted
+  "clip of the week."
+
+### 8.4 Vehicles — interactive interiors, 40+ base-exclusive rides
+Matching the confirmed 200+ vehicle roster with interactive interiors, PAUDC
+contributes a **40+ vehicle faction garage** — every one with a fully modeled
+interior: flip switches in the SV-77 Duppy's cockpit, walk the *Maroon Thunder*'s
+bridge mid-voyage, ride in the back of Big Auntie's cargo bay with your squad.
+Vehicle unlock tiers map one-to-one to faction rank.
+
+### 8.5 Stealth & Wanted-System Hooks
+GTA 6's confirmed prone crawling and smarter wanted system get a base-specific
+twist: PAUDC has its own **"Watch Level"** (separate from civilian wanted stars) for
+players who aren't enlisted or who go rogue inside the perimeter — escalating from
+polite MP escorts to Duppy gunship spotlights. For enlisted players it inverts into
+the **Standing meter**: discipline infractions (joyriding a forklift through the parade
+ground) cost Standing instead of triggering stars. Both systems are fictional
+game mechanics only.
+
+### 8.6 Weather as a Systems Driver
+GTA 6's dynamic hurricanes become PAUDC's signature: the base has a public
+**Storm Condition ladder (SC-4 → SC-1)** that visibly reconfigures the world —
+Skyfence petals lock shut, aircraft ferry out in dramatic mass launches, Palm Line
+boards its shutters, and the neon perimeter switches to amber storm lighting. Storm
+Season live events ride this system rather than scripted set dressing.
+
+### 8.7 Tone Calibration — "Florida Man energy, Jamaican accent"
+Leonida's chaotic local-news energy translates here into the base's comedic
+undercurrent: a crocodile keeps getting into the Pressure Dome, a private runs an
+unlicensed jerk-chicken stand out of a guard shack, the base radio DJ feuds with the
+official public-affairs office. The power fantasy stays cinematic; the world around
+it stays funny, alive, and a little unhinged.
+
+---
+
+## 9. Content Boundaries (Standing Rules for All Contributors)
 
 - Everything in PAUDC is **invented for a game**. No real units, real systems, real
   procedures, real security details, or real facility layouts may be referenced or
