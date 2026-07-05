@@ -97,7 +97,53 @@ Overhunt any species and it visibly thins out — prices crash, Miss Ouida refus
 stock ("Yuh mad? Let di hills breathe."), and a **Rewilding side mission** chain opens
 to restore it. Keeps the loop sustainable and the humor intact.
 
-## 4. Hooks Into Existing Systems
+## 4. Crocodiles & Alligators — The Apex Expansion
+
+Two species, two completely different game loops — and a built-in tone rule:
+
+### Native Crocodiles — protected, never processed
+The crocodile is the island's national symbol (it's on the fictional parish crest in
+the game, as in life), so in-game **native crocs are protected**: they can't be hunted,
+butchered, or sold. Instead they're the stars of the **Croc Wrangler** loop:
+
+- **Wrangler Contracts:** a croc in a swimming pool, a croc under a parked Duppy
+  tilt-jet, a croc asleep in the YARDCLASH ring an hour before fight night. Player
+  gets a snare pole, a tow skiff, and a timer — relocate it to the wetland preserve
+  without getting spun. Paid by the parish in cash *and* Standing.
+- **"Barrister"** — the canon celebrity: the enormous, unbothered croc who keeps
+  breaking into the Pressure Dome (and once guarded Instructor Palmer's curry pot).
+  He cannot be relocated permanently; he always comes back. Recurring comedy
+  engine, OnWatch superstar, unofficial base mascot with his own merch cosmetics.
+- **Croc-jacking (the danger mechanic):** wetland and river-mouth swimming is now
+  genuinely risky — a lurking silhouette, a music sting, and a QTE dive-escape. Death
+  by croc gets a special respawn quip. Airboats and elevated walkways become the
+  smart traversal choice through Grassrivers-style swamp.
+
+### Invasive Alligators — the menagerie strikes again
+The escaped eco-park had a gator lagoon. Gators are **invasive**, so the parish pays
+bounties and the full capture-and-process economy applies:
+
+| Product | Tier | Notes |
+|---|---|---|
+| Gator Hide | Rare | The Syndicate pays premium; Miss Ouida makes YARDCLASH champion belts from it |
+| Gator Meat Pack | Medium | Fort Flavor unlocks a stewed gator recipe at Butcher Level 6 |
+| "Swamp Gold" Teeth | Rare | Crafting component for the apartment trophy wall |
+
+- **Nest Events:** gator nests spawn near fishing spots and crash local prices until
+  cleared — a dynamic mini-economy disruption with a visible map icon.
+- **"The General":** a legendary bull gator boss in the deep swamp — night-only,
+  storm-only (SC-2 or worse), the land counterpart to the Trench Shadow questline.
+
+### Telling them apart (a game mechanic, not a lecture)
+New players WILL snare-pole a protected croc by mistake. First offense: Miss Ouida
+confiscates it, one-star Shop Rating hit, and a mandatory 90-second "Know Yuh
+Reptile" educational filmstrip in the market's back room — played completely
+straight, instantly skippable never, and one of the game's best jokes. Repeat
+offenses escalate Watch Level. The parish scanner app (a free OnWatch filter)
+overlays a green/red outline on any basking reptile, turning identification into a
+tiny skill players actually learn.
+
+## 5. Hooks Into Existing Systems
 
 - **Culinary Academy:** Granny-Approved dishes made with fresh Butcher & Market
   ingredients get a quality-tier head start — hunters and cooks feed one economy.
@@ -107,3 +153,6 @@ to restore it. Keeps the loop sustainable and the humor intact.
   wanted-posters are community events with leaderboards.
 - **Story:** Miss Ouida's ledger becomes evidence in the Barometer Syndicate
   campaign arc — the black-market buyers were never just buying meat.
+- **Crocs & gators:** Wrangler Contracts pay Standing (discipline currency), gator
+  hides feed YARDCLASH championship cosmetics, and Barrister's Pressure Dome
+  break-ins periodically shut down fight night — a world-event everyone films.
