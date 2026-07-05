@@ -20,7 +20,14 @@
 | [`PAUDC_Culinary_Academy.md`](PAUDC_Culinary_Academy.md) | The Tichfield Culinary Academy ("Fort Flavor") — cooking school hub, recipe/buff system, the curry goat questline, food economy and events. |
 | [`PAUDC_Wildlife_Butcher.md`](PAUDC_Wildlife_Butcher.md) | Wildlife ecosystem and the Blue Mountain Butcher & Market — stylized capture/processing loop, Butcher skill tree, hygiene minigame, dynamic pricing, black-market risk lever. |
 
-## Playable prototype
+## Playable prototypes
+
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.1**, a fully 3D
+WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
+terrain generated from the same Port Antonio-traced coastline, drivable amphibious
+jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
+with its teal door, and a recon-tour objective across all eight districts.
+
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a
 self-contained top-down browser prototype (open the file in any browser). Drive the
