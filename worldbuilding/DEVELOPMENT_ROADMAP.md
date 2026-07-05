@@ -21,7 +21,7 @@ that distinction is what keeps this project shippable.
 |---|---|---|
 | 0. Design bible | ✅ done | 9 docs in `worldbuilding/` — world, story, characters, systems, map |
 | 1. 2D prototype | ✅ done | `game/index.html` — top-down island, 3 missions, canvas |
-| 2. 3D prototype | ✅ done | `game/3d.html` — WebGL terrain, drivable jeep, zone beacons |
+| 2. 3D prototype | ✅ done | `game/3d.html` — WebGL terrain, drivable jeep, zone beacons, full 3-mission chain + Well Fed buff |
 | 3. Engine vertical slice | ⬜ next | One zone in a real engine, one great vehicle, one mission |
 | 4. Expanded slice | ⬜ later | On-foot + vehicle, NPC traffic, YARDCLASH, wanted system |
 
