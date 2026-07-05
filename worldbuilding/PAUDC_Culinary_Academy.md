@@ -53,11 +53,52 @@ jerk-chicken stand, canteen-credit economy) all converge.
 ## 4. Cooking Gameplay
 
 ### The Recipe System
-Players learn **24 fictionalized Jamaican-inspired recipes** across four tracks —
-Curries & Stews (curry goat is the capstone), Grill & Smoke, Sea Kitchen, and
-Sweets & Festival. Cooking is a hands-on minigame: prep rhythm taps, seasoning
-ratios by ear ("listen to di pot"), heat management on live fire, and a plating
-flourish. Quality tiers: *Eatable → Nice → Big Pot → Granny-Approved.*
+Players learn **24 recipes based on real Jamaican dishes** across four tracks.
+The dishes are authentic; only their in-game buffs and quest framing are fictional.
+Cooking is a hands-on minigame: prep rhythm taps, seasoning ratios by ear ("listen
+to di pot"), heat management on live fire, and a plating flourish. Quality tiers:
+*Eatable → Nice → Big Pot → Granny-Approved.*
+
+**Curries & Stews:** curry goat *(capstone)*, brown stew chicken, oxtail with
+butter beans, curry chicken, pepper pot soup, red peas soup.
+**Grill & Smoke:** jerk chicken, jerk pork, roast breadfruit, corn on the barrel
+grill, pan chicken, jerk sausage.
+**Sea Kitchen:** escovitch fish, ackee and saltfish, steamed fish with okra,
+brown stew fish, curried shrimp, saltfish fritters ("stamp and go").
+**Sweets & Festival:** festival, fried dumplings, sweet potato pudding, gizzada,
+grater cake, sorrel drink *(seasonal)*.
+
+Staples like rice and peas, bammy, and fried plantain unlock automatically as
+side-dish modifiers that upgrade any plate.
+
+### Example Recipe Cards (moderate detail, as shown in-game)
+
+**Curry Goat** — *Instructor Palmer's capstone.* Season cubed goat (or mutton)
+overnight with Jamaican curry powder, scotch bonnet, scallion, thyme, garlic,
+ginger, and pimento (allspice) berries. "Burn the curry": toast more curry powder
+in hot oil till fragrant before the meat goes in. Brown the meat, then simmer low
+and slow 2-3 hours until falling apart, adding water as needed; drop in cubed
+potato near the end to thicken the gravy. Serve over rice and peas. *In-game: the
+long simmer is real time — players leave the pot and come back, and rushing the
+heat ruins the tier.*
+
+**Jerk Chicken** — Marinate chicken overnight in a blended jerk paste: scotch
+bonnet, scallion, thyme, pimento, ginger, garlic, brown sugar, soy, lime. Grill
+slow over pimento wood (drum grill in-game), covered, turning and basting until
+smoky and charred at the edges. Chop and serve with hard dough bread or festival.
+*In-game: smoke color tells doneness; scotch bonnet quantity sets a real risk/reward
+heat slider.*
+
+**Ackee and Saltfish** — Soak and boil salted codfish to tame the salt, then flake.
+Sauté onion, tomato, scotch bonnet, and sweet pepper; fold in the saltfish, then
+gently add boiled ackee last — stir too hard and it mashes. Black pepper to finish;
+serve with fried dumplings or boiled green banana. *In-game: the national dish —
+finishing it Granny-Approved is the Sea Kitchen track exam.*
+
+**Festival** — Mix flour, cornmeal, sugar, baking powder, salt, vanilla, and a
+little water or milk into a soft dough; rest it, roll into long fingers, and deep-fry
+until golden and slightly crisp outside, sweet and fluffy inside. *In-game: the
+YARDCLASH crowd snack — the hype-meter buff dish.*
 
 ### The Curry Goat Questline — "Low and Slow"
 A five-part story quest with Instructor Palmer: source the meat from a hill farmer
@@ -82,7 +123,15 @@ unlocks curry goat as a craftable **squad buff meal** — the game's best stat f
 - **The Peninsula Plate** — seasonal tournament judged by Miss Birdie, the base
   commander, and one randomly selected NPC with chaotic taste.
 
-## 5. Why It Fits PAUDC
+## 5. Concept Art
+
+AI-generated concept art (Higgsfield, golden-hour courtyard cookout with the base
+glowing across the bay):
+
+- [Key art, variant 1](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_180936_94075c22-2836-4d97-a30e-d6f5a8774e14.png)
+- [Key art, variant 2](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_180936_21c3dec2-7eda-4ef3-8e9f-465022bad692.png)
+
+## 6. Why It Fits PAUDC
 
 The Academy is the soft-power heart of the game world: the place where base and town
 actually mix. Recruitment lore says more soldiers enlisted "because of the food at
