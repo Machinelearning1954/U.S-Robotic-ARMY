@@ -14,11 +14,14 @@
   #fine{bottom:12px;right:16px;font-size:9.5px;letter-spacing:.2em;opacity:.4;text-transform:uppercase;}
   .tb{position:fixed;bottom:24px;width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(58,245,216,.5);background:rgba(6,20,26,.45);color:#3af5d8;font:700 18px/64px inherit;text-align:center;display:none;pointer-events:auto;user-select:none;-webkit-user-select:none;}
   #tl{left:24px}#tr{left:104px}#tb{right:24px}#tf{right:104px}
+  #arrow{top:56px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:26px solid #ffb84d;filter:drop-shadow(0 0 6px rgba(255,184,77,.8));transform-origin:50% 70%;}
+  #dist{top:88px;left:50%;transform:translateX(-50%);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#ffb84d;font-variant-numeric:tabular-nums;}
   @media (pointer:coarse){.tb{display:block}#keys{display:none}}
   @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
 <canvas id="game"></canvas>
 <div class="hud" id="prog"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
+<div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD / arrows</b> drive — the Mudfish floats, aim for the beacons</div>
 <div class="hud" id="fine">Fictional game world · PAUDC 3D v0.1</div>
 <button class="tb" id="tl">&#8634;</button><button class="tb" id="tr">&#8635;</button><button class="tb" id="tf">&#9650;</button><button class="tb" id="tb">&#9660;</button>
@@ -75,8 +78,8 @@ const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x05131c);
 scene.fog=new THREE.Fog(0x05131c,180,720);
 const camera=new THREE.PerspectiveCamera(62,1,0.1,1600);
-scene.add(new THREE.HemisphereLight(0x8fd8e8,0x0a2418,0.55));
-const moon=new THREE.DirectionalLight(0xbfe8ff,0.7);moon.position.set(-200,300,-140);scene.add(moon);
+scene.add(new THREE.HemisphereLight(0x9fe0ee,0x14351f,0.95));
+const moon=new THREE.DirectionalLight(0xbfe8ff,1.0);moon.position.set(-200,300,-140);scene.add(moon);
 const geoCore=new THREE.PointLight(0x3af5d8,2.2,260);geoCore.position.set(mx(1150),34,mz(1400));scene.add(geoCore);
 // ---------------- terrain ----------------
 const SEG=150;
@@ -126,9 +129,9 @@ const box=(x,z,w,h,d,c,lift=0)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,
   b.position.set(x,Math.max(height(x,z),0)+h/2+lift,z);scene.add(b);return b;};
 for(const z of ZONES){
   const X=mx(z.x),Zz=mz(z.y),h=Math.max(height(X,Zz),0.5);
-  const pil=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,26,10,1,true),
-    new THREE.MeshBasicMaterial({color:0x3af5d8,transparent:true,opacity:0.32,side:THREE.DoubleSide,depthWrite:false}));
-  pil.position.set(X,h+13,Zz);scene.add(pil);
+  const pil=new THREE.Mesh(new THREE.CylinderGeometry(1.7,1.7,90,10,1,true),
+    new THREE.MeshBasicMaterial({color:0x3af5d8,transparent:true,opacity:0.5,side:THREE.DoubleSide,depthWrite:false}));
+  pil.position.set(X,h+45,Zz);scene.add(pil);
   label(z.name,X,h+30,Zz);
   beacons.push({...z,X,Z:Zz,got:false,pil});
 }
@@ -149,13 +152,15 @@ for(let i=0;i<6;i++)box(mx(660+(i%3)*40),mz(830+((i/3)|0)*42),5,3,4,[0xffc9a3,0x
 // ---------------- vehicle ----------------
 const jeep=new THREE.Group();
 {
-  const body=new THREE.Mesh(new THREE.BoxGeometry(4.4,1.2,2.4),new THREE.MeshLambertMaterial({color:0x39434d}));body.position.y=1.1;jeep.add(body);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(4.4,1.2,2.4),new THREE.MeshLambertMaterial({color:0x5a6c7c}));body.position.y=1.1;jeep.add(body);
   const cab=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.9,2.2),new THREE.MeshLambertMaterial({color:0x2b3742}));cab.position.set(-0.6,2,0);jeep.add(cab);
   const stripe=new THREE.Mesh(new THREE.BoxGeometry(0.5,1.25,2.42),new THREE.MeshBasicMaterial({color:0x3af5d8}));stripe.position.set(1.4,1.1,0);jeep.add(stripe);
   const wg=new THREE.CylinderGeometry(0.55,0.55,0.5,10).rotateX(Math.PI/2),wm=new THREE.MeshLambertMaterial({color:0x11181f});
   for(const[dx,dz]of[[1.5,1.2],[1.5,-1.2],[-1.5,1.2],[-1.5,-1.2]]){const w=new THREE.Mesh(wg,wm);w.position.set(dx,0.55,dz);jeep.add(w);}
   const head=new THREE.PointLight(0xfff2cc,1.4,40);head.position.set(2.6,1.4,0);jeep.add(head);
 }
+{const tl=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.3,0.5),new THREE.MeshBasicMaterial({color:0xff4455}));tl.position.set(-2.25,1.2,0.8);jeep.add(tl);
+  const tr=tl.clone();tr.position.z=-0.8;jeep.add(tr);}
 scene.add(jeep);
 const P={x:mx(700),z:mz(860),a:Math.PI,v:0};
 // ---------------- input ----------------
@@ -202,6 +207,15 @@ function tick(t){
     if(!b.got&&Math.hypot(P.x-b.X,P.z-b.Z)<16){b.got=true;b.pil.material.color.set(0xffb84d);toast(b.name);}
     if(b.got)got++;}
   $('prog').textContent=done?'FREE ROAM — the island is yours':`RECON TOUR  ${got} / ${ZONES.length} districts`;
+  // compass arrow to nearest unclaimed beacon
+  let nb=null,nd=1e9;
+  for(const b of beacons){if(b.got)continue;const d=Math.hypot(P.x-b.X,P.z-b.Z);if(d<nd){nd=d;nb=b;}}
+  const arrow=$('arrow');
+  if(nb&&!done){const wa=Math.atan2(-(nb.Z-P.z),nb.X-P.x);let rel=wa-P.a;
+    arrow.style.display='block';
+    arrow.style.transform='translateX(-50%) rotate('+(-rel*180/Math.PI)+'deg)';
+    $('dist').textContent=(nd|0)+' m';}
+  else{arrow.style.display='none';$('dist').textContent='';}
   $('tele').textContent=(wet?'HULL MODE  ':'ENGINE OK  ')+Math.abs(P.v*3.6|0)+' km/h';
   if(!done&&got===ZONES.length){done=true;toast('TOUR COMPLETE — WELCOME TO PAUDC');}
   if(perf>toastT)$('toast').style.opacity=0;
