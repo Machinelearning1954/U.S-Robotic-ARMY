@@ -25,6 +25,14 @@ that distinction is what keeps this project shippable.
 | 3. Engine vertical slice | ⬜ next | One zone in a real engine, one great vehicle, one mission |
 | 4. Expanded slice | ⬜ later | On-foot + vehicle, NPC traffic, YARDCLASH, wanted system |
 
+**Mobile render doctrine** for rung 3+ lives in [`../engine/MOBILE_RENDER_DOCTRINE.md`](../engine/MOBILE_RENDER_DOCTRINE.md)
+— GTA-6-class fidelity for PAUDC's *own* scenes on Fold 6 / iPhone 16 Pro Max,
+with reference shaders in `../engine/shaders/` (SSS skin, GPU cloth, ACES tonemap,
+froxel volumetrics). One deliberate scope change is recorded there: PAUDC never
+ships a process-injection overlay into a third-party game (that would violate
+Rule Zero and platform terms) — we own our render loop, so the same techniques
+apply natively with nothing to hook.
+
 ## Three legal paths forward (pick per goal)
 
 ### Path A — Own engine, own game (the main road)
