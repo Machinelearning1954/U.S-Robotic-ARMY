@@ -52,6 +52,9 @@ payout. v0.8 adds the Reef School fishing act (sonar spots, three red snapper,
 hold class at the pier for the INSTRUCTOR title) and the **Marlin GX** — an
 original luxury SUV parked at The Strip; walk up and press `E` to swap rides
 (faster on land, hates water — the Mudfish stays the amphibious workhorse).
+v0.10 adds the missing GTA staple: a live **circular radar** bottom-left (island
+shape, all ten districts, your heading, the objective and your parked ride) and a
+full-screen **pause map** on `M` / the MAP button with every district labeled.
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a
