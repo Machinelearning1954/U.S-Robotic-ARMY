@@ -293,25 +293,36 @@ the base's ring-by-ring rank-gated access doubles as a natural streaming boundar
 
 ### Asset Budget Breakdown
 
+Re-balanced as the world grew (ten districts now, plus Reef School, Beach
+Bootcamp, the BII, the region layer and the nightlife theater) — every new system
+was **absorbed inside the 150 GB envelope**, not bolted on top of it.
+
 | Category | Budget | What it buys |
 |---|---|---|
-| World geometry & terrain | 32 GB | Full island region, four biome bands, reef-to-peak continuous mesh, destructible storm damage states |
-| Textures & materials | 38 GB | 4K PBR everywhere players linger: wet concrete, sun-bleached paint, rust streaks, rain-beaded glass, jungle foliage layers |
-| Interiors | 14 GB | 80+ enterable PAUDC interiors plus town/civilian interiors, each with unique clutter and story props |
-| Characters & animation | 16 GB | NPC crowd variety (soldiers, families, dockworkers, vendors), facial animation for story cast, drill/parade/dance motion sets |
-| Vehicles | 10 GB | 40+ faction vehicles with full interactive interiors, damage states, storm-weathering variants |
-| Audio | 22 GB | Full radio stations (reggae/dancehall/soca/faction AM), 3D storm ambience, per-zone soundscapes, dialogue in English + Jamaican Patois performances |
-| Cinematics & story | 12 GB | Mocap cutscenes: enlistment ceremony, Maroon Thunder departure, Storm Season beats |
-| VFX & simulation data | 6 GB | Hurricane system, ocean sim states, Skyfence bloom effects, Geo-Core glow volumetrics |
+| World geometry & terrain | 32 GB | Ten-district island — the Twin Bays, Silver Springs valley, Pelican Key & the cays — plus streamed edges of Rust Quay and the Cinder Yards; four biome bands, reef-to-peak continuous mesh, destructible storm damage states |
+| Textures & materials | 36 GB | 4K PBR everywhere players linger: wet concrete, sun-bleached paint, rust streaks, rain-beaded glass, jungle foliage, Pelican Key's pastel art-deco, the Alexandria's coral glass, and neon-club material sets |
+| Interiors | 15 GB | 80+ enterable PAUDC interiors plus the Polytech Alexandria, Pelican Key hotels, Reef School, Fort Flavor kitchens, the gym and the apothecary — each hand-dressed |
+| Characters & animation | 16 GB | NPC crowd variety (soldiers, families, dockworkers, vendors), the Coach/instructor, croc & gator fauna, cloth-physics and subsurface-skin character rigs, facial + drill/parade/dance motion sets |
+| Vehicles | 10 GB | 40+ faction vehicles with interactive interiors and damage/storm-weathering variants — incl. the Mudfish, the Marlin GX, airboats, the sky-writer banner plane, the engine-rung seaplane |
+| Audio | 22 GB | Full radio stations (reggae/dancehall/soca/faction AM), 3D storm ambience, per-zone soundscapes, and English + Jamaican Patois dialogue — Likkle Oracle's voice lines included |
+| Cinematics & story | 11 GB | Mocap cutscenes: enlistment ceremony, Maroon Thunder departure, Storm Season and Snake Oil beats |
+| VFX & simulation data | 6 GB | Hurricane system, ocean sim states, Skyfence bloom, Geo-Core volumetrics, froxel volumetric fog |
+| Neural render weights (mobile) | 2 GB | On-device NPU models per the render doctrine: upscale, frame-gen, and neural texture reconstruction |
 | **Total** | **150 GB** | |
 
 ### Budget Rules
 - **Density over sprawl:** cut square kilometers before cutting interior detail — the
   GTA 6 lesson is that enterable, hand-dressed spaces sell scale more than empty land.
+- **New content is absorbed, not appended:** every system added after launch-scope
+  (Reef School, Bootcamp, the BII, the region layer) fits inside the 150 GB envelope
+  by re-balancing categories, never by growing the total.
 - **Audio is not negotiable:** the Caribbean soundscape is the game's identity; the
   22 GB audio slice is protected in every budget review.
 - **Storm states ship day one:** weather variants of geometry/textures are in-budget,
   not DLC.
+- **Neural weights pay for themselves:** the 2 GB of NPU models reconstruct textures
+  on-device, letting the texture slice cover more of the island than 2 GB of raw 4K
+  textures would (see `engine/MOBILE_RENDER_DOCTRINE.md`).
 
 ---
 
