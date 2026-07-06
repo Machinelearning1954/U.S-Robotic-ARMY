@@ -496,5 +496,43 @@ Design note: the real-world target spec already includes folding phones
 (Galaxy Z Fold class); the HUD stays responsive across squarish unfolded
 aspect ratios so quad-fold hardware, when it arrives, is already served.
 
+---
+
+## 14. The Gains Trade — Snake Oil, Satirized
+
+The island has a gray market for "performance." PAUDC plays it the way the
+genre always has — as **satire with consequences**, and with every substance
+100% invented:
+
+### The products (all fictional, all glowing suspiciously)
+- **Duppy Juice** — a teal serum sold from a gym locker "by a friend of a
+  friend." Promises YARDCLASH power. Delivers 90 seconds of sprint boost,
+  then **the Wobbles** (aim sway, jelly legs) for twice as long.
+- **Anansi Oil** — "eight limbs of strength, star." Grip buff for climbing;
+  your palms glow, which is terrible for stealth and everyone can see it.
+- **Iron Elixir "New Weigh-Up"** — a subscription wellness scam advertised on
+  OnWatch with testimonials from accounts created last Tuesday. Takes your
+  canteen credits, mails you a pamphlet.
+
+### The mechanics (the joke is that honesty wins)
+- Every serum is **strictly worse than the kitchen**: the Well Fed and Well
+  Rested buffs from Fort Flavor food and real sleep are stronger, last longer,
+  and have no crash. The med bay's Chief Medical Officer says it plainly:
+  *"Nuh tek nutten yuh cyaan pronounce."*
+- **YARDCLASH runs the Scanner** on fight night — glow in the veins means
+  disqualification and a week of Standing loss. The crowd boos the cheat, and
+  the boo is recorded and posted by OnWatch automatically.
+- Selling earns the BII ledger's **"Unlicensed Apothecary"** (★★); buying just
+  earns the Wobbles and public embarrassment.
+- **Story hook — "Snake Oil":** an Act 2 side chain traces the serum supply
+  through the Pelican Key hotels to a Barometer Syndicate front lab in Rust
+  Quay. Shutting it down converts the gym-locker dealer into Fort Flavor's
+  most annoying protein-shake evangelist.
+
+*Boundary note: no real supplement, peptide, hormone or medication is named or
+depicted anywhere in this game; no real-world usage, sourcing or dosing
+information exists in canon. The satire targets the scam economy, not any real
+product — and the game's answer is always the curry goat.*
+
 > All systems above are fictional game mechanics. Tone rule stands: cinematic and
 > playful — power fantasy, not procedure manual.
