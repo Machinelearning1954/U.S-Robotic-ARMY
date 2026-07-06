@@ -28,14 +28,30 @@ that reads the exact same buffers we already produce. Same NPU pipeline, same
 shaders, none of the legal or technical liability. Everything else in the
 doctrine is adopted as written.
 
+**Worked example — why we don't vendor game-specific upscaler mods.** Mods like
+RDRFSR2 (which ships DLLs that *Red Dead Redemption 2 loads at runtime* to
+redirect its NVIDIA NGX/DLSS calls to AMD FSR 2.0) are the injected form of this
+exact idea. PAUDC does not vendor or ship that kind of thing: it hooks a shipped
+Rockstar title, which is precisely what Rule Zero forbids, and renaming it does
+not change what the binary does. The *upscaler itself*, though, is legitimate and
+open — see below. We take the technique into our own renderer, not the hook.
+
 ---
 
 ## The five doctrines, mapped to our own engine
 
 ### 1. Deception — Neural assist (our NPU pipeline, our frames)
-- **Neural upscale:** render internal at 720–1080p, upscale to panel res with a
-  quantized ESRGAN-class model (TFLite NNAPI on Android, CoreML/ANE on iOS).
-  Falls back to spatial (FSR-style) upscale where the NPU is busy or hot.
+- **Temporal upscale (the workhorse):** render internal at 720–1080p and
+  reconstruct to panel resolution. **Reference implementation: AMD FSR 2.x**
+  (open-source, MIT, GPUOpen) — a temporal upscaler that takes exactly the inputs
+  we already own (color, depth, motion vectors, jitter) and needs *no game hook*
+  because it's a pass inside our own render graph. This is the legitimate,
+  buildable core of the whole "deception" doctrine: same math the injected mods
+  smuggle into other games, run natively on our frame. XeSS and a quantized
+  ESRGAN-class NPU model are the alternate paths per device tier.
+- **Neural upscale:** where the NPU is idle and cool, an ESRGAN-class model
+  (TFLite NNAPI on Android, CoreML/ANE on iOS) can beat FSR on detail; FSR is the
+  guaranteed fallback when the NPU is busy or hot.
 - **Frame generation:** render 45–60fps, synthesize intermediate frames from
   our own motion vectors for a 90–120fps panel. **Guardrail:** frame-gen is
   disabled whenever input latency matters (combat, YARDCLASH) — interpolated
