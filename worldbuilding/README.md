@@ -70,6 +70,12 @@ Port Antonio geography (twin harbors, Navy Island, Folly Point — everything on
 fictional), complete the Open House tour, relocate three crocs, and run the curry
 goat delivery. Keyboard (WASD/arrows + Space) and touch supported.
 
+[`../game/ISLAND_BUILD.md`](../game/ISLAND_BUILD.md) — **Island of Jamaica 3D**,
+the larger WebGPU sandbox build (the user's flagship vision): full island, on-foot
++ driving, A* police pursuit, dual protagonists, day/night, radio, save system —
+same universe as PAUDC, at a bigger scale. See the note for how it maps to canon,
+the content-boundary reconciliation it needs, and how to land the exact file.
+
 ## Canon quick facts
 
 - **Install target:** 150 GB, budgeted by asset category.
