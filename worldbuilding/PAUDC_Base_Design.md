@@ -386,6 +386,31 @@ split between two wings:
   to OnWatch's cinematic broadcast feed. In-world, when the island looks
   impossibly good, a Chromelab kid did that.
 
+### The Alexandria — the Polytech's great hall
+The campus centerpiece: a glass-and-coral library-laboratory the students named
+after the ancient world's great library. Every discipline keeps a bench here;
+its reading lamps burn all night during exam season and the whole valley glows.
+
+**The Lost-Signal Lab (drone navigation wing).** The island's drones — like
+everyone's — lean on the fictional **SkyGrid** satnav the way people lean on
+their phone maps. During Storm Conditions, Barometer Syndicate "Stormjack"
+rigs flood the grid with noise and drones start flying like duppies — lost,
+looping, homesick. The Alexandria's answer is a class, not a gadget:
+
+- **"Read de coastline"** — students teach drones to navigate the old way,
+  matching what the camera sees against remembered landmarks: the twin bays,
+  Navy Island's hump, the Skyfence petals, Folly light.
+- **Dead-reckoning drills** — fly a triangle blind over the Morass and come
+  home on memory and math alone.
+- **The Duppy Compass Cup** — monthly race: SkyGrid switched off, jammers on
+  (the DFS "Static Choir" bubble from the spec tree), first drone home wins.
+  Graduates' drones keep working when a storm — or a Syndicate job — kills
+  the grid, which is exactly when the campaign needs them.
+
+*Boundary note: SkyGrid, Stormjack and every technique above are invented game
+mechanics at postcard level — navigate by landmarks when satnav fails is folk
+knowledge, and no real-world system, hardware or procedure is referenced.*
+
 ### Gameplay hooks
 - **Chromelab Grade** — a player-facing photo-real display mode (filmic tone
   mapping, richer lighting, deeper draw). Unlocked in fiction by enrolling at the

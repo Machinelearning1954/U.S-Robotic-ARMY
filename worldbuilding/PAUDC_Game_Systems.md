@@ -457,5 +457,44 @@ contacts), **scope** (drive-by with the Chromelab camera rig, clocking
 entrances). Then the Hard Knock. Prep choices change the execution mission —
 skipping a source beat means improvising mid-job.
 
+---
+
+## 13. Likkle Oracle & the Quatrefold — OnWatch Gets a Voice and a Hinge
+
+### Likkle Oracle (the island's AI chatbot)
+The ORACLE Table's public-facing likkle sibling: a **Patois-speaking AI chat
+assistant** living inside every OnWatch phone, co-maintained by DFS signal
+students and the Chromelab. It is the game's diegetic helper — tutorials,
+mission dispatch, weather warnings and flavor, all in character:
+
+- "Weather Eye seh SC-3 a come. Move de boat dem, star."
+- "Reef School Friday. Bring patience an' bait."
+- "BII a watch yuh. Park nice."
+
+Rules: Likkle Oracle never breaks fiction, never lectures, and its Patois
+follows the character bible's dialogue guide (respectful, written with care,
+reviewed — never mock-accent). Players can mute it; it sulks about it on the
+weekly recap, which is the joke.
+
+**The sky-writer:** Likkle Oracle rents the island's banner plane. A little
+prop plane flies circuits over the twin bays towing glowing banner messages —
+event calls, storm notices, pure vibes. *Live in the prototype (v0.9): watch
+the sky.*
+
+### The Quatrefold ("de quattie")
+The Polytech's four-panel folding phone — the island's answer to the folding
+wave, and the canonical OnWatch hardware:
+
+| Fold state | Mode |
+|---|---|
+| **Palm** (folded) | Likkle Oracle chat, clips feed, clout ticker |
+| **Book** (2 panels) | live map + compass |
+| **Spread** (3 panels) | Snapper Scope sonar, drone feeds, YARDCLASH bets |
+| **Table** (4 panels flat) | mini ORACLE planning board — the Job Prep loop runs here |
+
+Design note: the real-world target spec already includes folding phones
+(Galaxy Z Fold class); the HUD stays responsive across squarish unfolded
+aspect ratios so quad-fold hardware, when it arrives, is already served.
+
 > All systems above are fictional game mechanics. Tone rule stands: cinematic and
 > playful — power fantasy, not procedure manual.
