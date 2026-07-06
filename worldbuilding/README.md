@@ -24,7 +24,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.15**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.16**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -76,7 +76,11 @@ Presence** (a matte-black figure with dim red eyes) trails you, gaining ground w
 you slow down. A **Paranoia vignette** closes in the nearer and darker it gets; drive
 into any lit district to make the static lift. Let it fill and you come to back at the
 harbor, unharmed — the arc's non-lethal rule, live. See
-[`PAUDC_Psych_Thriller.md`](PAUDC_Psych_Thriller.md).
+[`PAUDC_Psych_Thriller.md`](PAUDC_Psych_Thriller.md). v0.16 is the **Trailer
+Grade** film stack — the GTA-6-trailer look, layered onto Chromelab Grade:
+animated film grain, a teal-orange split-tone (warm highlights, cool shadows),
+a saturation/contrast lift, a natural lens vignette, and an anamorphic lens
+streak across the moon. Toggles with the grade (`C`).
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a

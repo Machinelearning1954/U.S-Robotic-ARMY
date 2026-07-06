@@ -28,6 +28,8 @@
   #rn{display:block;bottom:auto;top:164px;right:16px;width:56px;height:32px;border-radius:8px;font-size:12px;line-height:32px;}
   #thr{display:block;bottom:auto;top:204px;right:16px;width:56px;height:32px;border-radius:8px;font-size:10.5px;line-height:32px;}
   #vig{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .35s;z-index:5;background:radial-gradient(ellipse at 50% 46%,transparent 34%,rgba(3,4,6,.55) 74%,rgba(2,3,5,.96) 100%);}
+  #cine{position:fixed;inset:0;pointer-events:none;z-index:3;display:none;mix-blend-mode:soft-light;background:linear-gradient(180deg,rgba(255,158,64,.22) 0%,rgba(255,120,50,.08) 34%,rgba(0,64,92,.14) 70%,rgba(0,42,64,.30) 100%),radial-gradient(ellipse at 50% 50%,transparent 52%,rgba(2,8,14,.55) 100%);}
+  #grain{position:fixed;inset:0;pointer-events:none;z-index:7;display:none;mix-blend-mode:overlay;opacity:.11;image-rendering:pixelated;width:100vw;height:100vh;}
   #whisper{position:fixed;top:33%;left:50%;transform:translateX(-50%);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.28em;color:#c7d2db;opacity:0;transition:opacity .6s;text-shadow:0 0 12px #000,0 0 3px #7fa;z-index:6;pointer-events:none;text-align:center;max-width:92vw;}
   @media (pointer:coarse){.tb{display:block}#keys{display:none}#mini{bottom:100px}}
   @media (prefers-reduced-motion:reduce){#toast{transition:none}}
@@ -36,8 +38,8 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>E</b> swap · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.15</div>
-<div id="vig"></div><div id="whisper"></div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.16</div>
+<div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
 <button class="tb" id="tl">&#8634;</button><button class="tb" id="tr">&#8635;</button><button class="tb" id="tf">&#9650;</button><button class="tb" id="tb">&#9660;</button><button class="tb" id="gq">HD</button><button class="tb" id="fx">GRADE</button><button class="tb" id="mm">MAP</button><button class="tb" id="rn">RAIN</button><button class="tb" id="thr">THRLLR</button>
@@ -4057,6 +4059,7 @@ function waveWater(t){
   wpos.needsUpdate=true;water.geometry.computeVertexNormals();
 }
 // ---------------- sky dome + moon disc ----------------
+let moonStreak=null;
 {
   const sc2=document.createElement('canvas');sc2.width=2;sc2.height=256;
   const g2=sc2.getContext('2d');const gr=g2.createLinearGradient(0,0,0,256);
@@ -4071,6 +4074,13 @@ function waveWater(t){
   mg.fillStyle=rg;mg.fillRect(0,0,128,128);
   const moonSp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(mc),transparent:true,fog:false,depthWrite:false}));
   moonSp.position.set(-380,360,-270);moonSp.scale.set(120,120,1);scene.add(moonSp);
+  // anamorphic lens streak on the moon (trailer-grade optics, shown in Grade mode)
+  const ac=document.createElement('canvas');ac.width=512;ac.height=32;const ag=ac.getContext('2d');
+  const lg=ag.createLinearGradient(0,0,512,0);
+  lg.addColorStop(0,'rgba(120,190,255,0)');lg.addColorStop(0.5,'rgba(190,225,255,0.85)');lg.addColorStop(1,'rgba(120,190,255,0)');
+  ag.fillStyle=lg;ag.fillRect(0,10,512,12);
+  moonStreak=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(ac),transparent:true,fog:false,depthWrite:false,opacity:0.75}));
+  moonStreak.position.set(-380,360,-270);moonStreak.scale.set(560,26,1);scene.add(moonStreak);
 }
 // ---------------- palms (instanced) ----------------
 {
@@ -4456,7 +4466,22 @@ function addClout(n){clout+=n;try{localStorage.setItem('paudc_clout',clout);}cat
 addClout(0);
 // Chromelab Grade — the Polytech's photo-real display mode
 let grade=false;
-function setGrade(on,quiet){grade=on;
+// Trailer Grade film stack: animated grain + teal-orange split-tone + lens streak
+const grainCv=document.getElementById('grain');
+let grainTimer=null;
+function drawGrain(){const g=grainCv.getContext('2d');const im=g.createImageData(160,90);const d=im.data;
+  for(let i=0;i<d.length;i+=4){const v=110+Math.random()*72|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}
+  g.putImageData(im,0,0);}
+function setCine(on){
+  const gc=document.getElementById('cine');
+  if(gc)gc.style.display=on?'block':'none';
+  if(grainCv)grainCv.style.display=on?'block':'none';
+  const cv=document.getElementById('game');
+  if(cv)cv.style.filter=on?'saturate(1.16) contrast(1.05)':'';
+  if(moonStreak)moonStreak.visible=on;
+  if(on&&!grainTimer){drawGrain();grainTimer=setInterval(drawGrain,110);}
+  if(!on&&grainTimer){clearInterval(grainTimer);grainTimer=null;}}
+function setGrade(on,quiet){grade=on;setCine(on);
   moon.castShadow=on;
   if(refl)refl.visible=on;
   renderer.toneMapping=on?4:0;renderer.toneMappingExposure=on?1.22:1; // 4 = filmic (ACES)
@@ -4652,7 +4677,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3)}),setRain,setStatic,presence,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer}),setRain,setStatic,presence,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
