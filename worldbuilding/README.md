@@ -19,11 +19,12 @@
 | [`PAUDC_Game_Systems.md`](PAUDC_Game_Systems.md) | Systems design: rank ladder, four specialization trees, economy, OnWatch clout loop, Watch Level & Standing, Storm Condition gameplay, live-event calendar. |
 | [`PAUDC_Culinary_Academy.md`](PAUDC_Culinary_Academy.md) | The Tichfield Culinary Academy ("Fort Flavor") — cooking school hub, recipe/buff system, the curry goat questline, food economy and events. |
 | [`PAUDC_Wildlife_Butcher.md`](PAUDC_Wildlife_Butcher.md) | Wildlife ecosystem and the Blue Mountain Butcher & Market — stylized capture/processing loop, Butcher skill tree, hygiene minigame, dynamic pricing, black-market risk lever. |
+| [`PAUDC_Psych_Thriller.md`](PAUDC_Psych_Thriller.md) | **"The Static Hour"** — the optional psychological-thriller arc extending the Numbers Station thread: the Presence you can't fight, the Paranoia meter, an unreliable-narrator set-piece and its twist, all non-lethal by rule. |
 | [`DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) | How the project ships legally: no leaked Rockstar code ever, the prototype→engine ladder, Godot 4 next / UE5 later, FiveM gamemode option, legal study resources. |
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.14**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.15**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -68,7 +69,14 @@ medical wellness dispensary (fictional brand) on the Palm Line: once you're
 Instructor and Coach, its green beacon opens in free roam; drive up and hold steady
 to fill your script and gain the **IRIE** buff, which cools your BII Watch Level
 twice as fast. It's the legal, clinical counterpoint to the Gains Trade snake-oil —
-carrot, never stick.
+carrot, never stick. v0.15 adds **The Static Hour** (`T` or the THRLLR button) — the
+playable slice of the psychological-thriller arc: the world goes cold and
+claustrophobic, the numbers-station whisper-line ticks across the screen, and **The
+Presence** (a matte-black figure with dim red eyes) trails you, gaining ground when
+you slow down. A **Paranoia vignette** closes in the nearer and darker it gets; drive
+into any lit district to make the static lift. Let it fill and you come to back at the
+harbor, unharmed — the arc's non-lethal rule, live. See
+[`PAUDC_Psych_Thriller.md`](PAUDC_Psych_Thriller.md).
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a
