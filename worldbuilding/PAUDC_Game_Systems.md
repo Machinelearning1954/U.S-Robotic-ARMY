@@ -409,5 +409,50 @@ style points on the OnWatch clip, not realism.
 models, specs, or tactical procedure are referenced — see the content boundaries
 in the base design doc.*
 
+---
+
+## 12. The BII & the Infraction Ledger — Who Watches the Watch Level
+
+Trained on the community's favorite pastime — cataloguing every petty crime in
+the GTA 6 trailer — PAUDC gets a full infraction taxonomy and someone to enforce
+it: the **Bureau of Island Investigations (BII)**, a fictional, slightly
+overdressed federal-flavored agency that opened a two-desk office above the
+Pelican Key post office after the Barometer Syndicate's stateside money surfaced.
+Suits in the tropics, sweating through procedure. They are the *comedy* of law
+enforcement; base security remains the muscle.
+
+### The Infraction Ledger (what feeds Watch Level)
+All fictional, all stylized — severity in ★:
+
+| Infraction (in-world name) | Real-world genre trope | ★ |
+|---|---|---|
+| **Road Manners Advisory** | jaywalking | ☆ (warning only — the BII agent writes it down, nobody cares) |
+| **Undignified Transit** | riding on roofs, standing through sunroofs | ★ |
+| **Excessive Style, Vehicular** | donuts, wheelies, drifting the Strip | ★ |
+| **Unlicensed Regatta** | street (sea) racing | ★★ |
+| **Creative Parking** | stopping on the causeway | ★ |
+| **Brandishing a Kitchen Implement** | the hammer-auntie special | ★★ |
+| **Dress Code Violation, Gross** | indecent exposure ("the Key Man Clause") | ★★ |
+| **Declining an Invitation** | evading arrest | +★ on top of anything |
+| **Services, Theft of** | dine-and-dash at Fort Flavor | ★★ |
+| **The Whole Charge Sheet** | armed robbery of a Syndicate front | ★★★★ (mission content only) |
+
+- **The OnWatch irony is the system:** every infraction that raises Watch Level
+  also pays clout — the island loves a show. The BII confiscates clout... never.
+  They subpoena the clips as evidence and accidentally make them go viral again.
+- **Decay:** stars fade after a clean minute; sleeping (Well Rested) clears one
+  extra; a YARDCLASH appearance resets petty stars ("community service").
+- **In the prototype (v0.7):** sustained donuts at speed now trigger *Excessive
+  Style, Vehicular* — a BII watch star on the HUD (max 5, decays) plus a small
+  clout payout, the whole ledger philosophy in one mechanic.
+
+### The Job Prep loop (trained on classic heist structure)
+Big missions against the Syndicate use the genre's proven three-beat prep:
+**plan** (the board at the safehouse — routes, photos, tactical arrows),
+**source** (boat, truck, drone, kit — Field Kit lockers and Butcher/Polytech
+contacts), **scope** (drive-by with the Chromelab camera rig, clocking
+entrances). Then the Hard Knock. Prep choices change the execution mission —
+skipping a source beat means improvising mid-job.
+
 > All systems above are fictional game mechanics. Tone rule stands: cinematic and
 > playful — power fantasy, not procedure manual.

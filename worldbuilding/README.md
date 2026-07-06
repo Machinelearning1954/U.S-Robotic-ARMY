@@ -43,7 +43,12 @@ cottage windows, and a denser palm forest with varied heights — Chromelab Grad
 defaults ON. v0.5 adds true post-processing bloom in Grade mode (neon, beacons
 and pools genuinely glow), twin spotlight headlight cones, denser terrain, and the
 AI-pipeline Mudfish mesh (image-to-3D GLB) that live-loads as the player vehicle
-where the network allows.
+where the network allows. v0.6 adds Pelican Key as the tenth district and
+device-tier auto-detection (ULTRA/HIGH/BASE for PC / iPhone 16 & Fold 6 class /
+older phones). v0.7 adds true planar water reflections on ULTRA (the whole neon
+island mirrors in the sea in Grade mode) and the first BII infraction: sustained
+donuts trigger "Excessive Style, Vehicular" — a watch star plus a small clout
+payout.
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a

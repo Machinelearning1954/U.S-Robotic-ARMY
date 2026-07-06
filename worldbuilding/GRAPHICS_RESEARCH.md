@@ -58,6 +58,23 @@ palms; device tiers; adaptive resolution; HD/SD user preset.
    the cheap imitations, in order of payoff: stronger height fog + haze banding,
    planar-ish water specular (done), bloom (done), color grade (done).
 
+## Video-analysis findings (scene-by-scene, via hosted analyzer)
+
+Three previously-unwatchable reference videos were decoded with a hosted
+video-analysis service (2026-07-06):
+
+- **GTA V Enhanced walkthrough:** long drives carry the storytelling (calls and
+  texts pinned to the HUD while driving), and heists follow plan-board →
+  source-vehicles/kit → scope-the-target. Adopted as the Job Prep loop
+  (systems doc §12).
+- **"Every crime in the GTA 6 trailer" short:** the petty-crime taxonomy players
+  love cataloguing. Adopted as the BII Infraction Ledger (systems doc §12);
+  donut detection shipped in v0.7.
+- **Photoreal rainy-city driving showcase:** the look is wet asphalt + neon
+  reflections + tunnel strobe lighting + heavy rain. Reflections shipped in
+  v0.7 (planar water mirror on ULTRA); rain mode and tunnel lighting are the
+  next two candidates on this list.
+
 ## Target-look sample videos (Higgsfield, canon-styled)
 
 - [Mudfish night pier-drop, neon harbor](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_223656_eaec74c3-2ee6-448a-9d5a-dcab8d524659.mp4) — the water/headlight/neon reference for the Grade look.
