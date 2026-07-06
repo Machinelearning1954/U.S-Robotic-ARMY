@@ -23,7 +23,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.11**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.12**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -57,7 +57,10 @@ shape, all ten districts, your heading, the objective and your parked ride) and 
 full-screen **pause map** on `M` / the MAP button with every district labeled.
 v0.11 adds **Beach Bootcamp** — in free roam after the Reef School, three fitness
 stations glow on the Palm Line sand; hold form at each to complete the set (3/3
-earns the COACH title), the in-game fitness-coaching career.
+earns the COACH title), the in-game fitness-coaching career. v0.12 adds a third
+ride — the **Nighthawk streetbike** (park near it and press `E` to swap, now a
+three-vehicle ring) — and a **first-person rider POV** camera (`V`), trained on
+the Cyberpunk POV-motorbike showcase.
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a

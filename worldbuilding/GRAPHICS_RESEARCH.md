@@ -75,6 +75,12 @@ video-analysis service (2026-07-06):
   v0.7 (planar water mirror on ULTRA); rain mode and tunnel lighting are the
   next two candidates on this list.
 
+- **Cyberpunk 2077 POV motorbike showcase (path-traced, DreamPunk mod, RTX 5090):**
+  the desktop fidelity ceiling — full path tracing + DLSS 4. Confirms the engine-rung
+  targets (global illumination, dense night neon) and the value of a first-person
+  POV ride; the POV camera shipped in v0.12. Path tracing stays an engine-rung goal
+  (WebGL2 can't do it) per the render doctrine.
+
 ## Target-look sample videos (Higgsfield, canon-styled)
 
 - [Mudfish night pier-drop, neon harbor](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_223656_eaec74c3-2ee6-448a-9d5a-dcab8d524659.mp4) — the water/headlight/neon reference for the Grade look.

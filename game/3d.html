@@ -31,8 +31,8 @@
 <canvas id="game"></canvas>
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
-<div class="hud" id="keys"><b>WASD</b> drive · <b>E</b> swap · <b>M</b> map · <b>Q</b> quality · <b>C</b> grade — radar bottom-left</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.11</div>
+<div class="hud" id="keys"><b>WASD</b> drive · <b>E</b> swap ride · <b>V</b> POV · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.12</div>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
 <button class="tb" id="tl">&#8634;</button><button class="tb" id="tr">&#8635;</button><button class="tb" id="tf">&#9650;</button><button class="tb" id="tb">&#9660;</button><button class="tb" id="gq">HD</button><button class="tb" id="fx">GRADE</button><button class="tb" id="mm">MAP</button>
@@ -4237,8 +4237,32 @@ const gx=new THREE.Group();
 gx.traverse(o=>{if(o.isMesh)o.castShadow=true;});
 const gxP={x:mx(1430),z:mz(650),a:2.6},mudP={x:mx(700),z:mz(860),a:Math.PI};
 gx.position.set(gxP.x,Math.max(height(gxP.x,gxP.z),0.4),gxP.z);gx.rotation.y=gxP.a;scene.add(gx);
-let veh=0; // 0 Mudfish Mk-0 (amphibious), 1 Marlin GX (fast, hates water)
+// ---- Nighthawk: original streetbike (POV ride), parked near Ironbeach ----
+const bike=new THREE.Group();
+{
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.4,0.4),new THREE.MeshPhongMaterial({color:0x14181d,shininess:130,specular:0x8899aa}));frame.position.y=0.95;bike.add(frame);
+  const tank=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.5,0.5),new THREE.MeshPhongMaterial({color:0x3af5d8,shininess:160}));tank.position.set(0.1,1.2,0);bike.add(tank);
+  const seat=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.22,0.5),new THREE.MeshLambertMaterial({color:0x11151a}));seat.position.set(-0.7,1.15,0);bike.add(seat);
+  const bar=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,1),new THREE.MeshLambertMaterial({color:0x2b3742}));bar.position.set(1.0,1.3,0);bike.add(bar);
+  const wg=new THREE.CylinderGeometry(0.62,0.62,0.28,16).rotateX(Math.PI/2),wm=new THREE.MeshLambertMaterial({color:0x0a0c0e});
+  for(const dx of[1.15,-1.15]){const w=new THREE.Mesh(wg,wm);w.position.set(dx,0.62,0);bike.add(w);}
+  const bl=new THREE.Mesh(new THREE.SphereGeometry(0.16,10,8),new THREE.MeshBasicMaterial({color:0xf4f8ff}));bl.position.set(1.25,1.15,0);bike.add(bl);
+  const btl=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.16,0.3),new THREE.MeshBasicMaterial({color:0xff3344}));btl.position.set(-1.2,1.15,0);bike.add(btl);
+  const hlT=new THREE.Group();hlT.position.set(20,-0.4,0);bike.add(hlT);
+  const hl=new THREE.SpotLight(0xf2f6ff,2.4,80,0.42,0.5,1.1);hl.position.set(1.2,1.2,0);hl.target=hlT;bike.add(hl);
+}
+bike.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+const bikeP={x:mx(1000),z:mz(800),a:Math.PI};
+bike.position.set(bikeP.x,Math.max(height(bikeP.x,bikeP.z),0.4),bikeP.z);bike.rotation.y=bikeP.a;scene.add(bike);
+let veh=0; // 0 Mudfish Mk-0 (amphibious), 1 Marlin GX (fast, hates water), 2 Nighthawk bike
+let pov=false; // first-person rider camera (V)
 const P={x:mx(700),z:mz(860),a:Math.PI,v:0};
+// vehicle ring: mesh, parked pose, name, and per-ride handling stats
+const VEH=[
+  {g:jeep,pose:mudP,name:'MUDFISH MK-0 — hull mode ready',      acc:30,vmax:26,wacc:14,wmax:11,camd:26,camh:11,eye:2.5},
+  {g:gx,  pose:gxP, name:'MARLIN GX — Strip royalty, mind the water',acc:34,vmax:31,wacc:5, wmax:4, camd:27,camh:12,eye:2.8},
+  {g:bike,pose:bikeP,name:'NIGHTHAWK — POV ride, press V',      acc:40,vmax:35,wacc:3, wmax:3, camd:20,camh:8, eye:1.8},
+];
 // ---------------- input ----------------
 const keys={};
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.startsWith('Arrow')||e.key===' ')e.preventDefault();});
@@ -4256,15 +4280,17 @@ function toggleQ(){pxr=pxr>1?1:Math.min(devicePixelRatio,PXR_CAP);
   composer.setPixelRatio(pxr);composer.setSize(innerWidth,innerHeight);qLabel();}
 if(gq)gq.addEventListener('pointerdown',e=>{e.preventDefault();toggleQ();});
 addEventListener('keydown',e=>{if(e.key.toLowerCase()==='q')toggleQ();});
-addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='e')return;
-  const other=veh?mudP:gxP;
-  if(Math.hypot(P.x-other.x,P.z-other.z)<9&&Math.abs(P.v)<4){
-    const cur=veh?gxP:mudP;cur.x=P.x;cur.z=P.z;cur.a=P.a;
-    const cg=veh?gx:jeep;
-    cg.position.set(cur.x,Math.max(height(cur.x,cur.z),0.4),cur.z);cg.rotation.y=cur.a;
-    P.x=other.x;P.z=other.z;P.a=other.a;P.v=0;veh=1-veh;
-    toast(veh?'MARLIN GX — Strip royalty, mind the water':'MUDFISH MK-0 — hull mode ready');
-  }});
+addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='e'||Math.abs(P.v)>=4)return;
+  // swap into the nearest parked ride within reach
+  let ni=-1,nd=9;
+  for(let i=0;i<VEH.length;i++){if(i===veh)continue;
+    const d=Math.hypot(P.x-VEH[i].pose.x,P.z-VEH[i].pose.z);if(d<nd){nd=d;ni=i;}}
+  if(ni<0)return;
+  const cur=VEH[veh];cur.pose.x=P.x;cur.pose.z=P.z;cur.pose.a=P.a;
+  cur.g.position.set(P.x,Math.max(height(P.x,P.z),0.4),P.z);cur.g.rotation.y=P.a;
+  const nx=VEH[ni];P.x=nx.pose.x;P.z=nx.pose.z;P.a=nx.pose.a;P.v=0;veh=ni;
+  toast(nx.name);});
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='v'){pov=!pov;toast(pov?'RIDER POV':'CHASE CAM');}});
 qLabel();
 // ---------------- HUD ----------------
 const $=id=>document.getElementById(id);let toastT=0;
@@ -4299,7 +4325,7 @@ function drawRadar(){
   const dot=(wx,wz,col,r)=>{const dx=R+(wx-P.x)*RSCALE,dy=R+(wz-P.z)*RSCALE;
     if(Math.hypot(dx-R,dy-R)>R-3)return;mg.fillStyle=col;mg.beginPath();mg.arc(dx,dy,r,0,7);mg.fill();};
   if(radarTarget)dot(radarTarget.X,radarTarget.Z,'#ffb84d',3.2);
-  dot(veh?mudP.x:gxP.x,veh?mudP.z:gxP.z,'#8fbfff',2.4); // the parked ride you're not in
+  for(let i=0;i<VEH.length;i++)if(i!==veh)dot(VEH[i].pose.x,VEH[i].pose.z,'#8fbfff',2.2); // parked rides
   // player heading triangle
   mg.save();mg.translate(R,R);mg.rotate(-P.a+Math.PI/2);mg.fillStyle='#eafffb';
   mg.beginPath();mg.moveTo(0,-6);mg.lineTo(4,5);mg.lineTo(-4,5);mg.closePath();mg.fill();mg.restore();
@@ -4368,7 +4394,7 @@ function tick(t){
   prevWet=wet;
   const thr=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?0.6:0);
   const str=(keys.a||keys.arrowleft?1:0)-(keys.d||keys.arrowright?1:0);
-  const ACC=veh?34:30,VMAX=veh?31:26,WACC=veh?5:14,WMAX=veh?4:11;
+  const V=VEH[veh],ACC=V.acc,VMAX=V.vmax,WACC=V.wacc,WMAX=V.wmax;
   P.v+=thr*(wet?WACC:ACC)*dt;P.v*=wet?0.965:0.975;P.v=Math.max(-9,Math.min((wet?WMAX:VMAX)*(wellFed?1.12:1),P.v));
   if(Math.abs(P.v)>0.6)P.a+=str*1.9*dt*Math.sign(P.v);
   P.x+=Math.cos(P.a)*P.v*dt;P.z-=Math.sin(P.a)*P.v*dt;
@@ -4389,15 +4415,23 @@ function tick(t){
   }
   if(watch>0&&perf>watchT){watch--;watchT=perf+60000;}
   const gy=height(P.x,P.z),y=wet?0.55+0.18*Math.sin(t*0.004):Math.max(gy,0.4);
-  const av=veh?gx:jeep;
+  const av=VEH[veh].g;
   av.position.set(P.x,y,P.z);av.rotation.y=P.a;
   const ahead=height(P.x+Math.cos(P.a)*3,P.z-Math.sin(P.a)*3);
   av.rotation.z=wet?0.04*Math.sin(t*0.003):Math.atan2(ahead-gy,3)*0.6;
-  // camera chase (reused scratch vector — no per-frame allocation)
-  const cd=26,ch=11;
-  CAMT.set(P.x-Math.cos(P.a)*cd,y+ch,P.z+Math.sin(P.a)*cd);
-  camera.position.lerp(CAMT,1-Math.pow(0.0018,dt));
-  camera.lookAt(P.x,y+2.5,P.z);
+  // camera — chase, or first-person rider POV (V)
+  if(pov){
+    CAMT.set(P.x+Math.cos(P.a)*0.6,y+V.eye,P.z-Math.sin(P.a)*0.6);
+    camera.position.lerp(CAMT,1-Math.pow(0.00005,dt));
+    camera.lookAt(P.x+Math.cos(P.a)*30,y+V.eye-2.2,P.z-Math.sin(P.a)*30);
+    av.visible=veh===2; // hide car body in POV; keep the bike visible under you
+  }else{
+    const cd=V.camd,ch=V.camh;
+    CAMT.set(P.x-Math.cos(P.a)*cd,y+ch,P.z+Math.sin(P.a)*cd);
+    camera.position.lerp(CAMT,1-Math.pow(0.0018,dt));
+    camera.lookAt(P.x,y+2.5,P.z);
+    av.visible=true;
+  }
   // water shimmer + geo core pulse + beacons spin
   water.material.opacity=(refl&&grade?0.56:0.74)+0.05*Math.sin(t*0.0016);
   {const pa=t*0.00009,R=330;
@@ -4510,7 +4544,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach}),FISH_SPOTS,PIER,gxP,FIT,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov}),FISH_SPOTS,PIER,gxP,bikeP,FIT,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
