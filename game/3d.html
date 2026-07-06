@@ -32,7 +32,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> drive · <b>E</b> swap · <b>M</b> map · <b>Q</b> quality · <b>C</b> grade — radar bottom-left</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.10</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.11</div>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
 <button class="tb" id="tl">&#8634;</button><button class="tb" id="tr">&#8635;</button><button class="tb" id="tf">&#9650;</button><button class="tb" id="tb">&#9660;</button><button class="tb" id="gq">HD</button><button class="tb" id="fx">GRADE</button><button class="tb" id="mm">MAP</button>
@@ -4161,6 +4161,15 @@ pot.position.set(FORTP.X,Math.max(height(FORTP.X,FORTP.Z),0.3)+0.2,FORTP.Z);pot.
 const potPil=orangeBeacon(FORTP.X,FORTP.Z);
 const FISH_SPOTS=[[430,455],[1010,640],[1690,470]].map(([fx,fy])=>{
   const X=mx(fx),Z=mz(fy);return{X,Z,got:false,pil:orangeBeacon(X,Z)};});
+// Beach Bootcamp — three fitness stations on the Palm Line sand (free roam)
+const FIT_NAMES=['PUSH-UP SET','SQUAT SET','SPRINT SET'];
+const FIT=[[624,836],[700,846],[772,834]].map(([fx,fy],i)=>{
+  const X=mx(fx),Z=mz(fy),pil=orangeBeacon(X,Z);
+  // a low palm-log prop marks the station
+  const log=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,3,7).rotateZ(Math.PI/2),
+    new THREE.MeshLambertMaterial({color:0x6b4a2f}));
+  log.position.set(X,Math.max(height(X,Z),0.3)+0.4,Z);log.castShadow=true;log.visible=false;scene.add(log);
+  return{X,Z,name:FIT_NAMES[i],got:false,pil,log};});
 // ---------------- Likkle Oracle's sky-writer (banner plane) ----------------
 const planeG=new THREE.Group();
 {const fus=new THREE.Mesh(new THREE.BoxGeometry(5,1,1),new THREE.MeshLambertMaterial({color:0xd8dde2}));planeG.add(fus);
@@ -4341,7 +4350,7 @@ addEventListener('keydown',e=>{if(e.key.toLowerCase()==='c')setGrade(!grade);});
 {const fx=document.getElementById('fx');
  if(fx)fx.addEventListener('pointerdown',e=>{e.preventDefault();setGrade(!grade);});}
 // ---------------- loop ----------------
-let perf=0,last=0,slow=0,prevWet=false,donutT=0,parkT=0,regT=0,invT=0,invited=false,watch=0,watchT=0,fishT=0,fish=0,instructor=false,phase=0,carryCroc=null,relocated=0,hasPot=false,potT=0,wellFed=false;
+let perf=0,last=0,slow=0,prevWet=false,donutT=0,parkT=0,regT=0,invT=0,invited=false,watch=0,watchT=0,fishT=0,fish=0,instructor=false,setT=0,sets=0,coach=false,phase=0,carryCroc=null,relocated=0,hasPot=false,potT=0,wellFed=false;
 const PIER={X:mx(985),Z:mz(742)};
 function infraction(name,n){watch=Math.min(5,watch+n);watchT=perf+60000;addClout(3);
   toast(name+' \u2014 BII WATCH '+'\u2605'.repeat(watch));}
@@ -4463,7 +4472,23 @@ function tick(t){
       progText='REEF SCHOOL  bring the catch to the pier';
     }
   }else{
-    progText='FREE ROAM — INSTRUCTOR of the REEF SCHOOL  ·  the island is yours';
+    // Beach Bootcamp side activity — reveal stations, coach the circuit
+    if(!coach){
+      for(const s of FIT){if(!s.pil.visible){s.pil.visible=true;s.log.visible=true;}}
+      let ns=null,nd=1e9;
+      for(const s of FIT){if(s.got)continue;const d=Math.hypot(P.x-s.X,P.z-s.Z);if(d<nd){nd=d;ns=s;}}
+      if(ns){
+        if(nd<11&&Math.abs(P.v)<3){setT+=dt;
+          if(setT>2.5){setT=0;ns.got=true;sets++;ns.pil.visible=false;addClout(8);
+            toast(ns.name+' DONE  ('+sets+' / 3)');}}
+        else setT=Math.max(0,setT-dt);
+        target=ns;
+        progText='BEACH BOOTCAMP  set '+sets+' / 3'+(nd<11?'  —  hold form':'');
+      }
+      if(sets===3){coach=true;addClout(30);toast('BEACH BOOTCAMP COMPLETE — YOU ARE THE COACH');}
+    }else{
+      progText='FREE ROAM — INSTRUCTOR & COACH  ·  the island is yours';
+    }
   }
   $('prog').textContent=progText;
   const arrow=$('arrow');
@@ -4485,7 +4510,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh}),FISH_SPOTS,PIER,gxP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach}),FISH_SPOTS,PIER,gxP,FIT,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

@@ -23,7 +23,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.10**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.11**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -55,6 +55,9 @@ original luxury SUV parked at The Strip; walk up and press `E` to swap rides
 v0.10 adds the missing GTA staple: a live **circular radar** bottom-left (island
 shape, all ten districts, your heading, the objective and your parked ride) and a
 full-screen **pause map** on `M` / the MAP button with every district labeled.
+v0.11 adds **Beach Bootcamp** — in free roam after the Reef School, three fitness
+stations glow on the Palm Line sand; hold form at each to complete the set (3/3
+earns the COACH title), the in-game fitness-coaching career.
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a

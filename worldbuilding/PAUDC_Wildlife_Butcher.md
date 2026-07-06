@@ -219,3 +219,51 @@ the INSTRUCTOR title.*
 
 > Fictional gadget and gameplay. Real-world fishing regulations, seasons, and
 > size limits vary by place — this is a video game, not angling advice.
+
+---
+
+## 7. Beach Bootcamp — the Coach & the Morning Circuit
+
+The Reef School instructor has a second hat: at first light on the Palm Line
+sand he runs **Beach Bootcamp**, PAUDC's fitness-coaching career (a nod to the
+player's own coaching channel — the in-game Coach is the same canon character
+built from the reference art in Section 6). Recruits, cooks, off-duty everyone —
+the Coach takes all comers, and finishing the circuit feeds the recruitment
+world-stat and the Well Rested loop.
+
+### The Coach (canon look)
+Athletic Jamaican man, 30s, calm teacher's energy, shirtless in Jamaica-flag
+boardshorts on the beach at golden hour — same character sheet as the Reef
+School instructor. *(To swap in a player's own likeness, upload a reference
+image in-session; otherwise the canon Coach is used.)*
+
+### The Morning Circuit (moderate real-world grounding — bodyweight, beach-safe)
+Three stations, marked by palm-log props on the sand. General fitness only;
+scale to ability, warm up first, stop if it hurts.
+
+1. **Push-Up Set** — 3 rounds of push-ups to comfortable effort; hands on a
+   palm log to raise the angle if full push-ups are too much. Rest ~60s between
+   rounds. *Builds: chest, shoulders, core.*
+2. **Squat Set** — 3 rounds of bodyweight squats, heels down, knees tracking
+   over toes, sink to comfortable depth. Add a slow 3-count down for more
+   challenge. *Builds: legs, glutes.*
+3. **Sprint Set** — short beach sprints (soft sand adds resistance), walk back
+   to recover, repeat a handful of times. *Builds: conditioning, speed.*
+
+Cool down with an easy walk along the waterline and shoulder/hip stretches.
+
+### Gameplay
+- **In the prototype (v0.11):** in free roam after the Reef School, three
+  Bootcamp stations glow on the Palm Line beach — pull up to each and hold
+  steady to complete the set (3/3 earns the **COACH** title + clout).
+- **Rewards:** completing the daily circuit grants a light **Well Trained**
+  buff (stacks with Well Fed / Well Rested — carrot, never stick, per Systems
+  §10), canteen credits, and clout per graduate you coach.
+- **Cross-links:** Fort Flavor caters the post-workout smoothie bar; the
+  YARDCLASH roster recruits its best from Bootcamp regulars.
+
+> Fictional game activity. The routine above is general, non-prescriptive
+> bodyweight movement — not medical, training, or nutrition advice. Warm up,
+> scale to your own ability, and talk to a professional before starting any
+> program.
+
