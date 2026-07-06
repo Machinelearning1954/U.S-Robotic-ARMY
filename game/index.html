@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Robotic Army — Drone Defense</title>
+<style>
+  :root {
+    --bg: #0a0f0a;
+    --panel: #101a10;
+    --line: #1f3320;
+    --green: #6fda6f;
+    --dim: #4a7a4a;
+    --amber: #e0b350;
+    --red: #e06050;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: "Courier New", monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 12px;
+  }
+  h1 { font-size: 18px; letter-spacing: 3px; margin: 6px 0 2px; }
+  .sub { color: var(--dim); font-size: 11px; margin-bottom: 8px; }
+  #wrap { position: relative; }
+  canvas {
+    background: #050805;
+    border: 1px solid var(--line);
+    display: block;
+    max-width: 100%;
+  }
+  #hud {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    padding: 6px 2px;
+    width: 720px;
+    max-width: 100%;
+    justify-content: space-between;
+  }
+  #hud .amber { color: var(--amber); }
+  .help { color: var(--dim); font-size: 11px; margin-top: 6px; text-align: center; }
+  /* Intel overlay */
+  #intel {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 10, 5, 0.94);
+    border: 1px solid var(--line);
+    padding: 18px 22px;
+    overflow-y: auto;
+    display: none;
+  }
+  #intel h2 { font-size: 15px; letter-spacing: 2px; margin-bottom: 4px; }
+  #intel .note { color: var(--dim); font-size: 11px; margin-bottom: 14px; }
+  .file {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  .file.locked { color: var(--dim); border-style: dashed; }
+  .file .tag {
+    font-size: 10px;
+    padding: 1px 6px;
+    border: 1px solid currentColor;
+    margin-left: 8px;
+  }
+  .file .tag.inaccessible { color: var(--red); }
+  .file .tag.metadata { color: var(--amber); }
+  .file .row { margin-top: 4px; color: var(--dim); }
+  .file .row b { color: var(--green); font-weight: normal; }
+  .file a { color: var(--amber); }
+</style>
+</head>
+<body>
+  <h1>U.S. ROBOTIC ARMY</h1>
+  <div class="sub">// DRONE DEFENSE — SECTOR 7 //</div>
+  <div id="hud">
+    <span>SCORE <b id="score">0</b></span>
+    <span>WAVE <b id="wave">1</b></span>
+    <span class="amber">INTEL <b id="intelCount">0</b>/<b id="intelTotal">0</b></span>
+    <span>HULL <b id="hull">100</b>%</span>
+  </div>
+  <div id="wrap">
+    <canvas id="game" width="720" height="480"></canvas>
+    <div id="intel">
+      <h2>INTEL FILES</h2>
+      <div class="note">
+        Ingested media catalog (see /data/media_catalog.json). Clear a wave to declassify the next file.
+        Entries hold verified metadata only — source content was not retrievable at ingestion time.
+      </div>
+      <div id="files"></div>
+    </div>
+  </div>
+  <div class="help">←/→ or A/D move · SPACE fire · TAB intel files · ENTER start/restart</div>
+
+<script src="data/catalog.js"></script>
+<script>
+"use strict";
+const cv = document.getElementById("game");
+const cx = cv.getContext("2d");
+const W = cv.width, H = cv.height;
+const CATALOG = window.MEDIA_CATALOG || [];
+
+// ---------- state ----------
+const S = {
+  mode: "title",          // title | play | dead
+  score: 0,
+  wave: 1,
+  hull: 100,
+  unlocked: 0,            // intel files declassified (one per wave cleared)
+  player: { x: W / 2, w: 40, h: 18, speed: 300, cool: 0 },
+  shots: [],
+  drones: [],
+  sparks: [],
+  keys: {},
+  toast: null,            // {text, t}
+};
+
+function spawnWave(n) {
+  S.drones = [];
+  const rows = Math.min(2 + Math.floor(n / 2), 5);
+  const cols = Math.min(5 + n, 10);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      S.drones.push({
+        x: 60 + c * ((W - 120) / Math.max(cols - 1, 1)),
+        y: 50 + r * 42,
+        r: 12,
+        dir: 1,
+        vy: 0,
+        speed: 30 + n * 8 + r * 4,
+        diving: false,
+      });
+    }
+  }
+}
+
+function toast(text) { S.toast = { text, t: 2.5 }; }
+
+// ---------- intel overlay ----------
+const intelEl = document.getElementById("intel");
+const filesEl = document.getElementById("files");
+document.getElementById("intelTotal").textContent = CATALOG.length;
+
+function renderIntel() {
+  filesEl.innerHTML = "";
+  CATALOG.forEach((m, i) => {
+    const div = document.createElement("div");
+    const open = i < S.unlocked;
+    div.className = "file" + (open ? "" : " locked");
+    if (open) {
+      const tagClass = m.ingestStatus === "inaccessible" ? "inaccessible" : "metadata";
+      div.innerHTML =
+        `<b>FILE ${String(i + 1).padStart(2, "0")}</b> — ${m.title}` +
+        `<span class="tag ${tagClass}">${m.ingestStatus.toUpperCase()}</span>` +
+        `<div class="row">SOURCE: <b>${m.source}</b> · CHANNEL: <b>${m.channel}</b> · DATE: <b>${m.published}</b></div>` +
+        `<div class="row">TOPIC: ${m.topic}</div>` +
+        `<div class="row">LINK: <a href="${m.url}" target="_blank" rel="noopener">${m.url}</a></div>`;
+    } else {
+      div.innerHTML = `<b>FILE ${String(i + 1).padStart(2, "0")}</b> — [CLASSIFIED] · clear wave ${i + 1} to declassify`;
+    }
+    filesEl.appendChild(div);
+  });
+}
+
+function toggleIntel(force) {
+  const show = force !== undefined ? force : intelEl.style.display !== "block";
+  intelEl.style.display = show ? "block" : "none";
+  if (show) renderIntel();
+}
+
+// ---------- input ----------
+addEventListener("keydown", (e) => {
+  if (e.key === "Tab") { e.preventDefault(); toggleIntel(); return; }
+  S.keys[e.key.toLowerCase()] = true;
+  if (e.key === " ") e.preventDefault();
+  if (e.key === "Enter" && S.mode !== "play") startGame();
+});
+addEventListener("keyup", (e) => { S.keys[e.key.toLowerCase()] = false; });
+
+function startGame() {
+  S.mode = "play";
+  S.score = 0; S.wave = 1; S.hull = 100; S.unlocked = 0;
+  S.shots = []; S.sparks = [];
+  S.player.x = W / 2;
+  spawnWave(1);
+  toggleIntel(false);
+}
+
+// ---------- update ----------
+function update(dt) {
+  if (S.mode !== "play") return;
+  const p = S.player;
+  if (S.keys["arrowleft"] || S.keys["a"]) p.x -= p.speed * dt;
+  if (S.keys["arrowright"] || S.keys["d"]) p.x += p.speed * dt;
+  p.x = Math.max(p.w / 2, Math.min(W - p.w / 2, p.x));
+  p.cool -= dt;
+  if (S.keys[" "] && p.cool <= 0) {
+    S.shots.push({ x: p.x, y: H - 40 });
+    p.cool = 0.25;
+  }
+
+  S.shots.forEach((s) => (s.y -= 420 * dt));
+  S.shots = S.shots.filter((s) => s.y > -10);
+
+  // drone movement: sweep side to side, occasionally dive
+  let hitEdge = false;
+  S.drones.forEach((d) => {
+    if (d.diving) {
+      d.y += (d.speed + 120) * dt;
+    } else {
+      d.x += d.dir * d.speed * dt;
+      if (d.x < 30 || d.x > W - 30) hitEdge = true;
+      if (Math.random() < 0.0008 * S.wave) d.diving = true;
+    }
+  });
+  if (hitEdge) S.drones.forEach((d) => { d.dir *= -1; d.y += 14; });
+
+  // collisions: shots vs drones
+  S.shots = S.shots.filter((s) => {
+    for (let i = 0; i < S.drones.length; i++) {
+      const d = S.drones[i];
+      if (Math.abs(s.x - d.x) < d.r + 3 && Math.abs(s.y - d.y) < d.r + 3) {
+        S.drones.splice(i, 1);
+        S.score += 10;
+        for (let k = 0; k < 8; k++)
+          S.sparks.push({ x: d.x, y: d.y, vx: (Math.random() - 0.5) * 160, vy: (Math.random() - 0.5) * 160, t: 0.4 });
+        return false;
+      }
+    }
+    return true;
+  });
+
+  // drones reaching the ground / hitting player
+  S.drones = S.drones.filter((d) => {
+    if (d.y > H - 46 && Math.abs(d.x - p.x) < p.w / 2 + d.r) { S.hull -= 20; return false; }
+    if (d.y > H + 20) { S.hull -= 10; return false; }
+    return true;
+  });
+
+  S.sparks.forEach((s) => { s.x += s.vx * dt; s.y += s.vy * dt; s.t -= dt; });
+  S.sparks = S.sparks.filter((s) => s.t > 0);
+  if (S.toast) { S.toast.t -= dt; if (S.toast.t <= 0) S.toast = null; }
+
+  if (S.hull <= 0) { S.hull = 0; S.mode = "dead"; }
+
+  // wave cleared → declassify next intel file
+  if (S.drones.length === 0) {
+    if (S.unlocked < CATALOG.length) {
+      S.unlocked++;
+      toast(`INTEL FILE ${String(S.unlocked).padStart(2, "0")} DECLASSIFIED — press TAB`);
+    }
+    S.wave++;
+    spawnWave(S.wave);
+  }
+
+  document.getElementById("score").textContent = S.score;
+  document.getElementById("wave").textContent = S.wave;
+  document.getElementById("hull").textContent = S.hull;
+  document.getElementById("intelCount").textContent = S.unlocked;
+}
+
+// ---------- draw ----------
+function draw() {
+  cx.clearRect(0, 0, W, H);
+
+  // ground line
+  cx.strokeStyle = "#1f3320";
+  cx.beginPath(); cx.moveTo(0, H - 24); cx.lineTo(W, H - 24); cx.stroke();
+
+  if (S.mode === "title" || S.mode === "dead") {
+    cx.fillStyle = "#6fda6f";
+    cx.font = "28px Courier New";
+    cx.textAlign = "center";
+    cx.fillText(S.mode === "dead" ? "UNIT DESTROYED" : "U.S. ROBOTIC ARMY", W / 2, H / 2 - 30);
+    cx.font = "14px Courier New";
+    cx.fillStyle = "#4a7a4a";
+    if (S.mode === "dead") cx.fillText(`FINAL SCORE ${S.score} · INTEL ${S.unlocked}/${CATALOG.length}`, W / 2, H / 2);
+    cx.fillText("PRESS ENTER TO " + (S.mode === "dead" ? "REDEPLOY" : "DEPLOY"), W / 2, H / 2 + 28);
+    cx.fillText("CLEAR WAVES TO DECLASSIFY INGESTED MEDIA INTEL (TAB)", W / 2, H / 2 + 50);
+    return;
+  }
+
+  // player robot: body + turret
+  const p = S.player;
+  cx.fillStyle = "#6fda6f";
+  cx.fillRect(p.x - p.w / 2, H - 42, p.w, p.h);
+  cx.fillRect(p.x - 3, H - 52, 6, 12);
+  cx.fillStyle = "#0a0f0a";
+  cx.fillRect(p.x - p.w / 2 + 6, H - 38, 8, 6);
+  cx.fillRect(p.x + p.w / 2 - 14, H - 38, 8, 6);
+
+  // shots
+  cx.fillStyle = "#e0b350";
+  S.shots.forEach((s) => cx.fillRect(s.x - 1.5, s.y - 8, 3, 8));
+
+  // drones
+  S.drones.forEach((d) => {
+    cx.strokeStyle = d.diving ? "#e06050" : "#6fda6f";
+    cx.beginPath();
+    cx.moveTo(d.x - d.r, d.y);
+    cx.lineTo(d.x, d.y - d.r * 0.7);
+    cx.lineTo(d.x + d.r, d.y);
+    cx.lineTo(d.x, d.y + d.r * 0.7);
+    cx.closePath();
+    cx.stroke();
+    cx.fillStyle = cx.strokeStyle;
+    cx.fillRect(d.x - 1.5, d.y - 1.5, 3, 3);
+  });
+
+  // sparks
+  cx.fillStyle = "#e0b350";
+  S.sparks.forEach((s) => cx.fillRect(s.x, s.y, 2, 2));
+
+  // toast
+  if (S.toast) {
+    cx.fillStyle = "#e0b350";
+    cx.font = "13px Courier New";
+    cx.textAlign = "center";
+    cx.fillText(S.toast.text, W / 2, 28);
+  }
+}
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

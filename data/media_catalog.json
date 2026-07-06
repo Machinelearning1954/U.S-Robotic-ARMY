@@ -1,0 +1,39 @@
+{
+  "description": "Media catalog for the U.S. Robotic Army game. Each entry is a media link submitted for ingestion. Only publicly verifiable metadata is recorded here; video/reel content itself could not be fetched (YouTube and Instagram return HTTP 403 to this environment), so no claims are made about footage beyond title/channel metadata found via web search.",
+  "updated": "2026-07-06",
+  "entries": [
+    {
+      "id": "yt-c1ckQfK0YBU",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=c1ckQfK0YBU",
+      "title": "Pushing RTX 5090 to it's LIMITS with this Ultra Realistic GTA 5 Graphics MOD [8K60FPS]",
+      "channel": "Gamesource (per web search)",
+      "published": "2025-09-06",
+      "topic": "GTA 5 ultra-realistic graphics mod showcased on an RTX 5090 at 8K/60fps",
+      "ingest_status": "metadata_only",
+      "notes": "Video content not fetched (HTTP 403); title/channel/date sourced from web search results."
+    },
+    {
+      "id": "ig-DadPLqBROHy",
+      "source": "instagram",
+      "url": "https://www.instagram.com/reel/DadPLqBROHy/",
+      "title": null,
+      "channel": null,
+      "published": null,
+      "topic": null,
+      "ingest_status": "inaccessible",
+      "notes": "Instagram returned HTTP 403 and web search found no information about this reel. Content, caption, and author unknown."
+    },
+    {
+      "id": "yt-R9wayqAXifk",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=R9wayqAXifk",
+      "title": "50 BEST PC Games of 2024 [4K]",
+      "channel": "GameranxTV",
+      "published": "2025-01-11",
+      "topic": "Countdown of the 50 best PC games released in 2024",
+      "ingest_status": "metadata_only",
+      "notes": "Video content not fetched (HTTP 403); title/channel/date sourced from web search results."
+    }
+  ]
+}
