@@ -164,3 +164,58 @@ AI-generated concept art (Higgsfield):
 - **Crocs & gators:** Wrangler Contracts pay Standing (discipline currency), gator
   hides feed YARDCLASH championship cosmetics, and Barrister's Pressure Dome
   break-ins periodically shut down fight night — a world-event everyone films.
+
+---
+
+## 6. Reef School & the Snapper Scope — You, the Instructor
+
+The island's newest career: **Reef School instructor**, taught off the end of the
+Ironbeach pier. You certify, then you teach — recruits, cooks who want their own
+supply line, even the odd BII agent on a day off.
+
+### The Snapper Scope (fictional gadget)
+Inspired by real-world castable Bluetooth fishfinders, generalized for the game:
+a baseball-sized **castable sonar puck** with a soft teal light ring. Lob it off
+the pier or the Mudfish and it pings straight to your OnWatch phone:
+
+- **Fish arches with depth tags** — every mark shows its depth so you set your
+  bait right on the fish's nose.
+- **Bottom paint** — solid fill shows hardness: bright over reef and rock ledges
+  (snapper country), dim over sand and grass.
+- **Four scan presets** — Size, Depth, Schooling, Clean (tunes out clutter and
+  false echoes).
+- Rated to 60 m in-fiction; floats, glows when it pings, and the Chromelab sells
+  a colorway that matches your kit.
+- Sold at Miss Ouida's market stall; Butcher Level 3 discount applies.
+
+### The Red Snapper Curriculum (what you teach)
+Moderate real-world grounding, same policy as the Fort Flavor recipes:
+
+1. **Find hard structure.** Snapper hold near reef ledges, rock piles and
+   drop-offs — watch for bright bottom paint with arches stacked above it.
+2. **Bait honest.** Strips of sprat or squid on a simple bottom rig.
+3. **Drop to the bottom, then lift slow.** Snapper hit on the lift; patience
+   beats power. Hold the boat steady — drift ruins the drop.
+4. **Keeper rules.** Undersized fish go back over the side, every time. The
+   class measures every catch; the sanctuary reef is never fished.
+5. **Graduation:** your student lands two keepers unassisted, then the class
+   fries the catch — escovitch snapper night at Fort Flavor, Well Fed buff for
+   the whole cohort.
+
+### The instructor (canon look)
+The default instructor appearance is built from the player's own reference: an
+athletic Jamaican man in his 30s, calm teacher's energy, Jamaica-flag
+boardshorts, open fishing shirt, rod in one hand, glowing Scope puck in the
+other. Teaching pays canteen credits and clout per graduate; the Friday Fry
+after graduation feeds the recruitment world-stat.
+Concept art: [the Instructor on Ironbeach pier](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260706_022644_3a081458-ec5b-405f-a849-c146745329ce.png)
+(AI concept image, generated for this project).
+
+*In the prototype (v0.8): the mission chain grows a fourth act — Reef School.
+After the curry delivery, three sonar beacons mark reef spots in the bays; hold
+the Mudfish steady on a spot until the Scope pings your red snapper aboard
+(3 catches), then bring the catch to the Ironbeach pier to hold class and earn
+the INSTRUCTOR title.*
+
+> Fictional gadget and gameplay. Real-world fishing regulations, seasons, and
+> size limits vary by place — this is a video game, not angling advice.
