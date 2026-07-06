@@ -6,9 +6,9 @@
 class FeatureContext;
 
 //Global Context
-class CyberFsrContext
+class RoboFsrContext
 {
-	CyberFsrContext();
+	RoboFsrContext();
 public:
 	std::shared_ptr<Config> MyConfig;
 
@@ -24,9 +24,9 @@ public:
 	FeatureContext* CreateContext();
 	void DeleteContext(NVSDK_NGX_Handle* handle);
 
-	static std::shared_ptr<CyberFsrContext> instance()
+	static std::shared_ptr<RoboFsrContext> instance()
 	{
-		static std::shared_ptr<CyberFsrContext> INSTANCE{new CyberFsrContext()};
+		static std::shared_ptr<RoboFsrContext> INSTANCE{new RoboFsrContext()};
 		return INSTANCE;
 	}
 };
@@ -47,7 +47,7 @@ public:
 };
 
 template<class T>
-inline NVSDK_NGX_Parameter* CyberFsrContext::AllocateParameter()
+inline NVSDK_NGX_Parameter* RoboFsrContext::AllocateParameter()
 {
 	auto* instance = new T();
 	Parameters.push_back((NVSDK_NGX_Parameter*)instance);

@@ -2,7 +2,7 @@
 #include "Config.h"
 #include "Util.h"
 #include "NvParameter.h"
-#include "CyberFsr.h"
+#include "RoboFsr.h"
 
 void NvParameter::Set(const char* InName, unsigned long long InValue)
 {
@@ -261,7 +261,7 @@ void NvParameter::EvaluateRenderScale()
 {
 	FfxFsr2QualityMode fsrQualityMode;
 
-	auto config = CyberFsrContext::instance()->MyConfig;
+	auto config = RoboFsrContext::instance()->MyConfig;
 
 	if (config->UpscaleRatioOverrideEnabled.has_value() && config->UpscaleRatioOverrideEnabled && config->UpscaleRatioOverrideValue.has_value())
 	{

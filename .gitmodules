@@ -1,6 +1,6 @@
-[submodule "RDRFSR2/external/FidelityFX-FSR2"]
-	path = RDRFSR2/external/FidelityFX-FSR2
+[submodule "RoboFSR2/external/FidelityFX-FSR2"]
+	path = RoboFSR2/external/FidelityFX-FSR2
 	url = https://github.com/GPUOpen-Effects/FidelityFX-FSR2.git
-[submodule "RDRFSR2/external/nvngx_dlss_sdk"]
-	path = RDRFSR2/external/nvngx_dlss_sdk
+[submodule "RoboFSR2/external/nvngx_dlss_sdk"]
+	path = RoboFSR2/external/nvngx_dlss_sdk
 	url = https://github.com/PotatoOfDoom/DLSS.git

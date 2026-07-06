@@ -1,34 +1,14 @@
 # U.S-Robotic-ARMY
 
-This repository vendors the [RDRFSR2](https://github.com/RealIndica/RDRFSR2)
-project under [`RDRFSR2/`](RDRFSR2/).
+Home of **RoboFSR** — a translation layer that brings AMD FidelityFX Super
+Resolution 2.0 to Red Dead Redemption 2 through the game's DLSS code path, so
+temporal upscaling works on any GPU vendor.
 
-## RDRFSR2
+The project lives in [`RoboFSR2/`](RoboFSR2/) — see its
+[README](RoboFSR2/README.md) for how it works, installation, and build
+instructions.
 
-RDRFSR2 is a library for **Red Dead Redemption 2** that replaces NVIDIA DLSS
-with **AMD FidelityFX Super Resolution 2.0 (FSR 2.0)**. It is written primarily
-in C++ and targets Windows (Direct3D 12 and Vulkan). The upstream project is
-archived and read-only; this repository preserves its source at the state it
-was integrated.
-
-See [`RDRFSR2/README.md`](RDRFSR2/README.md) for the original installation and
-compilation instructions.
-
-### Layout
-
-| Path | Description |
-| --- | --- |
-| `RDRFSR2/CyberFSR/` | Main mod library (DLSS → FSR 2.0 translation, DX12/Vulkan hooks). |
-| `RDRFSR2/nvngxLoader/` | NVIDIA NGX loader shim. |
-| `RDRFSR2/external/simpleini/` | Vendored [SimpleIni](https://github.com/brofield/simpleini) header library. |
-| `RDRFSR2/external/FidelityFX-FSR2/` | Git submodule → [GPUOpen-Effects/FidelityFX-FSR2](https://github.com/GPUOpen-Effects/FidelityFX-FSR2) (pinned to `v2.0.1a`). |
-| `RDRFSR2/external/nvngx_dlss_sdk/` | Git submodule → [PotatoOfDoom/DLSS](https://github.com/PotatoOfDoom/DLSS). |
-| `RDRFSR2/CyberFSR.sln` | Visual Studio 2022 solution. |
-
-### Getting the external dependencies
-
-The two build-time SDK dependencies are tracked as git submodules. After
-cloning, pull them in:
+## Quick start
 
 ```sh
 git clone --recursive <this-repo-url>
@@ -36,13 +16,9 @@ git clone --recursive <this-repo-url>
 git submodule update --init --recursive
 ```
 
-Building additionally requires the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home)
-(with the `VULKAN_SDK` environment variable set) and Visual Studio 2022, as
-described in `RDRFSR2/README.md`.
+Building requires Windows, Visual Studio 2022, and the
+[Vulkan SDK](https://vulkan.lunarg.com/sdk/home) with `VULKAN_SDK` set.
 
-## Licensing
+## License
 
-The RDRFSR2 source retains its original license
-([`RDRFSR2/LICENSE`](RDRFSR2/LICENSE)). Vendored dependencies retain their own
-licenses. This repository's top-level [`LICENSE`](LICENSE) applies to the
-repository packaging.
+MIT — see [LICENSE](LICENSE) and [RoboFSR2/LICENSE](RoboFSR2/LICENSE).

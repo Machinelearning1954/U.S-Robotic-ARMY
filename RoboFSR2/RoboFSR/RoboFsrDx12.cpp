@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Config.h"
-#include "CyberFsr.h"
+#include "RoboFsr.h"
 #include "DirectXHooks.h"
 #include "Util.h"
 
@@ -18,22 +18,22 @@ NVSDK_NGX_Result NVSDK_NGX_D3D12_Init(unsigned long long InApplicationId, const 
 
 NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_D3D12_Shutdown(void)
 {
-	CyberFsrContext::instance()->Parameters.clear();
-	CyberFsrContext::instance()->Contexts.clear();
+	RoboFsrContext::instance()->Parameters.clear();
+	RoboFsrContext::instance()->Contexts.clear();
 	return NVSDK_NGX_Result_Success;
 }
 
 NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_D3D12_Shutdown1(ID3D12Device* InDevice)
 {
-	CyberFsrContext::instance()->Parameters.clear();
-	CyberFsrContext::instance()->Contexts.clear();
+	RoboFsrContext::instance()->Parameters.clear();
+	RoboFsrContext::instance()->Contexts.clear();
 	return NVSDK_NGX_Result_Success;
 }
 
 //Deprecated Parameter Function - Internal Memory Tracking
 NVSDK_NGX_Result NVSDK_NGX_D3D12_GetParameters(NVSDK_NGX_Parameter** OutParameters)
 {
-	*OutParameters = CyberFsrContext::instance()->AllocateParameter<NvParameter>();
+	*OutParameters = RoboFsrContext::instance()->AllocateParameter<NvParameter>();
 	return NVSDK_NGX_Result_Success;
 }
 
@@ -73,9 +73,9 @@ NVSDK_NGX_Result NVSDK_NGX_D3D12_CreateFeature(ID3D12GraphicsCommandList* InCmdL
 	ID3D12Device* device;
 	InCmdList->GetDevice(IID_PPV_ARGS(&device));
 
-	auto instance = CyberFsrContext::instance();
+	auto instance = RoboFsrContext::instance();
 	auto config = instance->MyConfig;
-	auto deviceContext = CyberFsrContext::instance()->CreateContext();
+	auto deviceContext = RoboFsrContext::instance()->CreateContext();
 	deviceContext->ViewMatrix = ViewMatrixHook::Create(*config);
 
 	*OutHandle = &deviceContext->Handle;
@@ -125,10 +125,10 @@ NVSDK_NGX_Result NVSDK_NGX_D3D12_CreateFeature(ID3D12GraphicsCommandList* InCmdL
 
 NVSDK_NGX_Result NVSDK_NGX_D3D12_ReleaseFeature(NVSDK_NGX_Handle* InHandle)
 {
-	auto deviceContext = CyberFsrContext::instance()->Contexts[InHandle->Id];
+	auto deviceContext = RoboFsrContext::instance()->Contexts[InHandle->Id];
 	FfxErrorCode errorCode = ffxFsr2ContextDestroy(deviceContext->FsrContext.get());
 	FFX_ASSERT(errorCode == FFX_OK);
-	CyberFsrContext::instance()->DeleteContext(InHandle);
+	RoboFsrContext::instance()->DeleteContext(InHandle);
 	return NVSDK_NGX_Result_Success;
 }
 
@@ -149,9 +149,9 @@ NVSDK_NGX_Result NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCommandList* InCm
 
 	ID3D12Device* device;
 	InCmdList->GetDevice(IID_PPV_ARGS(&device));
-	auto instance = CyberFsrContext::instance();
+	auto instance = RoboFsrContext::instance();
 	auto config = instance->MyConfig;
-	auto deviceContext = CyberFsrContext::instance()->Contexts[InFeatureHandle->Id];
+	auto deviceContext = RoboFsrContext::instance()->Contexts[InFeatureHandle->Id];
 
 	if (orgRootSig)
 	{

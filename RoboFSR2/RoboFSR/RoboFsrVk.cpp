@@ -1,40 +1,40 @@
 #include "pch.h"
 #include "Config.h"
-#include "CyberFsr.h"
+#include "RoboFsr.h"
 #include "DirectXHooks.h"
 #include "Util.h"
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_NGX_VULKAN_Init(unsigned long long InApplicationId, const wchar_t* InApplicationDataPath, VkInstance InInstance, VkPhysicalDevice InPD, VkDevice InDevice, const NVSDK_NGX_FeatureCommonInfo* InFeatureInfo, NVSDK_NGX_Version InSDKVersion)
 {
-	CyberFsrContext::instance()->VulkanDevice = InDevice;
-	CyberFsrContext::instance()->VulkanInstance = InInstance;
-	CyberFsrContext::instance()->VulkanPhysicalDevice = InPD;
+	RoboFsrContext::instance()->VulkanDevice = InDevice;
+	RoboFsrContext::instance()->VulkanInstance = InInstance;
+	RoboFsrContext::instance()->VulkanPhysicalDevice = InPD;
 	return NVSDK_NGX_Result_Success;
 }
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_VULKAN_Shutdown(void)
 {
-	CyberFsrContext::instance()->VulkanDevice = nullptr;
-	CyberFsrContext::instance()->VulkanInstance = nullptr;
-	CyberFsrContext::instance()->VulkanPhysicalDevice = nullptr;
-	CyberFsrContext::instance()->Parameters.clear();
-	CyberFsrContext::instance()->Contexts.clear();
+	RoboFsrContext::instance()->VulkanDevice = nullptr;
+	RoboFsrContext::instance()->VulkanInstance = nullptr;
+	RoboFsrContext::instance()->VulkanPhysicalDevice = nullptr;
+	RoboFsrContext::instance()->Parameters.clear();
+	RoboFsrContext::instance()->Contexts.clear();
 	return NVSDK_NGX_Result_Success;
 }
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_VULKAN_Shutdown1(VkDevice InDevice)
 {
-	CyberFsrContext::instance()->VulkanDevice = nullptr;
-	CyberFsrContext::instance()->VulkanInstance = nullptr;
-	CyberFsrContext::instance()->VulkanPhysicalDevice = nullptr;
-	CyberFsrContext::instance()->Parameters.clear();
-	CyberFsrContext::instance()->Contexts.clear();
+	RoboFsrContext::instance()->VulkanDevice = nullptr;
+	RoboFsrContext::instance()->VulkanInstance = nullptr;
+	RoboFsrContext::instance()->VulkanPhysicalDevice = nullptr;
+	RoboFsrContext::instance()->Parameters.clear();
+	RoboFsrContext::instance()->Contexts.clear();
 	return NVSDK_NGX_Result_Success;
 }
 
 NVSDK_NGX_Result NVSDK_NGX_VULKAN_GetParameters(NVSDK_NGX_Parameter** OutParameters)
 {
-	*OutParameters = CyberFsrContext::instance()->AllocateParameter<NvParameter>();
+	*OutParameters = RoboFsrContext::instance()->AllocateParameter<NvParameter>();
 	return NVSDK_NGX_Result_Success;
 }
 
@@ -63,14 +63,14 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_VULKAN_GetScratchBufferSize(
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_VULKAN_CreateFeature(VkCommandBuffer InCmdBuffer, NVSDK_NGX_Feature InFeatureID, const NVSDK_NGX_Parameter* InParameters, NVSDK_NGX_Handle** OutHandle)
 {
-	return NVSDK_NGX_VULKAN_CreateFeature1(CyberFsrContext::instance()->VulkanDevice, InCmdBuffer, InFeatureID, InParameters, OutHandle);
+	return NVSDK_NGX_VULKAN_CreateFeature1(RoboFsrContext::instance()->VulkanDevice, InCmdBuffer, InFeatureID, InParameters, OutHandle);
 }
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_VULKAN_CreateFeature1(VkDevice InDevice, VkCommandBuffer InCmdList, NVSDK_NGX_Feature InFeatureID, const NVSDK_NGX_Parameter* InParameters, NVSDK_NGX_Handle** OutHandle)
 {
 	const auto inParams = dynamic_cast<const NvParameter*>(InParameters);
 
-	auto instance = CyberFsrContext::instance();
+	auto instance = RoboFsrContext::instance();
 	auto config = instance->MyConfig;
 	auto deviceContext = instance->CreateContext();
 	deviceContext->ViewMatrix = ViewMatrixHook::Create(*config);
@@ -125,18 +125,18 @@ NVSDK_NGX_API NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_VULKAN_CreateFeature1(VkDevi
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_VULKAN_ReleaseFeature(NVSDK_NGX_Handle* InHandle)
 {
-	auto deviceContext = CyberFsrContext::instance()->Contexts[InHandle->Id];
+	auto deviceContext = RoboFsrContext::instance()->Contexts[InHandle->Id];
 	FfxErrorCode errorCode = ffxFsr2ContextDestroy(deviceContext->FsrContext.get());
 	FFX_ASSERT(errorCode == FFX_OK);
-	CyberFsrContext::instance()->DeleteContext(InHandle);
+	RoboFsrContext::instance()->DeleteContext(InHandle);
 	return NVSDK_NGX_Result_Success;
 }
 
 NVSDK_NGX_API NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_VULKAN_EvaluateFeature(VkCommandBuffer InCmdList, const NVSDK_NGX_Handle* InFeatureHandle, const NVSDK_NGX_Parameter* InParameters, PFN_NVSDK_NGX_ProgressCallback InCallback)
 {
-	auto instance = CyberFsrContext::instance();
+	auto instance = RoboFsrContext::instance();
 	auto config = instance->MyConfig;
-	auto deviceContext = CyberFsrContext::instance()->Contexts[InFeatureHandle->Id];
+	auto deviceContext = RoboFsrContext::instance()->Contexts[InFeatureHandle->Id];
 	const auto inParams = dynamic_cast<const NvParameter*>(InParameters);
 
 	auto color = (NVSDK_NGX_Resource_VK*)inParams->Color;

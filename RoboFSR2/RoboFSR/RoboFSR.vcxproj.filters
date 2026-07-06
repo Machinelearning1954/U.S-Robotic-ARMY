@@ -21,7 +21,7 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CyberFsr.h">
+    <ClInclude Include="RoboFsr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Util.h">
@@ -47,7 +47,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CyberFsr.cpp">
+    <ClCompile Include="RoboFsr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Util.cpp">
@@ -62,10 +62,10 @@
     <ClCompile Include="Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CyberFsrVk.cpp">
+    <ClCompile Include="RoboFsrVk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CyberFsrDx12.cpp">
+    <ClCompile Include="RoboFsrDx12.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NvParameter.cpp">

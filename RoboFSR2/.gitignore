@@ -429,4 +429,4 @@ FodyWeavers.xsd
 *.exe
 *.out
 *.app
-CyberFSR/imgui.ini
+RoboFSR/imgui.ini
