@@ -163,3 +163,35 @@ the tech budget are the same drawing:
 
 *All names, places, distances, ranks, and systems above are invented for a video
 game and have no real-world counterpart.*
+
+---
+
+## The Region Layer — trained on GTA 6's confirmed world structure
+
+Rockstar's officially confirmed Leonida layout (three cities — Vice City, Port
+Gellhorn, Ambrosia — plus the Keys, the Grassrivers wetlands, and Mount Kalaga)
+is the genre's proof that an open world reads as *real* when it has a small set
+of strongly-flavored regions, not one undifferentiated map. PAUDC adopts the
+same structure with entirely original geography and names:
+
+| Region | Role (genre analog) | Status |
+|---|---|---|
+| **The Twin Bays** | main city — the ten districts around the harbors | live in the prototype |
+| **Pelican Key & the Cays** | tropical island chain (Keys energy) | first cay live |
+| **The Duppy Morass** | vast wetland, airboats, crocs (Grassrivers energy) | live — the eastern wetland |
+| **Blue Mountain Country** | mountain / national-park region (Kalaga energy) | southern ridge live as terrain; trails later |
+| **Rust Quay** | run-down second port town, smuggler home turf (Port Gellhorn energy) — the Barometer Syndicate's mainland base | canon now, playable at the engine rung |
+| **The Cinder Yards** | inland industrial sprawl, the island's working-class heart (Ambrosia energy) | canon now, playable at the engine rung |
+
+Rules: each region keeps a distinct palette, soundscape and mission flavor; the
+campaign touches every region at least once; fast travel never skips a region a
+player hasn't entered. *Structure inspired by published, official information
+only — all places above are invented.*
+
+### Flyover lesson (2002 → 2026 comparison)
+The same shot of a light prop plane over the causeway islands, 24 years apart,
+is the genre's yardstick: identical composition, transformed fidelity. Two notes
+for our ladder: (1) a flyable light seaplane enters the vehicle roster at the
+engine rung — the browser prototype stays land/sea; (2) a **causeway bridge**
+to Pelican Key is on the prototype wishlist so the island chain reads connected
+the way those comparisons do.

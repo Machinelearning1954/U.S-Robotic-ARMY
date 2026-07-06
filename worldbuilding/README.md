@@ -48,7 +48,10 @@ device-tier auto-detection (ULTRA/HIGH/BASE for PC / iPhone 16 & Fold 6 class /
 older phones). v0.7 adds true planar water reflections on ULTRA (the whole neon
 island mirrors in the sea in Grade mode) and the first BII infraction: sustained
 donuts trigger "Excessive Style, Vehicular" — a watch star plus a small clout
-payout.
+payout. v0.8 adds the Reef School fishing act (sonar spots, three red snapper,
+hold class at the pier for the INSTRUCTOR title) and the **Marlin GX** — an
+original luxury SUV parked at The Strip; walk up and press `E` to swap rides
+(faster on land, hates water — the Mudfish stays the amphibious workhorse).
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a
