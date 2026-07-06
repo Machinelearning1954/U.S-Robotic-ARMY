@@ -442,9 +442,12 @@ All fictional, all stylized — severity in ★:
   They subpoena the clips as evidence and accidentally make them go viral again.
 - **Decay:** stars fade after a clean minute; sleeping (Well Rested) clears one
   extra; a YARDCLASH appearance resets petty stars ("community service").
-- **In the prototype (v0.7):** sustained donuts at speed now trigger *Excessive
-  Style, Vehicular* — a BII watch star on the HUD (max 5, decays) plus a small
-  clout payout, the whole ledger philosophy in one mechanic.
+- **In the prototype (v0.7):** four ledger entries are playable. Sustained
+  donuts trigger *Excessive Style, Vehicular* (★); idling on the harbor pier
+  earns *Creative Parking* (★); holding speed at sea earns *Unlicensed Regatta*
+  (★★); and at three stars the BII "would like a word" — keep speeding for
+  *Declining an Invitation* (+★). Stars decay clean; every infraction still
+  pays clout, because the island loves a show.
 
 ### The Job Prep loop (trained on classic heist structure)
 Big missions against the Syndicate use the genre's proven three-beat prep:
