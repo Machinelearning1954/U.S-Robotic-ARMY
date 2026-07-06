@@ -33,7 +33,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>E</b> swap · <b>V</b> POV · <b>R</b> storm · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.13</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.14</div>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
 <button class="tb" id="tl">&#8634;</button><button class="tb" id="tr">&#8635;</button><button class="tb" id="tf">&#9650;</button><button class="tb" id="tb">&#9660;</button><button class="tb" id="gq">HD</button><button class="tb" id="fx">GRADE</button><button class="tb" id="mm">MAP</button><button class="tb" id="rn">RAIN</button>
@@ -4195,6 +4195,19 @@ const FIT=[[624,836],[700,846],[772,834]].map(([fx,fy],i)=>{
     new THREE.MeshLambertMaterial({color:0x6b4a2f}));
   log.position.set(X,Math.max(height(X,Z),0.3)+0.4,Z);log.castShadow=true;log.visible=false;scene.add(log);
   return{X,Z,name:FIT_NAMES[i],got:false,pil,log};});
+// The Green Cross — licensed medical wellness dispensary (fictional brand; free roam)
+const DISP=(()=>{const X=mx(806),Z=mz(902),gy=Math.max(height(X,Z),0);
+  box(X,Z,8,5,7,0xeef4f0);                                     // white clinic
+  const cm=new THREE.MeshBasicMaterial({color:0x37d867});      // emissive green cross
+  const cy=gy+6.4;
+  const cv=new THREE.Mesh(new THREE.BoxGeometry(0.7,2.6,0.2),cm);cv.position.set(X,cy,Z+3.6);scene.add(cv);
+  const ch=new THREE.Mesh(new THREE.BoxGeometry(2.6,0.7,0.2),cm);ch.position.set(X,cy,Z+3.6);scene.add(ch);
+  const gl=new THREE.PointLight(0x5fe08a,1.4,90);gl.position.set(X,cy,Z);scene.add(gl);
+  const pil=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,80,10,1,true),
+    new THREE.MeshBasicMaterial({color:0x37d867,transparent:true,opacity:0.5,side:THREE.DoubleSide,depthWrite:false}));
+  pil.position.set(X,gy+40,Z);pil.visible=false;scene.add(pil);
+  label('GREEN CROSS',X,gy+22,Z);
+  return{X,Z,pil,got:false};})();
 // ---------------- Likkle Oracle's sky-writer (banner plane) ----------------
 const planeG=new THREE.Group();
 {const fus=new THREE.Mesh(new THREE.BoxGeometry(5,1,1),new THREE.MeshLambertMaterial({color:0xd8dde2}));planeG.add(fus);
@@ -4401,7 +4414,7 @@ addEventListener('keydown',e=>{if(e.key.toLowerCase()==='c')setGrade(!grade);});
 {const fx=document.getElementById('fx');
  if(fx)fx.addEventListener('pointerdown',e=>{e.preventDefault();setGrade(!grade);});}
 // ---------------- loop ----------------
-let perf=0,last=0,slow=0,prevWet=false,donutT=0,parkT=0,regT=0,invT=0,invited=false,watch=0,watchT=0,fishT=0,fish=0,instructor=false,setT=0,sets=0,coach=false,phase=0,carryCroc=null,relocated=0,hasPot=false,potT=0,wellFed=false;
+let perf=0,last=0,slow=0,prevWet=false,donutT=0,parkT=0,regT=0,invT=0,invited=false,watch=0,watchT=0,fishT=0,fish=0,instructor=false,setT=0,sets=0,coach=false,phase=0,carryCroc=null,relocated=0,hasPot=false,potT=0,wellFed=false,irie=false,irieT=0;
 const PIER={X:mx(985),Z:mz(742)};
 function infraction(name,n){watch=Math.min(5,watch+n);watchT=perf+60000;addClout(3);
   toast(name+' \u2014 BII WATCH '+'\u2605'.repeat(watch));}
@@ -4438,7 +4451,7 @@ function tick(t){
     if(watch<3)invited=false;
     else if(Math.abs(P.v)>20){invT+=dt;if(invT>6){invited=false;infraction('DECLINING AN INVITATION',1);}}
   }
-  if(watch>0&&perf>watchT){watch--;watchT=perf+60000;}
+  if(watch>0&&perf>watchT){watch--;watchT=perf+(irie?30000:60000);}  // IRIE = calm hands, BII cools twice as fast
   const gy=height(P.x,P.z),y=wet?0.55+0.18*Math.sin(t*0.004):Math.max(gy,0.4);
   const av=VEH[veh].g;
   av.position.set(P.x,y,P.z);av.rotation.y=P.a;
@@ -4545,8 +4558,19 @@ function tick(t){
         progText='BEACH BOOTCAMP  set '+sets+' / 3'+(nd<11?'  —  hold form':'');
       }
       if(sets===3){coach=true;addClout(30);toast('BEACH BOOTCAMP COMPLETE — YOU ARE THE COACH');}
+    }else if(!DISP.got){
+      // The Green Cross — fill a licensed medical wellness prescription
+      DISP.pil.visible=true;
+      const dd=Math.hypot(P.x-DISP.X,P.z-DISP.Z);
+      if(dd<12&&Math.abs(P.v)<4){irieT+=dt;
+        if(irieT>2){irieT=0;DISP.got=true;irie=true;DISP.pil.visible=false;
+          watch=Math.max(0,watch-1);addClout(12);
+          toast('GREEN CROSS — LICENSED MEDICAL  ·  PRESCRIPTION FILLED  ·  IRIE');}}
+      else irieT=Math.max(0,irieT-dt);
+      target=DISP;
+      progText='WELLNESS  fill your script at the GREEN CROSS'+(dd<12?'  —  dispensing, hold steady':'');
     }else{
-      progText='FREE ROAM — INSTRUCTOR & COACH  ·  the island is yours';
+      progText='FREE ROAM — INSTRUCTOR · COACH · IRIE  ·  the island is yours';
     }
   }
   $('prog').textContent=progText;
@@ -4558,7 +4582,7 @@ function tick(t){
     arrow.style.transform='translateX(-50%) rotate('+(-rel*180/Math.PI)+'deg)';
     $('dist').textContent=(nd2|0)+' m';}
   else{arrow.style.display='none';$('dist').textContent='';}
-  $('tele').textContent=(wet?'HULL MODE  ':'ENGINE OK  ')+Math.abs(P.v*3.6|0)+' km/h'+(wellFed?'  ·  WELL FED':'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
+  $('tele').textContent=(wet?'HULL MODE  ':'ENGINE OK  ')+Math.abs(P.v*3.6|0)+' km/h'+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
   if(perf>toastT)$('toast').style.opacity=0;
   radarTarget=target;drawRadar();
   const w=innerWidth,h=innerHeight;
@@ -4569,7 +4593,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain}),setRain,FISH_SPOTS,PIER,gxP,bikeP,FIT,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie}),setRain,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

@@ -23,7 +23,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.13**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.14**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -63,7 +63,12 @@ three-vehicle ring) — and a **first-person rider POV** camera (`V`), trained o
 the Cyberpunk POV-motorbike showcase. v0.13 adds **Storm mode** (`R` or the
 STORM button) — trained on the Cyberpunk rainy-neon night-drives: camera-following
 rain, darker storm sky and fog, dimmed moon, boosted wet-neon bloom, and glossier
-water; toggles back to clear skies.
+water; toggles back to clear skies. v0.14 adds the **Green Cross** — a licensed
+medical wellness dispensary (fictional brand) on the Palm Line: once you're
+Instructor and Coach, its green beacon opens in free roam; drive up and hold steady
+to fill your script and gain the **IRIE** buff, which cools your BII Watch Level
+twice as fast. It's the legal, clinical counterpoint to the Gains Trade snake-oil —
+carrot, never stick.
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a

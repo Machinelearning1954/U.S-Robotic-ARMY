@@ -534,5 +534,43 @@ depicted anywhere in this game; no real-world usage, sourcing or dosing
 information exists in canon. The satire targets the scam economy, not any real
 product — and the game's answer is always the curry goat.*
 
+---
+
+## 15. The Green Cross — Licensed Medical Wellness Dispensary
+
+The fictionalized Jamaica of PAUDC has a **legal, licensed medical-cannabis
+program**, the way the real island pioneered a regulated framework. In-game it's
+the **Green Cross** — a fictional-brand storefront clinic on the Palm Line, white
+walls and a glowing green cross, sitting in the same "carrot, never stick" wellness
+family as **Well Fed** (§10). It is deliberately the *legal, clinical* counterpoint
+to the Gains Trade snake-oil (§14): a prescription counter, not a gym-locker deal.
+
+### How it plays (already live in the 3D prototype)
+- The Green Cross opens up in **free roam**, once you've earned the Instructor and
+  Coach titles — its green beacon appears on the Palm Line and on the radar.
+- Drive up, hold steady, and the counter **fills your script**. You collect a
+  licensed medical batch and gain the **IRIE** buff.
+- **IRIE (calm hands):** a wellness/steadiness bonus. Your **BII Watch Level cools
+  off twice as fast** (§5 heat bleeds off in 30s instead of 60s), and filling the
+  script immediately eases one Watch star. It reads on the HUD next to WELL FED.
+  Pure carrot — you're never *required* to visit, nothing bad happens if you skip it.
+
+### The framing rules (content boundary)
+- **Licensed and medical, always.** Everything is presented through a regulated
+  dispensary with a prescription counter and a fictional brand — consistent with the
+  fictionalized island's legal program. No street dealing, no trafficking loop, no
+  sourcing, growing, dosing or preparation information exists in canon.
+- **No real product or strain is named**, and there is no depiction of use beyond
+  "collected a licensed batch → gained a calm buff." The mechanic is a wellness
+  pickup, kept non-glamorized and abstract.
+- It sits **opposite** the Gains Trade: the Green Cross is the honest, legal,
+  regulated path (a real buff, no crash), while the snake-oil serums are the scam.
+  The design point is the same as the food economy — the legitimate option wins.
+- **Rating:** genre-standard for an M-rated open-world title and treated with the
+  same restraint as the rest of the package — stylized, satirical where it's funny,
+  clinical where it's medical, never instructional.
+
+---
+
 > All systems above are fictional game mechanics. Tone rule stands: cinematic and
 > playful — power fantasy, not procedure manual.
