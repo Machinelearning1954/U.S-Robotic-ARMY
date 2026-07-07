@@ -38,6 +38,7 @@
 <nav><a href="index.html">&larr; back to campaign</a></nav>
 <div id="hud">
   <span class="bar">HP <span id="hp" class="accent">100</span></span>
+  <span class="bar">$ <span id="cash" class="accent">0</span></span>
   <span class="bar" id="ride">ON FOOT</span>
   <span id="stars"></span>
 </div>
@@ -46,7 +47,7 @@
   <div id="overlay">
     <h2 id="ovTitle">LIBERTY BAY</h2>
     <p id="ovBody">The war is over. ARES-7 walks free in Liberty Bay — a city of robots that never asked who won. Jack a car, cruise the grid, cause trouble. The RoboCops are watching, and five stars means the whole precinct comes for you.</p>
-    <p class="hint">WASD — move / drive · mouse + click — shoot · E — enter/exit car · cars: W gas, S brake/reverse, A/D steer · crime raises your wanted level, lay low to drop it</p>
+    <p class="hint">WASD — move / drive · mouse + click — shoot · E — enter/exit car · cars: W gas, S brake/reverse, A/D steer · crime raises your wanted level, lay low to drop it · earn cash on the streets — a $15,000 first-class jet waits at the airport (southeast)</p>
     <button id="ovBtn">HIT THE STREETS</button>
   </div>
 </div>
@@ -68,10 +69,12 @@ function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 function onRoad(x, y) { return (x % BLOCK) < ROAD || (y % BLOCK) < ROAD; }
 
 // ---------- city generation ----------
+const AIRPORT = { x: 2450, y: 1950, w: 660, h: 380 }; // southeast runway — no buildings here
 const buildings = [];
 for (let bx = 0; bx < WORLD_W / BLOCK; bx++) {
   for (let by = 0; by < WORLD_H / BLOCK; by++) {
     const x0 = bx * BLOCK + ROAD, y0 = by * BLOCK + ROAD;
+    if (x0 + BLOCK > AIRPORT.x && x0 < AIRPORT.x + AIRPORT.w && y0 + BLOCK > AIRPORT.y && y0 < AIRPORT.y + AIRPORT.h) continue;
     const bw = BLOCK - ROAD, bh = BLOCK - ROAD;
     const n = 1 + Math.floor(srnd() * 3);
     for (let k = 0; k < n; k++) {
@@ -107,8 +110,17 @@ for (let i = 0; i < 70; i++) {
   const p = roadPoint();
   peds.push({ x: p.x, y: p.y, r: 9, dir: srange(0, 7), speed: srange(0.4, 0.9), panic: 0, tint: srange(0.5, 1) });
 }
+// the first-class jet — $15,000, flies OVER the city
+const jet = { x: AIRPORT.x + AIRPORT.w / 2, y: AIRPORT.y + AIRPORT.h / 2, r: 26, angle: Math.PI, vel: 0, hp: 500, maxHp: 500, color: '#e8e2d0', jet: true, price: 15000, owned: false };
+cars.push(jet);
+// loose cash on the streets
+for (let i = 0; i < 30; i++) {
+  const p = roadPoint();
+  pickups.push({ x: p.x, y: p.y, r: 10, kind: 'cash', val: Math.floor(srange(100, 400)) });
+}
 let heat = 0, lastCrime = -999, tSec = 0, running = false, ammo = { smg: 0 };
-let eLatch = false, lastShot = 0;
+let eLatch = false, lastShot = 0, money = 0, msg = '', msgT = 0;
+function say(text) { msg = text; msgT = 3.5; }
 
 function stars() { return Math.min(5, Math.floor(heat / 5)); }
 function crime(amount) { heat = Math.min(29, heat + amount); lastCrime = tSec; }
@@ -153,6 +165,7 @@ function explode(x, y, r) { effects.push({ x, y, r, t: 18 }); }
 function killPed(i) {
   const p = peds[i];
   explode(p.x, p.y, 12);
+  pickups.push({ x: p.x, y: p.y, r: 10, kind: 'cash', val: 50 + Math.floor(Math.random() * 120) });
   peds.splice(i, 1);
   crime(4);
   for (const q of peds) if (dist(q, p) < 500) q.panic = 8;
@@ -163,7 +176,8 @@ function killPed(i) {
 function killCop(i) {
   const c = police[i];
   explode(c.x, c.y, 16);
-  if (Math.random() < 0.35) pickups.push({ x: c.x, y: c.y, r: 10, kind: Math.random() < 0.5 ? 'health' : 'smg' });
+  pickups.push({ x: c.x, y: c.y, r: 10, kind: 'cash', val: 200 + Math.floor(Math.random() * 200) });
+  if (Math.random() < 0.35) pickups.push({ x: c.x + 14, y: c.y, r: 10, kind: Math.random() < 0.5 ? 'health' : 'smg' });
   police.splice(i, 1);
   crime(6);
 }
@@ -179,14 +193,19 @@ function update(dt, now) {
   // enter / exit car
   if (keys['e'] && !eLatch) {
     eLatch = true;
-    if (player.veh) {
+    if (player.veh && player.veh.airborne) { say('YOU ARE AT 2,000 FEET. LAND FIRST (slow down).'); }
+    else if (player.veh) {
       const v = player.veh; player.veh = null;
       player.x = v.x + Math.cos(v.angle + Math.PI / 2) * 34;
       player.y = v.y + Math.sin(v.angle + Math.PI / 2) * 34;
       if (hitsBuilding(player, player.r)) { player.x = v.x; player.y = v.y - 34; }
     } else {
       const v = cars.find(c => dist(player, c) < c.r + 26);
-      if (v) { player.veh = v; crime(1.5); } // grand theft auto
+      if (v && v.jet && !v.owned) {
+        if (money >= v.price) { money -= v.price; v.owned = true; player.veh = v; say('FIRST CLASS, BABY. WELCOME ABOARD AIR ARES-1.'); }
+        else say('FIRST CLASS COSTS $' + v.price.toLocaleString() + ' — YOU HAVE $' + money.toLocaleString());
+      }
+      else if (v) { player.veh = v; if (!v.jet) crime(1.5); } // grand theft auto
     }
   }
   if (!keys['e']) eLatch = false;
@@ -197,19 +216,22 @@ function update(dt, now) {
   if (player.veh) {
     // ---- driving physics: acceleration, friction, speed-scaled steering ----
     const v = player.veh;
-    v.vel += fwd > 0 ? 0.16 : fwd < 0 ? (v.vel > 0 ? -0.3 : -0.12) : 0;
-    v.vel = Math.max(-3.2, Math.min(8.5, v.vel)) * 0.985;
+    const maxV = v.jet ? 14 : 8.5;
+    v.vel += fwd > 0 ? (v.jet ? 0.22 : 0.16) : fwd < 0 ? (v.vel > 0 ? -0.3 : -0.12) : 0;
+    v.vel = Math.max(-3.2, Math.min(maxV, v.vel)) * (v.jet ? 0.992 : 0.985);
     if (Math.abs(v.vel) > 0.15) v.angle += strafe * 0.038 * Math.min(1, Math.abs(v.vel) / 5) * Math.sign(v.vel);
+    v.airborne = v.jet && Math.abs(v.vel) > 5; // enough speed = wheels up, fly over everything
     const nx = { x: v.x + Math.cos(v.angle) * v.vel, y: v.y };
     const ny = { x: v.x, y: v.y + Math.sin(v.angle) * v.vel };
     const fast = Math.abs(v.vel) > 4;
-    if (!hitsBuilding(nx, v.r)) v.x = Math.max(v.r, Math.min(WORLD_W - v.r, nx.x));
+    if (v.airborne || !hitsBuilding(nx, v.r)) v.x = Math.max(v.r, Math.min(WORLD_W - v.r, nx.x));
     else { if (fast) { v.hp -= 20; explode(v.x, v.y, 10); } v.vel *= -0.3; }
-    if (!hitsBuilding(ny, v.r)) v.y = Math.max(v.r, Math.min(WORLD_H - v.r, ny.y));
+    if (v.airborne || !hitsBuilding(ny, v.r)) v.y = Math.max(v.r, Math.min(WORLD_H - v.r, ny.y));
     else { if (fast) { v.hp -= 20; explode(v.x, v.y, 10); } v.vel *= -0.3; }
+    if (v.jet && !v.airborne && hitsBuilding(v, v.r)) { v.vel = 0; } // landed on a rooftop: stuck until you throttle up
     player.x = v.x; player.y = v.y;
-    // roadkill
-    if (Math.abs(v.vel) > 1.2) {
+    // roadkill (not from the air)
+    if (!v.airborne && Math.abs(v.vel) > 1.2) {
       for (let i = peds.length - 1; i >= 0; i--) if (dist(v, peds[i]) < v.r + peds[i].r) killPed(i);
       for (let i = police.length - 1; i >= 0; i--) if (dist(v, police[i]) < v.r + police[i].r) { killCop(i); v.hp -= 12; }
     }
@@ -246,6 +268,7 @@ function update(dt, now) {
   }
   for (let i = copBullets.length - 1; i >= 0; i--) {
     const b = copBullets[i];
+    if (player.veh && player.veh.airborne) break; // can't hit first class from the sidewalk
     const pr = player.veh ? player.veh.r : player.r;
     if (Math.hypot(b.x - player.x, b.y - player.y) < pr + 3) {
       if (player.veh) player.veh.hp -= b.dmg; else player.hp -= b.dmg;
@@ -296,6 +319,7 @@ function update(dt, now) {
     const p = pickups[i];
     if (dist(player, p) < (player.veh ? player.veh.r : player.r) + p.r) {
       if (p.kind === 'health') player.hp = Math.min(player.maxHp, player.hp + 30);
+      else if (p.kind === 'cash') money += p.val;
       else ammo.smg += 40;
       pickups.splice(i, 1);
     }
@@ -310,8 +334,11 @@ function update(dt, now) {
     overlay.classList.remove('hidden');
   }
 
+  if (msgT > 0) msgT -= dt;
   hudHp.textContent = Math.max(0, player.hp | 0);
-  hudRide.textContent = player.veh ? 'DRIVING · ' + Math.abs(player.veh.vel * 18 | 0) + ' MPH' : ammo.smg > 0 ? 'ON FOOT · SMG ' + ammo.smg : 'ON FOOT · PISTOL';
+  document.getElementById('cash').textContent = money.toLocaleString();
+  hudRide.textContent = player.veh ? (player.veh.jet ? (player.veh.airborne ? 'FLYING FIRST CLASS · ' : 'TAXIING · ') : 'DRIVING · ') + Math.abs(player.veh.vel * 18 | 0) + ' MPH'
+                      : ammo.smg > 0 ? 'ON FOOT · SMG ' + ammo.smg : 'ON FOOT · PISTOL';
   hudStars.textContent = stars() ? 'WANTED ' + '★'.repeat(stars()) + '☆'.repeat(5 - stars()) : 'CLEAN';
 }
 
@@ -334,6 +361,14 @@ function draw() {
     cx.beginPath(); cx.moveTo(camX, gy + ROAD / 2); cx.lineTo(camX + VW, gy + ROAD / 2); cx.stroke();
   }
   cx.setLineDash([]);
+  // airport runway
+  cx.fillStyle = '#131922'; cx.fillRect(AIRPORT.x, AIRPORT.y, AIRPORT.w, AIRPORT.h);
+  cx.strokeStyle = '#2b3a4e'; cx.strokeRect(AIRPORT.x, AIRPORT.y, AIRPORT.w, AIRPORT.h);
+  cx.strokeStyle = '#3a4a63'; cx.lineWidth = 3; cx.setLineDash([26, 20]);
+  cx.beginPath(); cx.moveTo(AIRPORT.x + 30, AIRPORT.y + AIRPORT.h / 2); cx.lineTo(AIRPORT.x + AIRPORT.w - 30, AIRPORT.y + AIRPORT.h / 2); cx.stroke();
+  cx.setLineDash([]);
+  cx.fillStyle = '#3a4a63'; cx.font = '16px Courier New';
+  cx.fillText('LIBERTY BAY INTL', AIRPORT.x + 20, AIRPORT.y + 26);
   // buildings (only visible ones)
   const TONES = [['#232f40', '#31435c'], ['#1e2938', '#2b3a50'], ['#28344a', '#39496a']];
   for (const b of buildings) {
@@ -350,17 +385,43 @@ function draw() {
   for (const p of pickups) {
     cx.save(); cx.translate(p.x, p.y);
     if (p.kind === 'health') { cx.fillStyle = '#ff6b6b'; cx.fillRect(-8, -3, 16, 6); cx.fillRect(-3, -8, 6, 16); }
+    else if (p.kind === 'cash') { cx.fillStyle = '#3ddc84'; cx.fillRect(-9, -6, 18, 12); cx.fillStyle = '#0a0e14'; cx.font = '10px Courier New'; cx.fillText('$', -3, 4); }
     else { cx.fillStyle = '#ffd166'; cx.fillRect(-7, -5, 4, 10); cx.fillRect(-2, -5, 4, 10); cx.fillRect(3, -5, 4, 10); }
     cx.restore();
   }
   // cars
   for (const c of cars) {
-    if (c.x + 30 < camX || c.x - 30 > camX + VW || c.y + 30 < camY || c.y - 30 > camY + VH) continue;
-    cx.save(); cx.translate(c.x, c.y); cx.rotate(c.angle);
-    cx.fillStyle = c.color; cx.fillRect(-22, -12, 44, 24);
-    cx.fillStyle = 'rgba(10,14,20,0.55)'; cx.fillRect(-8, -9, 18, 18);
-    cx.fillStyle = '#e8e2c0'; cx.fillRect(18, -10, 4, 6); cx.fillRect(18, 4, 4, 6);
-    cx.restore();
+    if (c.x + 60 < camX || c.x - 60 > camX + VW || c.y + 60 < camY || c.y - 60 > camY + VH) continue;
+    if (c.jet) {
+      if (c.airborne) { // shadow on the ground below
+        cx.fillStyle = 'rgba(0,0,0,0.35)';
+        cx.save(); cx.translate(c.x + 24, c.y + 30); cx.rotate(c.angle);
+        cx.beginPath(); cx.ellipse(0, 0, 40, 16, 0, 0, 7); cx.fill(); cx.restore();
+      }
+      const lift = c.airborne ? 14 : 0;
+      cx.save(); cx.translate(c.x, c.y - lift); cx.rotate(c.angle);
+      cx.fillStyle = c.color;
+      cx.fillRect(-34, -7, 68, 14);                       // fuselage
+      cx.beginPath(); cx.moveTo(34, -7); cx.lineTo(48, 0); cx.lineTo(34, 7); cx.fill(); // nose
+      cx.beginPath(); cx.moveTo(-4, -7); cx.lineTo(-22, -34); cx.lineTo(-10, -7); cx.fill(); // wings
+      cx.beginPath(); cx.moveTo(-4, 7); cx.lineTo(-22, 34); cx.lineTo(-10, 7); cx.fill();
+      cx.beginPath(); cx.moveTo(-34, -6); cx.lineTo(-44, -16); cx.lineTo(-38, 0); cx.fill(); // tail
+      cx.fillStyle = '#c9a24f'; cx.fillRect(6, -5, 20, 10); // gold first-class stripe
+      cx.fillStyle = '#123047';
+      for (let wx = -28; wx < 2; wx += 8) cx.fillRect(wx, -5, 4, 4); // windows
+      cx.restore();
+      if (!c.owned) {
+        cx.fillStyle = '#3ddc84'; cx.font = 'bold 14px Courier New'; cx.textAlign = 'center';
+        cx.fillText('FIRST CLASS — $' + c.price.toLocaleString() + ' (E)', c.x, c.y - 44);
+        cx.textAlign = 'left';
+      }
+    } else {
+      cx.save(); cx.translate(c.x, c.y); cx.rotate(c.angle);
+      cx.fillStyle = c.color; cx.fillRect(-22, -12, 44, 24);
+      cx.fillStyle = 'rgba(10,14,20,0.55)'; cx.fillRect(-8, -9, 18, 18);
+      cx.fillStyle = '#e8e2c0'; cx.fillRect(18, -10, 4, 6); cx.fillRect(18, 4, 4, 6);
+      cx.restore();
+    }
     if (c.hp < c.maxHp) {
       cx.fillStyle = '#233'; cx.fillRect(c.x - 20, c.y - 26, 40, 3);
       cx.fillStyle = '#9fe870'; cx.fillRect(c.x - 20, c.y - 26, 40 * Math.max(0, c.hp / c.maxHp), 3);
@@ -404,12 +465,22 @@ function draw() {
   }
   cx.restore();
 
+  // on-screen message
+  if (msgT > 0) {
+    cx.fillStyle = 'rgba(6,10,16,0.75)'; cx.fillRect(VW / 2 - 300, VH - 64, 600, 34);
+    cx.fillStyle = '#ffd166'; cx.font = 'bold 14px Courier New'; cx.textAlign = 'center';
+    cx.fillText(msg, VW / 2, VH - 42);
+    cx.textAlign = 'left';
+  }
+
   // ---------- minimap ----------
   const MW = 170, MH = 128, MX = VW - MW - 10, MY = 10, sx = MW / WORLD_W, sy = MH / WORLD_H;
   cx.fillStyle = 'rgba(10,14,20,0.8)'; cx.fillRect(MX - 2, MY - 2, MW + 4, MH + 4);
   cx.strokeStyle = '#2b3a4e'; cx.strokeRect(MX - 2, MY - 2, MW + 4, MH + 4);
   cx.fillStyle = '#1c2534';
   for (const b of buildings) cx.fillRect(MX + b.x * sx, MY + b.y * sy, Math.max(1, b.w * sx), Math.max(1, b.h * sy));
+  cx.fillStyle = '#3ddc84'; // airport marker
+  cx.fillRect(MX + AIRPORT.x * sx, MY + AIRPORT.y * sy, AIRPORT.w * sx, AIRPORT.h * sy);
   cx.fillStyle = '#3d5a99';
   for (const c of police) cx.fillRect(MX + c.x * sx - 1, MY + c.y * sy - 1, 3, 3);
   cx.fillStyle = '#7fd4ff';
@@ -417,7 +488,8 @@ function draw() {
 }
 
 // ---------- debug hooks ----------
-window.__state = () => ({ x: player.x, y: player.y, hp: player.hp, inVehicle: !!player.veh, vel: player.veh ? player.veh.vel : 0, heat, stars: stars(), police: police.length, peds: peds.length, cars: cars.length, running });
+window.__state = () => ({ x: player.x, y: player.y, hp: player.hp, inVehicle: !!player.veh, inJet: !!(player.veh && player.veh.jet), airborne: !!(player.veh && player.veh.airborne), vel: player.veh ? player.veh.vel : 0, money, heat, stars: stars(), police: police.length, peds: peds.length, cars: cars.length, running });
+window.__cash = n => { money = n; };
 window.__teleport = (x, y) => { if (player.veh) { player.veh.x = x; player.veh.y = y; } player.x = x; player.y = y; };
 window.__wanted = n => { heat = n * 5; lastCrime = tSec; };
 

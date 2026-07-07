@@ -9,6 +9,8 @@ Two modes:
 - **Campaign** (`index.html`) — the 16-mission story
 - **Liberty Bay free roam** (`city.html`) — GTA-style open city: a 3200×2400 scrolling world with procedural blocks, jackable cars with acceleration/steering physics, wandering pedestrians that panic at gunfire, and RoboCop police with a 5-star wanted system (crime raises it, laying low drops it). Minimap included.
 
+  There's also money in Liberty Bay: cash lies in the streets and drops from your victims. Save up **$15,000** and head to Liberty Bay Intl (southeast, green on the minimap) — a first-class private jet is waiting. Throttle past 90 MPH and it goes wheels-up, flying clean over the whole city while the cops shake their fists below.
+
 ## Controls
 
 | Input | Action |
