@@ -4974,8 +4974,20 @@ function tick(t){
     wLimbs.aL.rotation.z=-sw*0.8;wLimbs.aR.rotation.z=sw*0.8;}
   const ahead=height(P.x+Math.cos(P.a)*3,P.z-Math.sin(P.a)*3);
   av.rotation.z=wet?0.04*Math.sin(t*0.003):Math.atan2(ahead-gy,3)*0.6;
-  // camera — chase, or first-person rider POV (V)
-  if(pov){
+  // camera — chase, or first-person rider POV (V); the Island Hop gets its own cams
+  if(FLIGHT.flying){
+    const vx=-Math.sin(FLIGHT.theta),vz=Math.cos(FLIGHT.theta); // direction of travel
+    if(pov){ // window seat: ride the fuselage, look along the wing to the island below
+      CAMT.set(jet.position.x-vx*1.5,jet.position.y+1.4,jet.position.z-vz*1.5);
+      camera.position.lerp(CAMT,1-Math.pow(0.00005,dt));
+      camera.lookAt(jet.position.x+vx*40-jet.position.x*0.12,jet.position.y-26,jet.position.z+vz*40-jet.position.z*0.12);
+    }else{ // air-to-air chase: the trailer shot
+      CAMT.set(jet.position.x-vx*30+8,jet.position.y+9,jet.position.z-vz*30+8);
+      camera.position.lerp(CAMT,1-Math.pow(0.0018,dt));
+      camera.lookAt(jet.position.x,jet.position.y,jet.position.z);
+    }
+    av.visible=false;
+  }else if(pov){
     CAMT.set(P.x+Math.cos(P.a)*0.6,y+V.eye,P.z-Math.sin(P.a)*0.6);
     camera.position.lerp(CAMT,1-Math.pow(0.00005,dt));
     camera.lookAt(P.x+Math.cos(P.a)*30,y+V.eye-2.2,P.z-Math.sin(P.a)*30);
