@@ -47,7 +47,7 @@
     <h2 id="ovTitle">U.S. ROBOTIC ARMY</h2>
     <p id="ovBody">A rogue AI has seized the nation's automated defense grid. You are unit <b>ARES-7</b>, the last loyal combat android. Fight through 15 missions to take it back.</p>
     <p class="objective" id="ovObjective"></p>
-    <p class="hint">WASD / arrows — move · mouse — aim · click / hold — fire · 1-6 — switch weapon · weapons &amp; ammo drop from enemies</p>
+    <p class="hint">WASD / arrows — move · mouse — aim · click / hold — fire · 1-6 — switch weapon · E — enter/exit vehicle · weapons &amp; ammo drop from enemies</p>
     <button id="ovBtn">DEPLOY</button>
   </div>
 </div>
@@ -93,9 +93,9 @@ let curWeapon = 0, lastShot = 0;
 function selectWeapon(i) { if (unlocked[i]) curWeapon = i; }
 
 // ---------- world state ----------
-let player, bullets, enemyBullets, enemies, pickups, walls, effects;
+let player, bullets, enemyBullets, enemies, pickups, walls, effects, vehicles;
 let mission = 0, state = 'menu'; // menu | briefing | play | debrief | won | dead
-let mTimer = 0, mCount = 0, kills = 0, escort = null, lastTime = 0;
+let mTimer = 0, mCount = 0, kills = 0, escort = null, lastTime = 0, eLatch = false;
 
 function rnd(a, b) { return a + Math.random() * (b - a); }
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
@@ -175,7 +175,7 @@ const MISSIONS = [
       escort.x += escort.speed;
       if (enemies.length < 5 && Math.random() < 0.008) spawnWave(2);
     }, done() { return escort && escort.x > W - 40; },
-    fail() { return escort && escort.hp <= 0; },
+    fail() { return escort && escort.hp <= 0; }, failMsg: 'The hauler was destroyed.',
     status() { return escort ? 'HAULER HP: ' + Math.max(0, escort.hp | 0) : ''; } },
 
   { title: 'M7 · SABOTAGE', brief: 'Enemy auto-turrets control the sector grid. Destroy all 3 turret emplacements.',
@@ -208,7 +208,7 @@ const MISSIONS = [
         if (d > 40) { escort.x += (player.x - escort.x) / d * 2.2; escort.y += (player.y - escort.y) / d * 2.2; }
       }
     }, done() { return escort && !escort.waiting && dist(escort, { x: 50, y: 50 }) < 44; },
-    fail() { return escort && escort.hp <= 0; },
+    fail() { return escort && escort.hp <= 0; }, failMsg: 'Dr. Reyes was killed.',
     status() { return !escort ? '' : escort.waiting ? 'REACH DR. REYES' : 'ESCORT TO GREEN ZONE'; },
     zones: [{ x: 50, y: 50, r: 44, color: '#3ddc84' }] },
 
@@ -258,6 +258,20 @@ const MISSIONS = [
       if (b && enemies.length < 6 && Math.random() < (b.hp < 700 ? 0.012 : 0.005)) spawnEdge('stalker');
     }, done() { return !enemies.some(e => e.type === 'hydra'); },
     status() { const b = enemies.find(e => e.type === 'hydra'); return b ? 'HYDRA HP: ' + b.hp : ''; } },
+
+  { title: 'M16 · EXODUS', brief: 'The HYDRA is dead, but the sector still crawls with leaderless drones. One K-9 armored personnel carrier survived the war — steal it from the old compound (southeast, press E to board) and drive to extraction. The longer you stay, the angrier the swarm gets. Run them over if they get in the way.',
+    objective: 'Steal the APC, drive to extraction', setup() {
+      walls = makeWalls(8); mTimer = 0;
+      vehicles.push({ x: W - 110, y: H - 110, r: 22, hp: 300, maxHp: 300, angle: Math.PI });
+      spawnEnemy('turret', W - 200, H - 190); spawnWave(3);
+    }, tick(dt) {
+      mTimer += dt;
+      const stars = Math.min(5, 1 + Math.floor(mTimer / 15));
+      if (enemies.length < 2 + stars * 2 && Math.random() < 0.005 * stars) spawnEdge(Math.random() < 0.25 ? 'stalker' : 'drone');
+    }, done() { return player.veh && dist(player, { x: 60, y: 60 }) < 54; },
+    fail() { return mTimer > 3 && vehicles.length === 0; }, failMsg: 'The APC was destroyed. No ride home.',
+    status() { const s = Math.min(5, 1 + Math.floor(mTimer / 15)); return (player.veh ? 'DRIVE TO EXTRACTION' : 'STEAL THE APC (E)') + ' · WANTED ' + '★'.repeat(s); },
+    zones: [{ x: 60, y: 60, r: 54, color: '#3ddc84' }] },
 ];
 
 function dropAt(x, y, kind, idx) { pickups.push({ kind, x, y, r: 11, w: idx }); }
@@ -266,7 +280,7 @@ function dropAt(x, y, kind, idx) { pickups.push({ kind, x, y, r: 11, w: idx }); 
 function startMission(i) {
   mission = i;
   player = { x: 60, y: H - 60, r: 14, hp: Math.max(player ? player.hp : 100, 60), maxHp: 100 };
-  bullets = []; enemyBullets = []; enemies = []; pickups = []; effects = []; escort = null;
+  bullets = []; enemyBullets = []; enemies = []; pickups = []; effects = []; vehicles = []; escort = null;
   mTimer = 0; mCount = 0; kills = 0;
   MISSIONS[i].setup();
   hudMnum.textContent = (i + 1) + '/' + MISSIONS.length;
@@ -293,7 +307,7 @@ function missionComplete() {
   if (mission >= MISSIONS.length) {
     state = 'won';
     ovTitle.textContent = 'VICTORY';
-    ovBody.textContent = 'The HYDRA burns, and with it the last copy of the rogue AI. Dr. Reyes rewrites the core, and the defense grid returns to human hands. The U.S. Robotic Army stands down — until it is needed again. Campaign complete, ARES-7.';
+    ovBody.textContent = 'The K-9 roars through the perimeter gate and the swarm falls away behind you. The rogue AI is gone, the grid is back in human hands, and Dr. Reyes is waiting at extraction. The U.S. Robotic Army stands down — until it is needed again. Campaign complete, ARES-7.';
     ovObjective.textContent = 'ALL ' + MISSIONS.length + ' MISSIONS COMPLETE';
     ovBtn.textContent = 'PLAY AGAIN';
   } else {
@@ -355,14 +369,38 @@ function killEnemy(i) {
 function update(dt, now) {
   const M = MISSIONS[mission];
 
-  // player movement
-  const sp = 3.1;
+  // enter / exit vehicle
+  if (keys['e'] && !eLatch) {
+    eLatch = true;
+    if (player.veh) { player.veh = null; player.x = Math.max(player.r, Math.min(W - player.r, player.x + 38)); }
+    else { const v = vehicles.find(v => dist(player, v) < v.r + 28); if (v) player.veh = v; }
+  }
+  if (!keys['e']) eLatch = false;
+
+  // player / vehicle movement
+  const sp = player.veh ? 6.2 : 3.1;
   let dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
   let dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
   if (dx || dy) { const l = Math.hypot(dx, dy); dx /= l; dy /= l; }
-  const nx = { x: player.x + dx * sp, y: player.y }, ny = { x: player.x, y: player.y + dy * sp };
-  if (!inWall(nx, player.r)) player.x = Math.max(player.r, Math.min(W - player.r, nx.x));
-  if (!inWall(ny, player.r)) player.y = Math.max(player.r, Math.min(H - player.r, ny.y));
+  if (player.veh) {
+    const v = player.veh;
+    const nvx = { x: v.x + dx * sp, y: v.y }, nvy = { x: v.x, y: v.y + dy * sp };
+    if (!inWall(nvx, v.r)) v.x = Math.max(v.r, Math.min(W - v.r, nvx.x));
+    if (!inWall(nvy, v.r)) v.y = Math.max(v.r, Math.min(H - v.r, nvy.y));
+    if (dx || dy) {
+      v.angle = Math.atan2(dy, dx);
+      // ram damage: roadkill anything under the wheels
+      for (let j = enemies.length - 1; j >= 0; j--) {
+        const e = enemies[j];
+        if (dist(v, e) < v.r + e.r) { e.hp -= 2.5; e.flash = 4; v.hp -= 0.6; if (e.hp <= 0) killEnemy(j); }
+      }
+    }
+    player.x = v.x; player.y = v.y;
+  } else {
+    const nx = { x: player.x + dx * sp, y: player.y }, ny = { x: player.x, y: player.y + dy * sp };
+    if (!inWall(nx, player.r)) player.x = Math.max(player.r, Math.min(W - player.r, nx.x));
+    if (!inWall(ny, player.r)) player.y = Math.max(player.r, Math.min(H - player.r, ny.y));
+  }
 
   if (mouse.down) shoot(now);
 
@@ -389,8 +427,9 @@ function update(dt, now) {
   // enemy bullets vs player / escort
   for (let i = enemyBullets.length - 1; i >= 0; i--) {
     const b = enemyBullets[i];
-    if (Math.hypot(b.x - player.x, b.y - player.y) < player.r + 3) {
-      player.hp -= b.dmg; enemyBullets.splice(i, 1); continue;
+    if (Math.hypot(b.x - player.x, b.y - player.y) < (player.veh ? player.veh.r : player.r) + 3) {
+      if (player.veh) player.veh.hp -= b.dmg; else player.hp -= b.dmg;
+      enemyBullets.splice(i, 1); continue;
     }
     if (escort && Math.hypot(b.x - escort.x, b.y - escort.y) < escort.r + 3) {
       escort.hp -= b.dmg; enemyBullets.splice(i, 1);
@@ -408,7 +447,9 @@ function update(dt, now) {
         if (!inWall(mx, e.r)) e.x = mx.x;
         if (!inWall(my, e.r)) e.y = my.y;
       }
-      if (d < e.r + player.r + 2 && t === player) player.hp -= (e.contact || 0.4);
+      if (t === player && d < e.r + (player.veh ? player.veh.r : player.r) + 2) {
+        if (player.veh) player.veh.hp -= (e.contact || 0.4); else player.hp -= (e.contact || 0.4);
+      }
     }
     e.cooldown -= dt * 1000;
     if (!e.noShoot && e.cooldown <= 0 && dist(e, player) < (e.range || 260)) {
@@ -430,10 +471,19 @@ function update(dt, now) {
     }
   }
   for (let i = effects.length - 1; i >= 0; i--) if (--effects[i].t <= 0) effects.splice(i, 1);
+  // vehicle destruction
+  for (let i = vehicles.length - 1; i >= 0; i--) {
+    if (vehicles[i].hp <= 0) {
+      const v = vehicles[i];
+      effects.push({ x: v.x, y: v.y, r: 44, t: 18 });
+      if (player.veh === v) { player.veh = null; player.hp -= 25; }
+      vehicles.splice(i, 1);
+    }
+  }
 
   if (M.tick) M.tick(dt);
   if (player.hp <= 0) return missionFailed();
-  if (M.fail && M.fail()) return missionFailed(mission === 5 ? 'The hauler was destroyed.' : 'Dr. Reyes was killed.');
+  if (M.fail && M.fail()) return missionFailed(M.failMsg);
   if (M.done()) return missionComplete();
 
   hudHp.textContent = Math.max(0, player.hp | 0);
@@ -451,7 +501,7 @@ function draw() {
   for (let y = 0; y < H; y += 40) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); }
   // zones
   const M = MISSIONS[mission];
-  if (M.zones) for (const z of M.zones) {
+  if (M && M.zones) for (const z of M.zones) {
     cx.beginPath(); cx.arc(z.x, z.y, z.r, 0, 7);
     cx.fillStyle = z.color + '22'; cx.fill();
     cx.strokeStyle = z.color; cx.stroke();
@@ -473,6 +523,18 @@ function draw() {
     else if (p.kind === 'ammo')   { cx.fillStyle = '#ffd166'; cx.fillRect(-7, -5, 4, 10); cx.fillRect(-2, -5, 4, 10); cx.fillRect(3, -5, 4, 10); }
     else if (p.kind === 'weapon') { cx.fillStyle = WEAPONS[p.w].color; cx.fillRect(-10, -3, 20, 6); cx.fillRect(2, 3, 5, 6); }
     cx.restore();
+  }
+  // vehicles
+  for (const v of vehicles) {
+    cx.save(); cx.translate(v.x, v.y); cx.rotate(v.angle || 0);
+    cx.fillStyle = '#4a6b3a'; cx.fillRect(-24, -15, 48, 30);
+    cx.fillStyle = '#2f4526'; cx.fillRect(-12, -10, 28, 20);
+    cx.fillStyle = '#7d9c68'; cx.fillRect(16, -6, 8, 12);
+    cx.restore();
+    if (v.hp < v.maxHp) {
+      cx.fillStyle = '#233'; cx.fillRect(v.x - 22, v.y - 30, 44, 4);
+      cx.fillStyle = '#9fe870'; cx.fillRect(v.x - 22, v.y - 30, 44 * Math.max(0, v.hp / v.maxHp), 4);
+    }
   }
   // escort
   if (escort && escort.hp > 0) {
@@ -529,6 +591,10 @@ function draw() {
 }
 
 // ---------- loop ----------
+// console debug API (also handy for cheats: __teleport(x, y))
+window.__state = () => ({ mission, state, x: player && player.x, y: player && player.y, inVehicle: !!(player && player.veh), vehicles: vehicles ? vehicles.length : 0, enemies: enemies ? enemies.length : 0 });
+window.__teleport = (x, y) => { if (!player) return; if (player.veh) { player.veh.x = x; player.veh.y = y; } player.x = x; player.y = y; };
+
 function loop(t) {
   const dt = Math.min(0.05, (t - lastTime) / 1000 || 0);
   lastTime = t;
