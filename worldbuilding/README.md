@@ -25,12 +25,14 @@
 | [`PAUDC_Driving_Physics.md`](PAUDC_Driving_Physics.md) | The **driving-physics module** — keep-left canon, friction-circle grip model, surface table, weather modifiers, suspension personality per ride, non-lethal damage spec, AI integration, per-region road behavior. Surface grip is live in the prototype. |
 | [`PAUDC_Economy.md`](PAUDC_Economy.md) | The **economy module** — regional profiles, shop categories, vendor behavior, dynamic pricing formula, inventory/supply chains, money flow, black-market risk ladder, tourism economy. Alexandria/Silver Springs resolve to our island districts. |
 | [`PAUDC_Transit.md`](PAUDC_Transit.md) | The **transit module** — route taxis, country buses, the Harbour Hopper ferry, boats, domestic air, the base shuttle; fast travel as physical, interruptible content. Ferry + taxi stands are live in the prototype. |
+| [`PAUDC_Combat_System.md`](PAUDC_Combat_System.md) | The **combat module** — the Field Kit arsenal extended (less-lethal-forward, fictional makes only), game-feel ballistics, melee generalized from YARDCLASH, AI combat behavior, non-lethal damage floor, de-escalation as the strongest verb. The Dazzler puck is live. |
+| [`PAUDC_Dialogue_Voice.md`](PAUDC_Dialogue_Voice.md) | The **dialogue & voice module** — regional registers, conversation states, ambient chatter beds on the world clock, five player stances (de-escalation strongest), emotional delivery rules, mission dialogue framework, binding authenticity rules. |
 | [`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md) | The **police/wanted module** — the satirical BII five-star ladder (Noted → The Full Apology), courtesy-first non-lethal philosophy, pursuit AI mapping, consequences table. Tier ★★★ is playable in the prototype. |
 | [`DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) | How the project ships legally: no leaked Rockstar code ever, the prototype→engine ladder, Godot 4 next / UE5 later, FiveM gamemode option, legal study resources. |
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.25**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.26**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -146,7 +148,15 @@ with `E` while it's docked, ride the deck around the bay, step off anywhere —
 and **route-taxi stands** at Palm Line, The Strip, and Silver Springs (hold at
 the yellow sign on foot and you're run to the next stand, *"small up
 yuhself"*). Fast travel that's part of the world, per
-[`PAUDC_Transit.md`](PAUDC_Transit.md).
+[`PAUDC_Transit.md`](PAUDC_Transit.md). v0.26 arms the Field Kit: press `G` to
+throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
+threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
+seconds (lights on, wheels off — your escape window) and a dazzled **Yard
+challenger** loses his wind-up for three. Eight-second cooldown, 45 m range,
+non-lethal to its core (see [`PAUDC_Combat_System.md`](PAUDC_Combat_System.md)).
+And The Strip gets the **Wheaton Night School** — classes upstairs at the
+Bassline club, an outside staircase past the pink marquee; attend on foot for
+the CERTIFIED title (+20 clout, and the bass was the metronome).
 
 
 [`../game/index.html`](../game/index.html) — **the front door**: a styled hub

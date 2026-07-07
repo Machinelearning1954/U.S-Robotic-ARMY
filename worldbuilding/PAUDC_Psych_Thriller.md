@@ -162,7 +162,18 @@ unharmed — the non-lethal rule, live. Toggle it off any time.
 
 ---
 
-## 9. Content boundary note
+## 9. Key art — "The Choir"
+
+The arc's poster motif (an original rendering, concept sourced from the wave of
+AI-coworker advertising): a **luminous brain suspended in a glass atrium, threads
+of light running down to rows of workers at glowing screens** — every listener
+wired to the one broadcast. In-world it doubles as satire: OnWatch runs sponsored
+posts for **"OBIE — the coworker that never sleeps"** (a fictional productivity
+service whose ads look exactly like this), and the Act-2 reveal is that OBIE's ad
+buy is a Weathermen conditioning funnel — the Gospel Hour dressed in startup
+clothes. The player has been scrolling past the villain the whole game.
+
+## 9b. Content boundary note
 
 - **Everything here is invented fiction.** The "conditioning broadcast" is a genre
   plot device (the mind-control-radio trope), described only in story terms. **No
