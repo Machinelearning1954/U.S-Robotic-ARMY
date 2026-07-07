@@ -2,7 +2,12 @@
 
 A top-down, GTA-inspired mission shooter. You are **ARES-7**, the last loyal combat android, fighting to retake the nation's automated defense grid from a rogue AI.
 
-**Play it:** open `game/index.html` in any browser. No build step, no dependencies — one file.
+**Play it:** open `game/index.html` in any browser. No build step, no dependencies.
+
+Two modes:
+
+- **Campaign** (`index.html`) — the 16-mission story
+- **Liberty Bay free roam** (`city.html`) — GTA-style open city: a 3200×2400 scrolling world with procedural blocks, jackable cars with acceleration/steering physics, wandering pedestrians that panic at gunfire, and RoboCop police with a 5-star wanted system (crime raises it, laying low drops it). Minimap included.
 
 ## Controls
 
