@@ -109,9 +109,8 @@ const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
 renderer.setSize(960, 600, false);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.outputEncoding = THREE.LinearEncoding; // gamma handled in the composite pass
+renderer.toneMapping = THREE.NoToneMapping;       // ACES applied in the composite pass
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(62, 960 / 600, 1, 6000);
 const hemi = new THREE.HemisphereLight(0x8fb4d8, 0x1a2230, 0.9); scene.add(hemi);
@@ -316,6 +315,59 @@ const smokes = [];
 for (let k = 0; k < 3; k++) {
   const p = new THREE.Mesh(new THREE.SphereGeometry(5, 8, 8), smokeMat.clone());
   p.userData.k = k; scene.add(p); smokes.push(p);
+}
+
+// ---------- Verlet cloth flag (real physics, GPU-friendly grid) ----------
+const flag = (function () {
+  const CW = 13, CH = 8, sp = 4.2;
+  const ox = IRONSMOKE.x - 34, oy = 62, oz = IRONSMOKE.y + IRONSMOKE.h + 42;
+  const pts = [], cons = [];
+  const id = (i, j) => j * CW + i;
+  for (let j = 0; j < CH; j++) for (let i = 0; i < CW; i++) {
+    const x = ox + i * sp, y = oy - j * sp, z = oz;
+    pts.push({ x, y, z, px: x, py: y, pz: z, pin: i === 0 });
+  }
+  for (let j = 0; j < CH; j++) for (let i = 0; i < CW; i++) {
+    if (i < CW - 1) cons.push([id(i, j), id(i + 1, j), sp]);
+    if (j < CH - 1) cons.push([id(i, j), id(i, j + 1), sp]);
+  }
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(CW * CH * 3);
+  const tris = [];
+  for (let j = 0; j < CH - 1; j++) for (let i = 0; i < CW - 1; i++) {
+    const a = id(i, j), b = id(i + 1, j), c = id(i, j + 1), d = id(i + 1, j + 1);
+    tris.push(a, c, b, b, c, d);
+  }
+  geo.setIndex(tris);
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x7fd4ff, emissive: 0x0d2c3a, roughness: 0.65, metalness: 0.1, side: THREE.DoubleSide }));
+  mesh.castShadow = true; scene.add(mesh);
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.9, 76, 8), new THREE.MeshStandardMaterial({ color: 0x39424f, metalness: 0.7, roughness: 0.5 }));
+  pole.position.set(ox, 38, oz); pole.castShadow = true; scene.add(pole);
+  return { pts, cons, geo, pos, CW, CH, ox, oy, sp, oz };
+})();
+function updateFlag() {
+  const f = flag, wind = 0.9 + Math.sin(tSec * 2) * 0.7;
+  for (const p of f.pts) {
+    if (p.pin) continue;
+    const vx = (p.x - p.px) * 0.96, vy = (p.y - p.py) * 0.96, vz = (p.z - p.pz) * 0.96;
+    p.px = p.x; p.py = p.y; p.pz = p.z;
+    p.x += vx; p.y += vy - 0.9; p.z += vz + wind + Math.sin(p.y * 0.1 + tSec * 3) * 0.4;
+  }
+  for (let it = 0; it < 3; it++) {
+    for (const c of f.cons) {
+      const a = f.pts[c[0]], b = f.pts[c[1]];
+      let dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+      const d = Math.hypot(dx, dy, dz) || 1e-4, k = (d - c[2]) / d * 0.5;
+      dx *= k; dy *= k; dz *= k;
+      if (!a.pin) { a.x += dx; a.y += dy; a.z += dz; }
+      if (!b.pin) { b.x -= dx; b.y -= dy; b.z -= dz; }
+    }
+    for (let j = 0; j < f.CH; j++) { const p = f.pts[j * f.CW]; p.x = f.ox; p.y = f.oy - j * f.sp; p.z = f.oz; }
+  }
+  for (let k = 0; k < f.pts.length; k++) { f.pos[k * 3] = f.pts[k].x; f.pos[k * 3 + 1] = f.pts[k].y; f.pos[k * 3 + 2] = f.pts[k].z; }
+  f.geo.attributes.position.needsUpdate = true;
+  f.geo.computeVertexNormals();
 }
 
 // ---------- entities ----------
@@ -683,6 +735,7 @@ function update(dt, now) {
     s.material.opacity = 0.35 * (1 - ph / 80);
     s.scale.setScalar(1 + ph / 40);
   }
+  updateFlag();
   doorRing.material.opacity = 0.5 + Math.sin(tSec * 4) * 0.3;
   sign.lookAt(camera.position.x, 44, camera.position.z);
   if (!jet.owned) priceTag.lookAt(camera.position.x, 50, camera.position.z);
@@ -732,13 +785,44 @@ window.__hp = n => { player.hp = n; };
 window.__wanted = n => { heat = n * 5; lastCrime = tSec; };
 window.__time = n => { tSec = n; };
 
+// ---------- cinematic post-processing: bloom + ACES + teal/orange grade + vignette + chromatic aberration ----------
+const RTOPT = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false };
+const rtScene = new THREE.WebGLRenderTarget(960, 600, RTOPT);
+const rtA = new THREE.WebGLRenderTarget(480, 300, RTOPT);
+const rtB = new THREE.WebGLRenderTarget(480, 300, RTOPT);
+const fsScene = new THREE.Scene();
+const fsCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const fsQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2));
+fsScene.add(fsQuad);
+const VERT = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
+const brightMat = new THREE.ShaderMaterial({ depthTest: false, depthWrite: false, uniforms: { tDiffuse: { value: null }, threshold: { value: 0.72 } }, vertexShader: VERT,
+  fragmentShader: 'varying vec2 vUv; uniform sampler2D tDiffuse; uniform float threshold; void main(){ vec3 c = texture2D(tDiffuse, vUv).rgb; float l = dot(c, vec3(0.2126,0.7152,0.0722)); float k = max(0.0, l - threshold); gl_FragColor = vec4(c * (k / max(l, 1e-4)), 1.0); }' });
+const blurMat = new THREE.ShaderMaterial({ depthTest: false, depthWrite: false, uniforms: { tDiffuse: { value: null }, dir: { value: new THREE.Vector2() }, res: { value: new THREE.Vector2(480, 300) } }, vertexShader: VERT,
+  fragmentShader: 'varying vec2 vUv; uniform sampler2D tDiffuse; uniform vec2 dir; uniform vec2 res; void main(){ vec2 px = dir / res; vec3 s = texture2D(tDiffuse, vUv).rgb * 0.227027; s += texture2D(tDiffuse, vUv + px*1.3846).rgb * 0.316216; s += texture2D(tDiffuse, vUv - px*1.3846).rgb * 0.316216; s += texture2D(tDiffuse, vUv + px*3.2308).rgb * 0.07027; s += texture2D(tDiffuse, vUv - px*3.2308).rgb * 0.07027; gl_FragColor = vec4(s, 1.0); }' });
+const compMat = new THREE.ShaderMaterial({ depthTest: false, depthWrite: false, uniforms: { tScene: { value: null }, tBloom: { value: null }, bloom: { value: 0.85 }, aberration: { value: 0.16 } }, vertexShader: VERT,
+  fragmentShader: 'varying vec2 vUv; uniform sampler2D tScene; uniform sampler2D tBloom; uniform float bloom; uniform float aberration; vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14), 0.0, 1.0); } void main(){ vec2 uv = vUv; vec2 d = uv - 0.5; float r2 = dot(d,d); vec2 off = d * r2 * aberration; vec3 col; col.r = texture2D(tScene, uv + off).r; col.g = texture2D(tScene, uv).g; col.b = texture2D(tScene, uv - off).b; col += texture2D(tBloom, uv).rgb * bloom; col = aces(col * 1.15); float l = dot(col, vec3(0.299,0.587,0.114)); vec3 shad = vec3(0.0,0.16,0.22); vec3 high = vec3(0.28,0.14,0.0); col += mix(shad, high, smoothstep(0.15,0.85,l)) * 0.14; float vig = smoothstep(1.0, 0.4, length(d)); col *= mix(0.62, 1.0, vig); col = pow(clamp(col,0.0,1.0), vec3(1.0/2.2)); gl_FragColor = vec4(col, 1.0); }' });
+let fxOn = true;
+function fsPass(mat, target) { fsQuad.material = mat; renderer.setRenderTarget(target || null); renderer.render(fsScene, fsCam); }
+function renderFrame() {
+  if (!fxOn) { renderer.setRenderTarget(null); renderer.render(scene, camera); return; }
+  renderer.setRenderTarget(rtScene); renderer.render(scene, camera);
+  brightMat.uniforms.tDiffuse.value = rtScene.texture; fsPass(brightMat, rtA);
+  for (let i = 0; i < 2; i++) {
+    blurMat.uniforms.tDiffuse.value = rtA.texture; blurMat.uniforms.dir.value.set(1, 0); fsPass(blurMat, rtB);
+    blurMat.uniforms.tDiffuse.value = rtB.texture; blurMat.uniforms.dir.value.set(0, 1); fsPass(blurMat, rtA);
+  }
+  compMat.uniforms.tScene.value = rtScene.texture; compMat.uniforms.tBloom.value = rtA.texture; fsPass(compMat, null);
+  renderer.setRenderTarget(null);
+}
+window.__fx = on => { fxOn = on; };
+
 // ---------- loop ----------
 let lastTime = 0;
 function loop(t) {
   const dt = Math.min(0.05, (t - lastTime) / 1000 || 0);
   lastTime = t;
   if (running) update(dt, t);
-  renderer.render(scene, camera);
+  renderFrame();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
