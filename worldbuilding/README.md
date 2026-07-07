@@ -24,7 +24,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.21**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.22**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -115,7 +115,12 @@ rebuilt with **arms and legs and a speed-scaled walk cycle**. The asset pipeline
 for higher-res texture packs runs free on Kaggle's GPU tier
 ([`../pipeline/kaggle_asset_pipeline.ipynb`](../pipeline/kaggle_asset_pipeline.ipynb));
 the roadmap documents every free cloud-GPU option and why the game itself never
-needs one (it renders on the player's device).
+needs one (it renders on the player's device). v0.22 gives the island **time**:
+a full **day/night cycle** (8-minute day) with a live HUD clock — dawn breaks
+pink over the harbor, noon is bright tropical daylight with long draw distance,
+dusk burns orange, and night brings back the neon; stars, moon, and lens streak
+fade with the light, `N` jumps time in 3-hour steps, and storm mode, the Static
+Hour, and Chromelab Grade all compose with it.
 
 
 [`../game/index.html`](../game/index.html) — **the front door**: a styled hub

@@ -38,8 +38,8 @@
 <canvas id="game"></canvas>
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
-<div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.21</div>
+<div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.22</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4075,20 +4075,20 @@ function waveWater(t){
   wpos.needsUpdate=true;water.geometry.computeVertexNormals();
 }
 // ---------------- sky dome + moon disc ----------------
-let moonStreak=null;
+let moonStreak=null,dome=null,moonSp=null,stars=null;
 {
   const sc2=document.createElement('canvas');sc2.width=2;sc2.height=256;
   const g2=sc2.getContext('2d');const gr=g2.createLinearGradient(0,0,0,256);
   gr.addColorStop(0,'#030d18');gr.addColorStop(0.55,'#07202e');gr.addColorStop(0.82,'#0d3342');gr.addColorStop(1,'#123a47');
   g2.fillStyle=gr;g2.fillRect(0,0,2,256);
-  const dome=new THREE.Mesh(new THREE.SphereGeometry(900,20,14),
-    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sc2),side:1,fog:false,depthWrite:false})); // side 1 = back
+  dome=new THREE.Mesh(new THREE.SphereGeometry(900,20,14),
+    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sc2),side:1,fog:false,depthWrite:false,transparent:true})); // side 1 = back
   dome.renderOrder=-1;scene.add(dome);
   const mc=document.createElement('canvas');mc.width=mc.height=128;const mg=mc.getContext('2d');
   const rg=mg.createRadialGradient(64,64,10,64,64,64);
   rg.addColorStop(0,'rgba(255,248,230,1)');rg.addColorStop(0.28,'rgba(230,238,255,0.9)');rg.addColorStop(1,'rgba(230,238,255,0)');
   mg.fillStyle=rg;mg.fillRect(0,0,128,128);
-  const moonSp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(mc),transparent:true,fog:false,depthWrite:false}));
+  moonSp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(mc),transparent:true,fog:false,depthWrite:false}));
   moonSp.position.set(-380,360,-270);moonSp.scale.set(120,120,1);scene.add(moonSp);
   // anamorphic lens streak on the moon (trailer-grade optics, shown in Grade mode)
   const ac=document.createElement('canvas');ac.width=512;ac.height=32;const ag=ac.getContext('2d');
@@ -4162,7 +4162,44 @@ for(let i=0;i<6;i++){box(mx(660+(i%3)*40),mz(830+((i/3)|0)*42),5,3,4,[0xffc9a3,0
 {const g=new THREE.BufferGeometry(),v=new Float32Array(1200);
  for(let i=0;i<400;i++){v[i*3]=(Math.random()-0.5)*2200;v[i*3+1]=140+Math.random()*500;v[i*3+2]=(Math.random()-0.5)*2200;}
  g.setAttribute('position',new THREE.BufferAttribute(v,3));
- scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x9fd8e8,size:1.4,sizeAttenuation:false})));}
+ stars=new THREE.Points(g,new THREE.PointsMaterial({color:0x9fd8e8,size:1.4,sizeAttenuation:false,transparent:true}));
+ scene.add(stars);}
+// ---------------- day/night cycle (v0.22) ----------------
+let tod=0.90,SUN_ELEV=0.5,DARK=1; // 0..1 = midnight..midnight; starts at night
+const CYCLE=480; // seconds per full in-game day
+const SKY=[
+ {t:0.00,bg:0x05131c,hemi:0.95,sunC:0xbfe8ff,sunI:1.00,elev:0.55,dark:1},
+ {t:0.22,bg:0x05131c,hemi:0.92,sunC:0xbfe8ff,sunI:0.95,elev:0.35,dark:1},
+ {t:0.28,bg:0x6e4256,hemi:1.10,sunC:0xffb37a,sunI:1.30,elev:0.12,dark:0.45},
+ {t:0.36,bg:0x7fb2d6,hemi:1.45,sunC:0xfff0d8,sunI:2.10,elev:0.70,dark:0},
+ {t:0.50,bg:0x8fc8e8,hemi:1.55,sunC:0xffffff,sunI:2.35,elev:1.00,dark:0},
+ {t:0.64,bg:0x85b4d4,hemi:1.45,sunC:0xffe8c8,sunI:2.00,elev:0.60,dark:0},
+ {t:0.72,bg:0xc27a4e,hemi:1.15,sunC:0xff9a55,sunI:1.40,elev:0.15,dark:0.45},
+ {t:0.78,bg:0x0a1826,hemi:1.00,sunC:0xbfe8ff,sunI:1.00,elev:0.40,dark:1},
+ {t:1.00,bg:0x05131c,hemi:0.95,sunC:0xbfe8ff,sunI:1.00,elev:0.55,dark:1},
+];
+const _c1=new THREE.Color(),_c2=new THREE.Color(),_warm=new THREE.Color(0xffe2bd);
+function applySky(){if(rain||stat)return;
+  let a=SKY[0],b=SKY[1];
+  for(let i=0;i<SKY.length-1;i++)if(tod>=SKY[i].t&&tod<=SKY[i+1].t){a=SKY[i];b=SKY[i+1];break;}
+  const f=(tod-a.t)/Math.max(1e-6,b.t-a.t);
+  _c1.set(a.bg).lerp(_c2.set(b.bg),f);
+  const hem=a.hemi+(b.hemi-a.hemi)*f,sunI=a.sunI+(b.sunI-a.sunI)*f;
+  SUN_ELEV=a.elev+(b.elev-a.elev)*f;DARK=a.dark+(b.dark-a.dark)*f;
+  if(grade)_c1.multiplyScalar(1.30);
+  scene.background.copy(_c1);scene.fog.color.copy(_c1);
+  scene.fog.far=(grade?880:720)+(1-DARK)*300;
+  hemi.intensity=hem*(grade?1.2:1);
+  _c2.set(a.sunC).lerp(new THREE.Color(b.sunC),f);
+  moon.color.copy(grade&&DARK>0.7?_warm:_c2);
+  moon.intensity=sunI*(grade?1.25:1);
+  if(dome)dome.material.opacity=DARK;
+  if(stars)stars.material.opacity=DARK;
+  if(moonSp)moonSp.material.opacity=DARK;
+  if(moonStreak)moonStreak.material.opacity=0.75*DARK;
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='n'){tod=(tod+0.125)%1;
+  toast('TIME  '+String(Math.floor(tod*24)).padStart(2,'0')+':'+String(Math.floor(tod*24%1*60)).padStart(2,'0'));}});
 // ---------------- Storm mode (rain + wet neon) ----------------
 let rain=false;
 const RAINN=TIER?1600:700,RAINR=95,RAINH=70;
@@ -4174,11 +4211,9 @@ let rainTex;{const rc=document.createElement('canvas');rc.width=4;rc.height=18;c
 const rainPts=new THREE.Points(rainGeo,new THREE.PointsMaterial({map:rainTex,color:0xcfe0ee,size:2.4,transparent:true,opacity:0.55,depthWrite:false,fog:false}));
 rainPts.visible=false;scene.add(rainPts);
 function setRain(on){rain=on;rainPts.visible=on;
-  const base=grade?0x0a1d29:0x05131c;
-  scene.background.set(on?0x0a1620:base);scene.fog.color.set(on?0x0a1620:base);
-  scene.fog.far=on?560:(grade?880:720);
-  hemi.intensity=on?0.6:(grade?1.15:0.95);
-  moon.intensity=(grade?1.35:1.0)*(on?0.7:1);
+  if(on){scene.background.set(0x0a1620);scene.fog.color.set(0x0a1620);
+    scene.fog.far=560;hemi.intensity=0.6;moon.intensity=(grade?1.35:1.0)*0.7;}
+  else applySky();
   if(bloom)bloom.strength=(TIER===2?0.5:0.42)+(on?0.16:0);
   water.material.opacity=on?0.86:(refl&&grade?0.56:0.74);
   const rn=document.getElementById('rn');if(rn){rn.textContent=on?'STORM':'RAIN';rn.style.color=on?'#8fd0ff':'#3af5d8';}
@@ -4207,11 +4242,8 @@ function setStatic(on){stat=on;presence.visible=on;
     paranoia=Math.max(paranoia,0.18);
     if(wh){wh.textContent=WHISPERS[0];wh.style.opacity=1;}
   }else{
-    const base=grade?0x0a1d29:0x05131c;
-    scene.background.set(rain?0x0a1620:base);scene.fog.color.set(rain?0x0a1620:base);
-    scene.fog.far=rain?560:(grade?880:720);
-    hemi.intensity=rain?0.6:(grade?1.15:0.95);
-    moon.intensity=(grade?1.35:1.0)*(rain?0.7:1);
+    if(rain){scene.background.set(0x0a1620);scene.fog.color.set(0x0a1620);scene.fog.far=560;hemi.intensity=0.6;}
+    else applySky();
     if(bloom)bloom.strength=(TIER===2?0.5:0.42)+(rain?0.16:0);
     paranoia=0;statT=0;if(vg)vg.style.opacity=0;if(wh)wh.style.opacity=0;
   }
@@ -4677,10 +4709,7 @@ function setGrade(on,quiet){grade=on;setCine(on);
   moon.castShadow=on;
   if(refl)refl.visible=on;
   renderer.toneMapping=on?4:0;renderer.toneMappingExposure=on?1.22:1; // 4 = filmic (ACES)
-  scene.fog.far=on?880:720;
-  scene.background.set(on?0x0a1d29:0x05131c);scene.fog.color.set(on?0x0a1d29:0x05131c);
-  hemi.intensity=on?1.15:0.95;
-  moon.intensity=on?1.35:1.0;moon.color.set(on?0xffe2bd:0xbfe8ff);
+  applySky(); // sky/fog/lights come from the day/night system, grade-aware
   water.material.shininess=on?140:90;
   scene.traverse(o=>{if(o.material)o.material.needsUpdate=true;});
   const fx=document.getElementById('fx');if(fx)fx.style.color=on?'#ffb84d':'#3af5d8';
@@ -4764,8 +4793,9 @@ function tick(t){
    planeG.rotation.y=-pa-Math.PI/2;
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
+  tod=(tod+dt/CYCLE)%1;applySky();
   waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);
-  moon.position.set(P.x-140,210,P.z-98);moon.target.position.set(P.x,0,P.z);
+  moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
   for(const b of beacons){b.pil.rotation.y=t*0.0012;
@@ -4870,7 +4900,8 @@ function tick(t){
     arrow.style.transform='translateX(-50%) rotate('+(-rel*180/Math.PI)+'deg)';
     $('dist').textContent=(nd2|0)+' m';}
   else{arrow.style.display='none';$('dist').textContent='';}
-  $('tele').textContent=(veh===WALKER?(wet?'SWIMMING  ':'ON FOOT  '):(wet?'HULL MODE  ':'ENGINE OK  '))+Math.abs(P.v*3.6|0)+' km/h'+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(rawClips?'  ·  '+rawClips+' RAW CLIP'+(rawClips>1?'S':''):'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
+  const clk=String(Math.floor(tod*24)).padStart(2,'0')+':'+String(Math.floor(tod*24%1*60)).padStart(2,'0');
+  $('tele').textContent=clk+'  ·  '+(veh===WALKER?(wet?'SWIMMING  ':'ON FOOT  '):(wet?'HULL MODE  ':'ENGINE OK  '))+Math.abs(P.v*3.6|0)+' km/h'+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(rawClips?'  ·  '+rawClips+' RAW CLIP'+(rawClips>1?'S':''):'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
   if(perf>toastT)$('toast').style.opacity=0;
   radarTarget=target;drawRadar();
   const w=innerWidth,h=innerHeight;
@@ -4881,7 +4912,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2)}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
