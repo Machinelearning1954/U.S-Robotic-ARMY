@@ -85,6 +85,7 @@ video-analysis service (2026-07-06):
 
 - [Mudfish night pier-drop, neon harbor](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_223656_eaec74c3-2ee6-448a-9d5a-dcab8d524659.mp4) — the water/headlight/neon reference for the Grade look.
 - [Golden-hour island flyover, ten districts](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260705_223743_d5b26c81-af84-4c4c-a298-1325ba60ac5d.mp4) — the daylight/atmosphere target for the engine rung.
+- [Lovebird Airways island approach](https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260707_101315_52aea64a-cabb-45f4-87ac-38bd2f800ea2.mp4) — the fictional flag carrier (cream/orange/gold, violet tail, hummingbird emblem) banking over the island at golden hour toward the coastal runway; the target look for the v0.27 Island Hop feature. Original livery, no real airline branding.
 
 > These are AI-generated concept/target-look videos for art direction, not
 > engine captures.
