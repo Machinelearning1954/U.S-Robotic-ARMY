@@ -90,5 +90,13 @@ Pre-generated lines (the SDK lane: Claude/GLM drafting into these frameworks,
 human-curated) shipped as static content; TTS only for prototype scratch,
 recorded voice actors for the engine rung — island voices cast authentically.
 
+**The pipeline is built** (`pipeline/dialogue/`): a 48-line curated, canon-tagged
+Patois dataset (`patois_dataset.jsonl`), the drop-in style-adapter system prompt
+(`STYLE_ADAPTER.md`), a runnable batch generator (`generate_dialogue.py`, Claude
+or GLM via the installed SDKs), and a Kaggle LoRA notebook
+(`pipeline/kaggle_lora_patois.ipynb`) for when the curated set passes ~2-5k lines.
+Human curation gates every line before it ships — the dataset only grows with
+approved lines, never raw model output.
+
 > All fictional. The voice of the island is the point — written with affection,
 > checked against the culture doc's rules every pass.

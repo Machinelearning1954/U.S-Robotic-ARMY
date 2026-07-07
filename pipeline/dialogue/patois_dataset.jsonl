@@ -1,0 +1,48 @@
+{"input": "NPC: friendly greeting, Kingston street", "output": "Wah gwaan, boss? Long time mi nuh see yuh 'bout yah.", "region": "Kingston", "role": "resident", "tone": "friendly"}
+{"input": "NPC: market vendor opening pitch", "output": "Come check di goods dem, mi love! Everyting fresh from mawnin.", "region": "Kingston", "role": "vendor", "tone": "friendly"}
+{"input": "NPC: bargaining counter-offer", "output": "Two hundred fi dat? Mi can drop it likkle, but yuh haffi support mi business, seen?", "region": "Kingston", "role": "vendor", "tone": "business"}
+{"input": "NPC: bargaining, closing the deal", "output": "Awrite, yuh win — tek it fi one-fifty. But nuh tell nobody seh mi soft.", "region": "Kingston", "role": "vendor", "tone": "humorous"}
+{"input": "NPC: route taxi driver, boarding", "output": "Small up yuhself! One more can hol' — hop in, mi carry yuh reach quick.", "region": "Kingston", "role": "taxi", "tone": "casual"}
+{"input": "NPC: taxi driver, traffic complaint", "output": "Dis traffic yah nuh normal. Roadwork again? Dem love dig up di same road, mi tell yuh.", "region": "Kingston", "role": "taxi", "tone": "humorous"}
+{"input": "NPC: selector hyping a sound system night", "output": "Tonight di lawn a go shake! Selector warm up from eight, so reach early or stand up a back.", "region": "Kingston", "role": "selector", "tone": "excited"}
+{"input": "NPC: studio musician, casual", "output": "Wi a voice a riddim later — if yuh hear di bassline an' yuh foot dem nuh move, check doctor.", "region": "Kingston", "role": "musician", "tone": "humorous"}
+{"input": "NPC: elder on veranda, weather wisdom", "output": "Rain a come. Mi knee tell mi before di radio, an' mi knee nuh wrong yet.", "region": "rural", "role": "elder", "tone": "calm"}
+{"input": "NPC: farmer, morning talk", "output": "Up from before day light, yes. Di banana dem nuh reap demself.", "region": "rural", "role": "farmer", "tone": "casual"}
+{"input": "NPC: fisherman on the beach at dawn", "output": "Sea calm dis mawnin — sweet likkle glass. Wi gone before di sun get hot.", "region": "coast", "role": "fisherman", "tone": "calm"}
+{"input": "NPC: net mender, storytelling", "output": "Dis net older dan yuh, young one. Mi granfaada twist di first cord fi it. Siddung, mek mi tell yuh.", "region": "coast", "role": "craftsperson", "tone": "warm"}
+{"input": "NPC: market seller, rural, kind", "output": "Yuh look hungry, mi pickney. Tek a june plum — dat one deh pon di house.", "region": "rural", "role": "vendor", "tone": "warm"}
+{"input": "NPC: domino player, mid-game", "output": "Study di board before yuh drop dat! Cho — awrite, six-love it name.", "region": "rural", "role": "resident", "tone": "humorous"}
+{"input": "NPC: storm warning, serious", "output": "Batten dung good, yuh hear? Dis one nuh play. Water an' battery from now.", "region": "any", "role": "resident", "tone": "serious"}
+{"input": "NPC: fisherman before a storm", "output": "Boat haffi come outta di water today. Sea soon get ignorant.", "region": "coast", "role": "fisherman", "tone": "serious"}
+{"input": "NPC: after the storm passes", "output": "Give thanks — roof hol', family safe. Zinc can replace, people cyaan.", "region": "any", "role": "resident", "tone": "calm"}
+{"input": "NPC: radio voice, storm advisory calm", "output": "Storm Condition Two in effect. Move calm, move early, look fi yuh neighbour dem.", "region": "any", "role": "radio", "tone": "serious"}
+{"input": "NPC: tour guide welcoming visitors", "output": "Welcome, welcome! Today wi a go see di falls — walk good, di rock dem love slippery people.", "region": "resort", "role": "guide", "tone": "humorous"}
+{"input": "NPC: beach bar, evening", "output": "Di vibes nice yah so. Relax yuhself, watch di sunset — it free every evening.", "region": "resort", "role": "bartender", "tone": "warm"}
+{"input": "NPC: craft market seller to a tourist", "output": "Everyting yah so mek by hand, no factory nuh touch it. Feel di wood — smooth like river stone.", "region": "resort", "role": "vendor", "tone": "friendly"}
+{"input": "NPC: boat operator, reef trip", "output": "Hold on likkle bit when wi cross di reef line — after dat, smooth sailing an' pretty water.", "region": "coast", "role": "boat", "tone": "casual"}
+{"input": "NPC: drill instructor, morning PT (Auntie Blades style)", "output": "Sun reach before unnu?! Line up! Sweat now or sorry later — mi accept both, but only one come wid breakfast.", "region": "PAUDC", "role": "instructor", "tone": "stern-humorous"}
+{"input": "NPC: Fort Flavor cook, serving", "output": "Mind di pot, it hot! Curry goat ready — one plate ago change yuh whole day, trust mi.", "region": "PAUDC", "role": "cook", "tone": "warm"}
+{"input": "NPC: BII officer, courtesy stop", "output": "Good evening. Lovely likkle speed yuh did a keep. Mi jus want a word — an' yuh licence.", "region": "PAUDC", "role": "BII", "tone": "polite-menace"}
+{"input": "NPC: BII officer, letting someone off", "output": "Ledger clear dis time. Drive like yuh granny inna di back seat, please an' thanks.", "region": "PAUDC", "role": "BII", "tone": "polite-menace"}
+{"input": "NPC: med bay officer, about supplements", "output": "Nuh tek nutten yuh cyaan pronounce. Curry goat an' sleep — dat a di real gains, soldier.", "region": "PAUDC", "role": "medic", "tone": "stern-humorous"}
+{"input": "NPC: mechanic at the motor pool", "output": "Yuh hear dat knockin'? Dat a di engine a beg fi mercy. Leave har wid mi till Tuesday.", "region": "PAUDC", "role": "mechanic", "tone": "casual"}
+{"input": "NPC: Plantin Airways gate agent", "output": "Boarding now fi di island hop! Window seat, yes? Green today, ripe tomorrow — walk good.", "region": "any", "role": "airline", "tone": "friendly"}
+{"input": "NPC: ferry captain, casting off", "output": "All aboard di Hopper! Nex' stop, di far mooring. If yuh drop anyting inna di sea, it belong to di sea now.", "region": "coast", "role": "ferry", "tone": "humorous"}
+{"input": "NPC: country bus conductor", "output": "Half Way Tree! Anybody fi Half Way Tree? Come sit by di window, breeze nice up front.", "region": "Kingston", "role": "bus", "tone": "casual"}
+{"input": "NPC: Polytech student at the Chromelab", "output": "Mi render a run all night — if it crash one more time mi a switch to farming, straight.", "region": "SilverSprings", "role": "student", "tone": "humorous"}
+{"input": "NPC: Wheaton night-school student", "output": "Class start when di bass drop downstairs. Yuh learn fi study to riddim — best focus mi ever have.", "region": "Strip", "role": "student", "tone": "casual"}
+{"input": "NPC: Alexandria trade school, workshop", "output": "Measure two time, cut one time. Di wood nuh grow back, an' neither do mi patience.", "region": "Alexandria", "role": "instructor", "tone": "stern-humorous"}
+{"input": "NPC: reacting to player's nice vehicle", "output": "Dat Marlin clean, boss! Mind di salt water though — chrome an' sea nuh friend.", "region": "any", "role": "resident", "tone": "friendly"}
+{"input": "NPC: wary of a troublemaker player", "output": "Mi see how yuh drive through di market yesterday. Walk easy today, yuh hear?", "region": "any", "role": "vendor", "tone": "wary"}
+{"input": "NPC: greeting a player with Protector reputation", "output": "A yuh dat?! Di same one weh help wi inna di storm! Anyting yuh want, jus ask — price nuh apply to yuh.", "region": "any", "role": "vendor", "tone": "warm"}
+{"input": "NPC: kid asking about the Rolling Calf fight", "output": "Dem seh yuh turn inna di Rolling Calf a Yard night! Show mi di horn dem! ... Mama seh mi mustn't ask dat.", "region": "any", "role": "kid", "tone": "excited"}
+{"input": "NPC: noticing the BII interceptor nearby", "output": "Easy, easy — di Interceptor deh 'bout. Nuh give dem no excitement today.", "region": "any", "role": "resident", "tone": "wary"}
+{"input": "NPC: jerk stand, smoke rising", "output": "Follow di smoke, yuh cyaan get lost! Quarter or half? Di pepper sauce a nuh joke ting, mi warn yuh.", "region": "any", "role": "cook", "tone": "humorous"}
+{"input": "NPC: patty shop at lunch rush", "output": "Beef, chicken, veggie — line move fast if unnu know weh unnu want! Cocoa bread wid dat?", "region": "Kingston", "role": "cook", "tone": "busy"}
+{"input": "NPC: ital stall, gentle pitch", "output": "Everyting yah so from di earth, no flesh, no stress. Try di stew — yuh body a go thank yuh.", "region": "any", "role": "cook", "tone": "calm"}
+{"input": "NPC: club door at the Bassline", "output": "Evening! Dress code a jus good vibes an' likkle common sense. Enjoy yuhself, nuh overdo it.", "region": "Strip", "role": "security", "tone": "friendly"}
+{"input": "NPC: late-night chat outside the club", "output": "Di night still young an' di bass still warm. One more tune, den mi gone — mi seh dat two hour now.", "region": "Strip", "role": "resident", "tone": "humorous"}
+{"input": "NPC: Green Cross dispensary counter", "output": "Prescription an' ID, please. Everyting licensed an' proper yah so — wellness, not wildness.", "region": "PalmLine", "role": "pharmacist", "tone": "calm"}
+{"input": "NPC: reef school instructor", "output": "Watch di sonar, wait fi di ping. Snapper nuh inna hurry, so yuh cyaan be inna hurry neither.", "region": "coast", "role": "instructor", "tone": "calm"}
+{"input": "NPC: croc sanctuary keeper", "output": "Miss Snappy love har new pond, yuh know. Ol' Boots still a sulk — him miss di east side mud.", "region": "PAUDC", "role": "keeper", "tone": "warm"}
+{"input": "NPC: goat herder on a rural road", "output": "Di goat dem have right a way, star. Yuh horn cyaan argue wid dat — jus wait likkle.", "region": "rural", "role": "farmer", "tone": "humorous"}
