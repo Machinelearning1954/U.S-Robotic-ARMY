@@ -20,6 +20,8 @@
 | [`PAUDC_Culinary_Academy.md`](PAUDC_Culinary_Academy.md) | The Tichfield Culinary Academy ("Fort Flavor") — cooking school hub, recipe/buff system, the curry goat questline, food economy and events. |
 | [`PAUDC_Wildlife_Butcher.md`](PAUDC_Wildlife_Butcher.md) | Wildlife ecosystem and the Blue Mountain Butcher & Market — stylized capture/processing loop, Butcher skill tree, hygiene minigame, dynamic pricing, black-market risk lever. |
 | [`PAUDC_Psych_Thriller.md`](PAUDC_Psych_Thriller.md) | **"The Static Hour"** — the optional psychological-thriller arc extending the Numbers Station thread: the Presence you can't fight, the Paranoia meter, an unreliable-narrator set-piece and its twist, all non-lethal by rule. |
+| [`JAMAICA_ISLAND_WORLD.md`](JAMAICA_ISLAND_WORLD.md) | **The full-island expansion spec** — all of fictionalized Jamaica at real scale: eight regions, biomes from SRTM elevation reference, road graph, GTA-6-tier fidelity spec for the engine rung, lighting presets, mission hooks. PAUDC stays the narrative heart. |
+| [`JAMAICA_NPC_CULTURE.md`](JAMAICA_NPC_CULTURE.md) | Island-wide **NPC culture & behavior system** — archetypes by region, clock-driven routines, reputation-based reactions (Protector/Troublemaker/Outsider/Local), natural Patois dialogue sets, behavior trees per class, cultural event calendar. Respectful and fiction-safe by rule. |
 | [`DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) | How the project ships legally: no leaked Rockstar code ever, the prototype→engine ladder, Godot 4 next / UE5 later, FiveM gamemode option, legal study resources. |
 
 ## Playable prototypes
