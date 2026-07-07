@@ -24,7 +24,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.18**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.19**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -94,7 +94,12 @@ the Rolling Calf**, the chain-dragging bull duppy of Jamaican folklore: double
 damage, faster on your feet, red eyes in the dark. Win for clout and the *Man
 Beat Duppy* call; get counted out and you can walk right back in. The
 transformation-fighter variant is canon in the base design doc (§10, Beast
-Night) — genre pattern only, every form original folklore-fiction.
+Night) — genre pattern only, every form original folklore-fiction. v0.19 adds the
+**Chromelab Re-Render Queue** — the AI-video-tool wave, satirized in-world: big
+stunts (splashdowns, Yard wins) now bank a **RAW CLIP** alongside their clout;
+carry them to the Chromelab at Silver Springs and hold, and the Polytech's AI
+enhancer re-renders them for **+8 bonus clout per clip** (systems doc §4.4, with
+the "NUH REAL!" over-glazing satire).
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a

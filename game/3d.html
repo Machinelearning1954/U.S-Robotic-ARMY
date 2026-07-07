@@ -39,7 +39,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.18</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.19</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4288,8 +4288,8 @@ function startFight(){fightOn=true;hp=3;ehp=6;hype=0;windup=0;strikeCd=0;
   brawler.position.set(YARD.X+5,Math.max(height(YARD.X+5,YARD.Z),0.2)+0.55,YARD.Z);
   toast('YARDCLASH — BEAST NIGHT  ·  SPACE to strike, fill the Yard Meter');}
 function endFight(won){fightOn=false;brawler.visible=false;endBeast();
-  if(won){fightWon=true;addClout(40);if(!beastTitle){beastTitle=true;}
-    toast('YARD CHAMPION — MAN BEAT DUPPY!  +40 CLOUT');}
+  if(won){fightWon=true;addClout(40);rawClips++;if(!beastTitle){beastTitle=true;}
+    toast('YARD CHAMPION — MAN BEAT DUPPY!  +40 CLOUT  ·  RAW CLIP BANKED');}
   else{P.x=YARD.X+16;P.z=YARD.Z+16;P.v=0;toast('COUNTED OUT — walk it off and come again');}}
 function updateFight(dt){
   if(!fightOn){
@@ -4609,7 +4609,8 @@ addEventListener('keydown',e=>{if(e.key.toLowerCase()==='c')setGrade(!grade);});
 {const fx=document.getElementById('fx');
  if(fx)fx.addEventListener('pointerdown',e=>{e.preventDefault();setGrade(!grade);});}
 // ---------------- loop ----------------
-let perf=0,last=0,slow=0,prevWet=false,donutT=0,parkT=0,regT=0,invT=0,invited=false,watch=0,watchT=0,fishT=0,fish=0,instructor=false,setT=0,sets=0,coach=false,phase=0,carryCroc=null,relocated=0,hasPot=false,potT=0,wellFed=false,irie=false,irieT=0;
+let perf=0,last=0,slow=0,prevWet=false,donutT=0,parkT=0,regT=0,invT=0,invited=false,watch=0,watchT=0,fishT=0,fish=0,instructor=false,setT=0,sets=0,coach=false,phase=0,carryCroc=null,relocated=0,hasPot=false,potT=0,wellFed=false,irie=false,irieT=0,rawClips=0,rrT=0;
+const CHROME={X:mx(520),Z:mz(1020)}; // the Chromelab at Silver Springs — AI re-render queue
 const PIER={X:mx(985),Z:mz(742)};
 function infraction(name,n){watch=Math.min(5,watch+n);watchT=perf+60000;addClout(3);
   toast(name+' \u2014 BII WATCH '+'\u2605'.repeat(watch));}
@@ -4623,7 +4624,12 @@ function tick(t){
   if(dt>0.04)slow++;else slow=Math.max(0,slow-1);
   if(slow>90&&pxr>1){pxr=Math.max(1,pxr-0.25);renderer.setPixelRatio(pxr);renderer.setSize(innerWidth,innerHeight,false);composer.setPixelRatio(pxr);composer.setSize(innerWidth,innerHeight);qLabel();slow=0;}
   const wet=isWater(P.x,P.z);
-  if(wet&&!prevWet&&Math.abs(P.v)>18){const n=grade?10:5;addClout(n);toast('SPLASHDOWN CLIP  +'+n+' CLOUT'+(grade?' — GRADED':''));}
+  if(wet&&!prevWet&&Math.abs(P.v)>18){const n=grade?10:5;addClout(n);rawClips++;toast('SPLASHDOWN CLIP  +'+n+' CLOUT'+(grade?' — GRADED':'')+'  ·  RAW CLIP BANKED');}
+  // Chromelab Re-Render queue: bring raw clips to the Polytech's AI enhancer
+  if(rawClips>0&&Math.hypot(P.x-CHROME.X,P.z-CHROME.Z)<12&&Math.abs(P.v)<4){rrT+=dt;
+    if(rrT>2){rrT=0;const pay=8*rawClips;addClout(pay);
+      toast('CHROMELAB RE-RENDER — '+rawClips+' CLIP'+(rawClips>1?'S':'')+' ENHANCED  +'+pay+' CLOUT');rawClips=0;}}
+  else rrT=Math.max(0,rrT-dt);
   prevWet=wet;
   const thr=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?0.6:0);
   const str=(keys.a||keys.arrowleft?1:0)-(keys.d||keys.arrowright?1:0);
@@ -4779,7 +4785,7 @@ function tick(t){
     arrow.style.transform='translateX(-50%) rotate('+(-rel*180/Math.PI)+'deg)';
     $('dist').textContent=(nd2|0)+' m';}
   else{arrow.style.display='none';$('dist').textContent='';}
-  $('tele').textContent=(veh===WALKER?(wet?'SWIMMING  ':'ON FOOT  '):(wet?'HULL MODE  ':'ENGINE OK  '))+Math.abs(P.v*3.6|0)+' km/h'+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
+  $('tele').textContent=(veh===WALKER?(wet?'SWIMMING  ':'ON FOOT  '):(wet?'HULL MODE  ':'ENGINE OK  '))+Math.abs(P.v*3.6|0)+' km/h'+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(rawClips?'  ·  '+rawClips+' RAW CLIP'+(rawClips>1?'S':''):'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
   if(perf>toastT)$('toast').style.opacity=0;
   radarTarget=target;drawRadar();
   const w=innerWidth,h=innerHeight;
@@ -4790,7 +4796,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast}),setRain,setStatic,presence,traffic,walker,YARD,brawler,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips}),setRain,setStatic,presence,traffic,walker,YARD,brawler,CHROME,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

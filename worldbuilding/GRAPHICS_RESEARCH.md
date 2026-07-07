@@ -88,3 +88,24 @@ video-analysis service (2026-07-06):
 
 > These are AI-generated concept/target-look videos for art direction, not
 > engine captures.
+
+## AI video agents as production tools (trailers / pre-viz / target-look)
+
+The 2025-26 crop of AI video platforms (Renoise-class "video agents" that
+generate cinematic shots from prompts and enhance raw footage — denoise, deblur,
+regrade, upscale; Higgsfield, already in our concept pipeline, is the same
+category) are legitimate **production tools** for this project:
+
+- **Target-look films & trailers:** generate canon-styled shots (like the two
+  sample videos above) for art direction and marketing — always labeled as
+  concept/AI, never passed off as engine captures.
+- **Cutscene pre-viz:** block out campaign cinematics cheaply before any engine
+  work; the *shipped* cutscenes are rendered in-engine from original assets.
+- **Enhancement passes:** AI upscale/denoise of our own captures for promo use.
+- **The rule stands:** these tools generate *original* content from our prompts
+  and our footage. They are never used to launder someone else's IP into
+  "original" assets — same Rule Zero logic as everywhere else.
+
+In-world, this whole tool category is satirized as the **Chromelab Re-Render
+Queue** (systems doc §4.4) — the island's AI enhancement studio that pays bonus
+clout for enhanced clips and flags over-glazed ones "NUH REAL!".

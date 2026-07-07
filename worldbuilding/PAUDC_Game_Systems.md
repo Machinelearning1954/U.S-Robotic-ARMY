@@ -199,7 +199,30 @@ Enlistment numbers are a **live world stat** fed by aggregate player clout:
 - Low recruitment: departments post desperation contracts at boosted ₡ rates,
   Auntie Blades gets meaner, the base radio runs guilt-trip recruitment ads.
 
-### 4.4 Downsides of Fame
+### 4.4 The Re-Render Queue — Chromelab AI Enhancement
+
+Trained on the real 2025-26 wave of AI video tools (generate-and-enhance platforms
+that denoise, deblur, upscale and "cinematize" raw footage), OnWatch gets a
+production pipeline — all of it an invented in-world service:
+
+- **Raw clips bank automatically.** Big filmable moments (splashdowns, Yard wins,
+  storm stunts) save a **RAW CLIP** alongside their instant clout.
+- **The Chromelab Re-Render Queue** at Silver Springs Polytech is the island's AI
+  enhancement studio: hand in raw clips and the lab's "re-render" pass — denoise,
+  deblur, filmic regrade, upscale — reposts them **enhanced**, paying bonus clout
+  per clip. Fiction-side it's students training their models on your footage;
+  gameplay-side it's a banked-reward loop that gives stunt players a reason to
+  visit the tech campus.
+- **The authenticity slider (the satire).** Push enhancement past "clean-up" into
+  full AI gloss and viewers start flagging clips **"NUH REAL!"** — over-glazed
+  clips earn more clout up front but risk a flag that halves the payout and dings
+  your Standing with the *keep-it-raw* crowd. The meta-joke is current: the feed
+  rewards polish and punishes fakery, and the line moves every week.
+- **Boundary note:** the Chromelab queue is a fictional in-game service; no real
+  AI product is depicted or named in-world. (Production-side, AI video tools are
+  listed as legitimate trailer/pre-viz options in the graphics research doc.)
+
+### 4.5 Downsides of Fame
 
 - **Rival-faction attention:** at Island tier, rival scouts begin appearing in your
   open-world sessions — ambushes on your known routes, Stormjack drones shadowing
