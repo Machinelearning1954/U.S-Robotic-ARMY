@@ -163,6 +163,12 @@ Hunyuan3D-2.1 performs self-hosted):
 UE5 as the graduation target and Path B held as a parallel option if the goal
 shifts to "multiplayer community now." Path C feeds both continuously.
 
+## The production toolchain
+
+The full **GPU → engine → DCC → AI → assets** pipeline map, with per-tool license
+status and what's already proven working in this repo (Blender headless renders,
+the AI SDKs, git-lfs), lives in [`../pipeline/TOOLCHAIN.md`](../pipeline/TOOLCHAIN.md).
+
 ## Free cloud GPUs — where they fit (and where they don't)
 
 **The game never needs a cloud GPU to run.** All three playable builds are
