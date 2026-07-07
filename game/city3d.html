@@ -163,6 +163,14 @@ const envTex = new THREE.CubeTexture([
 ]);
 envTex.needsUpdate = true;
 
+// real-time reflection probe: a cube camera at the player captures the ACTUAL
+// city, so metallic paint and wet streets reflect the real environment (the
+// technique RTX reflections fake with rays — here done with a live cubemap)
+const cubeRT = new THREE.WebGLCubeRenderTarget(128, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
+const cubeCam = new THREE.CubeCamera(2, 3200, cubeRT);
+scene.add(cubeCam);
+const reflectTex = cubeRT.texture; // materials point their envMap here
+
 // ground with painted roads (canvas texture)
 function paintGround(neonMode) {
   const g = document.createElement('canvas'); g.width = 1600; g.height = 1200;
@@ -184,7 +192,7 @@ function paintGround(neonMode) {
   return tex;
 }
 const groundTexPrime = paintGround(false), groundTexNeon = paintGround(true);
-const groundMat = new THREE.MeshStandardMaterial({ map: groundTexPrime, roughness: 0.55, metalness: 0.25, envMap: envTex }); // slightly wet asphalt
+const groundMat = new THREE.MeshStandardMaterial({ map: groundTexPrime, roughness: 0.55, metalness: 0.35, envMap: reflectTex, envMapIntensity: 1.0 }); // slightly wet asphalt
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_W, WORLD_H), groundMat);
 ground.rotation.x = -Math.PI / 2;
 ground.position.set(WORLD_W / 2, 0, WORLD_H / 2);
@@ -374,7 +382,7 @@ function updateFlag() {
 function shadowize(gp) { gp.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); return gp; }
 function robotMesh(color, scale) {
   const gp = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.75, envMap: envTex });
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.75, envMap: reflectTex });
   const body = new THREE.Mesh(new THREE.BoxGeometry(10, 14, 7), mat); body.position.y = 12; gp.add(body);
   const head = new THREE.Mesh(new THREE.BoxGeometry(7, 6, 7), mat); head.position.y = 22; gp.add(head);
   const eye = new THREE.Mesh(new THREE.BoxGeometry(5, 2, 1), new THREE.MeshBasicMaterial({ color: 0xff3b3b }));
@@ -384,9 +392,9 @@ function robotMesh(color, scale) {
 }
 function carMesh(color) {
   const gp = new THREE.Group();
-  const paint = new THREE.MeshPhysicalMaterial({ color, metalness: 0.9, roughness: 0.22, envMap: envTex, clearcoat: 1, clearcoatRoughness: 0.15 });
+  const paint = new THREE.MeshPhysicalMaterial({ color, metalness: 0.9, roughness: 0.22, envMap: reflectTex, clearcoat: 1, clearcoatRoughness: 0.15 });
   const body = new THREE.Mesh(new THREE.BoxGeometry(44, 12, 24), paint); body.position.y = 8; gp.add(body);
-  const cab = new THREE.Mesh(new THREE.BoxGeometry(22, 9, 20), new THREE.MeshPhysicalMaterial({ color: 0x0a0e14, metalness: 0.4, roughness: 0.1, envMap: envTex })); cab.position.set(-2, 18, 0); gp.add(cab);
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(22, 9, 20), new THREE.MeshPhysicalMaterial({ color: 0x0a0e14, metalness: 0.4, roughness: 0.1, envMap: reflectTex })); cab.position.set(-2, 18, 0); gp.add(cab);
   const lightMat = new THREE.MeshBasicMaterial({ color: 0xfff2c0 });
   const h1 = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 5), lightMat); h1.position.set(22, 8, -8); gp.add(h1);
   const h2 = h1.clone(); h2.position.z = 8; gp.add(h2);
@@ -394,12 +402,12 @@ function carMesh(color) {
 }
 function jetMesh() {
   const gp = new THREE.Group();
-  const white = new THREE.MeshPhysicalMaterial({ color: 0xe8e2d0, metalness: 0.85, roughness: 0.3, envMap: envTex, clearcoat: 0.8 });
+  const white = new THREE.MeshPhysicalMaterial({ color: 0xe8e2d0, metalness: 0.85, roughness: 0.3, envMap: reflectTex, clearcoat: 0.8 });
   const fus = new THREE.Mesh(new THREE.BoxGeometry(70, 12, 14), white); fus.position.y = 12; gp.add(fus);
   const nose = new THREE.Mesh(new THREE.ConeGeometry(7, 18, 8), white); nose.rotation.z = -Math.PI / 2; nose.position.set(44, 12, 0); gp.add(nose);
   const wing = new THREE.Mesh(new THREE.BoxGeometry(16, 2, 90), white); wing.position.set(-4, 10, 0); gp.add(wing);
   const tail = new THREE.Mesh(new THREE.BoxGeometry(12, 22, 2), white); tail.position.set(-32, 22, 0); gp.add(tail);
-  const stripe = new THREE.Mesh(new THREE.BoxGeometry(24, 13, 15), new THREE.MeshPhysicalMaterial({ color: 0xc9a24f, metalness: 1, roughness: 0.2, envMap: envTex })); stripe.position.set(8, 12, 0); gp.add(stripe);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(24, 13, 15), new THREE.MeshPhysicalMaterial({ color: 0xc9a24f, metalness: 1, roughness: 0.2, envMap: reflectTex })); stripe.position.set(8, 12, 0); gp.add(stripe);
   return shadowize(gp);
 }
 
@@ -442,7 +450,7 @@ function boom(x, z, r) {
 }
 
 // ---------- game state ----------
-let heat = 0, lastCrime = -999, tSec = 0, running = false, money = 0, ammoSmg = 0;
+let heat = 0, lastCrime = -999, tSec = 0, running = false, money = 0, ammoSmg = 0, frameN = 0;
 let eLatch = false, qLatch = false, lastShot = 0, neon = false, msgT = 0;
 function stars() { return Math.min(5, Math.floor(heat / 5)); }
 function crime(n) { heat = Math.min(29, heat + n); lastCrime = tSec; }
@@ -505,6 +513,18 @@ function shoot(now) {
 // ---------- update ----------
 function update(dt, now) {
   tSec += dt;
+  frameN++;
+  // refresh the reflection probe near the player a few times a second (6 faces is
+  // costly, so stagger it); hide the hero so it doesn't reflect itself
+  if (frameN % 12 === 0) {
+    cubeCam.position.set(player.x, player.veh ? 24 : 18, player.z);
+    const pv = playerMesh.visible, vv = player.veh ? player.veh.mesh.visible : false;
+    playerMesh.visible = false; if (player.veh) player.veh.mesh.visible = false;
+    ground.visible = false; // the ground samples this cube — hide it to avoid a feedback loop
+    cubeCam.update(renderer, scene);
+    ground.visible = true;
+    playerMesh.visible = pv; if (player.veh) player.veh.mesh.visible = vv;
+  }
   if (msgT > 0) { msgT -= dt; if (msgT <= 0) msgEl.classList.add('hidden'); }
   if (tSec - lastCrime > 8) heat = Math.max(0, heat - dt * 1.2);
 
@@ -526,7 +546,9 @@ function update(dt, now) {
   if (keys['r'] && !rLatch) {
     rLatch = true; raining = !raining;
     rain.visible = raining;
-    groundMat.roughness = raining ? 0.18 : 0.55; // rain-slick streets reflect more
+    groundMat.roughness = raining ? 0.08 : 0.55;        // rain-slick streets become near-mirror
+    groundMat.envMapIntensity = raining ? 2.2 : 1.0;    // and reflect the city hard
+    groundMat.metalness = raining ? 0.6 : 0.35;
     groundMat.needsUpdate = true;
     say(raining ? 'STORM ROLLING IN OVER LIBERTY BAY' : 'SKIES CLEARING');
   }
