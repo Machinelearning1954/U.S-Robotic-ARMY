@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Robotic Army — Campaign</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0e14; color: #cfd8e3; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  h1 { margin: 12px 0 4px; font-size: 22px; letter-spacing: 3px; color: #7fd4ff; text-transform: uppercase; }
+  #wrap { position: relative; }
+  canvas { background: #11161f; border: 2px solid #2b3a4e; display: block; cursor: crosshair; }
+  #hud { width: 960px; display: flex; justify-content: space-between; padding: 6px 4px; font-size: 13px; }
+  .bar { color: #9fb4cc; }
+  .accent { color: #7fd4ff; }
+  #overlay {
+    position: absolute; inset: 0; background: rgba(6, 10, 16, 0.88);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 40px;
+  }
+  #overlay h2 { color: #7fd4ff; letter-spacing: 2px; margin-bottom: 14px; font-size: 26px; }
+  #overlay p { max-width: 640px; line-height: 1.6; margin-bottom: 10px; font-size: 15px; }
+  #overlay .objective { color: #ffd166; }
+  #overlay .hint { color: #6c7f95; font-size: 13px; }
+  #overlay button {
+    margin-top: 18px; padding: 10px 34px; background: #123047; color: #7fd4ff;
+    border: 1px solid #7fd4ff; font-family: inherit; font-size: 16px; letter-spacing: 2px; cursor: pointer;
+  }
+  #overlay button:hover { background: #1b4463; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<h1>U.S. Robotic Army</h1>
+<div id="hud">
+  <span class="bar">HP <span id="hp" class="accent">100</span></span>
+  <span class="bar">WEAPON <span id="weap" class="accent">MK-1 PISTOL</span> · AMMO <span id="ammo" class="accent">&infin;</span></span>
+  <span class="bar">MISSION <span id="mnum" class="accent">1/10</span> · <span id="mobj" class="accent"></span></span>
+</div>
+<div id="wrap">
+  <canvas id="cv" width="960" height="600"></canvas>
+  <div id="overlay">
+    <h2 id="ovTitle">U.S. ROBOTIC ARMY</h2>
+    <p id="ovBody">A rogue AI has seized the nation's automated defense grid. You are unit <b>ARES-7</b>, the last loyal combat android. Fight through 10 missions to take it back.</p>
+    <p class="objective" id="ovObjective"></p>
+    <p class="hint">WASD / arrows — move · mouse — aim · click / hold — fire · 1-5 — switch weapon · weapons &amp; ammo drop from enemies</p>
+    <button id="ovBtn">DEPLOY</button>
+  </div>
+</div>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), cx = cv.getContext('2d');
+const W = cv.width, H = cv.height;
+const hudHp = document.getElementById('hp'), hudWeap = document.getElementById('weap'),
+      hudAmmo = document.getElementById('ammo'), hudMnum = document.getElementById('mnum'),
+      hudMobj = document.getElementById('mobj');
+const overlay = document.getElementById('overlay'), ovTitle = document.getElementById('ovTitle'),
+      ovBody = document.getElementById('ovBody'), ovObjective = document.getElementById('ovObjective'),
+      ovBtn = document.getElementById('ovBtn');
+
+// ---------- input ----------
+const keys = {};
+let mouse = { x: W / 2, y: H / 2, down: false };
+addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if ('12345'.includes(e.key)) selectWeapon(+e.key - 1); });
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+cv.addEventListener('mousemove', e => { const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+cv.addEventListener('mousedown', () => mouse.down = true);
+addEventListener('mouseup', () => mouse.down = false);
+
+// ---------- weapons (inventory system) ----------
+const WEAPONS = [
+  { name: 'MK-1 PISTOL',    dmg: 12, rate: 320, speed: 9,  spread: 0.05, pellets: 1, ammo: Infinity, color: '#ffd166' },
+  { name: 'RA-15 RIFLE',    dmg: 10, rate: 110, speed: 11, spread: 0.09, pellets: 1, ammo: 0, color: '#ff9f43' },
+  { name: 'SCATTER CANNON', dmg: 9,  rate: 620, speed: 8,  spread: 0.45, pellets: 6, ammo: 0, color: '#ff6b6b' },
+  { name: 'PLASMA LASER',   dmg: 22, rate: 240, speed: 14, spread: 0.02, pellets: 1, ammo: 0, color: '#7fd4ff' },
+  { name: 'RAILGUN',        dmg: 60, rate: 900, speed: 20, spread: 0,    pellets: 1, ammo: 0, color: '#c98fff' },
+];
+let unlocked = [true, false, false, false, false];
+let curWeapon = 0, lastShot = 0;
+function selectWeapon(i) { if (unlocked[i]) curWeapon = i; }
+
+// ---------- world state ----------
+let player, bullets, enemyBullets, enemies, pickups, walls, effects;
+let mission = 0, state = 'menu'; // menu | briefing | play | debrief | won | dead
+let mTimer = 0, mCount = 0, escort = null, lastTime = 0;
+
+function rnd(a, b) { return a + Math.random() * (b - a); }
+function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+function makeWalls(n) {
+  const w = [];
+  for (let i = 0; i < n; i++) {
+    w.push({ x: rnd(80, W - 200), y: rnd(80, H - 160), w: rnd(50, 140), h: rnd(30, 90) });
+  }
+  return w;
+}
+function inWall(p, r) {
+  return walls.some(w => p.x + r > w.x && p.x - r < w.x + w.w && p.y + r > w.y && p.y - r < w.y + w.h);
+}
+
+// ---------- enemies ----------
+function spawnEnemy(type, x, y) {
+  const base = { x, y, vx: 0, vy: 0, cooldown: rnd(400, 1400), flash: 0 };
+  if (type === 'drone')  Object.assign(base, { type, r: 13, hp: 30,  maxHp: 30,  speed: 1.7, dmg: 8,  color: '#e05c5c' });
+  if (type === 'heavy')  Object.assign(base, { type, r: 18, hp: 90,  maxHp: 90,  speed: 0.9, dmg: 14, color: '#c93b3b' });
+  if (type === 'turret') Object.assign(base, { type, r: 16, hp: 70,  maxHp: 70,  speed: 0,   dmg: 10, color: '#a05cd0' });
+  if (type === 'boss')   Object.assign(base, { type, r: 42, hp: 900, maxHp: 900, speed: 1.1, dmg: 20, color: '#ff3b6b' });
+  enemies.push(base);
+  return base;
+}
+function spawnWave(n, heavies) {
+  for (let i = 0; i < n; i++) {
+    const edge = Math.floor(rnd(0, 4));
+    const x = edge === 0 ? 20 : edge === 1 ? W - 20 : rnd(40, W - 40);
+    const y = edge === 2 ? 20 : edge === 3 ? H - 20 : rnd(40, H - 40);
+    spawnEnemy(i < (heavies || 0) ? 'heavy' : 'drone', x, y);
+  }
+}
+
+// ---------- missions ----------
+const MISSIONS = [
+  { title: 'M1 · BOOT CAMP', brief: 'Systems check, ARES-7. Move to the extraction beacon on the far side of the training yard.',
+    objective: 'Reach the beacon', setup() { walls = makeWalls(6); pickups.push({ kind: 'beacon', x: W - 60, y: 60, r: 18 }); },
+    done() { return dist(player, { x: W - 60, y: 60 }) < 30; }, status() { return 'REACH THE BEACON'; } },
+
+  { title: 'M2 · FIRST CONTACT', brief: 'Rogue recon drones breached the yard. Destroy all 5. Enemies drop weapons and ammo — grab the RA-15 Rifle.',
+    objective: 'Destroy 5 drones', setup() { walls = makeWalls(6); spawnWave(5); dropAt(rnd(200, 700), rnd(150, 450), 'weapon', 1); },
+    done() { return enemies.length === 0; }, status() { return 'HOSTILES: ' + enemies.length; } },
+
+  { title: 'M3 · SUPPLY RUN', brief: 'Loyalist caches are scattered across the sector. Collect all 4 supply crates before the drones do.',
+    objective: 'Collect 4 crates', setup() {
+      walls = makeWalls(8); mCount = 0;
+      for (let i = 0; i < 4; i++) pickups.push({ kind: 'crate', x: rnd(60, W - 60), y: rnd(60, H - 60), r: 12 });
+      spawnWave(4);
+    }, done() { return mCount >= 4; }, status() { return 'CRATES: ' + mCount + '/4'; } },
+
+  { title: 'M4 · PERIMETER DEFENSE', brief: 'Hold the line. Survive the assault for 45 seconds. Reinforcement waves will keep coming — stay mobile.',
+    objective: 'Survive 45s', setup() { walls = makeWalls(5); mTimer = 45; spawnWave(4); },
+    tick(dt) { mTimer -= dt; if (enemies.length < 4 && mTimer > 3) spawnWave(3, 1); },
+    done() { return mTimer <= 0; }, status() { return 'HOLD: ' + Math.max(0, mTimer).toFixed(0) + 's'; } },
+
+  { title: 'M5 · INTEL HEIST', brief: 'An enemy data chip holds the AI\'s grid access codes. Steal it and return to the extraction zone (green).',
+    objective: 'Steal the chip, extract', setup() {
+      walls = makeWalls(8); mCount = 0;
+      pickups.push({ kind: 'chip', x: W - 70, y: H - 70, r: 12 });
+      spawnEnemy('turret', W - 140, H - 140); spawnWave(4);
+    }, done() { return mCount >= 1 && dist(player, { x: 50, y: 50 }) < 40; },
+    status() { return mCount ? 'EXTRACT AT GREEN ZONE' : 'GRAB THE CHIP'; },
+    zones: [{ x: 50, y: 50, r: 40, color: '#3ddc84' }] },
+
+  { title: 'M6 · CONVOY ESCORT', brief: 'A supply hauler is crossing the sector. Keep it alive until it reaches the east gate. It cannot shoot back.',
+    objective: 'Escort the hauler', setup() {
+      walls = []; spawnWave(5, 1);
+      escort = { x: 40, y: H / 2, r: 16, hp: 120, maxHp: 120, speed: 0.6 };
+    }, tick(dt) {
+      if (!escort) return;
+      escort.x += escort.speed;
+      if (enemies.length < 5 && Math.random() < 0.008) spawnWave(2);
+    }, done() { return escort && escort.x > W - 40; },
+    fail() { return escort && escort.hp <= 0; },
+    status() { return escort ? 'HAULER HP: ' + Math.max(0, escort.hp | 0) : ''; } },
+
+  { title: 'M7 · SABOTAGE', brief: 'Enemy auto-turrets control the sector grid. Destroy all 3 turret emplacements.',
+    objective: 'Destroy 3 turrets', setup() {
+      walls = makeWalls(7);
+      spawnEnemy('turret', W / 2, 90); spawnEnemy('turret', 140, H - 110); spawnEnemy('turret', W - 140, H - 110);
+      spawnWave(3);
+    }, done() { return !enemies.some(e => e.type === 'turret'); },
+    status() { return 'TURRETS: ' + enemies.filter(e => e.type === 'turret').length + '/3'; } },
+
+  { title: 'M8 · BLACKOUT', brief: 'Destroy the shield generator (purple core), then survive the 20-second security lockdown that follows.',
+    objective: 'Destroy generator, survive lockdown', setup() {
+      walls = makeWalls(6); mCount = 0; mTimer = 20;
+      const g = spawnEnemy('turret', W / 2, H / 2); g.hp = g.maxHp = 200; g.generator = true; g.r = 22;
+    }, tick(dt) {
+      if (mCount) { mTimer -= dt; if (enemies.length < 5 && mTimer > 2) spawnWave(3, 1); }
+    }, done() { return mCount >= 1 && mTimer <= 0; },
+    status() { return mCount ? 'LOCKDOWN: ' + Math.max(0, mTimer).toFixed(0) + 's' : 'DESTROY THE GENERATOR'; } },
+
+  { title: 'M9 · RESCUE OP', brief: 'Dr. Reyes — the engineer who can rewrite the AI core — is held at the southeast compound. Reach her, then get her to the green zone alive.',
+    objective: 'Rescue Dr. Reyes', setup() {
+      walls = makeWalls(9); mCount = 0;
+      escort = { x: W - 70, y: H - 70, r: 12, hp: 80, maxHp: 80, speed: 0, follow: true, waiting: true };
+      spawnEnemy('turret', W - 160, H - 160); spawnWave(5, 2);
+    }, tick() {
+      if (!escort) return;
+      if (escort.waiting && dist(player, escort) < 34) escort.waiting = false;
+      if (!escort.waiting) {
+        const d = dist(player, escort);
+        if (d > 40) { escort.x += (player.x - escort.x) / d * 2.2; escort.y += (player.y - escort.y) / d * 2.2; }
+      }
+    }, done() { return escort && !escort.waiting && dist(escort, { x: 50, y: 50 }) < 44; },
+    fail() { return escort && escort.hp <= 0; },
+    status() { return !escort ? '' : escort.waiting ? 'REACH DR. REYES' : 'ESCORT TO GREEN ZONE'; },
+    zones: [{ x: 50, y: 50, r: 44, color: '#3ddc84' }] },
+
+  { title: 'M10 · FINAL ASSAULT', brief: 'This is it. The rogue AI has loaded itself into a TITAN-class siege mech. Bring it down and end this war.',
+    objective: 'Destroy the TITAN', setup() {
+      walls = makeWalls(4);
+      spawnEnemy('boss', W / 2, 120);
+      dropAt(W / 2 - 120, H - 80, 'weapon', 4); dropAt(W / 2 + 120, H - 80, 'health', 0);
+    }, tick() { if (enemies.length === 1 && enemies[0].hp < 450 && Math.random() < 0.004) spawnWave(2); },
+    done() { return !enemies.some(e => e.type === 'boss'); },
+    status() { const b = enemies.find(e => e.type === 'boss'); return b ? 'TITAN HP: ' + b.hp : ''; } },
+];
+
+function dropAt(x, y, kind, idx) { pickups.push({ kind, x, y, r: 11, w: idx }); }
+
+// ---------- mission flow ----------
+function startMission(i) {
+  mission = i;
+  player = { x: 60, y: H - 60, r: 14, hp: Math.max(player ? player.hp : 100, 60), maxHp: 100 };
+  bullets = []; enemyBullets = []; enemies = []; pickups = []; effects = []; escort = null;
+  mTimer = 0; mCount = 0;
+  MISSIONS[i].setup();
+  hudMnum.textContent = (i + 1) + '/10';
+  state = 'play';
+  overlay.classList.add('hidden');
+}
+function showBriefing(i) {
+  state = 'briefing';
+  ovTitle.textContent = MISSIONS[i].title;
+  ovBody.innerHTML = MISSIONS[i].brief;
+  ovObjective.textContent = 'OBJECTIVE: ' + MISSIONS[i].objective;
+  ovBtn.textContent = 'DEPLOY';
+  overlay.classList.remove('hidden');
+}
+ovBtn.onclick = () => {
+  if (state === 'menu' || state === 'debrief') showBriefing(mission);
+  else if (state === 'briefing') startMission(mission);
+  else if (state === 'dead') showBriefing(mission);
+  else if (state === 'won') { mission = 0; unlocked = [true, false, false, false, false]; curWeapon = 0; WEAPONS.forEach((w, i) => { if (i) w.ammo = 0; }); player = null; showBriefing(0); }
+};
+
+function missionComplete() {
+  mission++;
+  if (mission >= MISSIONS.length) {
+    state = 'won';
+    ovTitle.textContent = 'VICTORY';
+    ovBody.textContent = 'The TITAN falls. Dr. Reyes rewrites the core, and the defense grid returns to human hands. The U.S. Robotic Army stands down — until it is needed again. Campaign complete, ARES-7.';
+    ovObjective.textContent = 'ALL 10 MISSIONS COMPLETE';
+    ovBtn.textContent = 'PLAY AGAIN';
+  } else {
+    state = 'debrief';
+    ovTitle.textContent = 'MISSION COMPLETE';
+    ovBody.textContent = MISSIONS[mission - 1].title + ' cleared. Systems nominal. Next deployment ready.';
+    ovObjective.textContent = 'NEXT: ' + MISSIONS[mission].title;
+    ovBtn.textContent = 'CONTINUE';
+  }
+  overlay.classList.remove('hidden');
+}
+function missionFailed(msg) {
+  state = 'dead';
+  ovTitle.textContent = 'MISSION FAILED';
+  ovBody.textContent = msg || 'ARES-7 unit destroyed. Rebooting from last checkpoint.';
+  ovObjective.textContent = 'RETRY: ' + MISSIONS[mission].title;
+  ovBtn.textContent = 'REDEPLOY';
+  overlay.classList.remove('hidden');
+}
+
+// ---------- combat ----------
+function shoot(now) {
+  const w = WEAPONS[curWeapon];
+  if (now - lastShot < w.rate) return;
+  if (w.ammo !== Infinity && w.ammo <= 0) { curWeapon = 0; return; }
+  lastShot = now;
+  if (w.ammo !== Infinity) w.ammo--;
+  const base = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+  for (let p = 0; p < w.pellets; p++) {
+    const a = base + rnd(-w.spread, w.spread);
+    bullets.push({ x: player.x, y: player.y, vx: Math.cos(a) * w.speed, vy: Math.sin(a) * w.speed, dmg: w.dmg, color: w.color, life: 90 });
+  }
+}
+function enemyShoot(e) {
+  const t = (escort && !escort.follow && Math.random() < 0.5) ? escort : player;
+  const a = Math.atan2(t.y - e.y, t.x - e.x) + rnd(-0.12, 0.12);
+  enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * 5, vy: Math.sin(a) * 5, dmg: e.dmg, life: 140 });
+}
+function killEnemy(i) {
+  const e = enemies[i];
+  effects.push({ x: e.x, y: e.y, r: e.r, t: 18 });
+  // loot drops
+  const roll = Math.random();
+  if (e.generator) mCount++;
+  else if (e.type === 'boss') {}
+  else if (roll < 0.14) dropAt(e.x, e.y, 'health', 0);
+  else if (roll < 0.30) dropAt(e.x, e.y, 'ammo', 0);
+  else if (roll < 0.38) {
+    const locked = [1, 2, 3, 4].filter(w => !unlocked[w] && w <= Math.min(4, mission + 1));
+    if (locked.length) dropAt(e.x, e.y, 'weapon', locked[0]);
+    else dropAt(e.x, e.y, 'ammo', 0);
+  }
+  enemies.splice(i, 1);
+}
+
+// ---------- update ----------
+function update(dt, now) {
+  const M = MISSIONS[mission];
+
+  // player movement
+  const sp = 3.1;
+  let dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
+  let dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
+  if (dx || dy) { const l = Math.hypot(dx, dy); dx /= l; dy /= l; }
+  const nx = { x: player.x + dx * sp, y: player.y }, ny = { x: player.x, y: player.y + dy * sp };
+  if (!inWall(nx, player.r)) player.x = Math.max(player.r, Math.min(W - player.r, nx.x));
+  if (!inWall(ny, player.r)) player.y = Math.max(player.r, Math.min(H - player.r, ny.y));
+
+  if (mouse.down) shoot(now);
+
+  // bullets
+  for (const arr of [bullets, enemyBullets]) {
+    for (let i = arr.length - 1; i >= 0; i--) {
+      const b = arr[i];
+      b.x += b.vx; b.y += b.vy; b.life--;
+      if (b.life <= 0 || b.x < 0 || b.x > W || b.y < 0 || b.y > H || inWall(b, 2)) arr.splice(i, 1);
+    }
+  }
+  // player bullets vs enemies
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      const e = enemies[j];
+      if (Math.hypot(b.x - e.x, b.y - e.y) < e.r + 3) {
+        e.hp -= b.dmg; e.flash = 4; bullets.splice(i, 1);
+        if (e.hp <= 0) killEnemy(j);
+        break;
+      }
+    }
+  }
+  // enemy bullets vs player / escort
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    const b = enemyBullets[i];
+    if (Math.hypot(b.x - player.x, b.y - player.y) < player.r + 3) {
+      player.hp -= b.dmg; enemyBullets.splice(i, 1); continue;
+    }
+    if (escort && Math.hypot(b.x - escort.x, b.y - escort.y) < escort.r + 3) {
+      escort.hp -= b.dmg; enemyBullets.splice(i, 1);
+    }
+  }
+  // enemies
+  for (const e of enemies) {
+    if (e.flash) e.flash--;
+    if (e.speed) {
+      const t = (escort && !escort.follow && e.type !== 'boss' && Math.random() < 0.4) ? escort : player;
+      const d = dist(e, t);
+      if (d > 60) {
+        const mx = { x: e.x + (t.x - e.x) / d * e.speed, y: e.y };
+        const my = { x: e.x, y: e.y + (t.y - e.y) / d * e.speed };
+        if (!inWall(mx, e.r)) e.x = mx.x;
+        if (!inWall(my, e.r)) e.y = my.y;
+      }
+      if (d < e.r + player.r + 2 && t === player) player.hp -= 0.4;
+    }
+    e.cooldown -= dt * 1000;
+    if (e.cooldown <= 0 && dist(e, player) < (e.type === 'turret' ? 320 : 260)) {
+      enemyShoot(e);
+      if (e.type === 'boss') { enemyShoot(e); enemyShoot(e); }
+      e.cooldown = e.type === 'boss' ? 700 : e.type === 'turret' ? 1100 : rnd(900, 1700);
+    }
+  }
+  // pickups
+  for (let i = pickups.length - 1; i >= 0; i--) {
+    const p = pickups[i];
+    if (p.kind === 'beacon') continue;
+    if (dist(player, p) < player.r + p.r) {
+      if (p.kind === 'crate' || p.kind === 'chip') mCount++;
+      if (p.kind === 'health') player.hp = Math.min(player.maxHp, player.hp + 35);
+      if (p.kind === 'ammo') WEAPONS.forEach((w, wi) => { if (wi && unlocked[wi]) w.ammo += wi === 4 ? 6 : 25; });
+      if (p.kind === 'weapon') { unlocked[p.w] = true; WEAPONS[p.w].ammo += p.w === 4 ? 10 : 40; curWeapon = p.w; }
+      pickups.splice(i, 1);
+    }
+  }
+  for (let i = effects.length - 1; i >= 0; i--) if (--effects[i].t <= 0) effects.splice(i, 1);
+
+  if (M.tick) M.tick(dt);
+  if (player.hp <= 0) return missionFailed();
+  if (M.fail && M.fail()) return missionFailed(mission === 5 ? 'The hauler was destroyed.' : 'Dr. Reyes was killed.');
+  if (M.done()) return missionComplete();
+
+  hudHp.textContent = Math.max(0, player.hp | 0);
+  hudWeap.textContent = WEAPONS[curWeapon].name;
+  hudAmmo.textContent = WEAPONS[curWeapon].ammo === Infinity ? '∞' : WEAPONS[curWeapon].ammo;
+  hudMobj.textContent = M.status();
+}
+
+// ---------- render ----------
+function draw() {
+  cx.fillStyle = '#11161f'; cx.fillRect(0, 0, W, H);
+  // grid
+  cx.strokeStyle = '#161d29'; cx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, H); cx.stroke(); }
+  for (let y = 0; y < H; y += 40) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); }
+  // zones
+  const M = MISSIONS[mission];
+  if (M.zones) for (const z of M.zones) {
+    cx.beginPath(); cx.arc(z.x, z.y, z.r, 0, 7);
+    cx.fillStyle = z.color + '22'; cx.fill();
+    cx.strokeStyle = z.color; cx.stroke();
+  }
+  // walls
+  for (const w of walls) {
+    cx.fillStyle = '#232f40'; cx.fillRect(w.x, w.y, w.w, w.h);
+    cx.strokeStyle = '#31435c'; cx.strokeRect(w.x, w.y, w.w, w.h);
+  }
+  // pickups
+  for (const p of pickups) {
+    cx.save(); cx.translate(p.x, p.y);
+    if (p.kind === 'beacon') {
+      cx.strokeStyle = '#3ddc84'; cx.beginPath(); cx.arc(0, 0, p.r + Math.sin(Date.now() / 200) * 3, 0, 7); cx.stroke();
+      cx.fillStyle = '#3ddc84'; cx.fillRect(-3, -3, 6, 6);
+    } else if (p.kind === 'crate')  { cx.fillStyle = '#b58840'; cx.fillRect(-9, -9, 18, 18); cx.strokeStyle = '#e0b060'; cx.strokeRect(-9, -9, 18, 18); }
+    else if (p.kind === 'chip')   { cx.fillStyle = '#3ddc84'; cx.fillRect(-8, -6, 16, 12); cx.fillStyle = '#0a0e14'; cx.fillRect(-4, -2, 8, 4); }
+    else if (p.kind === 'health') { cx.fillStyle = '#ff6b6b'; cx.fillRect(-8, -3, 16, 6); cx.fillRect(-3, -8, 6, 16); }
+    else if (p.kind === 'ammo')   { cx.fillStyle = '#ffd166'; cx.fillRect(-7, -5, 4, 10); cx.fillRect(-2, -5, 4, 10); cx.fillRect(3, -5, 4, 10); }
+    else if (p.kind === 'weapon') { cx.fillStyle = WEAPONS[p.w].color; cx.fillRect(-10, -3, 20, 6); cx.fillRect(2, 3, 5, 6); }
+    cx.restore();
+  }
+  // escort
+  if (escort && escort.hp > 0) {
+    cx.fillStyle = escort.follow ? '#7dd87f' : '#8fb4ff';
+    cx.beginPath(); cx.arc(escort.x, escort.y, escort.r, 0, 7); cx.fill();
+    cx.fillStyle = '#0a0e14'; cx.fillRect(escort.x - 5, escort.y - 3, 10, 6);
+    cx.fillStyle = '#233'; cx.fillRect(escort.x - 16, escort.y - escort.r - 10, 32, 4);
+    cx.fillStyle = '#3ddc84'; cx.fillRect(escort.x - 16, escort.y - escort.r - 10, 32 * Math.max(0, escort.hp / escort.maxHp), 4);
+  }
+  // enemies
+  for (const e of enemies) {
+    cx.save(); cx.translate(e.x, e.y);
+    cx.fillStyle = e.flash ? '#ffffff' : e.color;
+    if (e.type === 'turret') {
+      cx.fillRect(-e.r, -e.r, e.r * 2, e.r * 2);
+      const a = Math.atan2(player.y - e.y, player.x - e.x);
+      cx.strokeStyle = e.generator ? '#c98fff' : '#ddd'; cx.lineWidth = 4;
+      cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(Math.cos(a) * e.r * 1.4, Math.sin(a) * e.r * 1.4); cx.stroke();
+    } else {
+      cx.beginPath(); cx.arc(0, 0, e.r, 0, 7); cx.fill();
+      const a = Math.atan2(player.y - e.y, player.x - e.x);
+      cx.fillStyle = '#0a0e14';
+      cx.beginPath(); cx.arc(Math.cos(a) * e.r * 0.5, Math.sin(a) * e.r * 0.5, e.r * 0.3, 0, 7); cx.fill();
+    }
+    if (e.hp < e.maxHp) {
+      cx.fillStyle = '#233'; cx.fillRect(-e.r, -e.r - 9, e.r * 2, 4);
+      cx.fillStyle = '#ff6b6b'; cx.fillRect(-e.r, -e.r - 9, e.r * 2 * (e.hp / e.maxHp), 4);
+    }
+    cx.restore();
+  }
+  // bullets
+  for (const b of bullets) { cx.fillStyle = b.color; cx.fillRect(b.x - 2, b.y - 2, 4, 4); }
+  for (const b of enemyBullets) { cx.fillStyle = '#ff5c5c'; cx.beginPath(); cx.arc(b.x, b.y, 3, 0, 7); cx.fill(); }
+  // effects
+  for (const f of effects) {
+    cx.strokeStyle = 'rgba(255,180,80,' + f.t / 18 + ')'; cx.lineWidth = 3;
+    cx.beginPath(); cx.arc(f.x, f.y, f.r + (18 - f.t) * 2, 0, 7); cx.stroke();
+  }
+  // player (robot)
+  if (player) {
+    cx.save(); cx.translate(player.x, player.y);
+    const a = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+    cx.fillStyle = '#7fd4ff'; cx.beginPath(); cx.arc(0, 0, player.r, 0, 7); cx.fill();
+    cx.fillStyle = '#123047'; cx.beginPath(); cx.arc(0, 0, player.r * 0.6, 0, 7); cx.fill();
+    cx.strokeStyle = WEAPONS[curWeapon].color; cx.lineWidth = 4;
+    cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(Math.cos(a) * player.r * 1.6, Math.sin(a) * player.r * 1.6); cx.stroke();
+    cx.restore();
+  }
+}
+
+// ---------- loop ----------
+function loop(t) {
+  const dt = Math.min(0.05, (t - lastTime) / 1000 || 0);
+  lastTime = t;
+  if (state === 'play') { update(dt, t); if (state === 'play') draw(); else draw(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
