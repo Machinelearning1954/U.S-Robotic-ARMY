@@ -267,3 +267,51 @@ Cool down with an easy walk along the waterline and shoulder/hip stretches.
 > scale to your own ability, and talk to a professional before starting any
 > program.
 
+
+---
+
+## 8. Island-Wide Wildlife & Environment AI (module expansion)
+
+*Extends this doc from the Port Antonio ecosystem to the whole island
+(`JAMAICA_ISLAND_WORLD.md`). Same rules: stylized, respectful, non-gory; wildlife
+never attacks unprovoked; the capture loop stays the humane canon above.*
+
+### 8.1 Regional profiles
+- **Coasts:** seabirds (gull/pelican/egret classes), crabs, reef fish schools, sea
+  turtles, rays; dolphins as rare boat-follow events.
+- **Forest & Blue Mountains:** doctor-bird-class hummingbirds (the island's icon,
+  photo-mission staple), parrots, tree lizards, fireflies at dusk, frogs after rain.
+- **Cockpit Country:** bats at cave mouths, owls, the deep-wild spawn tables.
+- **Rural roads:** goats (right of way, canon), mongoose dashes, egrets on cattle.
+- **Urban:** pigeons, feral cats with territory patrols, market-adjacent scavengers.
+
+### 8.2 Ambient behavior (prototype status)
+- **Seabirds are live (v0.24):** eight gulls circle coastal anchors, **scatter when
+  the player closes within ~18 m**, fly wider/faster while spooked, **half the
+  flock roosts in deep night**, and **all shelter during storms and the Static
+  Hour** — the empty sky is part of both moods.
+- Engine rung adds: flocking (boids), wire/roof perching, fish schools that part
+  around hulls, insect density by hour (fireflies at dusk, cicada beds by day).
+
+### 8.3 Ecosystem simulation rules
+Day/night (v0.22 clock) drives activity tables; weather overrides: rain → birds
+shelter + frogs surge; storm → coastal wildlife moves inland/deep (the hurricane
+evacuation is a visible world event and a storm-warning telegraph); fog → quiet
+skies, bold nocturnals. No predation gore — the food web is implied, never shown.
+
+### 8.4 Player interaction rules
+Feeding is the only direct verb outside the licensed capture loop (small trust/
+photo rewards); no hunting system; boats and vehicles scatter wildlife (and the
+BII ledgers wake-damage to nesting sites as an infraction — "Disturbing the
+Peace, Avian").
+
+### 8.5 Soundscape system (audio module hook)
+Layered ambient beds per biome × hour × weather: surf + gulls (coast day),
+crickets + frogs (rural night), market + pigeons (urban day), wind + silence
+(storm warning — the birds going quiet IS the alarm). Ships with the audio module.
+
+### 8.6 Mission/event hooks
+Wildlife rescue during storm events (Croc Wrangler generalizes), the illegal
+animal-trade bust chain (BII + black-market modules, no-glorification rule),
+photo-safari contracts (doctor-bird set), reef-health side quests feeding the
+Reef School.

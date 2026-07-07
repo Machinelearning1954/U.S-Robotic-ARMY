@@ -22,12 +22,14 @@
 | [`PAUDC_Psych_Thriller.md`](PAUDC_Psych_Thriller.md) | **"The Static Hour"** — the optional psychological-thriller arc extending the Numbers Station thread: the Presence you can't fight, the Paranoia meter, an unreliable-narrator set-piece and its twist, all non-lethal by rule. |
 | [`JAMAICA_ISLAND_WORLD.md`](JAMAICA_ISLAND_WORLD.md) | **The full-island expansion spec** — all of fictionalized Jamaica at real scale: eight regions, biomes from SRTM elevation reference, road graph, GTA-6-tier fidelity spec for the engine rung, lighting presets, mission hooks. PAUDC stays the narrative heart. |
 | [`JAMAICA_NPC_CULTURE.md`](JAMAICA_NPC_CULTURE.md) | Island-wide **NPC culture & behavior system** — archetypes by region, clock-driven routines, reputation-based reactions (Protector/Troublemaker/Outsider/Local), natural Patois dialogue sets, behavior trees per class, cultural event calendar. Respectful and fiction-safe by rule. |
+| [`PAUDC_Driving_Physics.md`](PAUDC_Driving_Physics.md) | The **driving-physics module** — keep-left canon, friction-circle grip model, surface table, weather modifiers, suspension personality per ride, non-lethal damage spec, AI integration, per-region road behavior. Surface grip is live in the prototype. |
+| [`PAUDC_Economy.md`](PAUDC_Economy.md) | The **economy module** — regional profiles, shop categories, vendor behavior, dynamic pricing formula, inventory/supply chains, money flow, black-market risk ladder, tourism economy. Alexandria/Silver Springs resolve to our island districts. |
 | [`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md) | The **police/wanted module** — the satirical BII five-star ladder (Noted → The Full Apology), courtesy-first non-lethal philosophy, pursuit AI mapping, consequences table. Tier ★★★ is playable in the prototype. |
 | [`DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) | How the project ships legally: no leaked Rockstar code ever, the prototype→engine ladder, Godot 4 next / UE5 later, FiveM gamemode option, legal study resources. |
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.23**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.24**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -131,6 +133,13 @@ while the chase is on, and ends one of two ways: linger slow near it for the
 **courtesy stop** (ledger cleared, −15 clout, "words were had") or hold real
 distance to escape (stars cool to ★★). See
 [`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md) for the full five-star ladder.
+v0.24 is the **driving-physics + wildlife pass**: a live surface-grip model —
+asphalt is the fast line (+8% top speed, sharper steering), sand drags and
+slides, **wet asphalt in a storm is the slickest thing on the island** — with
+the surface read out on the HUD; NPC traffic now **keeps left, Jamaica-style**;
+and the first ambient wildlife is airborne: eight seabirds circling the coast
+that scatter when you get close, half-roost in deep night, and empty the sky
+entirely during storms and the Static Hour.
 
 
 [`../game/index.html`](../game/index.html) — **the front door**: a styled hub

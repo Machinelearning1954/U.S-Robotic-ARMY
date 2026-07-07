@@ -39,7 +39,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.23</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.24</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4294,11 +4294,32 @@ function updateTraffic(dt){
     const dx=b.X-a.X,dz=b.Z-a.Z,len=Math.hypot(dx,dz)||1;
     c.f+=c.spd*dt/len;
     if(c.f>=1){c.f=0;c.seg=(c.seg+1)%ring.length;continue;}
-    const x=a.X+dx*c.f,z=a.Z+dz*c.f;
+    const x=a.X+dx*c.f+dz/len*1.8,z=a.Z+dz*c.f-dx/len*1.8; // keep left, Jamaica-style
     c.g.position.set(x,Math.max(height(x,z),0.15)+0.05,z);
     c.g.rotation.y=Math.atan2(-dz,dx);
   }
 }
+// ---------------- seabirds: ambient wildlife AI (day/night + storm aware) ----------------
+const birds=[];
+{const bm=new THREE.MeshBasicMaterial({color:0xf2f6f8});
+ for(let i=0;i<8;i++){const g=new THREE.Group();
+   const w1=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.07,0.28),bm);w1.rotation.z=0.35;w1.position.x=-0.6;g.add(w1);
+   const w2=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.07,0.28),bm);w2.rotation.z=-0.35;w2.position.x=0.6;g.add(w2);
+   const anch=ring[(i*ring.length/8)|0];
+   g.position.set(anch.X,20,anch.Z);scene.add(g);
+   birds.push({g,ax:anch.X,az:anch.Z,r:14+Math.random()*10,h:16+Math.random()*10,ph:Math.random()*6.28,sp:0.4+Math.random()*0.3,fl:0});}}
+function updateBirds(dt){
+  const shelter=rain||stat; // storms and the Static Hour empty the sky
+  for(let i=0;i<birds.length;i++){const b=birds[i];
+    b.g.visible=!shelter&&!(DARK>0.9&&i%2===0); // deep night: half the flock roosts
+    if(!b.g.visible)continue;
+    const pd=Math.hypot(P.x-b.g.position.x,P.z-b.g.position.z);
+    if(pd<18)b.fl=3; // scatter off the player
+    b.fl=Math.max(0,b.fl-dt);
+    b.ph+=b.sp*dt*(b.fl>0?2.4:1);
+    const r=b.r+(b.fl>0?14:0),h=b.h+(b.fl>0?9:0);
+    b.g.position.set(b.ax+Math.cos(b.ph)*r,h,b.az+Math.sin(b.ph)*r);
+    b.g.rotation.y=-b.ph;}}
 // ---------------- BII pursuit: the Courtesy Interceptor (active at 3+ stars) ----------------
 const patrol=new THREE.Group();
 {const bd=new THREE.Mesh(new THREE.BoxGeometry(4.2,1.15,2.1),new THREE.MeshLambertMaterial({color:0xe8eef2}));bd.position.y=1.0;patrol.add(bd);
@@ -4350,7 +4371,7 @@ function glowSprite(x,y,z,scale,color){
 for(const b of beacons){const h=Math.max(height(b.X,b.Z),0.5);glowSprite(b.X,h+8,b.Z,26);}
 glowSprite(mx(240),Math.max(height(mx(240),mz(272)),0)+9.5,mz(272),30,0xff5fd2); // Pelican Key sign halo
 // the ring ROAD itself — asphalt ribbon with dashed centerline, chunked to hug terrain
-let roadChunks=0;
+let roadChunks=0;const ROADPTS=[];
 {const rm=new THREE.MeshLambertMaterial({color:0xffffff,map:roadTex});
  for(let i=0;i<ring.length;i++){
    const a=ring[i],b=ring[(i+1)%ring.length];
@@ -4365,7 +4386,7 @@ let roadChunks=0;
      seg.material.map.repeat.set((len/CH)/9,1);
      seg.position.set(mxx,Math.max((h0+h1)/2,0.3)+0.09,mzz);
      seg.rotation.y=-ang; // chunks are short enough to sit flat on the slope
-     seg.receiveShadow=true;scene.add(seg);roadChunks++;
+     seg.receiveShadow=true;scene.add(seg);roadChunks++;ROADPTS.push({x:mxx,z:mzz});
    }}}
 // lamp posts along the district ring road — warm pools of light at night
 const LAMPL=TIER===2?5:0; // real lights only on ULTRA; heads glow on every tier
@@ -4759,7 +4780,7 @@ addEventListener('keydown',e=>{if(e.key.toLowerCase()==='c')setGrade(!grade);});
 {const fx=document.getElementById('fx');
  if(fx)fx.addEventListener('pointerdown',e=>{e.preventDefault();setGrade(!grade);});}
 // ---------------- loop ----------------
-let perf=0,last=0,slow=0,prevWet=false,donutT=0,parkT=0,regT=0,invT=0,invited=false,watch=0,watchT=0,fishT=0,fish=0,instructor=false,setT=0,sets=0,coach=false,phase=0,carryCroc=null,relocated=0,hasPot=false,potT=0,wellFed=false,irie=false,irieT=0,rawClips=0,rrT=0;
+let perf=0,last=0,slow=0,prevWet=false,donutT=0,parkT=0,regT=0,invT=0,invited=false,watch=0,watchT=0,fishT=0,fish=0,instructor=false,setT=0,sets=0,coach=false,phase=0,carryCroc=null,relocated=0,hasPot=false,potT=0,wellFed=false,irie=false,irieT=0,rawClips=0,rrT=0,surf='GRASS',grip=1;
 const CHROME={X:mx(520),Z:mz(1020)}; // the Chromelab at Silver Springs — AI re-render queue
 const PIER={X:mx(985),Z:mz(742)};
 function infraction(name,n){watch=Math.min(5,watch+n);watchT=perf+60000;addClout(3);
@@ -4783,10 +4804,20 @@ function tick(t){
   prevWet=wet;
   const thr=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?0.6:0);
   const str=(keys.a||keys.arrowleft?1:0)-(keys.d||keys.arrowright?1:0);
-  const V=VEH[veh],ACC=V.acc,VMAX=V.vmax,WACC=V.wacc,WMAX=V.wmax;
+  const V=VEH[veh],ACC=V.acc,WACC=V.wacc,WMAX=V.wmax;
+  // surface model: what's under the tires changes grip and speed
+  surf='GRASS';grip=0.95;
+  if(wet){surf='WATER';grip=1;}
+  else{let rd=1e9;for(const rc of ROADPTS){const d=Math.hypot(P.x-rc.x,P.z-rc.z);if(d<rd)rd=d;}
+    const gy2=height(P.x,P.z);
+    if(rd<4.8){surf='ASPHALT';grip=1.15;}
+    else if(gy2<3.0){surf='SAND';grip=0.8;}
+    if(rain)grip*=(surf==='ASPHALT'?0.78:0.9); // wet asphalt is the slickest
+  }
+  const VMAX=V.vmax*(veh===WALKER?1:(surf==='ASPHALT'?1.08:surf==='SAND'?0.85:1));
   P.v+=thr*(wet?WACC:ACC)*dt;P.v*=wet?0.965:0.975;P.v=Math.max(-9,Math.min((wet?WMAX:VMAX)*(wellFed?1.12:1),P.v));
   if(veh===WALKER)P.a+=str*2.8*dt*(P.v<-0.2?-1:1); // on foot you can turn in place
-  else if(Math.abs(P.v)>0.6)P.a+=str*1.9*dt*Math.sign(P.v);
+  else if(Math.abs(P.v)>0.6)P.a+=str*1.9*grip*dt*Math.sign(P.v);
   P.x+=Math.cos(P.a)*P.v*dt;P.z-=Math.sin(P.a)*P.v*dt;
   P.x=Math.max(-W2*SC/2+6,Math.min(W2*SC/2-6,P.x));P.z=Math.max(-H2*SC/2+6,Math.min(H2*SC/2-6,P.z));
   if(!wet&&Math.abs(P.v)>10&&str!==0)donutT+=dt*Math.abs(P.v)*0.06;else donutT=Math.max(0,donutT-dt*3);
@@ -4834,7 +4865,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -4941,7 +4972,7 @@ function tick(t){
     $('dist').textContent=(nd2|0)+' m';}
   else{arrow.style.display='none';$('dist').textContent='';}
   const clk=String(Math.floor(tod*24)).padStart(2,'0')+':'+String(Math.floor(tod*24%1*60)).padStart(2,'0');
-  $('tele').textContent=clk+'  ·  '+(veh===WALKER?(wet?'SWIMMING  ':'ON FOOT  '):(wet?'HULL MODE  ':'ENGINE OK  '))+Math.abs(P.v*3.6|0)+' km/h'+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(rawClips?'  ·  '+rawClips+' RAW CLIP'+(rawClips>1?'S':''):'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
+  $('tele').textContent=clk+'  ·  '+(veh===WALKER?(wet?'SWIMMING  ':'ON FOOT  '):(wet?'HULL MODE  ':'ENGINE OK  '))+Math.abs(P.v*3.6|0)+' km/h  ·  '+surf+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(rawClips?'  ·  '+rawClips+' RAW CLIP'+(rawClips>1?'S':''):'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
   if(perf>toastT)$('toast').style.opacity=0;
   radarTarget=target;drawRadar();
   const w=innerWidth,h=innerHeight;
@@ -4952,7 +4983,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
