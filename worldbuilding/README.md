@@ -157,10 +157,10 @@ non-lethal to its core (see [`PAUDC_Combat_System.md`](PAUDC_Combat_System.md)).
 And The Strip gets the **Wheaton Night School** — classes upstairs at the
 Bassline club, an outside staircase past the pink marquee; attend on foot for
 the CERTIFIED title (+20 clout, and the bass was the metronome). v0.27 puts
-**Lovebird Airways** in the sky — the island's fictional flag carrier (cream
-fuselage, orange and gold stripes, violet tail with the golden hummingbird),
-an homage-original livery. The jet circles the island at altitude all day; walk
-to the orange **LOVEBIRD AIRWAYS** kiosk by The Strip's runway and hold to board
+**Plantin Airways** in the sky — the island's fictional flag carrier (cream
+fuselage, orange and gold stripes, violet tail with a golden plantain),
+an original livery. The jet circles the island at altitude all day; walk
+to the orange **PLANTIN AIRWAYS** kiosk by The Strip's runway and hold to board
 the **Island Hop** — one full aerial lap of the island, window seat, then wheels
 down back at the gate (+15 clout, *"soon come" was a promise*). Target-look
 film in the graphics research doc.
