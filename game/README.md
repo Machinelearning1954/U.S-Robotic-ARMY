@@ -4,7 +4,7 @@ A top-down, GTA-inspired mission shooter. You are **ARES-7**, the last loyal com
 
 **Play it:** open `game/index.html` in any browser. No build step, no dependencies.
 
-Two modes:
+Three modes:
 
 - **Campaign** (`index.html`) — the 16-mission story
 - **Liberty Bay free roam** (`city.html`) — GTA-style open city: a 3200×2400 scrolling world with procedural blocks, jackable cars with acceleration/steering physics, wandering pedestrians that panic at gunfire, and RoboCop police with a 5-star wanted system (crime raises it, laying low drops it). Minimap included.
@@ -12,6 +12,8 @@ Two modes:
   There's also money in Liberty Bay: cash lies in the streets and drops from your victims. Save up **$15,000** and head to Liberty Bay Intl (southeast, green on the minimap) — a first-class private jet is waiting. Throttle past 90 MPH and it goes wheels-up, flying clean over the whole city while the cops shake their fists below.
 
   Hungry or shot up? The **Ironsmoke Restaurant** (orange on the minimap, chimney always smoking) serves a $50 dinner that restores full HP — walk to the glowing door and press E.
+
+- **Liberty Bay 3D** (`city3d.html`) — the same city in a real 3D engine (Three.js/WebGL, vendored in `lib/`, still fully offline). Third-person camera, the identical seeded street grid extruded into towers with lit windows, drivable cars, the first-class jet (it climbs to altitude and flies over the skyline), pedestrians, RoboCops, the wanted system, and the Ironsmoke — plus a **day/night cycle** (the 4th dimension) and a **Q-key shift into DIMENSION V**, a neon parallel city (the 5th). Controls change slightly in 3D: A/D turn, W/S move.
 
 ## Controls
 

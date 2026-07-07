@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Robotic Army — Liberty Bay 3D</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0e14; color: #cfd8e3; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  h1 { margin: 12px 0 4px; font-size: 22px; letter-spacing: 3px; color: #7fd4ff; text-transform: uppercase; }
+  nav { font-size: 13px; margin-bottom: 6px; }
+  nav a { color: #6c7f95; text-decoration: none; }
+  nav a:hover { color: #7fd4ff; }
+  #hud { width: 960px; display: flex; justify-content: space-between; padding: 6px 4px; font-size: 13px; }
+  .bar { color: #9fb4cc; }
+  .accent { color: #7fd4ff; }
+  #stars { color: #ffd166; letter-spacing: 2px; }
+  #wrap { position: relative; }
+  canvas#cv { border: 2px solid #2b3a4e; display: block; }
+  #mini { position: absolute; top: 12px; right: 12px; border: 1px solid #2b3a4e; background: rgba(10,14,20,0.8); }
+  #msg { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); background: rgba(6,10,16,0.8);
+         color: #ffd166; font-weight: bold; font-size: 14px; padding: 8px 22px; white-space: nowrap; }
+  #overlay {
+    position: absolute; inset: 0; background: rgba(6, 10, 16, 0.88);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 40px;
+  }
+  #overlay h2 { color: #7fd4ff; letter-spacing: 2px; margin-bottom: 14px; font-size: 26px; }
+  #overlay p { max-width: 680px; line-height: 1.6; margin-bottom: 10px; font-size: 15px; }
+  #overlay .hint { color: #6c7f95; font-size: 13px; }
+  #overlay button {
+    margin-top: 18px; padding: 10px 34px; background: #123047; color: #7fd4ff;
+    border: 1px solid #7fd4ff; font-family: inherit; font-size: 16px; letter-spacing: 2px; cursor: pointer;
+  }
+  #overlay button:hover { background: #1b4463; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<h1>Liberty Bay — 3D</h1>
+<nav><a href="index.html">campaign</a> · <a href="city.html">2D free roam</a></nav>
+<div id="hud">
+  <span class="bar">HP <span id="hp" class="accent">100</span></span>
+  <span class="bar">$ <span id="cash" class="accent">0</span></span>
+  <span class="bar" id="ride">ON FOOT</span>
+  <span class="bar">DIM <span id="dim" class="accent">PRIME</span></span>
+  <span id="stars"></span>
+</div>
+<div id="wrap">
+  <canvas id="cv" width="960" height="600"></canvas>
+  <canvas id="mini" width="170" height="128"></canvas>
+  <div id="msg" class="hidden"></div>
+  <div id="overlay">
+    <h2>LIBERTY BAY — FULL 3D</h2>
+    <p>The same city. A third dimension. ARES-7 walks the streets in real perspective now — day turns to night above the towers (the 4th dimension), and if reality gets boring, press <b>Q</b> to shift into DIMENSION V (the 5th). Cars drive, the jet flies, the Ironsmoke serves dinner, and the RoboCops still hate you.</p>
+    <p class="hint">W/S — forward/back · A/D — turn · click — fire · E — car / jet / restaurant · Q — dimension shift · in cars: W gas, S brake, A/D steer · $15,000 jet at the airport · $50 dinner at the Ironsmoke</p>
+    <button id="ovBtn">ENTER THE THIRD DIMENSION</button>
+  </div>
+</div>
+<script src="lib/three.min.js"></script>
+<script>
+'use strict';
+const WORLD_W = 3200, WORLD_H = 2400, BLOCK = 400, ROAD = 90;
+const AIRPORT = { x: 2450, y: 1950, w: 660, h: 380 };
+const IRONSMOKE = { x: 1300, y: 1000, w: 200, h: 120 };
+const IRON_DOOR = { x: IRONSMOKE.x + IRONSMOKE.w / 2, y: IRONSMOKE.y + IRONSMOKE.h + 20 };
+
+let seed = 20260707;
+function srnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+function srange(a, b) { return a + srnd() * (b - a); }
+function rnd(a, b) { return a + Math.random() * (b - a); }
+function d2(a, b) { const dx = a.x - b.x, dy = (a.y !== undefined ? a.y : a.z) - (b.y !== undefined ? b.y : b.z); return Math.hypot(dx, dy); }
+
+// ---------- city layout (same seed & shape as 2D Liberty Bay) ----------
+const buildings = [];
+for (let bx = 0; bx < WORLD_W / BLOCK; bx++) {
+  for (let by = 0; by < WORLD_H / BLOCK; by++) {
+    const x0 = bx * BLOCK + ROAD, y0 = by * BLOCK + ROAD;
+    if (x0 + BLOCK > AIRPORT.x && x0 < AIRPORT.x + AIRPORT.w && y0 + BLOCK > AIRPORT.y && y0 < AIRPORT.y + AIRPORT.h) continue;
+    const bw = BLOCK - ROAD, bh = BLOCK - ROAD;
+    const n = 1 + Math.floor(srnd() * 3);
+    for (let k = 0; k < n; k++) {
+      const w = srange(70, bw / (n > 1 ? 2.2 : 1.4)), h = srange(70, bh / (n > 1 ? 2.2 : 1.4));
+      buildings.push({ x: x0 + srange(8, bw - w - 8), y: y0 + srange(8, bh - h - 8), w, h, ht: srange(45, 170), tone: Math.floor(srange(0, 3)) });
+    }
+  }
+}
+for (let i = buildings.length - 1; i >= 0; i--) {
+  const b = buildings[i];
+  if (b.x + b.w > IRONSMOKE.x - 24 && b.x < IRONSMOKE.x + IRONSMOKE.w + 24 && b.y + b.h > IRONSMOKE.y - 24 && b.y < IRONSMOKE.y + IRONSMOKE.h + 44) buildings.splice(i, 1);
+}
+buildings.push({ ...IRONSMOKE, ht: 34, tone: 0, iron: true });
+function hitsBuilding(p, r) {
+  const pz = p.z !== undefined ? p.z : p.y;
+  return buildings.some(b => p.x + r > b.x && p.x - r < b.x + b.w && pz + r > b.y && pz - r < b.y + b.h);
+}
+function roadPoint() {
+  for (;;) {
+    const horizontal = srnd() < 0.5;
+    const x = horizontal ? srange(30, WORLD_W - 30) : Math.floor(srange(0, WORLD_W / BLOCK)) * BLOCK + ROAD / 2;
+    const y = horizontal ? Math.floor(srange(0, WORLD_H / BLOCK)) * BLOCK + ROAD / 2 : srange(30, WORLD_H - 30);
+    if (!hitsBuilding({ x, y }, 16)) return { x, y };
+  }
+}
+
+// ---------- three.js scene ----------
+const cv = document.getElementById('cv');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+renderer.setSize(960, 600, false);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(62, 960 / 600, 1, 6000);
+const hemi = new THREE.HemisphereLight(0x8fb4d8, 0x1a2230, 0.9); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff2d8, 0.9); sun.position.set(800, 1200, 400); scene.add(sun);
+scene.fog = new THREE.Fog(0x0e1420, 500, 3000);
+
+// ground with painted roads (canvas texture)
+function paintGround(neonMode) {
+  const g = document.createElement('canvas'); g.width = 1600; g.height = 1200;
+  const c = g.getContext('2d'); const s = 0.5;
+  c.fillStyle = neonMode ? '#050510' : '#1b2230'; c.fillRect(0, 0, 1600, 1200);
+  c.fillStyle = neonMode ? '#0a0a1e' : '#14181f';
+  for (let x = 0; x < WORLD_W; x += BLOCK) c.fillRect(x * s, 0, ROAD * s, 1200);
+  for (let y = 0; y < WORLD_H; y += BLOCK) c.fillRect(0, y * s, 1600, ROAD * s);
+  c.strokeStyle = neonMode ? '#00e5ff' : '#2a344a'; c.lineWidth = 2; c.setLineDash([10, 12]);
+  for (let x = 0; x < WORLD_W; x += BLOCK) { c.beginPath(); c.moveTo((x + ROAD / 2) * s, 0); c.lineTo((x + ROAD / 2) * s, 1200); c.stroke(); }
+  for (let y = 0; y < WORLD_H; y += BLOCK) { c.beginPath(); c.moveTo(0, (y + ROAD / 2) * s); c.lineTo(1600, (y + ROAD / 2) * s); c.stroke(); }
+  c.setLineDash([]);
+  c.fillStyle = neonMode ? '#12081e' : '#131922';
+  c.fillRect(AIRPORT.x * s, AIRPORT.y * s, AIRPORT.w * s, AIRPORT.h * s);
+  c.strokeStyle = neonMode ? '#ff2bd6' : '#3a4a63'; c.lineWidth = 3; c.setLineDash([14, 10]);
+  c.beginPath(); c.moveTo((AIRPORT.x + 30) * s, (AIRPORT.y + AIRPORT.h / 2) * s); c.lineTo((AIRPORT.x + AIRPORT.w - 30) * s, (AIRPORT.y + AIRPORT.h / 2) * s); c.stroke();
+  c.setLineDash([]);
+  const tex = new THREE.CanvasTexture(g);
+  return tex;
+}
+const groundTexPrime = paintGround(false), groundTexNeon = paintGround(true);
+const groundMat = new THREE.MeshLambertMaterial({ map: groundTexPrime });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_W, WORLD_H), groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.set(WORLD_W / 2, 0, WORLD_H / 2);
+scene.add(ground);
+
+// building window texture
+function windowTex(base, glow) {
+  const g = document.createElement('canvas'); g.width = 64; g.height = 64;
+  const c = g.getContext('2d');
+  c.fillStyle = base; c.fillRect(0, 0, 64, 64);
+  for (let x = 6; x < 60; x += 14) for (let y = 6; y < 60; y += 16) {
+    c.fillStyle = Math.random() < 0.4 ? glow : 'rgba(20,26,38,0.9)';
+    c.fillRect(x, y, 8, 10);
+  }
+  const t = new THREE.CanvasTexture(g); t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+const TONES = ['#232f40', '#1e2938', '#28344a'];
+const primeMats = TONES.map(t => new THREE.MeshLambertMaterial({ map: windowTex(t, '#ffe9a0') }));
+const neonMats = TONES.map((t, i) => new THREE.MeshLambertMaterial({ map: windowTex('#0a0518', ['#00e5ff', '#ff2bd6', '#9d4dff'][i]), emissive: new THREE.Color(['#003a44', '#3a0030', '#22103a'][i]) }));
+const ironMatPrime = new THREE.MeshLambertMaterial({ color: 0x2e2624, emissive: 0x1a0e06 });
+const ironMatNeon = new THREE.MeshLambertMaterial({ color: 0x2e1024, emissive: 0x550022 });
+
+const buildingMeshes = [];
+for (const b of buildings) {
+  const geo = new THREE.BoxGeometry(b.w, b.ht, b.h);
+  const m = new THREE.Mesh(geo, b.iron ? ironMatPrime : primeMats[b.tone]);
+  m.position.set(b.x + b.w / 2, b.ht / 2, b.y + b.h / 2);
+  m.userData.b = b;
+  scene.add(m); buildingMeshes.push(m);
+}
+// Ironsmoke sign
+function textSprite(text, color, w, h, font) {
+  const g = document.createElement('canvas'); g.width = 256; g.height = 64;
+  const c = g.getContext('2d');
+  c.fillStyle = '#0f0c0a'; c.fillRect(0, 0, 256, 64);
+  c.fillStyle = color; c.font = 'bold ' + (font || 34) + 'px Courier New'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(text, 128, 34);
+  const t = new THREE.CanvasTexture(g);
+  const sp = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: false }));
+  return sp;
+}
+const sign = textSprite('IRONSMOKE', '#ff8c42', 120, 30);
+sign.position.set(IRONSMOKE.x + IRONSMOKE.w / 2, 44, IRONSMOKE.y + IRONSMOKE.h + 1);
+scene.add(sign);
+const doorRing = new THREE.Mesh(new THREE.RingGeometry(10, 14, 24), new THREE.MeshBasicMaterial({ color: 0x3ddc84, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }));
+doorRing.rotation.x = -Math.PI / 2;
+doorRing.position.set(IRON_DOOR.x, 0.5, IRON_DOOR.y);
+scene.add(doorRing);
+// smoke puffs
+const smokeMat = new THREE.MeshBasicMaterial({ color: 0x9a9aa8, transparent: true, opacity: 0.3 });
+const smokes = [];
+for (let k = 0; k < 3; k++) {
+  const p = new THREE.Mesh(new THREE.SphereGeometry(5, 8, 8), smokeMat.clone());
+  p.userData.k = k; scene.add(p); smokes.push(p);
+}
+
+// ---------- entities ----------
+function robotMesh(color, scale) {
+  const gp = new THREE.Group();
+  const mat = new THREE.MeshLambertMaterial({ color });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(10, 14, 7), mat); body.position.y = 12; gp.add(body);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(7, 6, 7), mat); head.position.y = 22; gp.add(head);
+  const eye = new THREE.Mesh(new THREE.BoxGeometry(5, 2, 1), new THREE.MeshBasicMaterial({ color: 0xff3b3b }));
+  eye.position.set(0, 22, 3.8); gp.add(eye);
+  if (scale) gp.scale.setScalar(scale);
+  return gp;
+}
+function carMesh(color) {
+  const gp = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(44, 12, 24), new THREE.MeshLambertMaterial({ color })); body.position.y = 8; gp.add(body);
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(22, 9, 20), new THREE.MeshLambertMaterial({ color: 0x0a0e14 })); cab.position.set(-2, 18, 0); gp.add(cab);
+  const lightMat = new THREE.MeshBasicMaterial({ color: 0xfff2c0 });
+  const h1 = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 5), lightMat); h1.position.set(22, 8, -8); gp.add(h1);
+  const h2 = h1.clone(); h2.position.z = 8; gp.add(h2);
+  return gp;
+}
+function jetMesh() {
+  const gp = new THREE.Group();
+  const white = new THREE.MeshLambertMaterial({ color: 0xe8e2d0 });
+  const fus = new THREE.Mesh(new THREE.BoxGeometry(70, 12, 14), white); fus.position.y = 12; gp.add(fus);
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(7, 18, 8), white); nose.rotation.z = -Math.PI / 2; nose.position.set(44, 12, 0); gp.add(nose);
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(16, 2, 90), white); wing.position.set(-4, 10, 0); gp.add(wing);
+  const tail = new THREE.Mesh(new THREE.BoxGeometry(12, 22, 2), white); tail.position.set(-32, 22, 0); gp.add(tail);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(24, 13, 15), new THREE.MeshLambertMaterial({ color: 0xc9a24f })); stripe.position.set(8, 12, 0); gp.add(stripe);
+  return gp;
+}
+
+const player = { x: BLOCK + 45, z: 45, yaw: 0, r: 9, hp: 100, maxHp: 100, veh: null };
+const playerMesh = robotMesh(0x7fd4ff); scene.add(playerMesh);
+
+const cars = [];
+const CAR_COLORS = [0xc94f4f, 0x4f7fc9, 0xc9b44f, 0x7d7d8a, 0x5aa06a, 0xa05cd0, 0xd07a3c];
+for (let i = 0; i < 30; i++) {
+  const p = roadPoint();
+  const c = { x: p.x, z: p.y, r: 20, angle: srnd() < 0.5 ? 0 : Math.PI / 2, vel: 0, hp: 240, maxHp: 240 };
+  c.mesh = carMesh(CAR_COLORS[i % CAR_COLORS.length]); scene.add(c.mesh);
+  cars.push(c);
+}
+const jet = { x: AIRPORT.x + AIRPORT.w / 2, z: AIRPORT.y + AIRPORT.h / 2, r: 26, angle: Math.PI, vel: 0, hp: 500, maxHp: 500, jet: true, price: 15000, owned: false, lift: 0 };
+jet.mesh = jetMesh(); scene.add(jet.mesh);
+cars.push(jet);
+const priceTag = textSprite('$15,000 (E)', '#3ddc84', 90, 22, 30);
+priceTag.position.set(jet.x, 50, jet.z); scene.add(priceTag);
+
+const peds = [];
+for (let i = 0; i < 40; i++) {
+  const p = roadPoint();
+  const pd = { x: p.x, z: p.y, r: 6, dir: srange(0, 7), speed: srange(0.4, 0.9), panic: 0 };
+  pd.mesh = robotMesh([0xa0aabe, 0x9eb8a2, 0xb8a89e][i % 3], 0.7); scene.add(pd.mesh);
+  peds.push(pd);
+}
+const police = [], bullets = [], copBullets = [], pickups = [], booms = [];
+function addPickup(x, z, kind, val) {
+  const colors = { cash: 0x3ddc84, health: 0xff6b6b, smg: 0xffd166 };
+  const m = new THREE.Mesh(new THREE.BoxGeometry(8, 8, 8), new THREE.MeshLambertMaterial({ color: colors[kind], emissive: colors[kind], emissiveIntensity: 0.4 }));
+  m.position.set(x, 6, z); scene.add(m);
+  pickups.push({ x, z, r: 9, kind, val: val || 0, mesh: m });
+}
+for (let i = 0; i < 30; i++) { const p = roadPoint(); addPickup(p.x, p.y, 'cash', Math.floor(srange(100, 400))); }
+function boom(x, z, r) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 10), new THREE.MeshBasicMaterial({ color: 0xffa040, transparent: true, opacity: 0.8 }));
+  m.position.set(x, 10, z); scene.add(m);
+  booms.push({ mesh: m, t: 18 });
+}
+
+// ---------- game state ----------
+let heat = 0, lastCrime = -999, tSec = 0, running = false, money = 0, ammoSmg = 0;
+let eLatch = false, qLatch = false, lastShot = 0, neon = false, msgT = 0;
+function stars() { return Math.min(5, Math.floor(heat / 5)); }
+function crime(n) { heat = Math.min(29, heat + n); lastCrime = tSec; }
+const msgEl = document.getElementById('msg');
+function say(t) { msgEl.textContent = t; msgEl.classList.remove('hidden'); msgT = 3.5; }
+
+const keys = {};
+addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+let firing = false;
+cv.addEventListener('mousedown', () => firing = true);
+addEventListener('mouseup', () => firing = false);
+const overlay = document.getElementById('overlay');
+document.getElementById('ovBtn').onclick = () => {
+  if (player.hp <= 0) {
+    player.hp = 100; player.veh = null; heat = 0;
+    for (const c of police) scene.remove(c.mesh);
+    police.length = 0;
+    const p = roadPoint(); player.x = p.x; player.z = p.y;
+  }
+  running = true; overlay.classList.add('hidden');
+};
+
+function killPed(i) {
+  const p = peds[i];
+  boom(p.x, p.z, 8);
+  addPickup(p.x, p.z, 'cash', 50 + Math.floor(Math.random() * 120));
+  scene.remove(p.mesh);
+  peds.splice(i, 1);
+  crime(4);
+  for (const q of peds) if (d2({ x: q.x, y: q.z }, { x: p.x, y: p.z }) < 500) q.panic = 8;
+  const np = roadPoint();
+  if (Math.hypot(np.x - player.x, np.y - player.z) > 700) {
+    const pd = { x: np.x, z: np.y, r: 6, dir: srange(0, 7), speed: srange(0.4, 0.9), panic: 0 };
+    pd.mesh = robotMesh(0xa0aabe, 0.7); scene.add(pd.mesh); peds.push(pd);
+  }
+}
+function killCop(i) {
+  const c = police[i];
+  boom(c.x, c.z, 10);
+  addPickup(c.x, c.z, 'cash', 200 + Math.floor(Math.random() * 200));
+  if (Math.random() < 0.35) addPickup(c.x + 12, c.z, Math.random() < 0.5 ? 'health' : 'smg');
+  scene.remove(c.mesh);
+  police.splice(i, 1);
+  crime(6);
+}
+function shoot(now) {
+  const useSmg = ammoSmg > 0;
+  if (now - lastShot < (useSmg ? 110 : 300)) return;
+  lastShot = now;
+  if (useSmg) ammoSmg--;
+  const a = player.yaw + rnd(-0.04, 0.04);
+  const m = new THREE.Mesh(new THREE.SphereGeometry(2, 6, 6), new THREE.MeshBasicMaterial({ color: 0xffd166 }));
+  m.position.set(player.x, 14, player.z); scene.add(m);
+  bullets.push({ x: player.x, z: player.z, vx: Math.sin(a) * 10, vz: Math.cos(a) * 10, dmg: useSmg ? 10 : 14, life: 70, mesh: m });
+  crime(0.15);
+  for (const p of peds) if (Math.hypot(p.x - player.x, p.z - player.z) < 420) p.panic = 6;
+}
+
+// ---------- update ----------
+function update(dt, now) {
+  tSec += dt;
+  if (msgT > 0) { msgT -= dt; if (msgT <= 0) msgEl.classList.add('hidden'); }
+  if (tSec - lastCrime > 8) heat = Math.max(0, heat - dt * 1.2);
+
+  // dimension shift (5th dimension)
+  if (keys['q'] && !qLatch) {
+    qLatch = true; neon = !neon;
+    groundMat.map = neon ? groundTexNeon : groundTexPrime; groundMat.needsUpdate = true;
+    for (const m of buildingMeshes) {
+      const b = m.userData.b;
+      m.material = b.iron ? (neon ? ironMatNeon : ironMatPrime) : (neon ? neonMats[b.tone] : primeMats[b.tone]);
+    }
+    scene.fog.color.set(neon ? 0x14001e : 0x0e1420);
+    document.getElementById('dim').textContent = neon ? 'V' : 'PRIME';
+    say(neon ? 'DIMENSION V — REALITY IS OPTIONAL' : 'DIMENSION PRIME — WELCOME BACK');
+  }
+  if (!keys['q']) qLatch = false;
+
+  // day/night (4th dimension): 120s cycle
+  const day = (Math.sin(tSec / 120 * Math.PI * 2) + 1) / 2; // 0 night, 1 noon
+  sun.intensity = neon ? 0.25 : 0.15 + day * 0.85;
+  hemi.intensity = neon ? 1.1 : 0.35 + day * 0.65;
+  if (!neon) scene.fog.color.setRGB(0.05 + day * 0.25, 0.078 + day * 0.32, 0.125 + day * 0.42);
+  renderer.setClearColor(scene.fog.color);
+
+  // E: restaurant / vehicles
+  if (keys['e'] && !eLatch) {
+    eLatch = true;
+    if (player.veh && player.veh.jet && player.veh.lift > 2) say('YOU ARE AT 2,000 FEET. LAND FIRST (slow down).');
+    else if (player.veh) {
+      const v = player.veh; player.veh = null;
+      player.x = v.x + Math.sin(v.angle + Math.PI / 2) * 36;
+      player.z = v.z + Math.cos(v.angle + Math.PI / 2) * 36;
+      if (hitsBuilding({ x: player.x, z: player.z }, player.r)) { player.x = v.x; player.z = v.z - 36; }
+    } else if (Math.hypot(player.x - IRON_DOOR.x, player.z - IRON_DOOR.y) < 30) {
+      if (money >= 50) { money -= 50; player.hp = player.maxHp; say('IRONSMOKE SPECIAL — FULLY RESTORED (-$50)'); }
+      else say("IRONSMOKE: DINNER'S $50, ROBOT. COME BACK WITH MONEY.");
+    } else {
+      const v = cars.find(c => Math.hypot(player.x - c.x, player.z - c.z) < c.r + 26);
+      if (v && v.jet && !v.owned) {
+        if (money >= v.price) { money -= v.price; v.owned = true; player.veh = v; scene.remove(priceTag); say('FIRST CLASS, BABY. WELCOME ABOARD AIR ARES-1.'); }
+        else say('FIRST CLASS COSTS $' + v.price.toLocaleString() + ' — YOU HAVE $' + money.toLocaleString());
+      } else if (v) { player.veh = v; if (!v.jet) crime(1.5); }
+    }
+  }
+  if (!keys['e']) eLatch = false;
+
+  const fwd = (keys['w'] || keys['arrowup'] ? 1 : 0) - (keys['s'] || keys['arrowdown'] ? 1 : 0);
+  const turn = (keys['a'] || keys['arrowleft'] ? 1 : 0) - (keys['d'] || keys['arrowright'] ? 1 : 0);
+
+  if (player.veh) {
+    const v = player.veh;
+    const maxV = v.jet ? 14 : 8.5;
+    v.vel += fwd > 0 ? (v.jet ? 0.22 : 0.16) : fwd < 0 ? (v.vel > 0 ? -0.3 : -0.12) : 0;
+    v.vel = Math.max(-3.2, Math.min(maxV, v.vel)) * (v.jet ? 0.992 : 0.985);
+    if (Math.abs(v.vel) > 0.15) v.angle += turn * 0.038 * Math.min(1, Math.abs(v.vel) / 5) * Math.sign(v.vel);
+    const airborne = v.jet && Math.abs(v.vel) > 5;
+    v.lift = v.jet ? Math.max(0, Math.min(60, (v.lift || 0) + (airborne ? 40 * dt : -50 * dt))) : 0;
+    const flying = v.lift > 30;
+    const nx = { x: v.x + Math.sin(v.angle) * v.vel, z: v.z };
+    const nz = { x: v.x, z: v.z + Math.cos(v.angle) * v.vel };
+    const fast = Math.abs(v.vel) > 4;
+    if (flying || !hitsBuilding(nx, v.r)) v.x = Math.max(v.r, Math.min(WORLD_W - v.r, nx.x));
+    else { if (fast) { v.hp -= 20; boom(v.x, v.z, 8); } v.vel *= -0.3; }
+    if (flying || !hitsBuilding(nz, v.r)) v.z = Math.max(v.r, Math.min(WORLD_H - v.r, nz.z));
+    else { if (fast) { v.hp -= 20; boom(v.x, v.z, 8); } v.vel *= -0.3; }
+    player.x = v.x; player.z = v.z; player.yaw = v.angle;
+    if (!flying && Math.abs(v.vel) > 1.2) {
+      for (let i = peds.length - 1; i >= 0; i--) if (Math.hypot(v.x - peds[i].x, v.z - peds[i].z) < v.r + peds[i].r) killPed(i);
+      for (let i = police.length - 1; i >= 0; i--) if (Math.hypot(v.x - police[i].x, v.z - police[i].z) < v.r + police[i].r) { killCop(i); v.hp -= 12; }
+    }
+    if (v.hp <= 0) {
+      boom(v.x, v.z, 30); player.veh = null; player.hp -= 30;
+      scene.remove(v.mesh); cars.splice(cars.indexOf(v), 1);
+    }
+  } else {
+    player.yaw += turn * 2.6 * dt;
+    if (fwd) {
+      const sp = 3.1 * fwd;
+      const nx = { x: player.x + Math.sin(player.yaw) * sp, z: player.z };
+      const nz = { x: player.x, z: player.z + Math.cos(player.yaw) * sp };
+      if (!hitsBuilding(nx, player.r)) player.x = Math.max(player.r, Math.min(WORLD_W - player.r, nx.x));
+      if (!hitsBuilding(nz, player.r)) player.z = Math.max(player.r, Math.min(WORLD_H - player.r, nz.z));
+    }
+  }
+
+  if (firing && !player.veh) shoot(now);
+
+  // bullets
+  for (const arr of [bullets, copBullets]) {
+    for (let i = arr.length - 1; i >= 0; i--) {
+      const b = arr[i];
+      b.x += b.vx; b.z += b.vz; b.life--;
+      b.mesh.position.set(b.x, 14, b.z);
+      if (b.life <= 0 || hitsBuilding(b, 2)) { scene.remove(b.mesh); arr.splice(i, 1); }
+    }
+  }
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i]; let hit = false;
+    for (let j = peds.length - 1; j >= 0; j--) if (Math.hypot(b.x - peds[j].x, b.z - peds[j].z) < 10) { killPed(j); hit = true; break; }
+    if (!hit) for (let j = police.length - 1; j >= 0; j--) {
+      const c = police[j];
+      if (Math.hypot(b.x - c.x, b.z - c.z) < c.r + 4) { c.hp -= b.dmg; if (c.hp <= 0) killCop(j); hit = true; break; }
+    }
+    if (!hit) for (const c of cars) if (c !== player.veh && Math.hypot(b.x - c.x, b.z - c.z) < c.r) { c.hp -= b.dmg; crime(0.2); hit = true; break; }
+    if (hit) { scene.remove(b.mesh); bullets.splice(i, 1); }
+  }
+  for (let i = copBullets.length - 1; i >= 0; i--) {
+    const b = copBullets[i];
+    if (player.veh && player.veh.lift > 30) break;
+    const pr = player.veh ? player.veh.r : player.r;
+    if (Math.hypot(b.x - player.x, b.z - player.z) < pr + 4) {
+      if (player.veh) player.veh.hp -= b.dmg; else player.hp -= b.dmg;
+      scene.remove(b.mesh); copBullets.splice(i, 1);
+    }
+  }
+  for (let i = cars.length - 1; i >= 0; i--) if (cars[i].hp <= 0 && cars[i] !== player.veh) { boom(cars[i].x, cars[i].z, 26); scene.remove(cars[i].mesh); cars.splice(i, 1); crime(2); }
+
+  // peds
+  for (const p of peds) {
+    if (p.panic > 0) { p.panic -= dt; p.dir = Math.atan2(p.x - player.x, p.z - player.z) + rnd(-0.4, 0.4); }
+    else if (Math.random() < 0.01) p.dir += rnd(-1, 1);
+    const sp = p.panic > 0 ? 2.4 : p.speed;
+    const nx = { x: p.x + Math.sin(p.dir) * sp, z: p.z }, nz = { x: p.x, z: p.z + Math.cos(p.dir) * sp };
+    if (!hitsBuilding(nx, p.r) && nx.x > p.r && nx.x < WORLD_W - p.r) p.x = nx.x; else p.dir += Math.PI / 2;
+    if (!hitsBuilding(nz, p.r) && nz.z > p.r && nz.z < WORLD_H - p.r) p.z = nz.z; else p.dir += Math.PI / 2;
+    p.mesh.position.set(p.x, 0, p.z); p.mesh.rotation.y = p.dir;
+  }
+
+  // police
+  const want = stars() * 2;
+  while (police.length < want) {
+    const a = rnd(0, 7);
+    const c = { x: Math.max(10, Math.min(WORLD_W - 10, player.x + Math.sin(a) * 520)), z: Math.max(10, Math.min(WORLD_H - 10, player.z + Math.cos(a) * 520)), r: 8, hp: 45, maxHp: 45, cool: rnd(400, 1200) };
+    c.mesh = robotMesh(0x3d5a99); scene.add(c.mesh);
+    police.push(c);
+  }
+  if (want === 0 && police.length && Math.random() < 0.02) { scene.remove(police[police.length - 1].mesh); police.pop(); }
+  for (const c of police) {
+    const d = Math.hypot(c.x - player.x, c.z - player.z);
+    if (d > 40) {
+      const sp = 2.1;
+      const nx = { x: c.x + (player.x - c.x) / d * sp, z: c.z }, nz = { x: c.x, z: c.z + (player.z - c.z) / d * sp };
+      if (!hitsBuilding(nx, c.r)) c.x = nx.x;
+      if (!hitsBuilding(nz, c.r)) c.z = nz.z;
+    }
+    c.mesh.position.set(c.x, 0, c.z);
+    c.mesh.rotation.y = Math.atan2(player.x - c.x, player.z - c.z);
+    c.cool -= dt * 1000;
+    if (c.cool <= 0 && d < 340) {
+      const a = Math.atan2(player.x - c.x, player.z - c.z) + rnd(-0.08, 0.08);
+      const m = new THREE.Mesh(new THREE.SphereGeometry(2.4, 6, 6), new THREE.MeshBasicMaterial({ color: 0xff5c5c }));
+      m.position.set(c.x, 14, c.z); scene.add(m);
+      copBullets.push({ x: c.x, z: c.z, vx: Math.sin(a) * 5.5, vz: Math.cos(a) * 5.5, dmg: 7, life: 110, mesh: m });
+      c.cool = rnd(800, 1500);
+    }
+  }
+
+  // pickups
+  for (let i = pickups.length - 1; i >= 0; i--) {
+    const p = pickups[i];
+    p.mesh.position.y = 6 + Math.sin(tSec * 3 + i) * 2;
+    p.mesh.rotation.y = tSec * 2;
+    if (Math.hypot(player.x - p.x, player.z - p.z) < (player.veh ? player.veh.r : player.r) + p.r + 4) {
+      if (p.kind === 'health') player.hp = Math.min(player.maxHp, player.hp + 30);
+      else if (p.kind === 'cash') money += p.val;
+      else ammoSmg += 40;
+      scene.remove(p.mesh); pickups.splice(i, 1);
+    }
+  }
+  for (let i = booms.length - 1; i >= 0; i--) {
+    const f = booms[i];
+    f.t--; f.mesh.scale.multiplyScalar(1.09); f.mesh.material.opacity = f.t / 18 * 0.8;
+    if (f.t <= 0) { scene.remove(f.mesh); booms.splice(i, 1); }
+  }
+
+  // sync meshes
+  playerMesh.position.set(player.x, player.veh ? -100 : 0, player.z); // hide under map while riding
+  playerMesh.rotation.y = player.yaw;
+  for (const c of cars) {
+    c.mesh.position.set(c.x, c.jet ? (c.lift || 0) : 0, c.z);
+    c.mesh.rotation.y = c.angle - Math.PI / 2; // meshes are modeled +X-forward; motion forward is (sin a, cos a)
+  }
+  // smoke
+  for (const s of smokes) {
+    const ph = (tSec * 22 + s.userData.k * 26) % 80;
+    s.position.set(IRONSMOKE.x + IRONSMOKE.w - 30 + Math.sin((tSec + s.userData.k) * 2) * 5, 36 + ph * 0.6, IRONSMOKE.y + 20);
+    s.material.opacity = 0.35 * (1 - ph / 80);
+    s.scale.setScalar(1 + ph / 40);
+  }
+  doorRing.material.opacity = 0.5 + Math.sin(tSec * 4) * 0.3;
+  sign.lookAt(camera.position.x, 44, camera.position.z);
+  if (!jet.owned) priceTag.lookAt(camera.position.x, 50, camera.position.z);
+
+  // camera chase
+  const camDist = player.veh ? 170 : 120;
+  const camH = player.veh && player.veh.lift ? 90 + player.veh.lift : (player.veh ? 80 : 60);
+  const tx = player.x - Math.sin(player.yaw) * camDist;
+  const tz = player.z - Math.cos(player.yaw) * camDist;
+  camera.position.lerp(new THREE.Vector3(tx, camH, tz), 0.08);
+  camera.lookAt(player.x, (player.veh ? player.veh.lift || 0 : 0) + 20, player.z);
+
+  if (player.hp <= 0) {
+    running = false;
+    overlay.querySelector('h2').textContent = 'WASTED';
+    overlay.querySelector('p').textContent = 'The RoboCops scrape ARES-7 off the pavement and reboot it at the nearest depot.';
+    document.getElementById('ovBtn').textContent = 'RESPAWN';
+    overlay.classList.remove('hidden');
+  }
+
+  // HUD
+  document.getElementById('hp').textContent = Math.max(0, player.hp | 0);
+  document.getElementById('cash').textContent = money.toLocaleString();
+  document.getElementById('ride').textContent = player.veh
+    ? (player.veh.jet ? (player.veh.lift > 30 ? 'FLYING FIRST CLASS · ' : 'TAXIING · ') : 'DRIVING · ') + Math.abs(player.veh.vel * 18 | 0) + ' MPH'
+    : ammoSmg > 0 ? 'ON FOOT · SMG ' + ammoSmg : 'ON FOOT · PISTOL';
+  document.getElementById('stars').textContent = stars() ? 'WANTED ' + '★'.repeat(stars()) + '☆'.repeat(5 - stars()) : 'CLEAN';
+
+  // minimap
+  const mc = document.getElementById('mini').getContext('2d');
+  const MW = 170, MH = 128, sx = MW / WORLD_W, sy = MH / WORLD_H;
+  mc.fillStyle = 'rgba(10,14,20,0.85)'; mc.fillRect(0, 0, MW, MH);
+  mc.fillStyle = '#1c2534';
+  for (const b of buildings) mc.fillRect(b.x * sx, b.y * sy, Math.max(1, b.w * sx), Math.max(1, b.h * sy));
+  mc.fillStyle = '#3ddc84'; mc.fillRect(AIRPORT.x * sx, AIRPORT.y * sy, AIRPORT.w * sx, AIRPORT.h * sy);
+  mc.fillStyle = '#ff8c42'; mc.fillRect(IRONSMOKE.x * sx - 1, IRONSMOKE.y * sy - 1, Math.max(3, IRONSMOKE.w * sx), Math.max(3, IRONSMOKE.h * sy));
+  mc.fillStyle = '#3d5a99';
+  for (const c of police) mc.fillRect(c.x * sx - 1, c.z * sy - 1, 3, 3);
+  mc.fillStyle = '#7fd4ff'; mc.fillRect(player.x * sx - 2, player.z * sy - 2, 4, 4);
+}
+
+// ---------- debug hooks ----------
+window.__state = () => ({ x: player.x, z: player.z, hp: player.hp, inVehicle: !!player.veh, inJet: !!(player.veh && player.veh.jet), lift: player.veh ? (player.veh.lift || 0) : 0, vel: player.veh ? player.veh.vel : 0, money, heat, stars: stars(), police: police.length, peds: peds.length, cars: cars.length, neon, running });
+window.__teleport = (x, z) => { if (player.veh) { player.veh.x = x; player.veh.z = z; } player.x = x; player.z = z; };
+window.__cash = n => { money = n; };
+window.__hp = n => { player.hp = n; };
+window.__wanted = n => { heat = n * 5; lastCrime = tSec; };
+
+// ---------- loop ----------
+let lastTime = 0;
+function loop(t) {
+  const dt = Math.min(0.05, (t - lastTime) / 1000 || 0);
+  lastTime = t;
+  if (running) update(dt, t);
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
