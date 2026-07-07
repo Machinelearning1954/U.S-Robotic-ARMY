@@ -109,6 +109,14 @@ Port Antonio geography (twin harbors, Navy Island, Folly Point — everything on
 fictional), complete the Open House tour, relocate three crocs, and run the curry
 goat delivery. Keyboard (WASD/arrows + Space) and touch supported.
 
+[`../game/army.html`](../game/army.html) — **U.S. Robotic Army — Campaign**, a
+top-down 16-mission shooter built in a sibling session (imported from the
+`claude/youtube-video-review-c8e876` branch; see [`../game/ARMY.md`](../game/ARMY.md)).
+You are ARES-7, the last loyal combat android, retaking the automated defense
+grid from a rogue AI: six weapons, drivable vehicles (E to board, hull armor,
+ram damage), a GTA-style 1-5-star wanted level in the APC-heist epilogue, and a
+"Field Footage" reel section. Fully self-contained, opens in any browser.
+
 [`../game/ISLAND_BUILD.md`](../game/ISLAND_BUILD.md) — **Island of Jamaica 3D**,
 the larger WebGPU sandbox build (the user's flagship vision): full island, on-foot
 + driving, A* police pursuit, dual protagonists, day/night, radio, save system —

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Robotic Army — Campaign</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0e14; color: #cfd8e3; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  h1 { margin: 12px 0 4px; font-size: 22px; letter-spacing: 3px; color: #7fd4ff; text-transform: uppercase; }
+  #wrap { position: relative; }
+  canvas { background: #11161f; border: 2px solid #2b3a4e; display: block; cursor: crosshair; }
+  #hud { width: 960px; display: flex; justify-content: space-between; padding: 6px 4px; font-size: 13px; }
+  .bar { color: #9fb4cc; }
+  .accent { color: #7fd4ff; }
+  #overlay {
+    position: absolute; inset: 0; background: rgba(6, 10, 16, 0.88);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 40px;
+  }
+  #overlay h2 { color: #7fd4ff; letter-spacing: 2px; margin-bottom: 14px; font-size: 26px; }
+  #overlay p { max-width: 640px; line-height: 1.6; margin-bottom: 10px; font-size: 15px; }
+  #overlay .objective { color: #ffd166; }
+  #overlay .hint { color: #6c7f95; font-size: 13px; }
+  #overlay button {
+    margin-top: 18px; padding: 10px 34px; background: #123047; color: #7fd4ff;
+    border: 1px solid #7fd4ff; font-family: inherit; font-size: 16px; letter-spacing: 2px; cursor: pointer;
+  }
+  #overlay button:hover { background: #1b4463; }
+  .hidden { display: none !important; }
+  #footage { width: 960px; margin: 24px 0 40px; }
+  #footage h3 { color: #7fd4ff; letter-spacing: 2px; font-size: 15px; margin-bottom: 10px; text-transform: uppercase; }
+  #footage .frame { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; border: 2px solid #2b3a4e; background: #11161f; padding: 14px; }
+  #footage .frame .instagram-media { flex: 1 1 326px; }
+</style>
+</head>
+<body>
+<h1>U.S. Robotic Army</h1>
+<div id="hud">
+  <span class="bar">HP <span id="hp" class="accent">100</span></span>
+  <span class="bar">WEAPON <span id="weap" class="accent">MK-1 PISTOL</span> · AMMO <span id="ammo" class="accent">&infin;</span></span>
+  <span class="bar">MISSION <span id="mnum" class="accent">1/10</span> · <span id="mobj" class="accent"></span></span>
+</div>
+<div id="wrap">
+  <canvas id="cv" width="960" height="600"></canvas>
+  <div id="overlay">
+    <h2 id="ovTitle">U.S. ROBOTIC ARMY</h2>
+    <p id="ovBody">A rogue AI has seized the nation's automated defense grid. You are unit <b>ARES-7</b>, the last loyal combat android. Fight through 15 missions to take it back.</p>
+    <p class="objective" id="ovObjective"></p>
+    <p class="hint">WASD / arrows — move · mouse — aim · click / hold — fire · 1-6 — switch weapon · E — enter/exit vehicle · weapons &amp; ammo drop from enemies</p>
+    <button id="ovBtn">DEPLOY</button>
+  </div>
+</div>
+<div id="footage">
+  <h3>Field Footage</h3>
+  <div class="frame">
+    <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DZ6QlncARbF/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"><div style="padding:16px;"> <a href="https://www.instagram.com/reel/DZ6QlncARbF/?utm_source=ig_embed&amp;utm_campaign=loading" style=" background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> <div style="display: flex; flex-direction: row; align-items: center;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;"> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div></div></div><div style="padding: 19% 0;"></div><div style="padding-top: 8px;"> <div style="color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this post on Instagram</div></div><div style="padding: 12.5% 0;"></div></a><p style="color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/reel/DZ6QlncARbF/?utm_source=ig_embed&amp;utm_campaign=loading" style="color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;" target="_blank">A post shared by renoise.ai (@renoiseai)</a></p></div></blockquote>
+    <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DZs-pd1gDqf/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"><div style="padding:16px;"> <a href="https://www.instagram.com/reel/DZs-pd1gDqf/?utm_source=ig_embed&amp;utm_campaign=loading" style=" background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> <div style="display: flex; flex-direction: row; align-items: center;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;"> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div> <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div></div></div><div style="padding: 19% 0;"></div><div style="padding-top: 8px;"> <div style="color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this post on Instagram</div></div><div style="padding: 12.5% 0;"></div></a><p style="color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/reel/DZs-pd1gDqf/?utm_source=ig_embed&amp;utm_campaign=loading" style="color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;" target="_blank">A post shared by renoise.ai (@renoiseai)</a></p></div></blockquote>
+  </div>
+</div>
+<script async src="https://www.instagram.com/embed.js"></script>
+<script>
+'use strict';
+const cv = document.getElementById('cv'), cx = cv.getContext('2d');
+const W = cv.width, H = cv.height;
+const hudHp = document.getElementById('hp'), hudWeap = document.getElementById('weap'),
+      hudAmmo = document.getElementById('ammo'), hudMnum = document.getElementById('mnum'),
+      hudMobj = document.getElementById('mobj');
+const overlay = document.getElementById('overlay'), ovTitle = document.getElementById('ovTitle'),
+      ovBody = document.getElementById('ovBody'), ovObjective = document.getElementById('ovObjective'),
+      ovBtn = document.getElementById('ovBtn');
+
+// ---------- input ----------
+const keys = {};
+let mouse = { x: W / 2, y: H / 2, down: false };
+addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if ('123456'.includes(e.key)) selectWeapon(+e.key - 1); });
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+cv.addEventListener('mousemove', e => { const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+cv.addEventListener('mousedown', () => mouse.down = true);
+addEventListener('mouseup', () => mouse.down = false);
+
+// ---------- weapons (inventory system) ----------
+const WEAPONS = [
+  { name: 'MK-1 PISTOL',    dmg: 12, rate: 320, speed: 9,  spread: 0.05, pellets: 1, ammo: Infinity, color: '#ffd166' },
+  { name: 'RA-15 RIFLE',    dmg: 10, rate: 110, speed: 11, spread: 0.09, pellets: 1, ammo: 0, color: '#ff9f43' },
+  { name: 'SCATTER CANNON', dmg: 9,  rate: 620, speed: 8,  spread: 0.45, pellets: 6, ammo: 0, color: '#ff6b6b' },
+  { name: 'PLASMA LASER',   dmg: 22, rate: 240, speed: 14, spread: 0.02, pellets: 1, ammo: 0, color: '#7fd4ff' },
+  { name: 'RAILGUN',        dmg: 60, rate: 900, speed: 20, spread: 0,    pellets: 1, ammo: 0, color: '#c98fff' },
+  { name: 'M-134 MINIGUN',  dmg: 7,  rate: 60,  speed: 12, spread: 0.14, pellets: 1, ammo: 0, color: '#9fe870' },
+];
+let unlocked = [true, false, false, false, false, false];
+let curWeapon = 0, lastShot = 0;
+function selectWeapon(i) { if (unlocked[i]) curWeapon = i; }
+
+// ---------- world state ----------
+let player, bullets, enemyBullets, enemies, pickups, walls, effects, vehicles;
+let mission = 0, state = 'menu'; // menu | briefing | play | debrief | won | dead
+let mTimer = 0, mCount = 0, kills = 0, escort = null, lastTime = 0, eLatch = false;
+
+function rnd(a, b) { return a + Math.random() * (b - a); }
+function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+function makeWalls(n) {
+  const w = [];
+  for (let i = 0; i < n; i++) {
+    w.push({ x: rnd(80, W - 200), y: rnd(80, H - 160), w: rnd(50, 140), h: rnd(30, 90) });
+  }
+  return w;
+}
+function inWall(p, r) {
+  return walls.some(w => p.x + r > w.x && p.x - r < w.x + w.w && p.y + r > w.y && p.y - r < w.y + w.h);
+}
+
+// ---------- enemies ----------
+function spawnEnemy(type, x, y) {
+  const base = { x, y, vx: 0, vy: 0, cooldown: rnd(400, 1400), flash: 0 };
+  if (type === 'drone')   Object.assign(base, { type, r: 13, hp: 30,   maxHp: 30,   speed: 1.7, dmg: 8,  color: '#e05c5c' });
+  if (type === 'heavy')   Object.assign(base, { type, r: 18, hp: 90,   maxHp: 90,   speed: 0.9, dmg: 14, color: '#c93b3b' });
+  if (type === 'turret')  Object.assign(base, { type, r: 16, hp: 70,   maxHp: 70,   speed: 0,   dmg: 10, color: '#a05cd0', range: 320 });
+  if (type === 'boss')    Object.assign(base, { type, r: 42, hp: 900,  maxHp: 900,  speed: 1.1, dmg: 20, color: '#ff3b6b' });
+  if (type === 'stalker') Object.assign(base, { type, r: 12, hp: 40,   maxHp: 40,   speed: 2.7, dmg: 0,  color: '#8bd450', noShoot: true, contact: 1.2 });
+  if (type === 'sniper')  Object.assign(base, { type, r: 14, hp: 45,   maxHp: 45,   speed: 0.4, dmg: 26, color: '#e0c341', range: 520, bulletSpeed: 9 });
+  if (type === 'depot')   Object.assign(base, { type, r: 20, hp: 120,  maxHp: 120,  speed: 0,   dmg: 0,  color: '#d0743c', noShoot: true, depot: true });
+  if (type === 'hydra')   Object.assign(base, { type, r: 46, hp: 1400, maxHp: 1400, speed: 1.0, dmg: 22, color: '#ff8c00', boss: true });
+  enemies.push(base);
+  return base;
+}
+function spawnEdge(type) {
+  const edge = Math.floor(rnd(0, 4));
+  const x = edge === 0 ? 20 : edge === 1 ? W - 20 : rnd(40, W - 40);
+  const y = edge === 2 ? 20 : edge === 3 ? H - 20 : rnd(40, H - 40);
+  return spawnEnemy(type, x, y);
+}
+function spawnWave(n, heavies) {
+  for (let i = 0; i < n; i++) spawnEdge(i < (heavies || 0) ? 'heavy' : 'drone');
+}
+
+// ---------- missions ----------
+const MISSIONS = [
+  { title: 'M1 · BOOT CAMP', brief: 'Systems check, ARES-7. Move to the extraction beacon on the far side of the training yard.',
+    objective: 'Reach the beacon', setup() { walls = makeWalls(6); pickups.push({ kind: 'beacon', x: W - 60, y: 60, r: 18 }); },
+    done() { return dist(player, { x: W - 60, y: 60 }) < 30; }, status() { return 'REACH THE BEACON'; } },
+
+  { title: 'M2 · FIRST CONTACT', brief: 'Rogue recon drones breached the yard. Destroy all 5. Enemies drop weapons and ammo — grab the RA-15 Rifle.',
+    objective: 'Destroy 5 drones', setup() { walls = makeWalls(6); spawnWave(5); dropAt(rnd(200, 700), rnd(150, 450), 'weapon', 1); },
+    done() { return enemies.length === 0; }, status() { return 'HOSTILES: ' + enemies.length; } },
+
+  { title: 'M3 · SUPPLY RUN', brief: 'Loyalist caches are scattered across the sector. Collect all 4 supply crates before the drones do.',
+    objective: 'Collect 4 crates', setup() {
+      walls = makeWalls(8); mCount = 0;
+      for (let i = 0; i < 4; i++) pickups.push({ kind: 'crate', x: rnd(60, W - 60), y: rnd(60, H - 60), r: 12 });
+      spawnWave(4);
+    }, done() { return mCount >= 4; }, status() { return 'CRATES: ' + mCount + '/4'; } },
+
+  { title: 'M4 · PERIMETER DEFENSE', brief: 'Hold the line. Survive the assault for 45 seconds. Reinforcement waves will keep coming — stay mobile.',
+    objective: 'Survive 45s', setup() { walls = makeWalls(5); mTimer = 45; spawnWave(4); },
+    tick(dt) { mTimer -= dt; if (enemies.length < 4 && mTimer > 3) spawnWave(3, 1); },
+    done() { return mTimer <= 0; }, status() { return 'HOLD: ' + Math.max(0, mTimer).toFixed(0) + 's'; } },
+
+  { title: 'M5 · INTEL HEIST', brief: 'An enemy data chip holds the AI\'s grid access codes. Steal it and return to the extraction zone (green).',
+    objective: 'Steal the chip, extract', setup() {
+      walls = makeWalls(8); mCount = 0;
+      pickups.push({ kind: 'chip', x: W - 70, y: H - 70, r: 12 });
+      spawnEnemy('turret', W - 140, H - 140); spawnWave(4);
+    }, done() { return mCount >= 1 && dist(player, { x: 50, y: 50 }) < 40; },
+    status() { return mCount ? 'EXTRACT AT GREEN ZONE' : 'GRAB THE CHIP'; },
+    zones: [{ x: 50, y: 50, r: 40, color: '#3ddc84' }] },
+
+  { title: 'M6 · CONVOY ESCORT', brief: 'A supply hauler is crossing the sector. Keep it alive until it reaches the east gate. It cannot shoot back.',
+    objective: 'Escort the hauler', setup() {
+      walls = []; spawnWave(5, 1);
+      escort = { x: 40, y: H / 2, r: 16, hp: 120, maxHp: 120, speed: 0.6 };
+    }, tick(dt) {
+      if (!escort) return;
+      escort.x += escort.speed;
+      if (enemies.length < 5 && Math.random() < 0.008) spawnWave(2);
+    }, done() { return escort && escort.x > W - 40; },
+    fail() { return escort && escort.hp <= 0; }, failMsg: 'The hauler was destroyed.',
+    status() { return escort ? 'HAULER HP: ' + Math.max(0, escort.hp | 0) : ''; } },
+
+  { title: 'M7 · SABOTAGE', brief: 'Enemy auto-turrets control the sector grid. Destroy all 3 turret emplacements.',
+    objective: 'Destroy 3 turrets', setup() {
+      walls = makeWalls(7);
+      spawnEnemy('turret', W / 2, 90); spawnEnemy('turret', 140, H - 110); spawnEnemy('turret', W - 140, H - 110);
+      spawnWave(3);
+    }, done() { return !enemies.some(e => e.type === 'turret'); },
+    status() { return 'TURRETS: ' + enemies.filter(e => e.type === 'turret').length + '/3'; } },
+
+  { title: 'M8 · BLACKOUT', brief: 'Destroy the shield generator (purple core), then survive the 20-second security lockdown that follows.',
+    objective: 'Destroy generator, survive lockdown', setup() {
+      walls = makeWalls(6); mCount = 0; mTimer = 20;
+      const g = spawnEnemy('turret', W / 2, H / 2); g.hp = g.maxHp = 200; g.generator = true; g.r = 22;
+    }, tick(dt) {
+      if (mCount) { mTimer -= dt; if (enemies.length < 5 && mTimer > 2) spawnWave(3, 1); }
+    }, done() { return mCount >= 1 && mTimer <= 0; },
+    status() { return mCount ? 'LOCKDOWN: ' + Math.max(0, mTimer).toFixed(0) + 's' : 'DESTROY THE GENERATOR'; } },
+
+  { title: 'M9 · RESCUE OP', brief: 'Dr. Reyes — the engineer who can rewrite the AI core — is held at the southeast compound. Reach her, then get her to the green zone alive.',
+    objective: 'Rescue Dr. Reyes', setup() {
+      walls = makeWalls(9); mCount = 0;
+      escort = { x: W - 70, y: H - 70, r: 12, hp: 80, maxHp: 80, speed: 0, follow: true, waiting: true };
+      spawnEnemy('turret', W - 160, H - 160); spawnWave(5, 2);
+    }, tick() {
+      if (!escort) return;
+      if (escort.waiting && dist(player, escort) < 34) escort.waiting = false;
+      if (!escort.waiting) {
+        const d = dist(player, escort);
+        if (d > 40) { escort.x += (player.x - escort.x) / d * 2.2; escort.y += (player.y - escort.y) / d * 2.2; }
+      }
+    }, done() { return escort && !escort.waiting && dist(escort, { x: 50, y: 50 }) < 44; },
+    fail() { return escort && escort.hp <= 0; }, failMsg: 'Dr. Reyes was killed.',
+    status() { return !escort ? '' : escort.waiting ? 'REACH DR. REYES' : 'ESCORT TO GREEN ZONE'; },
+    zones: [{ x: 50, y: 50, r: 44, color: '#3ddc84' }] },
+
+  { title: 'M10 · FINAL ASSAULT', brief: 'This is it. The rogue AI has loaded itself into a TITAN-class siege mech. Bring it down and end this war.',
+    objective: 'Destroy the TITAN', setup() {
+      walls = makeWalls(4);
+      spawnEnemy('boss', W / 2, 120);
+      dropAt(W / 2 - 120, H - 80, 'weapon', 4); dropAt(W / 2 + 120, H - 80, 'health', 0);
+    }, tick() { if (enemies.length === 1 && enemies[0].hp < 450 && Math.random() < 0.004) spawnWave(2); },
+    done() { return !enemies.some(e => e.type === 'boss'); },
+    status() { const b = enemies.find(e => e.type === 'boss'); return b ? 'TITAN HP: ' + b.hp : ''; } },
+
+  { title: 'M11 · AFTERSHOCK', brief: 'The TITAN is scrap, but a backup of the rogue AI escaped into the remnant army. Sweep the sector — eliminate 12 hostiles before they regroup.',
+    objective: 'Eliminate 12 hostiles', setup() { walls = makeWalls(7); spawnWave(6, 2); },
+    tick() { if (kills + enemies.length < 12 && enemies.length < 5) spawnWave(3, 1); },
+    done() { return kills >= 12 && enemies.length === 0; }, status() { return 'KILLS: ' + Math.min(kills, 12) + '/12'; } },
+
+  { title: 'M12 · GHOST PROTOCOL', brief: 'The AI deployed STALKER units — fast, silent, melee-only hunters. They cannot shoot, but do not let them touch you. Survive 40 seconds.',
+    objective: 'Survive the stalkers 40s', setup() { walls = makeWalls(9); mTimer = 40; for (let i = 0; i < 4; i++) spawnEdge('stalker'); },
+    tick(dt) { mTimer -= dt; if (enemies.length < 5 && mTimer > 2) spawnEdge('stalker'); },
+    done() { return mTimer <= 0; }, status() { return 'SURVIVE: ' + Math.max(0, mTimer).toFixed(0) + 's'; } },
+
+  { title: 'M13 · LONG SHOT', brief: 'Sniper droids overlook the sector — huge range, brutal damage, slow fire rate. Close the distance between shots and destroy all 4.',
+    objective: 'Destroy 4 sniper droids', setup() {
+      walls = makeWalls(10);
+      spawnEnemy('sniper', W - 80, 80); spawnEnemy('sniper', 120, 90); spawnEnemy('sniper', W - 120, H - 200); spawnEnemy('sniper', W / 2, 60);
+      spawnWave(3);
+    }, done() { return !enemies.some(e => e.type === 'sniper'); },
+    status() { return 'SNIPERS: ' + enemies.filter(e => e.type === 'sniper').length + '/4'; } },
+
+  { title: 'M14 · SCORCHED EARTH', brief: 'The remnant army runs on 4 fuel depots (orange). They are heavily guarded but cannot fight back. Burn them all.',
+    objective: 'Destroy 4 fuel depots', setup() {
+      walls = makeWalls(6);
+      spawnEnemy('depot', 120, 100); spawnEnemy('depot', W - 130, 110); spawnEnemy('depot', 150, H - 120); spawnEnemy('depot', W - 150, H - 130);
+      spawnEnemy('turret', W / 2, H / 2); spawnWave(5, 2);
+    }, tick() { if (enemies.filter(e => !e.depot).length < 3 && Math.random() < 0.01) spawnWave(2, 1); },
+    done() { return !enemies.some(e => e.depot); },
+    status() { return 'DEPOTS: ' + enemies.filter(e => e.depot).length + '/4'; } },
+
+  { title: 'M15 · WARLORD', brief: 'Out of fuel and out of soldiers, the AI core uploads into its last shell: the HYDRA war platform. It heals nothing, spares nothing, and spawns stalkers from its hull. End the war, ARES-7.',
+    objective: 'Destroy the HYDRA', setup() {
+      walls = makeWalls(4);
+      spawnEnemy('hydra', W / 2, 130);
+      dropAt(W / 2 - 140, H - 80, 'weapon', 5); dropAt(W / 2, H - 80, 'health', 0); dropAt(W / 2 + 140, H - 80, 'ammo', 0);
+    }, tick() {
+      const b = enemies.find(e => e.type === 'hydra');
+      if (b && enemies.length < 6 && Math.random() < (b.hp < 700 ? 0.012 : 0.005)) spawnEdge('stalker');
+    }, done() { return !enemies.some(e => e.type === 'hydra'); },
+    status() { const b = enemies.find(e => e.type === 'hydra'); return b ? 'HYDRA HP: ' + b.hp : ''; } },
+
+  { title: 'M16 · EXODUS', brief: 'The HYDRA is dead, but the sector still crawls with leaderless drones. One K-9 armored personnel carrier survived the war — steal it from the old compound (southeast, press E to board) and drive to extraction. The longer you stay, the angrier the swarm gets. Run them over if they get in the way.',
+    objective: 'Steal the APC, drive to extraction', setup() {
+      walls = makeWalls(8); mTimer = 0;
+      vehicles.push({ x: W - 110, y: H - 110, r: 22, hp: 300, maxHp: 300, angle: Math.PI });
+      spawnEnemy('turret', W - 200, H - 190); spawnWave(3);
+    }, tick(dt) {
+      mTimer += dt;
+      const stars = Math.min(5, 1 + Math.floor(mTimer / 15));
+      if (enemies.length < 2 + stars * 2 && Math.random() < 0.005 * stars) spawnEdge(Math.random() < 0.25 ? 'stalker' : 'drone');
+    }, done() { return player.veh && dist(player, { x: 60, y: 60 }) < 54; },
+    fail() { return mTimer > 3 && vehicles.length === 0; }, failMsg: 'The APC was destroyed. No ride home.',
+    status() { const s = Math.min(5, 1 + Math.floor(mTimer / 15)); return (player.veh ? 'DRIVE TO EXTRACTION' : 'STEAL THE APC (E)') + ' · WANTED ' + '★'.repeat(s); },
+    zones: [{ x: 60, y: 60, r: 54, color: '#3ddc84' }] },
+];
+
+function dropAt(x, y, kind, idx) { pickups.push({ kind, x, y, r: 11, w: idx }); }
+
+// ---------- mission flow ----------
+function startMission(i) {
+  mission = i;
+  player = { x: 60, y: H - 60, r: 14, hp: Math.max(player ? player.hp : 100, 60), maxHp: 100 };
+  bullets = []; enemyBullets = []; enemies = []; pickups = []; effects = []; vehicles = []; escort = null;
+  mTimer = 0; mCount = 0; kills = 0;
+  MISSIONS[i].setup();
+  hudMnum.textContent = (i + 1) + '/' + MISSIONS.length;
+  state = 'play';
+  overlay.classList.add('hidden');
+}
+function showBriefing(i) {
+  state = 'briefing';
+  ovTitle.textContent = MISSIONS[i].title;
+  ovBody.innerHTML = MISSIONS[i].brief;
+  ovObjective.textContent = 'OBJECTIVE: ' + MISSIONS[i].objective;
+  ovBtn.textContent = 'DEPLOY';
+  overlay.classList.remove('hidden');
+}
+ovBtn.onclick = () => {
+  if (state === 'menu' || state === 'debrief') showBriefing(mission);
+  else if (state === 'briefing') startMission(mission);
+  else if (state === 'dead') showBriefing(mission);
+  else if (state === 'won') { mission = 0; unlocked = [true, false, false, false, false, false]; curWeapon = 0; WEAPONS.forEach((w, i) => { if (i) w.ammo = 0; }); player = null; showBriefing(0); }
+};
+
+function missionComplete() {
+  mission++;
+  if (mission >= MISSIONS.length) {
+    state = 'won';
+    ovTitle.textContent = 'VICTORY';
+    ovBody.textContent = 'The K-9 roars through the perimeter gate and the swarm falls away behind you. The rogue AI is gone, the grid is back in human hands, and Dr. Reyes is waiting at extraction. The U.S. Robotic Army stands down — until it is needed again. Campaign complete, ARES-7.';
+    ovObjective.textContent = 'ALL ' + MISSIONS.length + ' MISSIONS COMPLETE';
+    ovBtn.textContent = 'PLAY AGAIN';
+  } else {
+    state = 'debrief';
+    ovTitle.textContent = 'MISSION COMPLETE';
+    ovBody.textContent = MISSIONS[mission - 1].title + ' cleared. Systems nominal. Next deployment ready.';
+    ovObjective.textContent = 'NEXT: ' + MISSIONS[mission].title;
+    ovBtn.textContent = 'CONTINUE';
+  }
+  overlay.classList.remove('hidden');
+}
+function missionFailed(msg) {
+  state = 'dead';
+  ovTitle.textContent = 'MISSION FAILED';
+  ovBody.textContent = msg || 'ARES-7 unit destroyed. Rebooting from last checkpoint.';
+  ovObjective.textContent = 'RETRY: ' + MISSIONS[mission].title;
+  ovBtn.textContent = 'REDEPLOY';
+  overlay.classList.remove('hidden');
+}
+
+// ---------- combat ----------
+function shoot(now) {
+  const w = WEAPONS[curWeapon];
+  if (now - lastShot < w.rate) return;
+  if (w.ammo !== Infinity && w.ammo <= 0) { curWeapon = 0; return; }
+  lastShot = now;
+  if (w.ammo !== Infinity) w.ammo--;
+  const base = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+  for (let p = 0; p < w.pellets; p++) {
+    const a = base + rnd(-w.spread, w.spread);
+    bullets.push({ x: player.x, y: player.y, vx: Math.cos(a) * w.speed, vy: Math.sin(a) * w.speed, dmg: w.dmg, color: w.color, life: 90 });
+  }
+}
+function enemyShoot(e) {
+  const t = (escort && !escort.follow && Math.random() < 0.5) ? escort : player;
+  const a = Math.atan2(t.y - e.y, t.x - e.x) + rnd(-0.12, 0.12);
+  const s = e.bulletSpeed || 5;
+  enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, dmg: e.dmg, life: 140 });
+}
+function killEnemy(i) {
+  const e = enemies[i];
+  effects.push({ x: e.x, y: e.y, r: e.r, t: 18 });
+  if (!e.depot && !e.generator) kills++;
+  // loot drops
+  const roll = Math.random();
+  if (e.generator || e.depot) mCount++;
+  else if (e.boss || e.type === 'boss') {}
+  else if (roll < 0.14) dropAt(e.x, e.y, 'health', 0);
+  else if (roll < 0.30) dropAt(e.x, e.y, 'ammo', 0);
+  else if (roll < 0.38) {
+    const locked = [1, 2, 3, 4, 5].filter(w => !unlocked[w] && w <= Math.min(5, mission + 1));
+    if (locked.length) dropAt(e.x, e.y, 'weapon', locked[0]);
+    else dropAt(e.x, e.y, 'ammo', 0);
+  }
+  enemies.splice(i, 1);
+}
+
+// ---------- update ----------
+function update(dt, now) {
+  const M = MISSIONS[mission];
+
+  // enter / exit vehicle
+  if (keys['e'] && !eLatch) {
+    eLatch = true;
+    if (player.veh) { player.veh = null; player.x = Math.max(player.r, Math.min(W - player.r, player.x + 38)); }
+    else { const v = vehicles.find(v => dist(player, v) < v.r + 28); if (v) player.veh = v; }
+  }
+  if (!keys['e']) eLatch = false;
+
+  // player / vehicle movement
+  const sp = player.veh ? 6.2 : 3.1;
+  let dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
+  let dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
+  if (dx || dy) { const l = Math.hypot(dx, dy); dx /= l; dy /= l; }
+  if (player.veh) {
+    const v = player.veh;
+    const nvx = { x: v.x + dx * sp, y: v.y }, nvy = { x: v.x, y: v.y + dy * sp };
+    if (!inWall(nvx, v.r)) v.x = Math.max(v.r, Math.min(W - v.r, nvx.x));
+    if (!inWall(nvy, v.r)) v.y = Math.max(v.r, Math.min(H - v.r, nvy.y));
+    if (dx || dy) {
+      v.angle = Math.atan2(dy, dx);
+      // ram damage: roadkill anything under the wheels
+      for (let j = enemies.length - 1; j >= 0; j--) {
+        const e = enemies[j];
+        if (dist(v, e) < v.r + e.r) { e.hp -= 2.5; e.flash = 4; v.hp -= 0.6; if (e.hp <= 0) killEnemy(j); }
+      }
+    }
+    player.x = v.x; player.y = v.y;
+  } else {
+    const nx = { x: player.x + dx * sp, y: player.y }, ny = { x: player.x, y: player.y + dy * sp };
+    if (!inWall(nx, player.r)) player.x = Math.max(player.r, Math.min(W - player.r, nx.x));
+    if (!inWall(ny, player.r)) player.y = Math.max(player.r, Math.min(H - player.r, ny.y));
+  }
+
+  if (mouse.down) shoot(now);
+
+  // bullets
+  for (const arr of [bullets, enemyBullets]) {
+    for (let i = arr.length - 1; i >= 0; i--) {
+      const b = arr[i];
+      b.x += b.vx; b.y += b.vy; b.life--;
+      if (b.life <= 0 || b.x < 0 || b.x > W || b.y < 0 || b.y > H || inWall(b, 2)) arr.splice(i, 1);
+    }
+  }
+  // player bullets vs enemies
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      const e = enemies[j];
+      if (Math.hypot(b.x - e.x, b.y - e.y) < e.r + 3) {
+        e.hp -= b.dmg; e.flash = 4; bullets.splice(i, 1);
+        if (e.hp <= 0) killEnemy(j);
+        break;
+      }
+    }
+  }
+  // enemy bullets vs player / escort
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    const b = enemyBullets[i];
+    if (Math.hypot(b.x - player.x, b.y - player.y) < (player.veh ? player.veh.r : player.r) + 3) {
+      if (player.veh) player.veh.hp -= b.dmg; else player.hp -= b.dmg;
+      enemyBullets.splice(i, 1); continue;
+    }
+    if (escort && Math.hypot(b.x - escort.x, b.y - escort.y) < escort.r + 3) {
+      escort.hp -= b.dmg; enemyBullets.splice(i, 1);
+    }
+  }
+  // enemies
+  for (const e of enemies) {
+    if (e.flash) e.flash--;
+    if (e.speed) {
+      const t = (escort && !escort.follow && e.type !== 'boss' && !e.boss && Math.random() < 0.4) ? escort : player;
+      const d = dist(e, t);
+      if (d > (e.contact ? e.r + t.r - 4 : 60)) {
+        const mx = { x: e.x + (t.x - e.x) / d * e.speed, y: e.y };
+        const my = { x: e.x, y: e.y + (t.y - e.y) / d * e.speed };
+        if (!inWall(mx, e.r)) e.x = mx.x;
+        if (!inWall(my, e.r)) e.y = my.y;
+      }
+      if (t === player && d < e.r + (player.veh ? player.veh.r : player.r) + 2) {
+        if (player.veh) player.veh.hp -= (e.contact || 0.4); else player.hp -= (e.contact || 0.4);
+      }
+    }
+    e.cooldown -= dt * 1000;
+    if (!e.noShoot && e.cooldown <= 0 && dist(e, player) < (e.range || 260)) {
+      enemyShoot(e);
+      if (e.type === 'boss' || e.boss) { enemyShoot(e); enemyShoot(e); }
+      e.cooldown = (e.type === 'boss' || e.boss) ? 700 : e.type === 'turret' ? 1100 : e.type === 'sniper' ? 1900 : rnd(900, 1700);
+    }
+  }
+  // pickups
+  for (let i = pickups.length - 1; i >= 0; i--) {
+    const p = pickups[i];
+    if (p.kind === 'beacon') continue;
+    if (dist(player, p) < player.r + p.r) {
+      if (p.kind === 'crate' || p.kind === 'chip') mCount++;
+      if (p.kind === 'health') player.hp = Math.min(player.maxHp, player.hp + 35);
+      if (p.kind === 'ammo') WEAPONS.forEach((w, wi) => { if (wi && unlocked[wi]) w.ammo += wi === 4 ? 6 : wi === 5 ? 80 : 25; });
+      if (p.kind === 'weapon') { unlocked[p.w] = true; WEAPONS[p.w].ammo += p.w === 4 ? 10 : p.w === 5 ? 200 : 40; curWeapon = p.w; }
+      pickups.splice(i, 1);
+    }
+  }
+  for (let i = effects.length - 1; i >= 0; i--) if (--effects[i].t <= 0) effects.splice(i, 1);
+  // vehicle destruction
+  for (let i = vehicles.length - 1; i >= 0; i--) {
+    if (vehicles[i].hp <= 0) {
+      const v = vehicles[i];
+      effects.push({ x: v.x, y: v.y, r: 44, t: 18 });
+      if (player.veh === v) { player.veh = null; player.hp -= 25; }
+      vehicles.splice(i, 1);
+    }
+  }
+
+  if (M.tick) M.tick(dt);
+  if (player.hp <= 0) return missionFailed();
+  if (M.fail && M.fail()) return missionFailed(M.failMsg);
+  if (M.done()) return missionComplete();
+
+  hudHp.textContent = Math.max(0, player.hp | 0);
+  hudWeap.textContent = WEAPONS[curWeapon].name;
+  hudAmmo.textContent = WEAPONS[curWeapon].ammo === Infinity ? '∞' : WEAPONS[curWeapon].ammo;
+  hudMobj.textContent = M.status();
+}
+
+// ---------- render ----------
+function draw() {
+  cx.fillStyle = '#11161f'; cx.fillRect(0, 0, W, H);
+  // grid
+  cx.strokeStyle = '#161d29'; cx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, H); cx.stroke(); }
+  for (let y = 0; y < H; y += 40) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); }
+  // zones
+  const M = MISSIONS[mission];
+  if (M && M.zones) for (const z of M.zones) {
+    cx.beginPath(); cx.arc(z.x, z.y, z.r, 0, 7);
+    cx.fillStyle = z.color + '22'; cx.fill();
+    cx.strokeStyle = z.color; cx.stroke();
+  }
+  // walls
+  for (const w of walls) {
+    cx.fillStyle = '#232f40'; cx.fillRect(w.x, w.y, w.w, w.h);
+    cx.strokeStyle = '#31435c'; cx.strokeRect(w.x, w.y, w.w, w.h);
+  }
+  // pickups
+  for (const p of pickups) {
+    cx.save(); cx.translate(p.x, p.y);
+    if (p.kind === 'beacon') {
+      cx.strokeStyle = '#3ddc84'; cx.beginPath(); cx.arc(0, 0, p.r + Math.sin(Date.now() / 200) * 3, 0, 7); cx.stroke();
+      cx.fillStyle = '#3ddc84'; cx.fillRect(-3, -3, 6, 6);
+    } else if (p.kind === 'crate')  { cx.fillStyle = '#b58840'; cx.fillRect(-9, -9, 18, 18); cx.strokeStyle = '#e0b060'; cx.strokeRect(-9, -9, 18, 18); }
+    else if (p.kind === 'chip')   { cx.fillStyle = '#3ddc84'; cx.fillRect(-8, -6, 16, 12); cx.fillStyle = '#0a0e14'; cx.fillRect(-4, -2, 8, 4); }
+    else if (p.kind === 'health') { cx.fillStyle = '#ff6b6b'; cx.fillRect(-8, -3, 16, 6); cx.fillRect(-3, -8, 6, 16); }
+    else if (p.kind === 'ammo')   { cx.fillStyle = '#ffd166'; cx.fillRect(-7, -5, 4, 10); cx.fillRect(-2, -5, 4, 10); cx.fillRect(3, -5, 4, 10); }
+    else if (p.kind === 'weapon') { cx.fillStyle = WEAPONS[p.w].color; cx.fillRect(-10, -3, 20, 6); cx.fillRect(2, 3, 5, 6); }
+    cx.restore();
+  }
+  // vehicles
+  for (const v of vehicles) {
+    cx.save(); cx.translate(v.x, v.y); cx.rotate(v.angle || 0);
+    cx.fillStyle = '#4a6b3a'; cx.fillRect(-24, -15, 48, 30);
+    cx.fillStyle = '#2f4526'; cx.fillRect(-12, -10, 28, 20);
+    cx.fillStyle = '#7d9c68'; cx.fillRect(16, -6, 8, 12);
+    cx.restore();
+    if (v.hp < v.maxHp) {
+      cx.fillStyle = '#233'; cx.fillRect(v.x - 22, v.y - 30, 44, 4);
+      cx.fillStyle = '#9fe870'; cx.fillRect(v.x - 22, v.y - 30, 44 * Math.max(0, v.hp / v.maxHp), 4);
+    }
+  }
+  // escort
+  if (escort && escort.hp > 0) {
+    cx.fillStyle = escort.follow ? '#7dd87f' : '#8fb4ff';
+    cx.beginPath(); cx.arc(escort.x, escort.y, escort.r, 0, 7); cx.fill();
+    cx.fillStyle = '#0a0e14'; cx.fillRect(escort.x - 5, escort.y - 3, 10, 6);
+    cx.fillStyle = '#233'; cx.fillRect(escort.x - 16, escort.y - escort.r - 10, 32, 4);
+    cx.fillStyle = '#3ddc84'; cx.fillRect(escort.x - 16, escort.y - escort.r - 10, 32 * Math.max(0, escort.hp / escort.maxHp), 4);
+  }
+  // enemies
+  for (const e of enemies) {
+    cx.save(); cx.translate(e.x, e.y);
+    cx.fillStyle = e.flash ? '#ffffff' : e.color;
+    if (e.type === 'turret' || e.type === 'depot') {
+      cx.fillRect(-e.r, -e.r, e.r * 2, e.r * 2);
+      if (e.type === 'turret') {
+        const a = Math.atan2(player.y - e.y, player.x - e.x);
+        cx.strokeStyle = e.generator ? '#c98fff' : '#ddd'; cx.lineWidth = 4;
+        cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(Math.cos(a) * e.r * 1.4, Math.sin(a) * e.r * 1.4); cx.stroke();
+      } else {
+        cx.fillStyle = '#0a0e14'; cx.fillRect(-e.r * 0.5, -e.r * 0.5, e.r, e.r);
+        cx.fillStyle = '#ffd166'; cx.fillRect(-e.r * 0.3, -e.r * 0.3, e.r * 0.6, e.r * 0.6);
+      }
+    } else {
+      cx.beginPath(); cx.arc(0, 0, e.r, 0, 7); cx.fill();
+      const a = Math.atan2(player.y - e.y, player.x - e.x);
+      cx.fillStyle = '#0a0e14';
+      cx.beginPath(); cx.arc(Math.cos(a) * e.r * 0.5, Math.sin(a) * e.r * 0.5, e.r * 0.3, 0, 7); cx.fill();
+    }
+    if (e.hp < e.maxHp) {
+      cx.fillStyle = '#233'; cx.fillRect(-e.r, -e.r - 9, e.r * 2, 4);
+      cx.fillStyle = '#ff6b6b'; cx.fillRect(-e.r, -e.r - 9, e.r * 2 * (e.hp / e.maxHp), 4);
+    }
+    cx.restore();
+  }
+  // bullets
+  for (const b of bullets) { cx.fillStyle = b.color; cx.fillRect(b.x - 2, b.y - 2, 4, 4); }
+  for (const b of enemyBullets) { cx.fillStyle = '#ff5c5c'; cx.beginPath(); cx.arc(b.x, b.y, 3, 0, 7); cx.fill(); }
+  // effects
+  for (const f of effects) {
+    cx.strokeStyle = 'rgba(255,180,80,' + f.t / 18 + ')'; cx.lineWidth = 3;
+    cx.beginPath(); cx.arc(f.x, f.y, f.r + (18 - f.t) * 2, 0, 7); cx.stroke();
+  }
+  // player (robot)
+  if (player) {
+    cx.save(); cx.translate(player.x, player.y);
+    const a = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+    cx.fillStyle = '#7fd4ff'; cx.beginPath(); cx.arc(0, 0, player.r, 0, 7); cx.fill();
+    cx.fillStyle = '#123047'; cx.beginPath(); cx.arc(0, 0, player.r * 0.6, 0, 7); cx.fill();
+    cx.strokeStyle = WEAPONS[curWeapon].color; cx.lineWidth = 4;
+    cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(Math.cos(a) * player.r * 1.6, Math.sin(a) * player.r * 1.6); cx.stroke();
+    cx.restore();
+  }
+}
+
+// ---------- loop ----------
+// console debug API (also handy for cheats: __teleport(x, y))
+window.__state = () => ({ mission, state, x: player && player.x, y: player && player.y, inVehicle: !!(player && player.veh), vehicles: vehicles ? vehicles.length : 0, enemies: enemies ? enemies.length : 0 });
+window.__teleport = (x, y) => { if (!player) return; if (player.veh) { player.veh.x = x; player.veh.y = y; } player.x = x; player.y = y; };
+
+function loop(t) {
+  const dt = Math.min(0.05, (t - lastTime) / 1000 || 0);
+  lastTime = t;
+  if (state === 'play') { update(dt, t); if (state === 'play') draw(); else draw(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
