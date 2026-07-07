@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GTA-Tier Prompt Forge — for Claude Fable 5</title>
+<style>
+  :root {
+    --bg: #07090f; --panel: #0e1420; --panel2: #131b2b; --line: #223049;
+    --txt: #cfe0f5; --dim: #6c86a8; --neon: #22e0c8; --neon2: #ff2bd6; --amber: #ffd166;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { background: radial-gradient(1200px 600px at 50% -10%, #12203a 0%, var(--bg) 60%); color: var(--txt);
+         font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; min-height: 100vh; padding-bottom: 74px; }
+  header { text-align: center; padding: 18px 16px 8px; }
+  header h1 { font-size: clamp(20px, 5vw, 28px); letter-spacing: 2px; font-weight: 800;
+    background: linear-gradient(90deg, var(--neon), var(--neon2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  header p { color: var(--dim); font-size: 12px; letter-spacing: 1px; margin-top: 2px; }
+  main { max-width: 720px; margin: 0 auto; padding: 8px 14px 30px; }
+  .tab { display: none; } .tab.active { display: block; animation: fade .2s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .field { margin: 14px 0; }
+  .field > label { display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--neon); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 9px 14px; border: 1px solid var(--line); border-radius: 20px; background: var(--panel);
+    color: var(--dim); font-size: 13px; cursor: pointer; transition: all .15s; user-select: none; }
+  .chip:hover { border-color: var(--neon); color: var(--txt); }
+  .chip.sel { background: linear-gradient(90deg, rgba(34,224,200,.18), rgba(255,43,214,.18));
+    border-color: var(--neon); color: #fff; box-shadow: 0 0 14px rgba(34,224,200,.25); }
+
+  input[type=range] { width: 100%; accent-color: var(--neon); }
+  .rangeval { color: var(--amber); font-weight: 700; }
+  textarea, input[type=text] { width: 100%; background: var(--panel); border: 1px solid var(--line); color: var(--txt);
+    border-radius: 10px; padding: 11px; font-family: inherit; font-size: 14px; }
+  textarea { resize: vertical; min-height: 60px; }
+
+  .forge-btn { display: block; width: 100%; margin-top: 22px; padding: 16px; border: none; border-radius: 12px;
+    background: linear-gradient(90deg, var(--neon), var(--neon2)); color: #05070c; font-size: 17px; font-weight: 800;
+    letter-spacing: 3px; cursor: pointer; box-shadow: 0 0 24px rgba(34,224,200,.35); }
+  .forge-btn:active { transform: scale(.99); }
+  .ghost { background: var(--panel); color: var(--txt); border: 1px solid var(--line); box-shadow: none; }
+
+  .result-box { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-top: 8px; }
+  pre#promptOut { white-space: pre-wrap; word-break: break-word; font-family: 'SF Mono', Consolas, monospace;
+    font-size: 12.5px; line-height: 1.5; color: #bfe9df; max-height: 46vh; overflow: auto; }
+  .feat-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .feat { font-size: 11px; padding: 4px 9px; border-radius: 6px; background: rgba(34,224,200,.1);
+    border: 1px solid rgba(34,224,200,.35); color: var(--neon); }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .actions button { padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2);
+    color: var(--txt); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .actions button:active { transform: scale(.98); }
+
+  .saved-item { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+  .saved-item h4 { font-size: 13px; color: var(--amber); margin-bottom: 4px; }
+  .saved-item .meta { font-size: 11px; color: var(--dim); margin-bottom: 8px; }
+  .saved-item .mini { display: flex; gap: 8px; }
+  .saved-item .mini button { flex: 1; padding: 8px; font-size: 12px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--panel2); color: var(--txt); cursor: pointer; }
+  .empty { color: var(--dim); text-align: center; padding: 40px 10px; font-size: 14px; }
+
+  .info p { color: var(--txt); line-height: 1.6; margin: 10px 0; font-size: 14px; }
+  .info h3 { color: var(--neon); margin: 18px 0 6px; font-size: 15px; letter-spacing: 1px; }
+  .info code { background: var(--panel2); padding: 1px 6px; border-radius: 4px; color: var(--amber); font-size: 13px; }
+  .info .warn { border-left: 3px solid var(--amber); padding: 10px 12px; background: rgba(255,209,102,.06); border-radius: 0 8px 8px 0; }
+
+  nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: rgba(8,11,18,.96);
+    border-top: 1px solid var(--line); backdrop-filter: blur(8px); padding-bottom: env(safe-area-inset-bottom); }
+  nav button { flex: 1; background: none; border: none; color: var(--dim); font-size: 11px; padding: 12px 0;
+    cursor: pointer; letter-spacing: 1px; }
+  nav button.on { color: var(--neon); }
+  nav button .ic { display: block; font-size: 18px; margin-bottom: 2px; }
+  .toast { position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%); background: var(--neon); color: #05070c;
+    padding: 10px 20px; border-radius: 20px; font-weight: 700; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>PROMPT FORGE</h1>
+  <p>GTA-TIER SCENE PROMPTS · FOR CLAUDE FABLE 5</p>
+</header>
+
+<main>
+  <!-- FORGE TAB -->
+  <section id="tab-forge" class="tab active">
+    <div class="field"><label>Scene</label><div class="chips" data-group="scene"></div></div>
+    <div class="field"><label>Weather</label><div class="chips" data-group="weather"></div></div>
+    <div class="field"><label>Lighting</label><div class="chips" data-group="lighting"></div></div>
+    <div class="field"><label>Camera</label><div class="chips" data-group="camera"></div></div>
+    <div class="field"><label>Region · Leonida</label><div class="chips" data-group="region"></div></div>
+    <div class="field"><label>Time of Day</label><div class="chips" data-group="time"></div></div>
+    <div class="field">
+      <label>Detail Density — <span id="detailVal" class="rangeval">Nanite-tier</span></label>
+      <input type="range" id="detail" min="0" max="4" value="4" step="1">
+    </div>
+    <div class="field"><label>Target Device</label><div class="chips" data-group="device"></div></div>
+    <div class="field"><label>Extra direction (optional)</label>
+      <input type="text" id="extra" placeholder="e.g. neon reflections in wet asphalt, a lone figure under a streetlight"></div>
+    <button class="forge-btn" id="forgeBtn">⚡ FORGE PROMPT</button>
+    <button class="forge-btn ghost" id="randomBtn" style="margin-top:10px;letter-spacing:2px;font-size:14px;">🎲 RANDOM FORGE</button>
+  </section>
+
+  <!-- RESULT TAB -->
+  <section id="tab-result" class="tab">
+    <div class="feat-row" id="featRow"></div>
+    <div class="result-box"><pre id="promptOut">Forge a prompt first.</pre></div>
+    <div class="actions">
+      <button id="copyBtn">📋 Copy</button>
+      <button id="saveBtn">💾 Save</button>
+      <button id="shareBtn">🔗 Share</button>
+      <button id="regenBtn">♻ Regenerate</button>
+    </div>
+  </section>
+
+  <!-- SAVED TAB -->
+  <section id="tab-saved" class="tab">
+    <div class="field"><input type="text" id="search" placeholder="🔍 Search saved prompts…"></div>
+    <div id="savedList"></div>
+  </section>
+
+  <!-- INFO TAB -->
+  <section id="tab-info" class="tab info">
+    <h3>What this is</h3>
+    <p>A forge for <b>structured scene-generation prompts</b> aimed at Claude Fable 5. You dial in a scene, weather,
+       lighting model, camera, Leonida region, detail tier, and target device — it assembles a precise, multi-section
+       prompt you can paste into a chat to have Fable 5 write a GTA-6-tier scene description, shot list, or render brief.</p>
+    <div class="warn">
+      <p style="margin:0;font-size:13px;"><b>Honest scope:</b> this generates <i>prompts and scene descriptions</i>.
+      It does not itself render 3D graphics or run a game engine — no app on a phone renders true GTA 6 at native 4K.
+      For real in-browser ray tracing, see the WebGPU path tracer in this repo (<code>game/city_rtx.html</code>).</p>
+    </div>
+    <h3>Device targets</h3>
+    <p>The prompt bakes in the right GPU/API hints per device:</p>
+    <p>• <b>Lenovo Legion 7i</b> — RTX laptop GPU, DX12/Vulkan, hardware ray tracing + DLSS.<br>
+       • <b>iPhone 16 Pro</b> — A18 Pro, Metal 3, MetalFX upscaling.<br>
+       • <b>Galaxy Fold 6</b> — Snapdragon 8 Gen 3, Vulkan, foldable dual-screen layout.</p>
+    <h3>How to use</h3>
+    <p>1. Forge a prompt. 2. Copy it. 3. Paste it to Claude Fable 5. 4. Save the ones that work.
+       Everything saves locally in your browser — nothing leaves the device.</p>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-tab="forge"><span class="ic">⚙</span>Forge</button>
+  <button data-tab="result"><span class="ic">✦</span>Result</button>
+  <button data-tab="saved"><span class="ic">💾</span>Saved</button>
+  <button data-tab="info"><span class="ic">ⓘ</span>Info</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const OPTS = {
+  scene: ['Beach boardwalk', 'Neon downtown', 'Everglades swamp', 'Highway at speed', 'Luxury marina', 'Back-alley slums', 'Nightclub district', 'Suburban sprawl'],
+  weather: ['Clear', 'Thunderstorm', 'Tropical downpour', 'Heat haze', 'Rolling fog', 'Golden hurricane sky', 'Overcast'],
+  lighting: ['Ray-traced (dynamic env reflections)', 'Volumetric god rays', 'Neon night bloom', 'Harsh midday sun'],
+  camera: ['Cinematic dolly', 'Low-angle hero shot', 'Aerial drone sweep', 'Handheld chase', 'Dutch-angle tension', 'Slow orbital'],
+  region: ['Vice Beach (Miami)', 'Downtown Vice City', 'Leonida Keys', 'Port Gellhorn', 'Ambrosia farmland'],
+  time: ['Dawn', 'Noon', 'Golden hour', 'Blue hour', 'Midnight'],
+  device: ['Lenovo Legion 7i', 'iPhone 16 Pro', 'Galaxy Fold 6', 'Any high-end 2026'],
+};
+const DETAIL = ['Sparse', 'Moderate', 'Dense', 'Very dense', 'Nanite-tier micro-geometry'];
+const DEVICE_SPEC = {
+  'Lenovo Legion 7i': 'NVIDIA RTX laptop GPU · DirectX 12 Ultimate / Vulkan · hardware ray tracing + DLSS 3 frame generation · target 1440p120',
+  'iPhone 16 Pro': 'Apple A18 Pro · Metal 3 · hardware ray tracing + MetalFX temporal upscaling · target ProMotion 120Hz',
+  'Galaxy Fold 6': 'Snapdragon 8 Gen 3 · Vulkan 1.3 · Adreno ray query · foldable 7.6" inner-screen layout · target 90fps thermal-managed',
+  'Any high-end 2026': 'RTX-class GPU or A18/Snapdragon-8-Gen-3 tier · Vulkan/Metal 3 · hardware RT + AI upscaling',
+};
+const sel = {};
+Object.keys(OPTS).forEach(g => sel[g] = OPTS[g][0]);
+let detail = 4, lastPrompt = '';
+
+// build chips
+document.querySelectorAll('.chips').forEach(box => {
+  const g = box.dataset.group;
+  OPTS[g].forEach((label, i) => {
+    const c = document.createElement('div');
+    c.className = 'chip' + (i === 0 ? ' sel' : '');
+    c.textContent = label; c.dataset.val = label;
+    c.onclick = () => { sel[g] = label; box.querySelectorAll('.chip').forEach(x => x.classList.remove('sel')); c.classList.add('sel'); };
+    box.appendChild(c);
+  });
+});
+const detailEl = document.getElementById('detail'), detailVal = document.getElementById('detailVal');
+detailEl.oninput = () => { detail = +detailEl.value; detailVal.textContent = DETAIL[detail]; };
+
+function buildPrompt() {
+  const extra = document.getElementById('extra').value.trim();
+  const rt = sel.lighting.startsWith('Ray-traced');
+  const feats = ['Ray tracing', 'Volumetric lighting', DETAIL[detail], 'Cinematic camera', sel.weather + ' weather', 'Region-accurate architecture'];
+  const p =
+`# GTA-6-TIER SCENE BRIEF — for Claude Fable 5
+
+## Scene
+Render a photorealistic, GTA-6-caliber scene: **${sel.scene}** in ${sel.region}, at ${sel.time.toLowerCase()}, ${sel.weather.toLowerCase()} weather.
+
+## Rendering directives
+- Lighting: ${sel.lighting}. ${rt ? 'Use ray-traced global illumination with dynamic reflections that mirror the actual surrounding environment (wet asphalt, glass, chrome) — not static cubemaps.' : 'Physically-based direct + bounce lighting with soft shadows.'}
+- Volumetrics: atmospheric fog, light shafts through humidity, particle haze in the air.
+- Geometry: ${DETAIL[detail]} — layered surface detail, no visible LOD popping, dense clutter and props.
+- Materials: PBR with subsurface scattering on skin, clearcoat on vehicles, wet/roughness variation on ground.
+- Weather FX: ${sel.weather} — with matching wind, puddles/reflections, and sky state.
+
+## Camera
+${sel.camera}. Frame it like a AAA game cinematic: rule-of-thirds composition, shallow depth of field, ACES filmic tone mapping, subtle chromatic aberration and bloom, teal-and-orange color grade.
+
+## Region accuracy — ${sel.region}
+Architecture, signage, foliage, and vehicles must read as authentic to ${sel.region}: correct building styles, palm species, license plates, and street furniture. Populate with believable NPC density and traffic.
+
+## Target hardware
+${sel.device} — ${DEVICE_SPEC[sel.device]}.
+Optimize the described techniques to this budget (variable-rate shading, temporal upscaling, and frame generation where available).
+${extra ? '\n## Extra direction\n' + extra + '\n' : ''}
+## Deliverable
+Produce: (1) a vivid paragraph describing the final frame, (2) a bulleted shot/render breakdown (lighting, materials, post-fx), and (3) a short "engine settings" block a technical artist could act on. Keep it grounded in what 2026 hardware can actually do.`;
+  return { text: p, feats };
+}
+
+function showResult(res) {
+  lastPrompt = res.text;
+  document.getElementById('promptOut').textContent = res.text;
+  const fr = document.getElementById('featRow'); fr.innerHTML = '';
+  res.feats.forEach(f => { const s = document.createElement('span'); s.className = 'feat'; s.textContent = f; fr.appendChild(s); });
+  switchTab('result');
+}
+document.getElementById('forgeBtn').onclick = () => showResult(buildPrompt());
+document.getElementById('regenBtn').onclick = () => showResult(buildPrompt());
+document.getElementById('randomBtn').onclick = () => {
+  Object.keys(OPTS).forEach(g => {
+    const v = OPTS[g][Math.floor(Math.random() * OPTS[g].length)];
+    sel[g] = v;
+    const box = document.querySelector('.chips[data-group="' + g + '"]');
+    box.querySelectorAll('.chip').forEach(c => c.classList.toggle('sel', c.dataset.val === v));
+  });
+  detail = Math.floor(Math.random() * 5); detailEl.value = detail; detailVal.textContent = DETAIL[detail];
+  showResult(buildPrompt());
+};
+
+// clipboard / share
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1400); }
+document.getElementById('copyBtn').onclick = async () => {
+  try { await navigator.clipboard.writeText(lastPrompt); toast('Copied ✓'); }
+  catch { const ta = document.createElement('textarea'); ta.value = lastPrompt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('Copied ✓'); }
+};
+document.getElementById('shareBtn').onclick = async () => {
+  if (navigator.share) { try { await navigator.share({ title: 'GTA-tier prompt', text: lastPrompt }); } catch {} }
+  else { document.getElementById('copyBtn').onclick(); toast('Copied (share n/a) ✓'); }
+};
+
+// persistence
+const KEY = 'forge.saved.v1';
+function getSaved() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } }
+function setSaved(a) { localStorage.setItem(KEY, JSON.stringify(a)); }
+document.getElementById('saveBtn').onclick = () => {
+  if (!lastPrompt) return toast('Forge one first');
+  const a = getSaved();
+  a.unshift({ id: Date.now(), title: sel.scene + ' · ' + sel.region, meta: sel.weather + ' · ' + sel.time + ' · ' + DETAIL[detail], text: lastPrompt });
+  setSaved(a); renderSaved(); toast('Saved ✓');
+};
+function renderSaved(filter) {
+  const list = document.getElementById('savedList'); const a = getSaved();
+  const q = (filter || '').toLowerCase();
+  const items = a.filter(x => !q || (x.title + x.meta + x.text).toLowerCase().includes(q));
+  if (!items.length) { list.innerHTML = '<div class="empty">' + (a.length ? 'No matches.' : 'No saved prompts yet. Forge one and hit Save.') + '</div>'; return; }
+  list.innerHTML = '';
+  items.forEach(x => {
+    const d = document.createElement('div'); d.className = 'saved-item';
+    const h = document.createElement('h4'); h.textContent = x.title;
+    const m = document.createElement('div'); m.className = 'meta'; m.textContent = x.meta;
+    const mini = document.createElement('div'); mini.className = 'mini';
+    const load = document.createElement('button'); load.textContent = 'Load'; load.onclick = () => { lastPrompt = x.text; document.getElementById('promptOut').textContent = x.text; document.getElementById('featRow').innerHTML = ''; switchTab('result'); };
+    const del = document.createElement('button'); del.textContent = 'Delete'; del.onclick = () => { setSaved(getSaved().filter(y => y.id !== x.id)); renderSaved(document.getElementById('search').value); toast('Deleted'); };
+    mini.append(load, del); d.append(h, m, mini); list.appendChild(d);
+  });
+}
+document.getElementById('search').oninput = e => renderSaved(e.target.value);
+
+// tabs
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  if (name === 'saved') renderSaved(document.getElementById('search').value);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+// expose for headless test
+window.__forge = { buildPrompt, getSaved, switchTab };
+renderSaved();
+</script>
+</body>
+</html>
