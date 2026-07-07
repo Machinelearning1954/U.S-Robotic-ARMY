@@ -9,7 +9,16 @@
   body { background: #0a0e14; color: #cfd8e3; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
   h1 { margin: 12px 0 4px; font-size: 22px; letter-spacing: 3px; color: #7fd4ff; text-transform: uppercase; }
   #wrap { position: relative; }
-  canvas { background: #11161f; border: 2px solid #2b3a4e; display: block; cursor: crosshair; }
+  canvas { background: #11161f; border: 2px solid #2b3a4e; display: block; cursor: crosshair; filter: saturate(1.18) contrast(1.07); }
+  /* Trailer Grade film stack (ported from PAUDC 3D) + CRT cabinet pass */
+  #cine { position: absolute; inset: 0; pointer-events: none; z-index: 3; mix-blend-mode: soft-light;
+    background: linear-gradient(180deg, rgba(255,158,64,.20) 0%, rgba(255,120,50,.07) 34%, rgba(0,64,92,.13) 70%, rgba(0,42,64,.28) 100%),
+      radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(2,8,14,.6) 100%); }
+  #scan { position: absolute; inset: 0; pointer-events: none; z-index: 4; opacity: .16;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.55) 0 1px, transparent 1px 3px); }
+  #grain { position: absolute; inset: 0; pointer-events: none; z-index: 5; mix-blend-mode: overlay; opacity: .12; image-rendering: pixelated; width: 100%; height: 100%; }
+  #island { margin-top: 8px; font-size: 12px; letter-spacing: .12em; }
+  #island a { color: #3af5d8; text-decoration: none; }
   #hud { width: 960px; display: flex; justify-content: space-between; padding: 6px 4px; font-size: 13px; }
   .bar { color: #9fb4cc; }
   .accent { color: #7fd4ff; }
@@ -43,6 +52,7 @@
 </div>
 <div id="wrap">
   <canvas id="cv" width="960" height="600"></canvas>
+  <div id="cine"></div><div id="scan"></div><canvas id="grain" width="120" height="75"></canvas>
   <div id="overlay">
     <h2 id="ovTitle">U.S. ROBOTIC ARMY</h2>
     <p id="ovBody">A rogue AI has seized the nation's automated defense grid. You are unit <b>ARES-7</b>, the last loyal combat android. Fight through 15 missions to take it back.</p>
@@ -602,6 +612,14 @@ function loop(t) {
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
+</script>
+<div id="island"><a href="index.html">&#8592; BACK TO THE ISLAND &mdash; PAUDC front door</a></div>
+<script>
+(()=>{const g=document.getElementById('grain').getContext('2d');
+function draw(){const im=g.createImageData(120,75);const d=im.data;
+  for(let i=0;i<d.length;i+=4){const v=110+Math.random()*72|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}
+  g.putImageData(im,0,0);}
+draw();setInterval(draw,110);})();
 </script>
 </body>
 </html>

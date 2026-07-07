@@ -39,7 +39,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.19</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.20</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4001,7 +4001,7 @@ const TIER=(()=>{
     ||(devicePixelRatio>=3&&Math.min(screen.width,screen.height)>=390);
   return hi?1:0;
 })();
-const PXR_CAP=[1,1.5,1.75][TIER],BLOOM_ON=TIER>0,SHADOW_MAP=[512,1024,2048][TIER];
+const PXR_CAP=[1,1.5,1.75][TIER],BLOOM_ON=TIER>0,SHADOW_MAP=[512,1024,4096][TIER];
 let pxr=Math.min(devicePixelRatio,PXR_CAP);renderer.setPixelRatio(pxr);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=2; // 2 = soft PCF
 const scene=new THREE.Scene();
@@ -4252,6 +4252,48 @@ function updateTraffic(dt){
     c.g.rotation.y=Math.atan2(-dz,dx);
   }
 }
+// ---------------- v0.20 graphics: street lamps + neon glow sprites ----------------
+let glowTex;{const gc=document.createElement('canvas');gc.width=gc.height=64;const g=gc.getContext('2d');
+ const rg=g.createRadialGradient(32,32,2,32,32,32);
+ rg.addColorStop(0,'rgba(160,255,236,0.85)');rg.addColorStop(0.4,'rgba(58,245,216,0.32)');rg.addColorStop(1,'rgba(58,245,216,0)');
+ g.fillStyle=rg;g.fillRect(0,0,64,64);glowTex=new THREE.CanvasTexture(gc);}
+function glowSprite(x,y,z,scale,color){
+  const m=new THREE.SpriteMaterial({map:glowTex,transparent:true,depthWrite:false,color:color||0xffffff,blending:2}); // 2 = additive
+  const sp=new THREE.Sprite(m);sp.position.set(x,y,z);sp.scale.set(scale,scale,1);scene.add(sp);return sp;}
+// halo every district beacon (the neon pops even off-ULTRA, no bloom needed)
+for(const b of beacons){const h=Math.max(height(b.X,b.Z),0.5);glowSprite(b.X,h+8,b.Z,26);}
+glowSprite(mx(240),Math.max(height(mx(240),mz(272)),0)+9.5,mz(272),30,0xff5fd2); // Pelican Key sign halo
+// lamp posts along the district ring road — warm pools of light at night
+const LAMPL=TIER===2?5:0; // real lights only on ULTRA; heads glow on every tier
+for(let i=0;i<ring.length;i++){
+  const a=ring[i],b=ring[(i+1)%ring.length];
+  const x=(a.X+b.X)/2,z=(a.Z+b.Z)/2,gy=height(x,z);
+  if(gy<0.6)continue; // no lamps in the sea lanes
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.2,7.5,7),new THREE.MeshLambertMaterial({color:0x2b3742}));
+  pole.position.set(x,gy+3.75,z);pole.castShadow=true;scene.add(pole);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.42,8,8),new THREE.MeshBasicMaterial({color:0xffd98a}));
+  head.position.set(x,gy+7.6,z);scene.add(head);
+  glowSprite(x,gy+7.6,z,9,0xffd98a);
+  if(i%2===0&&LAMPL&&i/2<LAMPL){const pl=new THREE.PointLight(0xffd08a,1.1,42);pl.position.set(x,gy+7.2,z);scene.add(pl);}
+}
+// ---------------- GRIDFALL arcade cabinet (the rec room, by the Yard) ----------------
+const ARC={X:mx(1250)-20,Z:mz(1020)-14};
+{const gy=Math.max(height(ARC.X,ARC.Z),0.2);
+ const cab=new THREE.Mesh(new THREE.BoxGeometry(1.6,3,1.4),new THREE.MeshLambertMaterial({color:0x1a2230}));
+ cab.position.set(ARC.X,gy+1.5,ARC.Z);cab.castShadow=true;scene.add(cab);
+ const scr=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.9,0.08),new THREE.MeshBasicMaterial({color:0x7fd4ff}));
+ scr.position.set(ARC.X,gy+2.1,ARC.Z+0.72);scene.add(scr);
+ const marq=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.4,0.2),new THREE.MeshBasicMaterial({color:0xff5fd2}));
+ marq.position.set(ARC.X,gy+3.2,ARC.Z+0.62);scene.add(marq);
+ glowSprite(ARC.X,gy+2.2,ARC.Z+0.9,7,0x7fd4ff);
+ label('GRIDFALL',ARC.X,gy+6,ARC.Z);}
+let arcHint=0;
+function updateArcade(dt){
+  if(veh!==WALKER)return;
+  const d=Math.hypot(P.x-ARC.X,P.z-ARC.Z);
+  if(d<5&&perf>arcHint){arcHint=perf+4000;toast('GRIDFALL cabinet — press E to play U.S. ROBOTIC ARMY');}}
+addEventListener('keydown',e=>{
+  if(e.key.toLowerCase()==='e'&&veh===WALKER&&Math.hypot(P.x-ARC.X,P.z-ARC.Z)<5)location.href='army.html';});
 // ---------------- YARDCLASH Beast Night: the Yard ring at the Crucible ----------------
 const YARD={X:mx(1250)+22,Z:mz(1020)+10};
 {const ry=Math.max(height(YARD.X,YARD.Z),0.2);
@@ -4679,7 +4721,7 @@ function tick(t){
    planeG.rotation.y=-pa-Math.PI/2;
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);
   moon.position.set(P.x-140,210,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -4796,7 +4838,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips}),setRain,setStatic,presence,traffic,walker,YARD,brawler,CHROME,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips}),setRain,setStatic,presence,traffic,walker,YARD,brawler,CHROME,ARC,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

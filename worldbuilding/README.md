@@ -24,7 +24,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.19**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.20**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -99,10 +99,21 @@ Night) — genre pattern only, every form original folklore-fiction. v0.19 adds 
 stunts (splashdowns, Yard wins) now bank a **RAW CLIP** alongside their clout;
 carry them to the Chromelab at Silver Springs and hold, and the Polytech's AI
 enhancer re-renders them for **+8 bonus clout per clip** (systems doc §4.4, with
-the "NUH REAL!" over-glazing satire).
+the "NUH REAL!" over-glazing satire). v0.20 unifies the package into **one game
+with one front door** ([`../game/index.html`](../game/index.html) is now the hub;
+the classic top-down prototype moved to [`../game/2d.html`](../game/2d.html)) and
+boosts the 3D night look: additive neon halos on every district beacon and the
+Pelican sign, **lamp posts with warm light pools along the ring road** (real
+point lights on ULTRA), 4K shadow maps on ULTRA — and the **GRIDFALL arcade
+cabinet** in the Crucible rec room, where walking up on foot and pressing `E`
+boots the U.S. Robotic Army campaign in-fiction.
 
 
-[`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a
+[`../game/index.html`](../game/index.html) — **the front door**: a styled hub
+that presents the whole package as one game with three doors (Neon Harbor 3D,
+the GRIDFALL cabinet, the classic prototype).
+
+[`../game/2d.html`](../game/2d.html) — **PAUDC: Neon Harbor v0.1**, a
 self-contained top-down browser prototype (open the file in any browser). Drive the
 amphibious Mudfish Mk-0 around an island whose coastline is traced from the real
 Port Antonio geography (twin harbors, Navy Island, Folly Point — everything on it
@@ -112,6 +123,8 @@ goat delivery. Keyboard (WASD/arrows + Space) and touch supported.
 [`../game/army.html`](../game/army.html) — **U.S. Robotic Army — Campaign**, a
 top-down 16-mission shooter built in a sibling session (imported from the
 `claude/youtube-video-review-c8e876` branch; see [`../game/ARMY.md`](../game/ARMY.md)).
+In canon it's **GRIDFALL**, the Crucible rec-room arcade cabinet — bootable from
+inside the 3D game — now wearing the Trailer Grade film stack + CRT scanlines.
 You are ARES-7, the last loyal combat android, retaking the automated defense
 grid from a rogue AI: six weapons, drivable vehicles (E to board, hull armor,
 ram damage), a GTA-style 1-5-star wanted level in the APC-heist epilogue, and a

@@ -2,7 +2,10 @@
 
 > Imported from the `claude/youtube-video-review-c8e876` branch (built there as
 > `game/index.html`); lives here as `game/army.html` so it coexists with the
-> PAUDC: Neon Harbor prototypes. Same repo universe, separate playable game.
+> PAUDC: Neon Harbor prototypes. In canon it is **GRIDFALL** — the arcade cabinet
+> in the Crucible rec room: walk up to it on foot in the 3D game and press `E` to
+> boot this campaign. It now wears the PAUDC Trailer Grade film stack plus CRT
+> scanlines (the cabinet glass), and links back to the front door.
 
 A top-down, GTA-inspired mission shooter. You are **ARES-7**, the last loyal combat android, fighting to retake the nation's automated defense grid from a rogue AI.
 

@@ -1,289 +1,58 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PAUDC: Neon Harbor — Playable Prototype</title>
-</head><body><style>
-  :root{
-    --ink:#dff7f1; --teal:#3af5d8; --amber:#ffb84d; --red:#ff5566;
-    --panel:rgba(6,20,26,.82); --line:rgba(58,245,216,.35);
-  }
-  html,body{height:100%;margin:0;overflow:hidden;background:#041820;}
-  body{font-family:'Bahnschrift','DIN Alternate','Franklin Gothic Medium','Arial Narrow',Arial,sans-serif;color:var(--ink);}
-  #wrap{position:fixed;inset:0;}
-  canvas#game{display:block;width:100%;height:100%;touch-action:none;}
-  .hud{position:absolute;pointer-events:none;}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;backdrop-filter:blur(3px);}
-  #obj{top:14px;left:14px;max-width:300px;}
-  #obj h1{margin:0 0 2px;font-size:13px;letter-spacing:.18em;color:var(--teal);text-transform:uppercase;}
-  #obj .m{font-size:16px;font-weight:700;letter-spacing:.02em;}
-  #obj .d{font-size:12.5px;opacity:.85;margin-top:3px;line-height:1.45;}
-  #obj .p{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--amber);margin-top:6px;font-variant-numeric:tabular-nums;}
-  #stats{top:14px;right:14px;text-align:right;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.7;font-variant-numeric:tabular-nums;}
-  #stats b{color:var(--teal);font-weight:400;}
-  #toast{top:22%;left:50%;transform:translateX(-50%);text-align:center;opacity:0;transition:opacity .5s;}
-  #toast .z{font-size:34px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-shadow:0 0 18px var(--teal),0 2px 0 #000;}
-  #toast .s{font-size:13px;letter-spacing:.3em;color:var(--teal);text-transform:uppercase;}
-  #msg{bottom:110px;left:50%;transform:translateX(-50%);font-size:15px;color:var(--amber);text-shadow:0 1px 2px #000;opacity:0;transition:opacity .4s;text-align:center;max-width:82vw;}
-  #mini{bottom:14px;left:14px;border:1px solid var(--line);border-radius:6px;background:var(--panel);}
-  #keys{bottom:14px;right:14px;font-size:11.5px;letter-spacing:.06em;opacity:.8;}
-  #keys b{color:var(--teal);}
-  #stick,#actbtn{position:absolute;bottom:26px;display:none;pointer-events:auto;}
-  #stick{left:26px;width:120px;height:120px;border-radius:50%;border:1.5px solid var(--line);background:rgba(6,20,26,.4);}
-  #nub{position:absolute;left:38px;top:38px;width:44px;height:44px;border-radius:50%;background:rgba(58,245,216,.5);}
-  #actbtn{right:26px;width:84px;height:84px;border-radius:50%;border:1.5px solid var(--amber);background:rgba(255,184,77,.22);color:var(--amber);font:700 13px/84px inherit;text-align:center;letter-spacing:.1em;}
-  #fine{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:9.5px;letter-spacing:.22em;opacity:.45;text-transform:uppercase;}
-  @media (pointer:coarse){ #stick,#actbtn{display:block;} #keys{display:none;} }
-  @media (prefers-reduced-motion:reduce){ #toast,#msg{transition:none;} }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAUDC — Port Antonio Unified Defense Complex</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{min-height:100%;}
+  body{background:radial-gradient(ellipse at 50% -10%,#0d2a38 0%,#05131c 55%,#030b12 100%);
+    color:#dff7f1;font-family:'Bahnschrift','Franklin Gothic Medium','Arial Narrow',Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;padding:42px 18px 60px;}
+  h1{font-size:30px;letter-spacing:.3em;color:#3af5d8;text-transform:uppercase;text-align:center;
+    text-shadow:0 0 22px rgba(58,245,216,.5);}
+  #sub{margin-top:8px;font-size:12.5px;letter-spacing:.22em;opacity:.65;text-transform:uppercase;text-align:center;}
+  #cards{margin-top:44px;display:flex;gap:22px;flex-wrap:wrap;justify-content:center;max-width:1100px;}
+  a.card{display:block;width:300px;padding:26px 24px 22px;border:1.5px solid rgba(58,245,216,.35);
+    border-radius:14px;background:linear-gradient(180deg,rgba(10,29,41,.9),rgba(5,19,28,.95));
+    text-decoration:none;color:inherit;transition:transform .15s,border-color .15s,box-shadow .15s;}
+  a.card:hover{transform:translateY(-4px);border-color:#3af5d8;box-shadow:0 8px 34px rgba(58,245,216,.18);}
+  .tag{font-size:10px;letter-spacing:.28em;color:#ffb84d;text-transform:uppercase;}
+  .card h2{margin:10px 0 8px;font-size:19px;letter-spacing:.08em;color:#eafffb;}
+  .card p{font-size:13px;line-height:1.55;opacity:.8;}
+  .go{margin-top:14px;font-size:12px;letter-spacing:.2em;color:#3af5d8;}
+  #fine{position:fixed;bottom:12px;right:16px;font-size:9.5px;letter-spacing:.2em;opacity:.4;text-transform:uppercase;}
+  .flag{display:inline-block;margin-left:8px;padding:2px 7px;border:1px solid rgba(255,184,77,.5);border-radius:6px;
+    font-size:9px;letter-spacing:.2em;color:#ffb84d;vertical-align:2px;}
 </style>
-<div id="wrap">
-  <canvas id="game"></canvas>
-  <div class="hud card" id="obj"><h1>Objective</h1><div class="m" id="objName"></div><div class="d" id="objDesc"></div><div class="p" id="objProg"></div></div>
-  <div class="hud card" id="stats"></div>
-  <div class="hud" id="toast"><div class="z" id="toastZ"></div><div class="s" id="toastS"></div></div>
-  <div class="hud" id="msg"></div>
-  <canvas class="hud" id="mini" width="188" height="128"></canvas>
-  <div class="hud card" id="keys"><b>WASD / arrows</b> drive &nbsp;·&nbsp; <b>SPACE</b> interact</div>
-  <div id="stick"><div id="nub"></div></div>
-  <button id="actbtn">ACTION</button>
-  <div class="hud" id="fine">Fictional game world · PAUDC prototype v0.1 · coastline traced from real Port Antonio geography</div>
+</head>
+<body>
+<h1>Port Antonio<br>Unified Defense Complex</h1>
+<div id="sub">One fictional game world &middot; pick your door</div>
+<div id="cards">
+  <a class="card" href="3d.html">
+    <span class="tag">Flagship &middot; open world 3D</span>
+    <h2>Neon Harbor <span class="flag">v0.20</span></h2>
+    <p>The island, fully 3D: drive, walk, swim, fish, brawl at the Yard, ride the storm,
+       survive the Static Hour. Trailer-grade film look, radar, ten districts.</p>
+    <div class="go">DEPLOY &#9656;</div>
+  </a>
+  <a class="card" href="army.html">
+    <span class="tag">Rec-room arcade &middot; GRIDFALL cabinet</span>
+    <h2>U.S. Robotic Army</h2>
+    <p>The 16-mission campaign the soldiers play at the Crucible rec room: ARES-7 vs the
+       rogue grid. Six weapons, drivable armor, five-star heat. CRT glass and all.</p>
+    <div class="go">INSERT COIN &#9656;</div>
+  </a>
+  <a class="card" href="2d.html">
+    <span class="tag">Classic &middot; top-down origin</span>
+    <h2>Neon Harbor v0.1</h2>
+    <p>Where it started: the top-down island prototype — the Open House tour, the croc
+       relocations, the curry goat run. Keyboard and touch.</p>
+    <div class="go">REWIND &#9656;</div>
+  </a>
 </div>
-<script>
-'use strict';
-// ---------- world ----------
-const W=2400,H=1600;
-// Coastline inspired by the satellite view of Port Antonio: sea north, Navy Island NW,
-// West Harbour / Titchfield peninsula / East Harbour, Folly Point east, hills south.
-const COAST=[[0,640],[150,610],[300,590],[430,600],[500,640],[540,700],[600,745],[665,760],[720,730],[745,660],[755,560],[775,470],[800,440],[828,455],[845,540],[860,640],[905,715],[975,750],[1055,745],[1120,700],[1160,640],[1230,600],[1330,570],[1440,545],[1540,520],[1600,470],[1660,505],[1720,560],[1800,600],[1900,640],[2020,660],[2150,650],[2280,620],[2400,600]];
-const NAVY={x:330,y:430,rx:110,ry:62};
-const ZONES=[
- {id:'palm',   name:'Palm Line',            sub:'Garrison Village',        x:700, y:860, r:95},
- {id:'fort',   name:'Fort Flavor',          sub:'Tichfield Culinary Academy',x:800,y:505, r:60},
- {id:'iron',   name:'Ironbeach',            sub:'Naval Anchorage',         x:990, y:790, r:90},
- {id:'strip',  name:'The Strip',            sub:'Errol Flynn Joint Airfield',x:1450,y:620,r:100},
- {id:'cruc',   name:'The Crucible',         sub:'Selection & Training',    x:1250,y:1020,r:100},
- {id:'sky',    name:'Skyfence',             sub:'Interceptor Gardens',     x:900, y:1170,r:90},
- {id:'ear',    name:'The Ear',              sub:'Listening Campus',        x:1560,y:1260,r:90},
- {id:'vault',  name:'The Vault',            sub:'Mount Nonsuch Citadel',   x:1150,y:1420,r:95},
- {id:'butch',  name:'Blue Mountain Butcher',sub:'& Market',                x:1000,y:960, r:55},
- {id:'swamp',  name:'The Wetland',          sub:'Croc Preserve',           x:2020,y:840, r:130},
-];
-const Z=Object.fromEntries(ZONES.map(z=>[z.id,z]));
-const ROADS=[['palm','fort'],['palm','iron'],['iron','strip'],['palm','butch'],['butch','cruc'],['cruc','strip'],['butch','sky'],['sky','vault'],['cruc','ear'],['ear','vault'],['strip','swamp'],['ear','swamp']];
-// ---------- canvases ----------
-const cv=document.getElementById('game'),cx=cv.getContext('2d');
-const mini=document.getElementById('mini'),mx=mini.getContext('2d');
-const terr=document.createElement('canvas');terr.width=W;terr.height=H;const tx=terr.getContext('2d');
-function coastPath(g){g.beginPath();g.moveTo(COAST[0][0],COAST[0][1]);for(let i=1;i<COAST.length;i++){const[a,b]=COAST[i-1],[c,d]=COAST[i];g.quadraticCurveTo(a,b,(a+c)/2,(b+d)/2);}g.lineTo(W,H);g.lineTo(0,H);g.closePath();}
-function drawTerrain(){
-  const g=tx;
-  const sea=g.createLinearGradient(0,0,0,900);sea.addColorStop(0,'#04222e');sea.addColorStop(1,'#0e4f56');
-  g.fillStyle=sea;g.fillRect(0,0,W,H);
-  // land
-  coastPath(g);const land=g.createLinearGradient(0,400,0,H);land.addColorStop(0,'#c9b287');land.addColorStop(.09,'#1c4a2c');land.addColorStop(.55,'#143722');land.addColorStop(1,'#0c2417');
-  g.fillStyle=land;g.fill();
-  g.save();coastPath(g);g.clip();
-  // southern ridge
-  g.fillStyle='rgba(10,26,20,.9)';g.beginPath();g.moveTo(0,1600);g.lineTo(0,1290);
-  for(let x=0;x<=W;x+=120)g.lineTo(x,1250+70*Math.sin(x*.006)+40*Math.sin(x*.017));
-  g.lineTo(W,1600);g.closePath();g.fill();
-  // jungle stipple + palms
-  for(let i=0;i<900;i++){const x=(i*997)%W,y=760+((i*613)%820);g.fillStyle=i%3?'rgba(30,80,45,.5)':'rgba(60,130,70,.35)';g.fillRect(x,y,5,5);}
-  for(let i=0;i<80;i++){const x=(i*331)%W,y=690+((i*211)%140);g.strokeStyle='rgba(70,150,90,.8)';g.lineWidth=2;
-    for(let a=0;a<5;a++){g.beginPath();g.moveTo(x,y);g.lineTo(x+11*Math.cos(a*1.256+i),y-5-6*Math.sin(a*1.256));g.stroke();}}
-  // wetland
-  g.fillStyle='rgba(24,74,66,.75)';g.beginPath();g.ellipse(2020,840,190,130,0,0,7);g.fill();
-  for(let i=0;i<26;i++){g.fillStyle='rgba(14,79,86,.8)';g.beginPath();g.ellipse(1880+(i*97)%300,760+(i*53)%170,14,7,0,0,7);g.fill();}
-  // roads
-  g.strokeStyle='#232c33';g.lineWidth=16;g.lineCap='round';
-  for(const[a,b]of ROADS){g.beginPath();g.moveTo(Z[a].x,Z[a].y);g.lineTo(Z[b].x,Z[b].y);g.stroke();}
-  g.strokeStyle='rgba(58,245,216,.28)';g.lineWidth=2;g.setLineDash([14,18]);
-  for(const[a,b]of ROADS){g.beginPath();g.moveTo(Z[a].x,Z[a].y);g.lineTo(Z[b].x,Z[b].y);g.stroke();}
-  g.setLineDash([]);
-  g.restore();
-  // Navy Island
-  g.fillStyle='#17402a';g.beginPath();g.ellipse(NAVY.x,NAVY.y,NAVY.rx,NAVY.ry,-.2,0,7);g.fill();
-  g.fillStyle='#c9b287';g.beginPath();g.ellipse(NAVY.x,NAVY.y+40,NAVY.rx*.9,14,-.15,0,7);g.fill();
-  // structures per zone (simple neon-lit blocks)
-  const bld=(x,y,w,h,c)=>{g.fillStyle='#2b3742';g.fillRect(x,y,w,h);g.fillStyle=c;g.fillRect(x,y,w,3);};
-  bld(950,760,26,40,'#3af5d8');bld(1000,770,26,34,'#3af5d8');            // Ironbeach sheds
-  g.fillStyle='#39424c';g.fillRect(940,700,120,18);                       // pier
-  g.fillStyle='#2f3a44';g.fillRect(1330,596,240,22);                      // runway
-  g.fillStyle='rgba(58,245,216,.8)';for(let i=0;i<9;i++)g.fillRect(1336+i*26,605,10,3);
-  for(let i=0;i<6;i++)bld(650+(i%3)*38,830+((i/3)|0)*40,26,24,'#ffb84d'); // Palm Line cottages
-  bld(786,478,34,30,'#ffb84d');                                           // Fort Flavor hall
-  g.fillStyle='#cfd8dc';for(let i=0;i<3;i++){g.beginPath();g.arc(1520+i*42,1252,15,0,7);g.fill();} // radomes
-  g.fillStyle='#2b3742';g.beginPath();g.moveTo(1150,1360);g.lineTo(1090,1450);g.lineTo(1210,1450);g.closePath();g.fill(); // Vault door
-  g.fillStyle='rgba(58,245,216,.9)';g.fillRect(1142,1398,16,42);
-  for(let i=0;i<6;i++){g.fillStyle='rgba(58,245,216,.55)';g.beginPath();g.arc(860+(i%3)*40,1150+((i/3)|0)*40,9,0,7);g.fill();} // Skyfence petals
-  bld(986,940,30,26,'#ff8866');                                           // Butcher shop
-  g.fillStyle='#3b4a55';g.beginPath();g.arc(1250,1000,26,0,7);g.fill();   // Pressure Dome
-  g.fillStyle='rgba(58,245,216,.5)';g.beginPath();g.arc(1250,1000,26,3.6,5.8);g.stroke();
-}
-drawTerrain();
-const TD=tx.getImageData(0,0,W,H).data;
-const isWater=(x,y)=>{x|=0;y|=0;if(x<0||y<0||x>=W||y>=H)return true;const i=(y*W+x)*4;const r=TD[i],g=TD[i+1],b=TD[i+2];return b>g&&r<30&&b>40;};
-// ---------- entities ----------
-const player={x:700,y:860,a:-1.2,v:0};
-const crocs=[
- {x:2000,y:830,a:0,home:Z.swamp,got:false},{x:2090,y:880,a:2,home:Z.swamp,got:false},
- {x:720,y:895,a:1,home:{x:720,y:895,r:40},got:false,label:'pool crasher'},
-];
-const barrister={x:1258,y:1032};
-let clout=0,recruits=1204,carrying=false,tstart=0;
-// ---------- missions ----------
-const visited=new Set();
-const missions=[
- {name:'Open House',desc:'The tour is the tutorial. Drive the amphibious Mudfish Mk-0 and visit every district of the complex.',
-  prog:()=>`${visited.size} / 8 districts`,
-  done:()=>visited.size>=8},
- {name:'Croc Wrangler',desc:'Three crocs are loose — one is in the Palm Line pool. Get close and press ACTION to relocate them to the wetland preserve. Gently.',
-  prog:()=>`${crocs.filter(c=>c.got).length} / 3 relocated`,
-  done:()=>crocs.every(c=>c.got)},
- {name:'Low & Slow',desc:'Collect Instructor Palmer’s curry goat pot at Fort Flavor (ACTION), then deliver it to Palm Line in under 75 seconds. Don’t dunk it.',
-  prog:()=>carrying?`pot aboard — ${Math.max(0,75-((now-tstart)/1000)|0)}s`:'collect the pot at Fort Flavor',
-  done:()=>false},
-];
-let mi=0,finished=false,fireworks=[];
-// ---------- input ----------
-const keys={};let act=false;
-addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key===' '){act=true;e.preventDefault();}});
-addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-const stick=document.getElementById('stick'),nub=document.getElementById('nub');let sv={x:0,y:0};
-stick.addEventListener('touchstart',ts,{passive:false});stick.addEventListener('touchmove',ts,{passive:false});
-stick.addEventListener('touchend',()=>{sv={x:0,y:0};nub.style.left='38px';nub.style.top='38px';});
-function ts(e){e.preventDefault();const r=stick.getBoundingClientRect(),t=e.touches[0];
- let dx=t.clientX-r.left-60,dy=t.clientY-r.top-60;const m=Math.hypot(dx,dy)||1,c=Math.min(m,44);
- dx=dx/m*c;dy=dy/m*c;sv={x:dx/44,y:dy/44};nub.style.left=(38+dx)+'px';nub.style.top=(38+dy)+'px';}
-document.getElementById('actbtn').addEventListener('touchstart',e=>{e.preventDefault();act=true;});
-// ---------- ui helpers ----------
-const $=id=>document.getElementById(id);
-let toastT=0,msgT=0;
-function toast(z,s){$('toastZ').textContent=z;$('toastS').textContent=s;$('toast').style.opacity=1;toastT=now+2600;}
-function say(t,ms=3200){$('msg').textContent=t;$('msg').style.opacity=1;msgT=now+ms;}
-// ---------- loop ----------
-let now=0,last=0,curZone=null;
-function step(t){
-  now=t;const dt=Math.min(.05,(t-last)/1000||.016);last=t;
-  // drive
-  let thr=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?.6:0);
-  let str=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
-  if(sv.x||sv.y){thr=Math.max(thr,-sv.y>.15?Math.hypot(sv.x,sv.y):(-sv.y<-.15?-.5:0));
-    const want=Math.atan2(sv.y,sv.x);let d=want-player.a;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;str=Math.max(-1,Math.min(1,d*3));thr=Math.hypot(sv.x,sv.y);}
-  const wet=isWater(player.x,player.y);
-  const top=wet?110:250;
-  player.v+=thr*(wet?160:420)*dt;player.v*=wet?.965:.975;player.v=Math.max(-top*.4,Math.min(top,player.v));
-  player.a+=str*2.4*dt*(Math.abs(player.v)>8?1:0)*Math.sign(player.v||1);
-  player.x=Math.max(12,Math.min(W-12,player.x+Math.cos(player.a)*player.v*dt));
-  player.y=Math.max(12,Math.min(H-12,player.y+Math.sin(player.a)*player.v*dt));
-  // zones
-  let inZ=null;
-  for(const z of ZONES){if(Math.hypot(player.x-z.x,player.y-z.y)<z.r){inZ=z;break;}}
-  if(inZ&&inZ!==curZone){toast(inZ.name,inZ.sub);if(mi===0&&!visited.has(inZ.id)&&inZ.id!=='swamp'&&inZ.id!=='butch'){visited.add(inZ.id);clout+=15;recruits+=3;}}
-  curZone=inZ;
-  // crocs wander
-  for(const c of crocs){if(c.got)continue;c.a+=(Math.sin(now*.001+c.x)*.6)*dt;
-    c.x+=Math.cos(c.a)*18*dt;c.y+=Math.sin(c.a)*18*dt;
-    const d=Math.hypot(c.x-c.home.x,c.y-c.home.y);if(d>c.home.r){c.a=Math.atan2(c.home.y-c.y,c.home.x-c.x);}}
-  // actions
-  if(act){act=false;
-    if(mi===1){const c=crocs.find(c=>!c.got&&Math.hypot(c.x-player.x,c.y-player.y)<46);
-      if(c){c.got=true;clout+=40;recruits+=8;say(c.label?'Pool croc relocated. The party applauds.':'Croc relocated to the preserve. Standing +1.');}}
-    if(Math.hypot(barrister.x-player.x,barrister.y-player.y)<52){say('This is BARRISTER. He is not going anywhere. Respect.',3600);clout+=25;}
-    if(mi===2&&!carrying&&Math.hypot(Z.fort.x-player.x,Z.fort.y-player.y)<Z.fort.r){carrying=true;tstart=now;say('Pot aboard. LOW AND SLOW does not mean stop.');}
-  }
-  if(mi===2&&carrying){
-    if(wet){carrying=false;say('You dunked the curry. Palmer felt it from across the bay. Try again.',3600);}
-    else if((now-tstart)/1000>75){carrying=false;say('Cold curry is a crime here. Collect a fresh pot.',3600);}
-    else if(Math.hypot(Z.palm.x-player.x,Z.palm.y-player.y)<Z.palm.r){finished=true;mi=3;clout+=120;recruits+=40;
-      toast('Prototype complete','Palm Line enlistment ceremony');say('Granny-Approved delivery. Fireworks over the bay. Recruitment is UP.',6e3);
-      for(let i=0;i<40;i++)fireworks.push({x:Z.palm.x-60+Math.random()*120,y:Z.palm.y-40,vx:(Math.random()-.5)*160,vy:-90-Math.random()*160,t:now+Math.random()*800});}
-  }
-  if(!finished&&missions[mi]&&missions[mi].done()){mi++;clout+=60;recruits+=15;
-    if(mi===1)say('Tour complete. Miss Ouida heard about the crocs…');
-    if(mi===2)say('Instructor Palmer needs a delivery driver. Fort Flavor, go.');}
-  // HUD
-  const m=missions[Math.min(mi,2)];
-  $('objName').textContent=finished?'Free roam':m.name;
-  $('objDesc').textContent=finished?'The island is yours. Prototype v0.1 ends here — the design docs describe the rest.':m.desc;
-  $('objProg').textContent=finished?'':m.prog();
-  $('stats').innerHTML=`ONWATCH CLOUT <b>${clout}</b><br>RECRUITMENT <b>${recruits}</b><br>${wet?'<b>HULL MODE</b>':'ENGINE NOMINAL'}`;
-  if(now>toastT)$('toast').style.opacity=0;
-  if(now>msgT)$('msg').style.opacity=0;
-  draw();requestAnimationFrame(step);
-}
-// ---------- render ----------
-function draw(){
-  const vw=innerWidth,vh=innerHeight,dpr=devicePixelRatio||1;
-  if(cv.width!==vw*dpr){cv.width=vw*dpr;cv.height=vh*dpr;}
-  cx.setTransform(dpr,0,0,dpr,0,0);
-  const s=Math.max(vw/1500,vh/1000);
-  let cxx=player.x-vw/2/s,cyy=player.y-vh/2/s;
-  cxx=Math.max(0,Math.min(W-vw/s,cxx));cyy=Math.max(0,Math.min(H-vh/s,cyy));
-  cx.save();cx.scale(s,s);cx.translate(-cxx,-cyy);
-  cx.drawImage(terr,0,0);
-  // animated shoreline shimmer
-  cx.strokeStyle='rgba(120,230,220,'+(0.25+0.15*Math.sin(now*.002))+')';cx.lineWidth=3;
-  cx.beginPath();cx.moveTo(COAST[0][0],COAST[0][1]-6);
-  for(let i=1;i<COAST.length;i++){const[a,b]=COAST[i-1],[c,d]=COAST[i];cx.quadraticCurveTo(a,b-6,(a+c)/2,(b+d)/2-6);}cx.stroke();
-  // zone markers
-  for(const z of ZONES){const pu=1+.08*Math.sin(now*.003+z.x);
-    cx.strokeStyle=z===curZone?'rgba(255,184,77,.9)':'rgba(58,245,216,.55)';cx.lineWidth=2;
-    cx.beginPath();cx.arc(z.x,z.y,z.r*pu*.35,0,7);cx.stroke();
-    cx.fillStyle='rgba(223,247,241,.95)';cx.font='700 15px "Arial Narrow",Arial,sans-serif';cx.textAlign='center';
-    cx.fillText(z.name.toUpperCase(),z.x,z.y-z.r*.38-6);}
-  // objective beacon
-  let tgt=null;
-  if(mi===0){for(const z of ZONES){if(!visited.has(z.id)&&z.id!=='swamp'&&z.id!=='butch'){tgt=z;break;}}}
-  if(mi===1){const c=crocs.find(c=>!c.got);if(c)tgt=c;}
-  if(mi===2)tgt=carrying?Z.palm:Z.fort;
-  if(tgt){cx.strokeStyle='rgba(255,184,77,.9)';cx.lineWidth=3;
-    cx.beginPath();cx.arc(tgt.x,tgt.y,20+6*Math.sin(now*.006),0,7);cx.stroke();}
-  // crocs
-  for(const c of crocs){if(c.got)continue;
-    cx.save();cx.translate(c.x,c.y);cx.rotate(c.a);
-    cx.fillStyle='#4e7c3a';cx.beginPath();cx.ellipse(0,0,17,7,0,0,7);cx.fill();
-    cx.fillStyle='#375c28';cx.beginPath();cx.ellipse(13,0,7,4,0,0,7);cx.fill();
-    cx.fillStyle='#ffe08a';cx.fillRect(15,-3,2,2);cx.fillRect(15,1,2,2);cx.restore();}
-  // Barrister (bigger, unbothered, sunglasses)
-  cx.save();cx.translate(barrister.x,barrister.y);
-  cx.fillStyle='#557f3f';cx.beginPath();cx.ellipse(0,0,30,12,-.4,0,7);cx.fill();
-  cx.fillStyle='#111';cx.fillRect(16,-9,10,4);cx.restore();
-  // player vehicle
-  cx.save();cx.translate(player.x,player.y);cx.rotate(player.a);
-  if(isWater(player.x,player.y)){cx.strokeStyle='rgba(200,255,245,.5)';cx.lineWidth=2;
-    cx.beginPath();cx.moveTo(-14,-8);cx.lineTo(-30,-14);cx.moveTo(-14,8);cx.lineTo(-30,14);cx.stroke();}
-  cx.fillStyle='#39434d';cx.fillRect(-14,-8,28,16);
-  cx.fillStyle='#3af5d8';cx.fillRect(4,-8,4,16);
-  cx.fillStyle=carrying?'#ffb84d':'#101820';cx.beginPath();cx.arc(-4,0,4,0,7);cx.fill();
-  cx.fillStyle='rgba(255,240,200,.9)';cx.fillRect(14,-6,3,4);cx.fillRect(14,2,3,4);
-  cx.restore();
-  // fireworks
-  fireworks=fireworks.filter(f=>now-f.t<1600);
-  for(const f of fireworks){const a=(now-f.t)/1000;if(a<0)continue;
-    cx.fillStyle=`hsla(${(f.x|0)%360},90%,70%,${1-a/1.6})`;
-    cx.beginPath();cx.arc(f.x+f.vx*a,f.y+f.vy*a+60*a*a,2.5,0,7);cx.fill();}
-  cx.restore();
-  // night vignette
-  const vg=cx.createRadialGradient(vw/2,vh/2,vh*.35,vw/2,vh/2,vh*.9);
-  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(2,10,14,.55)');
-  cx.fillStyle=vg;cx.fillRect(0,0,vw,vh);
-  // minimap (static base pre-rendered once)
-  mx.drawImage(miniBase,0,0);
-  mx.save();mx.scale(188/W,128/H);
-  if(tgt){mx.fillStyle='#ffb84d';mx.beginPath();mx.arc(tgt.x,tgt.y,26,0,7);mx.fill();}
-  mx.fillStyle='#fff';mx.beginPath();mx.arc(player.x,player.y,22,0,7);mx.fill();
-  mx.restore();
-}
-// pre-render static minimap base once
-const miniBase=document.createElement('canvas');miniBase.width=188;miniBase.height=128;
-{const g=miniBase.getContext('2d');
- g.fillStyle='rgba(4,24,32,.95)';g.fillRect(0,0,188,128);
- g.save();g.scale(188/W,128/H);
- g.fillStyle='#0e4f56';g.fillRect(0,0,W,H);
- coastPath(g);g.fillStyle='#143722';g.fill();
- g.fillStyle='#17402a';g.beginPath();g.ellipse(NAVY.x,NAVY.y,NAVY.rx,NAVY.ry,-.2,0,7);g.fill();
- for(const z of ZONES){g.fillStyle='rgba(58,245,216,.8)';g.beginPath();g.arc(z.x,z.y,16,0,7);g.fill();}
- g.restore();}
-say('Welcome to PAUDC. Drive the tour — every district, no rush. (This vehicle floats. You’ll see.)',5e3);
-toast('Port Antonio','Unified Defense Complex');
-requestAnimationFrame(step);
-</script></body>
+<div id="fine">Fictional game world &middot; PAUDC front door</div>
+</body>
 </html>
