@@ -24,7 +24,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.20**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.21**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -106,7 +106,16 @@ boosts the 3D night look: additive neon halos on every district beacon and the
 Pelican sign, **lamp posts with warm light pools along the ring road** (real
 point lights on ULTRA), 4K shadow maps on ULTRA — and the **GRIDFALL arcade
 cabinet** in the Crucible rec room, where walking up on foot and pressing `E`
-boots the U.S. Robotic Army campaign in-fiction.
+boots the U.S. Robotic Army campaign in-fiction. v0.21 is the **San Andreas
+rung**: procedural textures everywhere (zero downloads — noise-detail ground,
+window-grid building facades on the cottages, Pelican strip and Polytech,
+asphalt with dashed centerlines), a real **ring road** laid in 61 terrain-hugging
+chunks along the district loop the traffic already drives, and the walker
+rebuilt with **arms and legs and a speed-scaled walk cycle**. The asset pipeline
+for higher-res texture packs runs free on Kaggle's GPU tier
+([`../pipeline/kaggle_asset_pipeline.ipynb`](../pipeline/kaggle_asset_pipeline.ipynb));
+the roadmap documents every free cloud-GPU option and why the game itself never
+needs one (it renders on the player's device).
 
 
 [`../game/index.html`](../game/index.html) — **the front door**: a styled hub

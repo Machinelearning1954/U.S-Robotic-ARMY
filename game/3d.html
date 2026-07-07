@@ -39,7 +39,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.20</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.21</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4039,7 +4039,22 @@ const tg=new THREE.PlaneGeometry(W2*SC,H2*SC,SEG,SEG);tg.rotateX(-Math.PI/2);
   }
   tg.setAttribute('color',new THREE.BufferAttribute(col,3));tg.computeVertexNormals();
 }
-const terra=new THREE.Mesh(tg,new THREE.MeshLambertMaterial({vertexColors:true}));
+// ---- procedural texture library (SA-rung: textures everywhere, zero downloads) ----
+function canvasTex(w,h,draw,repX,repY){const c=document.createElement('canvas');c.width=w;c.height=h;
+  draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);
+  t.wrapS=t.wrapT=1000;/* RepeatWrapping */ if(repX)t.repeat.set(repX,repY||repX);return t;}
+const detailTex=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#8f8f8f';g.fillRect(0,0,w,h);
+  for(let i=0;i<2600;i++){const v=120+Math.random()*46|0;g.fillStyle='rgb('+v+','+v+','+v+')';
+    g.fillRect(Math.random()*w,Math.random()*h,1.6,1.6);}},64,42);
+const facadeTex=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#cfcfcf';g.fillRect(0,0,w,h);
+  for(let y=10;y<h-14;y+=26)for(let x=10;x<w-14;x+=24){
+    g.fillStyle=Math.random()<0.42?'#ffd98a':'#1a2530';g.fillRect(x,y,14,16);
+    g.fillStyle='rgba(0,0,0,0.25)';g.fillRect(x,y+14,14,2);}});
+const roadTex=canvasTex(128,64,(g,w,h)=>{g.fillStyle='#232b33';g.fillRect(0,0,w,h);
+  for(let i=0;i<900;i++){const v=28+Math.random()*26|0;g.fillStyle='rgb('+v+','+v+','+(v+6)+')';
+    g.fillRect(Math.random()*w,Math.random()*h,1.5,1.5);}
+  g.fillStyle='#d8cf9a';for(let x=0;x<w;x+=32)g.fillRect(x,h/2-1.6,18,3.2);});
+const terra=new THREE.Mesh(tg,new THREE.MeshLambertMaterial({vertexColors:true,map:detailTex}));
 terra.receiveShadow=true;scene.add(terra);
 // ---------------- water ----------------
 const water=new THREE.Mesh(new THREE.PlaneGeometry(W2*SC*1.6,H2*SC*1.6,80,54).rotateX(-Math.PI/2),
@@ -4107,7 +4122,7 @@ function label(text,x,y,z){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));
   sp.position.set(x,y,z);sp.scale.set(46,8.6,1);scene.add(sp);
 }
-const box=(x,z,w,h,d,c,lift=0)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:c}));
+const box=(x,z,w,h,d,c,lift=0,tex=null)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial(tex?{color:c,map:tex}:{color:c}));
   b.castShadow=b.receiveShadow=true;b.position.set(x,Math.max(height(x,z),0)+h/2+lift,z);scene.add(b);return b;};
 for(const z of ZONES){
   const X=mx(z.x),Zz=mz(z.y),h=Math.max(height(X,Zz),0.5);
@@ -4122,7 +4137,7 @@ box(mx(1450),mz(610),64,0.6,7,0x39434d);                    // runway
 for(let i=0;i<3;i++){const s=new THREE.Mesh(new THREE.SphereGeometry(3.2,12,10),new THREE.MeshLambertMaterial({color:0xdde7ea}));
   const X=mx(1500+i*44),Zz=mz(1255);s.position.set(X,height(X,Zz)+3,Zz);scene.add(s);}    // radomes
 box(mx(985),mz(742),3.4,2.2,16,0x39434d);                    // pier into harbor
-for(let i=0;i<6;i++){box(mx(660+(i%3)*40),mz(830+((i/3)|0)*42),5,3,4,[0xffc9a3,0xa3e6ff,0xffe9a3][i%3]);
+for(let i=0;i<6;i++){box(mx(660+(i%3)*40),mz(830+((i/3)|0)*42),5,3,4,[0xffc9a3,0xa3e6ff,0xffe9a3][i%3],0,facadeTex);
   const wX=mx(660+(i%3)*40),wZ=mz(830+((i/3)|0)*42);
   const win=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.8,0.1),new THREE.MeshBasicMaterial({color:0xffd98a}));
   win.position.set(wX,Math.max(height(wX,wZ),0)+1.6,wZ+2.06);scene.add(win);} // cottages + lit windows
@@ -4131,7 +4146,7 @@ for(let i=0;i<6;i++){box(mx(660+(i%3)*40),mz(830+((i/3)|0)*42),5,3,4,[0xffc9a3,0
  box(mx(1150),mz(1408),4,7,1.4,0x3af5d8);}                   // Vault + glowing door
 // Pelican Key: pastel art-deco strip + neon sign
 {const cols=[0xffb6c1,0x9fe8ff,0xfff3a3,0xb8ffd0];
- for(let i=0;i<4;i++)box(mx(196+i*32),mz(288),7,8-(i%2)*2,6,cols[i]);
+ for(let i=0;i<4;i++)box(mx(196+i*32),mz(288),7,8-(i%2)*2,6,cols[i],0,facadeTex);
  const neon=new THREE.Mesh(new THREE.BoxGeometry(10,1.2,0.5),new THREE.MeshBasicMaterial({color:0xff5fd2}));
  const nX=mx(240),nZ=mz(272);neon.position.set(nX,Math.max(height(nX,nZ),0)+9.5,nZ);scene.add(neon);}
 // Silver Springs: three glowing terrace pools + the Polytech campus
@@ -4142,7 +4157,7 @@ for(let i=0;i<6;i++){box(mx(660+(i%3)*40),mz(830+((i/3)|0)*42),5,3,4,[0xffc9a3,0
    pool.position.set(X,height(X,Zz)+0.25,Zz);scene.add(pool);}
  const lamp=new THREE.PointLight(0x8ff5e8,1.6,120);
  lamp.position.set(mx(590),height(mx(590),mz(1090))+8,mz(1090));scene.add(lamp);
- box(mx(520),mz(1020),8,5,5,0x3a7d8c);box(mx(600),mz(1035),6,4,8,0x46606e);} // Chromelab + The Works
+ box(mx(520),mz(1020),8,5,5,0x3a7d8c,0,facadeTex);box(mx(600),mz(1035),6,4,8,0x46606e,0,facadeTex);} // Chromelab + The Works
 // stars
 {const g=new THREE.BufferGeometry(),v=new Float32Array(1200);
  for(let i=0;i<400;i++){v[i*3]=(Math.random()-0.5)*2200;v[i*3+1]=140+Math.random()*500;v[i*3+2]=(Math.random()-0.5)*2200;}
@@ -4263,6 +4278,24 @@ function glowSprite(x,y,z,scale,color){
 // halo every district beacon (the neon pops even off-ULTRA, no bloom needed)
 for(const b of beacons){const h=Math.max(height(b.X,b.Z),0.5);glowSprite(b.X,h+8,b.Z,26);}
 glowSprite(mx(240),Math.max(height(mx(240),mz(272)),0)+9.5,mz(272),30,0xff5fd2); // Pelican Key sign halo
+// the ring ROAD itself — asphalt ribbon with dashed centerline, chunked to hug terrain
+let roadChunks=0;
+{const rm=new THREE.MeshLambertMaterial({color:0xffffff,map:roadTex});
+ for(let i=0;i<ring.length;i++){
+   const a=ring[i],b=ring[(i+1)%ring.length];
+   const dx=b.X-a.X,dz=b.Z-a.Z,len=Math.hypot(dx,dz),ang=Math.atan2(dz,dx);
+   const CH=Math.max(3,Math.round(len/26));
+   for(let c=0;c<CH;c++){
+     const f0=c/CH,f1=(c+1)/CH,mxx=a.X+dx*(f0+f1)/2,mzz=a.Z+dz*(f0+f1)/2;
+     const h0=height(a.X+dx*f0,a.Z+dz*f0),h1=height(a.X+dx*f1,a.Z+dz*f1);
+     if(h0<0.6||h1<0.6)continue; // sea lanes stay open water
+     const seg=new THREE.Mesh(new THREE.BoxGeometry(len/CH+1.2,0.14,5.6),rm.clone());
+     seg.material.map=roadTex.clone();seg.material.map.needsUpdate=true;
+     seg.material.map.repeat.set((len/CH)/9,1);
+     seg.position.set(mxx,Math.max((h0+h1)/2,0.3)+0.09,mzz);
+     seg.rotation.y=-ang; // chunks are short enough to sit flat on the slope
+     seg.receiveShadow=true;scene.add(seg);roadChunks++;
+   }}}
 // lamp posts along the district ring road — warm pools of light at night
 const LAMPL=TIER===2?5:0; // real lights only on ULTRA; heads glow on every tier
 for(let i=0;i<ring.length;i++){
@@ -4499,10 +4532,16 @@ let pov=false; // first-person rider camera (V)
 const P={x:mx(700),z:mz(860),a:Math.PI,v:0};
 // vehicle ring: mesh, parked pose, name, and per-ride handling stats
 // ---- the walker: on-foot mode, implemented as the fourth "ride" ----
-const walker=new THREE.Group();
-{const legs=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.8,0.5),new THREE.MeshLambertMaterial({color:0x2b3742}));legs.position.y=0.4;walker.add(legs);
- const torso=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.75,0.62),new THREE.MeshLambertMaterial({color:0x3af5d8}));torso.position.y=1.15;walker.add(torso);
- const head=new THREE.Mesh(new THREE.SphereGeometry(0.24,10,8),new THREE.MeshLambertMaterial({color:0x8a5a3b}));head.position.y=1.78;walker.add(head);}
+const walker=new THREE.Group(),wLimbs={};
+{const pants=new THREE.MeshLambertMaterial({color:0x2b3742}),skin=new THREE.MeshLambertMaterial({color:0x8a5a3b});
+ for(const[k,zz]of[['lL',0.14],['lR',-0.14]]){ // legs pivot at the hip
+   const leg=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.8,0.22).translate(0,-0.4,0),pants);
+   leg.position.set(0,0.82,zz);walker.add(leg);wLimbs[k]=leg;}
+ const torso=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.75,0.62),new THREE.MeshLambertMaterial({color:0x3af5d8}));torso.position.y=1.2;walker.add(torso);
+ for(const[k,zz]of[['aL',0.42],['aR',-0.42]]){ // arms pivot at the shoulder
+   const arm=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.68,0.18).translate(0,-0.34,0),skin);
+   arm.position.set(0,1.52,zz);walker.add(arm);wLimbs[k]=arm;}
+ const head=new THREE.Mesh(new THREE.SphereGeometry(0.24,10,8),skin);head.position.y=1.82;walker.add(head);}
 walker.traverse(o=>{if(o.isMesh)o.castShadow=true;});walker.visible=false;scene.add(walker);
 const walkP={x:mx(700),z:mz(860),a:0};
 const VEH=[
@@ -4699,6 +4738,10 @@ function tick(t){
   const gy=height(P.x,P.z),y=wet?0.55+0.18*Math.sin(t*0.004):Math.max(gy,0.4);
   const av=VEH[veh].g;
   av.position.set(P.x,y,P.z);av.rotation.y=P.a;
+  if(veh===WALKER&&av===walker){ // walk cycle: limbs swing with speed
+    const sw=Math.sin(t*0.013)*Math.min(1,Math.abs(P.v)/3.5)*0.85;
+    wLimbs.lL.rotation.z=sw;wLimbs.lR.rotation.z=-sw;
+    wLimbs.aL.rotation.z=-sw*0.8;wLimbs.aR.rotation.z=sw*0.8;}
   const ahead=height(P.x+Math.cos(P.a)*3,P.z-Math.sin(P.a)*3);
   av.rotation.z=wet?0.04*Math.sin(t*0.003):Math.atan2(ahead-gy,3)*0.6;
   // camera — chase, or first-person rider POV (V)
@@ -4838,7 +4881,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips}),setRain,setStatic,presence,traffic,walker,YARD,brawler,CHROME,ARC,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

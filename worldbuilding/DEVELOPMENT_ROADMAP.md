@@ -162,3 +162,29 @@ Hunyuan3D-2.1 performs self-hosted):
 **Path A with Godot 4 is the next rung** (keeps the web-playable pipeline), with
 UE5 as the graduation target and Path B held as a parallel option if the goal
 shifts to "multiplayer community now." Path C feeds both continuously.
+
+## Free cloud GPUs — where they fit (and where they don't)
+
+**The game never needs a cloud GPU to run.** All three playable builds are
+browser WebGL: they render on the *player's* GPU, and the San Andreas-rung look
+(textures, roads, animated characters) runs comfortably on a laptop iGPU or a
+mid-range phone — that's what the device-tier system is for. Streaming the game
+*from* a cloud GPU (GeForce NOW-style) is a paid-infrastructure problem and not
+part of this plan.
+
+Where free cloud-GPU tiers genuinely help is the **asset pipeline** — generating
+original textures, 3D models, and target-look media that ship as static files:
+
+| Free tier | What you get | Use it for |
+|---|---|---|
+| **Google Colab (free)** | T4 GPU sessions (time-limited, non-guaranteed) | Run open-source generators: Hunyuan3D-2 (image→GLB props, already canon in our pipeline), Stable Diffusion-class texture synthesis, ESRGAN upscaling of our procedural textures |
+| **Kaggle Notebooks** | ~30 GPU-hrs/week (T4/P100), more predictable than Colab | Batch texture/LOD generation runs; training-free upscale passes over sprite sheets. **Ready to run:** [`../pipeline/kaggle_asset_pipeline.ipynb`](../pipeline/kaggle_asset_pipeline.ipynb) — upload at kaggle.com/code, pick a GPU accelerator, run: regenerates the game's procedural textures and Real-ESRGAN-upscales them 4x, plus an optional image→GLB prop step |
+| **Hugging Face Spaces** | free CPU Spaces; ZeroGPU grants for demos | Hosting small asset-gen demos; running quantized models |
+| **Lightning.ai / Modal / Replicate** | monthly free credits (amounts change — check current terms) | Occasional bigger jobs: one-off 4K texture packs, mesh cleanup |
+| **GitHub Actions (free minutes)** | CPU only — no GPU | Build/verify pipeline (headless Playwright smoke tests), never generation |
+
+**Rules that stand regardless of tier:** generated assets must be *original*
+(our prompts, our concept art — never laundering someone else's IP through a
+model); check each service's current ToS for commercial use of free-tier output;
+and everything generated gets committed as ordinary files so the game itself
+stays dependency-free and offline-capable.
