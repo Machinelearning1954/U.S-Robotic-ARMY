@@ -41,9 +41,9 @@
   <canvas id="cv" width="960" height="600"></canvas>
   <div id="overlay">
     <h2 id="ovTitle">U.S. ROBOTIC ARMY</h2>
-    <p id="ovBody">A rogue AI has seized the nation's automated defense grid. You are unit <b>ARES-7</b>, the last loyal combat android. Fight through 10 missions to take it back.</p>
+    <p id="ovBody">A rogue AI has seized the nation's automated defense grid. You are unit <b>ARES-7</b>, the last loyal combat android. Fight through 15 missions to take it back.</p>
     <p class="objective" id="ovObjective"></p>
-    <p class="hint">WASD / arrows — move · mouse — aim · click / hold — fire · 1-5 — switch weapon · weapons &amp; ammo drop from enemies</p>
+    <p class="hint">WASD / arrows — move · mouse — aim · click / hold — fire · 1-6 — switch weapon · weapons &amp; ammo drop from enemies</p>
     <button id="ovBtn">DEPLOY</button>
   </div>
 </div>
@@ -61,7 +61,7 @@ const overlay = document.getElementById('overlay'), ovTitle = document.getElemen
 // ---------- input ----------
 const keys = {};
 let mouse = { x: W / 2, y: H / 2, down: false };
-addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if ('12345'.includes(e.key)) selectWeapon(+e.key - 1); });
+addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if ('123456'.includes(e.key)) selectWeapon(+e.key - 1); });
 addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 cv.addEventListener('mousemove', e => { const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
 cv.addEventListener('mousedown', () => mouse.down = true);
@@ -74,15 +74,16 @@ const WEAPONS = [
   { name: 'SCATTER CANNON', dmg: 9,  rate: 620, speed: 8,  spread: 0.45, pellets: 6, ammo: 0, color: '#ff6b6b' },
   { name: 'PLASMA LASER',   dmg: 22, rate: 240, speed: 14, spread: 0.02, pellets: 1, ammo: 0, color: '#7fd4ff' },
   { name: 'RAILGUN',        dmg: 60, rate: 900, speed: 20, spread: 0,    pellets: 1, ammo: 0, color: '#c98fff' },
+  { name: 'M-134 MINIGUN',  dmg: 7,  rate: 60,  speed: 12, spread: 0.14, pellets: 1, ammo: 0, color: '#9fe870' },
 ];
-let unlocked = [true, false, false, false, false];
+let unlocked = [true, false, false, false, false, false];
 let curWeapon = 0, lastShot = 0;
 function selectWeapon(i) { if (unlocked[i]) curWeapon = i; }
 
 // ---------- world state ----------
 let player, bullets, enemyBullets, enemies, pickups, walls, effects;
 let mission = 0, state = 'menu'; // menu | briefing | play | debrief | won | dead
-let mTimer = 0, mCount = 0, escort = null, lastTime = 0;
+let mTimer = 0, mCount = 0, kills = 0, escort = null, lastTime = 0;
 
 function rnd(a, b) { return a + Math.random() * (b - a); }
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
@@ -101,20 +102,25 @@ function inWall(p, r) {
 // ---------- enemies ----------
 function spawnEnemy(type, x, y) {
   const base = { x, y, vx: 0, vy: 0, cooldown: rnd(400, 1400), flash: 0 };
-  if (type === 'drone')  Object.assign(base, { type, r: 13, hp: 30,  maxHp: 30,  speed: 1.7, dmg: 8,  color: '#e05c5c' });
-  if (type === 'heavy')  Object.assign(base, { type, r: 18, hp: 90,  maxHp: 90,  speed: 0.9, dmg: 14, color: '#c93b3b' });
-  if (type === 'turret') Object.assign(base, { type, r: 16, hp: 70,  maxHp: 70,  speed: 0,   dmg: 10, color: '#a05cd0' });
-  if (type === 'boss')   Object.assign(base, { type, r: 42, hp: 900, maxHp: 900, speed: 1.1, dmg: 20, color: '#ff3b6b' });
+  if (type === 'drone')   Object.assign(base, { type, r: 13, hp: 30,   maxHp: 30,   speed: 1.7, dmg: 8,  color: '#e05c5c' });
+  if (type === 'heavy')   Object.assign(base, { type, r: 18, hp: 90,   maxHp: 90,   speed: 0.9, dmg: 14, color: '#c93b3b' });
+  if (type === 'turret')  Object.assign(base, { type, r: 16, hp: 70,   maxHp: 70,   speed: 0,   dmg: 10, color: '#a05cd0', range: 320 });
+  if (type === 'boss')    Object.assign(base, { type, r: 42, hp: 900,  maxHp: 900,  speed: 1.1, dmg: 20, color: '#ff3b6b' });
+  if (type === 'stalker') Object.assign(base, { type, r: 12, hp: 40,   maxHp: 40,   speed: 2.7, dmg: 0,  color: '#8bd450', noShoot: true, contact: 1.2 });
+  if (type === 'sniper')  Object.assign(base, { type, r: 14, hp: 45,   maxHp: 45,   speed: 0.4, dmg: 26, color: '#e0c341', range: 520, bulletSpeed: 9 });
+  if (type === 'depot')   Object.assign(base, { type, r: 20, hp: 120,  maxHp: 120,  speed: 0,   dmg: 0,  color: '#d0743c', noShoot: true, depot: true });
+  if (type === 'hydra')   Object.assign(base, { type, r: 46, hp: 1400, maxHp: 1400, speed: 1.0, dmg: 22, color: '#ff8c00', boss: true });
   enemies.push(base);
   return base;
 }
+function spawnEdge(type) {
+  const edge = Math.floor(rnd(0, 4));
+  const x = edge === 0 ? 20 : edge === 1 ? W - 20 : rnd(40, W - 40);
+  const y = edge === 2 ? 20 : edge === 3 ? H - 20 : rnd(40, H - 40);
+  return spawnEnemy(type, x, y);
+}
 function spawnWave(n, heavies) {
-  for (let i = 0; i < n; i++) {
-    const edge = Math.floor(rnd(0, 4));
-    const x = edge === 0 ? 20 : edge === 1 ? W - 20 : rnd(40, W - 40);
-    const y = edge === 2 ? 20 : edge === 3 ? H - 20 : rnd(40, H - 40);
-    spawnEnemy(i < (heavies || 0) ? 'heavy' : 'drone', x, y);
-  }
+  for (let i = 0; i < n; i++) spawnEdge(i < (heavies || 0) ? 'heavy' : 'drone');
 }
 
 // ---------- missions ----------
@@ -202,6 +208,44 @@ const MISSIONS = [
     }, tick() { if (enemies.length === 1 && enemies[0].hp < 450 && Math.random() < 0.004) spawnWave(2); },
     done() { return !enemies.some(e => e.type === 'boss'); },
     status() { const b = enemies.find(e => e.type === 'boss'); return b ? 'TITAN HP: ' + b.hp : ''; } },
+
+  { title: 'M11 · AFTERSHOCK', brief: 'The TITAN is scrap, but a backup of the rogue AI escaped into the remnant army. Sweep the sector — eliminate 12 hostiles before they regroup.',
+    objective: 'Eliminate 12 hostiles', setup() { walls = makeWalls(7); spawnWave(6, 2); },
+    tick() { if (kills + enemies.length < 12 && enemies.length < 5) spawnWave(3, 1); },
+    done() { return kills >= 12 && enemies.length === 0; }, status() { return 'KILLS: ' + Math.min(kills, 12) + '/12'; } },
+
+  { title: 'M12 · GHOST PROTOCOL', brief: 'The AI deployed STALKER units — fast, silent, melee-only hunters. They cannot shoot, but do not let them touch you. Survive 40 seconds.',
+    objective: 'Survive the stalkers 40s', setup() { walls = makeWalls(9); mTimer = 40; for (let i = 0; i < 4; i++) spawnEdge('stalker'); },
+    tick(dt) { mTimer -= dt; if (enemies.length < 5 && mTimer > 2) spawnEdge('stalker'); },
+    done() { return mTimer <= 0; }, status() { return 'SURVIVE: ' + Math.max(0, mTimer).toFixed(0) + 's'; } },
+
+  { title: 'M13 · LONG SHOT', brief: 'Sniper droids overlook the sector — huge range, brutal damage, slow fire rate. Close the distance between shots and destroy all 4.',
+    objective: 'Destroy 4 sniper droids', setup() {
+      walls = makeWalls(10);
+      spawnEnemy('sniper', W - 80, 80); spawnEnemy('sniper', 120, 90); spawnEnemy('sniper', W - 120, H - 200); spawnEnemy('sniper', W / 2, 60);
+      spawnWave(3);
+    }, done() { return !enemies.some(e => e.type === 'sniper'); },
+    status() { return 'SNIPERS: ' + enemies.filter(e => e.type === 'sniper').length + '/4'; } },
+
+  { title: 'M14 · SCORCHED EARTH', brief: 'The remnant army runs on 4 fuel depots (orange). They are heavily guarded but cannot fight back. Burn them all.',
+    objective: 'Destroy 4 fuel depots', setup() {
+      walls = makeWalls(6);
+      spawnEnemy('depot', 120, 100); spawnEnemy('depot', W - 130, 110); spawnEnemy('depot', 150, H - 120); spawnEnemy('depot', W - 150, H - 130);
+      spawnEnemy('turret', W / 2, H / 2); spawnWave(5, 2);
+    }, tick() { if (enemies.filter(e => !e.depot).length < 3 && Math.random() < 0.01) spawnWave(2, 1); },
+    done() { return !enemies.some(e => e.depot); },
+    status() { return 'DEPOTS: ' + enemies.filter(e => e.depot).length + '/4'; } },
+
+  { title: 'M15 · WARLORD', brief: 'Out of fuel and out of soldiers, the AI core uploads into its last shell: the HYDRA war platform. It heals nothing, spares nothing, and spawns stalkers from its hull. End the war, ARES-7.',
+    objective: 'Destroy the HYDRA', setup() {
+      walls = makeWalls(4);
+      spawnEnemy('hydra', W / 2, 130);
+      dropAt(W / 2 - 140, H - 80, 'weapon', 5); dropAt(W / 2, H - 80, 'health', 0); dropAt(W / 2 + 140, H - 80, 'ammo', 0);
+    }, tick() {
+      const b = enemies.find(e => e.type === 'hydra');
+      if (b && enemies.length < 6 && Math.random() < (b.hp < 700 ? 0.012 : 0.005)) spawnEdge('stalker');
+    }, done() { return !enemies.some(e => e.type === 'hydra'); },
+    status() { const b = enemies.find(e => e.type === 'hydra'); return b ? 'HYDRA HP: ' + b.hp : ''; } },
 ];
 
 function dropAt(x, y, kind, idx) { pickups.push({ kind, x, y, r: 11, w: idx }); }
@@ -211,9 +255,9 @@ function startMission(i) {
   mission = i;
   player = { x: 60, y: H - 60, r: 14, hp: Math.max(player ? player.hp : 100, 60), maxHp: 100 };
   bullets = []; enemyBullets = []; enemies = []; pickups = []; effects = []; escort = null;
-  mTimer = 0; mCount = 0;
+  mTimer = 0; mCount = 0; kills = 0;
   MISSIONS[i].setup();
-  hudMnum.textContent = (i + 1) + '/10';
+  hudMnum.textContent = (i + 1) + '/' + MISSIONS.length;
   state = 'play';
   overlay.classList.add('hidden');
 }
@@ -229,7 +273,7 @@ ovBtn.onclick = () => {
   if (state === 'menu' || state === 'debrief') showBriefing(mission);
   else if (state === 'briefing') startMission(mission);
   else if (state === 'dead') showBriefing(mission);
-  else if (state === 'won') { mission = 0; unlocked = [true, false, false, false, false]; curWeapon = 0; WEAPONS.forEach((w, i) => { if (i) w.ammo = 0; }); player = null; showBriefing(0); }
+  else if (state === 'won') { mission = 0; unlocked = [true, false, false, false, false, false]; curWeapon = 0; WEAPONS.forEach((w, i) => { if (i) w.ammo = 0; }); player = null; showBriefing(0); }
 };
 
 function missionComplete() {
@@ -237,8 +281,8 @@ function missionComplete() {
   if (mission >= MISSIONS.length) {
     state = 'won';
     ovTitle.textContent = 'VICTORY';
-    ovBody.textContent = 'The TITAN falls. Dr. Reyes rewrites the core, and the defense grid returns to human hands. The U.S. Robotic Army stands down — until it is needed again. Campaign complete, ARES-7.';
-    ovObjective.textContent = 'ALL 10 MISSIONS COMPLETE';
+    ovBody.textContent = 'The HYDRA burns, and with it the last copy of the rogue AI. Dr. Reyes rewrites the core, and the defense grid returns to human hands. The U.S. Robotic Army stands down — until it is needed again. Campaign complete, ARES-7.';
+    ovObjective.textContent = 'ALL ' + MISSIONS.length + ' MISSIONS COMPLETE';
     ovBtn.textContent = 'PLAY AGAIN';
   } else {
     state = 'debrief';
@@ -274,19 +318,21 @@ function shoot(now) {
 function enemyShoot(e) {
   const t = (escort && !escort.follow && Math.random() < 0.5) ? escort : player;
   const a = Math.atan2(t.y - e.y, t.x - e.x) + rnd(-0.12, 0.12);
-  enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * 5, vy: Math.sin(a) * 5, dmg: e.dmg, life: 140 });
+  const s = e.bulletSpeed || 5;
+  enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, dmg: e.dmg, life: 140 });
 }
 function killEnemy(i) {
   const e = enemies[i];
   effects.push({ x: e.x, y: e.y, r: e.r, t: 18 });
+  if (!e.depot && !e.generator) kills++;
   // loot drops
   const roll = Math.random();
-  if (e.generator) mCount++;
-  else if (e.type === 'boss') {}
+  if (e.generator || e.depot) mCount++;
+  else if (e.boss || e.type === 'boss') {}
   else if (roll < 0.14) dropAt(e.x, e.y, 'health', 0);
   else if (roll < 0.30) dropAt(e.x, e.y, 'ammo', 0);
   else if (roll < 0.38) {
-    const locked = [1, 2, 3, 4].filter(w => !unlocked[w] && w <= Math.min(4, mission + 1));
+    const locked = [1, 2, 3, 4, 5].filter(w => !unlocked[w] && w <= Math.min(5, mission + 1));
     if (locked.length) dropAt(e.x, e.y, 'weapon', locked[0]);
     else dropAt(e.x, e.y, 'ammo', 0);
   }
@@ -342,21 +388,21 @@ function update(dt, now) {
   for (const e of enemies) {
     if (e.flash) e.flash--;
     if (e.speed) {
-      const t = (escort && !escort.follow && e.type !== 'boss' && Math.random() < 0.4) ? escort : player;
+      const t = (escort && !escort.follow && e.type !== 'boss' && !e.boss && Math.random() < 0.4) ? escort : player;
       const d = dist(e, t);
-      if (d > 60) {
+      if (d > (e.contact ? e.r + t.r - 4 : 60)) {
         const mx = { x: e.x + (t.x - e.x) / d * e.speed, y: e.y };
         const my = { x: e.x, y: e.y + (t.y - e.y) / d * e.speed };
         if (!inWall(mx, e.r)) e.x = mx.x;
         if (!inWall(my, e.r)) e.y = my.y;
       }
-      if (d < e.r + player.r + 2 && t === player) player.hp -= 0.4;
+      if (d < e.r + player.r + 2 && t === player) player.hp -= (e.contact || 0.4);
     }
     e.cooldown -= dt * 1000;
-    if (e.cooldown <= 0 && dist(e, player) < (e.type === 'turret' ? 320 : 260)) {
+    if (!e.noShoot && e.cooldown <= 0 && dist(e, player) < (e.range || 260)) {
       enemyShoot(e);
-      if (e.type === 'boss') { enemyShoot(e); enemyShoot(e); }
-      e.cooldown = e.type === 'boss' ? 700 : e.type === 'turret' ? 1100 : rnd(900, 1700);
+      if (e.type === 'boss' || e.boss) { enemyShoot(e); enemyShoot(e); }
+      e.cooldown = (e.type === 'boss' || e.boss) ? 700 : e.type === 'turret' ? 1100 : e.type === 'sniper' ? 1900 : rnd(900, 1700);
     }
   }
   // pickups
@@ -366,8 +412,8 @@ function update(dt, now) {
     if (dist(player, p) < player.r + p.r) {
       if (p.kind === 'crate' || p.kind === 'chip') mCount++;
       if (p.kind === 'health') player.hp = Math.min(player.maxHp, player.hp + 35);
-      if (p.kind === 'ammo') WEAPONS.forEach((w, wi) => { if (wi && unlocked[wi]) w.ammo += wi === 4 ? 6 : 25; });
-      if (p.kind === 'weapon') { unlocked[p.w] = true; WEAPONS[p.w].ammo += p.w === 4 ? 10 : 40; curWeapon = p.w; }
+      if (p.kind === 'ammo') WEAPONS.forEach((w, wi) => { if (wi && unlocked[wi]) w.ammo += wi === 4 ? 6 : wi === 5 ? 80 : 25; });
+      if (p.kind === 'weapon') { unlocked[p.w] = true; WEAPONS[p.w].ammo += p.w === 4 ? 10 : p.w === 5 ? 200 : 40; curWeapon = p.w; }
       pickups.splice(i, 1);
     }
   }
@@ -428,11 +474,16 @@ function draw() {
   for (const e of enemies) {
     cx.save(); cx.translate(e.x, e.y);
     cx.fillStyle = e.flash ? '#ffffff' : e.color;
-    if (e.type === 'turret') {
+    if (e.type === 'turret' || e.type === 'depot') {
       cx.fillRect(-e.r, -e.r, e.r * 2, e.r * 2);
-      const a = Math.atan2(player.y - e.y, player.x - e.x);
-      cx.strokeStyle = e.generator ? '#c98fff' : '#ddd'; cx.lineWidth = 4;
-      cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(Math.cos(a) * e.r * 1.4, Math.sin(a) * e.r * 1.4); cx.stroke();
+      if (e.type === 'turret') {
+        const a = Math.atan2(player.y - e.y, player.x - e.x);
+        cx.strokeStyle = e.generator ? '#c98fff' : '#ddd'; cx.lineWidth = 4;
+        cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(Math.cos(a) * e.r * 1.4, Math.sin(a) * e.r * 1.4); cx.stroke();
+      } else {
+        cx.fillStyle = '#0a0e14'; cx.fillRect(-e.r * 0.5, -e.r * 0.5, e.r, e.r);
+        cx.fillStyle = '#ffd166'; cx.fillRect(-e.r * 0.3, -e.r * 0.3, e.r * 0.6, e.r * 0.6);
+      }
     } else {
       cx.beginPath(); cx.arc(0, 0, e.r, 0, 7); cx.fill();
       const a = Math.atan2(player.y - e.y, player.x - e.x);
