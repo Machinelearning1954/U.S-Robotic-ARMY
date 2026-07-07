@@ -1,0 +1,63 @@
+# The Wanted System — BII Watch Level & Pursuit
+
+> **FICTIONAL VIDEO GAME CONTENT.** The island-wide police/wanted design for the
+> PAUDC universe. The enforcing body is the **BII (Bureau of Island Integrity)** — an
+> invented, satirical courtesy-first force established in the systems doc (§5 Watch
+> Level, §12 Infraction Ledger). **No real police force, unit, tactic, or procedure
+> is depicted; everything here is invented and tuned for comedy-forward, non-lethal
+> play.** This doc unifies the existing pieces and adds the pursuit ladder.
+
+## Design pillars
+
+1. **Non-lethal, always.** PAUDC's power-fantasy floor applies to the law too: no
+   death screens, no kill squads. Getting caught costs time, clout, and dignity.
+2. **Courtesy-first satire.** The BII's whole voice is polite menace: infractions
+   are "invitations," arrests are "words being had," the SWAT-equivalent is a
+   *very* insistent customer-service department.
+3. **The chase is the content.** Stars exist to produce great chases and great
+   OnWatch clips — the system feeds the clout economy on both ends (fleeing pays
+   filmable moments; getting stopped costs clout).
+
+## The five-star ladder (island-wide)
+
+| Stars | Name | What happens |
+|---|---|---|
+| ★ | **Noted** | A courtesy note on the ledger. Nothing visible; decays fast. |
+| ★★ | **Observed** | A patrol shadows you at distance — visible on the radar, never engages. Prices tick up at BII-adjacent vendors. |
+| ★★★ | **Invited** | *(Live in the prototype, v0.23.)* The **Courtesy Interceptor** is dispatched — teal-striped cruiser, flashing bar, radar blip. It pursues; linger slow near it and you're **courtesy-stopped**: ledger cleared, −15 clout, released on the spot. Outrun it (real distance, sustained) and stars cool to ★★. |
+| ★★★★ | **Escorted** | Two interceptors run a pincer; route-taxi NPCs pull over ahead of you (civilian traffic parts, telegraphing the pincer's path). Roadside spike *cones* (satire: literal traffic cones that only work if you drive over them slowly). |
+| ★★★★★ | **The Full Apology** | The storm-rated interceptor (works at sea), a spotter drone with a spotlight cone, and roadblocks at ring-road chokepoints. Reserved for mission crescendos; still non-lethal — the fail state is the island's most elaborate courtesy stop. |
+
+## How stars rise and fall
+
+- **Rise:** the Infraction Ledger (systems doc §12) — donuts ("Excessive Style,
+  Vehicular"), creative parking, unlicensed regattas, declining invitations, and
+  mission-specific infractions.
+- **Fall:** time (60s per star), **twice as fast with IRIE** (Green Cross buff),
+  frozen during an active pursuit, instant-cleared by a courtesy stop, cooled to
+  ★★ by a clean escape.
+- **Fame is heat** (OnWatch §4): higher clout tiers accelerate star gain — everyone
+  recognizes you, including the BII.
+
+## Pursuit AI (engine mapping)
+
+- **Interceptor behavior:** pursue → maintain-contact → stop-attempt loop; road-
+  snapped where possible, amphibious-but-grudging in water (7 m/s vs 29 on land, so
+  the sea is a genuine escape valve — canon: the Mudfish always wins the harbor).
+- **Escape logic:** sustained true distance (70 m for 12 s at ★★★; tighter at higher
+  tiers), or line-of-sight breaks in Cockpit-Country-class terrain (engine rung).
+- **Catch logic:** proximity + low speed, held briefly — surrender is always a
+  *choice the player makes by slowing down*, which keeps stops feeling fair.
+- Prototype implementation is the ★★★ tier end-to-end (dispatch → chase → radar
+  blip → stop/escape); ★★★★/★★★★★ ship with the engine rung's traffic control.
+
+## Consequences table
+
+| Outcome | Cost | Canon flavor |
+|---|---|---|
+| Courtesy stop | ledger cleared, −15 clout, a moment of your time | "Words were had." |
+| Clean escape | stars → ★★, cooldown restarts | the clip usually earns more than the fine would've cost |
+| Mission arrest (story) | scripted only | the BII interview room has excellent coffee and worse small talk |
+
+> All fictional. The BII, its interceptors, and every procedure above are invented
+> for a comedy-forward game; nothing depicts real law enforcement.

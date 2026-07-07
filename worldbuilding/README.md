@@ -22,11 +22,12 @@
 | [`PAUDC_Psych_Thriller.md`](PAUDC_Psych_Thriller.md) | **"The Static Hour"** — the optional psychological-thriller arc extending the Numbers Station thread: the Presence you can't fight, the Paranoia meter, an unreliable-narrator set-piece and its twist, all non-lethal by rule. |
 | [`JAMAICA_ISLAND_WORLD.md`](JAMAICA_ISLAND_WORLD.md) | **The full-island expansion spec** — all of fictionalized Jamaica at real scale: eight regions, biomes from SRTM elevation reference, road graph, GTA-6-tier fidelity spec for the engine rung, lighting presets, mission hooks. PAUDC stays the narrative heart. |
 | [`JAMAICA_NPC_CULTURE.md`](JAMAICA_NPC_CULTURE.md) | Island-wide **NPC culture & behavior system** — archetypes by region, clock-driven routines, reputation-based reactions (Protector/Troublemaker/Outsider/Local), natural Patois dialogue sets, behavior trees per class, cultural event calendar. Respectful and fiction-safe by rule. |
+| [`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md) | The **police/wanted module** — the satirical BII five-star ladder (Noted → The Full Apology), courtesy-first non-lethal philosophy, pursuit AI mapping, consequences table. Tier ★★★ is playable in the prototype. |
 | [`DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) | How the project ships legally: no leaked Rockstar code ever, the prototype→engine ladder, Godot 4 next / UE5 later, FiveM gamemode option, legal study resources. |
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.22**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.23**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -122,7 +123,14 @@ a full **day/night cycle** (8-minute day) with a live HUD clock — dawn breaks
 pink over the harbor, noon is bright tropical daylight with long draw distance,
 dusk burns orange, and night brings back the neon; stars, moon, and lens streak
 fade with the light, `N` jumps time in 3-hour steps, and storm mode, the Static
-Hour, and Chromelab Grade all compose with it.
+Hour, and Chromelab Grade all compose with it. v0.23 gives the stars teeth: at
+**★★★ the BII dispatches the Courtesy Interceptor** — a teal-striped cruiser with
+a flashing light bar that hunts you down (fast on land, grudging at sea — the
+harbor is a real escape valve), blips red/blue on the radar, freezes star decay
+while the chase is on, and ends one of two ways: linger slow near it for the
+**courtesy stop** (ledger cleared, −15 clout, "words were had") or hold real
+distance to escape (stars cool to ★★). See
+[`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md) for the full five-star ladder.
 
 
 [`../game/index.html`](../game/index.html) — **the front door**: a styled hub

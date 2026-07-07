@@ -39,7 +39,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.22</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.23</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4299,6 +4299,45 @@ function updateTraffic(dt){
     c.g.rotation.y=Math.atan2(-dz,dx);
   }
 }
+// ---------------- BII pursuit: the Courtesy Interceptor (active at 3+ stars) ----------------
+const patrol=new THREE.Group();
+{const bd=new THREE.Mesh(new THREE.BoxGeometry(4.2,1.15,2.1),new THREE.MeshLambertMaterial({color:0xe8eef2}));bd.position.y=1.0;patrol.add(bd);
+ const cb=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.85,1.9),new THREE.MeshLambertMaterial({color:0x0f5a66}));cb.position.set(-0.2,1.9,0);patrol.add(cb);
+ const stripe=new THREE.Mesh(new THREE.BoxGeometry(4.22,0.3,2.12),new THREE.MeshBasicMaterial({color:0x3af5d8}));stripe.position.y=1.35;patrol.add(stripe);
+ const wg=new THREE.CylinderGeometry(0.55,0.55,0.5,10).rotateX(Math.PI/2),wm=new THREE.MeshLambertMaterial({color:0x11181f});
+ for(const[dx,dz]of[[1.4,1.1],[1.4,-1.1],[-1.4,1.1],[-1.4,-1.1]]){const w=new THREE.Mesh(wg,wm);w.position.set(dx,0.55,dz);patrol.add(w);}}
+const lightR=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.24,0.5),new THREE.MeshBasicMaterial({color:0xff2b3a}));lightR.position.set(-0.2,2.45,0.5);patrol.add(lightR);
+const lightB=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.24,0.5),new THREE.MeshBasicMaterial({color:0x2b6bff}));lightB.position.set(-0.2,2.45,-0.5);patrol.add(lightB);
+patrol.traverse(o=>{if(o.isMesh)o.castShadow=true;});patrol.visible=false;scene.add(patrol);
+let pursuit=false,stopT=0,escT=0,patrolV=0;
+function spawnPatrol(){pursuit=true;stopT=0;escT=0;patrolV=0;patrol.visible=true;
+  // rolls in from the nearest ring waypoint that isn't on top of you
+  let best=null,bd=1e9;for(const w of ring){const d=Math.hypot(P.x-w.X,P.z-w.Z);if(d<bd&&d>40){bd=d;best=w;}}
+  const s=best||ring[0];patrol.position.set(s.X,Math.max(height(s.X,s.Z),0.3)+0.1,s.Z);
+  toast('BII COURTESY INTERCEPTOR DISPATCHED — ★★★');}
+function endPursuit(caught){pursuit=false;patrol.visible=false;
+  if(caught){watch=0;clout=Math.max(0,clout-15);try{localStorage.setItem('paudc_clout',clout);}catch(e){}
+    $('clout').textContent='ONWATCH  '+clout+' CLOUT';P.v=0;
+    toast('COURTESY STOP — words were had, ledger cleared, -15 clout');}
+  else{watch=Math.min(watch,2);watchT=perf+30000;toast('LOST THEM — stars cooling');}}
+function updatePursuit(dt){
+  if(!pursuit){if(watch>=3)spawnPatrol();return;}
+  // flashing light bar
+  const ph=(perf/240|0)%2;lightR.material.color.set(ph?0xff2b3a:0x5a1016);lightB.material.color.set(ph?0x14265a:0x2b6bff);
+  // drives at the player: quick on land, grudging in water (amphibious, barely)
+  const dx=P.x-patrol.position.x,dz=P.z-patrol.position.z,d=Math.hypot(dx,dz);
+  const wetP=isWater(patrol.position.x,patrol.position.z);
+  const vmax=wetP?7:29;patrolV=Math.min(vmax,patrolV+(wetP?6:16)*dt);
+  if(d>3){patrol.position.x+=dx/d*patrolV*dt;patrol.position.z+=dz/d*patrolV*dt;}
+  patrol.position.y=Math.max(height(patrol.position.x,patrol.position.z),0.3)+0.1;
+  patrol.rotation.y=Math.atan2(-dz,dx);
+  // caught: linger slow within reach
+  if(d<8&&Math.abs(P.v)<6){stopT+=dt;if(stopT>1.2){endPursuit(true);return;}}
+  else stopT=Math.max(0,stopT-dt);
+  // escaped: keep real distance for 12s
+  if(d>70){escT+=dt;if(escT>12){endPursuit(false);return;}}
+  else escT=0;
+}
 // ---------------- v0.20 graphics: street lamps + neon glow sprites ----------------
 let glowTex;{const gc=document.createElement('canvas');gc.width=gc.height=64;const g=gc.getContext('2d');
  const rg=g.createRadialGradient(32,32,2,32,32,32);
@@ -4657,6 +4696,7 @@ function drawRadar(){
     if(Math.hypot(dx-R,dy-R)>R-3)return;mg.fillStyle=col;mg.beginPath();mg.arc(dx,dy,r,0,7);mg.fill();};
   if(radarTarget)dot(radarTarget.X,radarTarget.Z,'#ffb84d',3.2);
   for(let i=0;i<VEH.length;i++)if(i!==veh)dot(VEH[i].pose.x,VEH[i].pose.z,'#8fbfff',2.2); // parked rides
+  if(pursuit){const ph=(perf/240|0)%2;dot(patrol.position.x,patrol.position.z,ph?'#ff2b3a':'#2b6bff',3);} // the law
   // player heading triangle
   mg.save();mg.translate(R,R);mg.rotate(-P.a+Math.PI/2);mg.fillStyle='#eafffb';
   mg.beginPath();mg.moveTo(0,-6);mg.lineTo(4,5);mg.lineTo(-4,5);mg.closePath();mg.fill();mg.restore();
@@ -4763,7 +4803,7 @@ function tick(t){
     if(watch<3)invited=false;
     else if(Math.abs(P.v)>20){invT+=dt;if(invT>6){invited=false;infraction('DECLINING AN INVITATION',1);}}
   }
-  if(watch>0&&perf>watchT){watch--;watchT=perf+(irie?30000:60000);}  // IRIE = calm hands, BII cools twice as fast
+  if(!pursuit&&watch>0&&perf>watchT){watch--;watchT=perf+(irie?30000:60000);}  // IRIE = calm hands, BII cools twice as fast
   const gy=height(P.x,P.z),y=wet?0.55+0.18*Math.sin(t*0.004):Math.max(gy,0.4);
   const av=VEH[veh].g;
   av.position.set(P.x,y,P.z);av.rotation.y=P.a;
@@ -4794,7 +4834,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -4912,7 +4952,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2)}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
