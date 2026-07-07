@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Robotic Army — Liberty Bay RTX (WebGPU)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0e14; color: #cfd8e3; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  h1 { margin: 12px 0 4px; font-size: 22px; letter-spacing: 3px; color: #7fd4ff; text-transform: uppercase; }
+  nav { font-size: 13px; margin-bottom: 6px; }
+  nav a { color: #6c7f95; text-decoration: none; } nav a:hover { color: #7fd4ff; }
+  #hud { width: 960px; display: flex; justify-content: space-between; padding: 6px 4px; font-size: 13px; }
+  .bar { color: #9fb4cc; } .accent { color: #7fd4ff; }
+  #wrap { position: relative; }
+  canvas { border: 2px solid #2b3a4e; display: block; background: #11161f; }
+  #note { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+          text-align: center; padding: 40px; background: rgba(6,10,16,0.9); }
+  #note h2 { color: #7fd4ff; letter-spacing: 2px; margin-bottom: 14px; }
+  #note p { max-width: 620px; line-height: 1.6; margin-bottom: 10px; font-size: 15px; }
+  #note a.btn { margin-top: 16px; padding: 10px 30px; background: #123047; color: #7fd4ff; border: 1px solid #7fd4ff;
+                text-decoration: none; letter-spacing: 2px; }
+  #note a.btn:hover { background: #1b4463; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<h1>Liberty Bay — RTX</h1>
+<nav><a href="index.html">campaign</a> · <a href="city.html">2D</a> · <a href="city3d.html">WebGL 3D</a></nav>
+<div id="hud">
+  <span class="bar">RENDERER <span id="rend" class="accent">detecting…</span></span>
+  <span class="bar">SAMPLES <span id="spp" class="accent">0</span></span>
+  <span class="bar">WEATHER <span id="wx" class="accent">CLEAR</span> · DIM <span id="dim" class="accent">PRIME</span></span>
+</div>
+<div id="wrap">
+  <canvas id="cv" width="960" height="600"></canvas>
+  <div id="note" class="hidden">
+    <h2 id="noteTitle">WEBGPU REQUIRED</h2>
+    <p id="noteBody"></p>
+    <a class="btn" href="city3d.html">OPEN THE WEBGL 3D CITY →</a>
+  </div>
+</div>
+<p style="max-width:960px;font-size:12px;color:#6c7f95;margin-top:8px;line-height:1.5;">
+  Real-time <b>path tracing</b> on WebGPU: every pixel casts primary rays against the city geometry, a sun shadow ray, and a
+  reflection bounce, accumulated over frames for clean soft lighting. Controls: <b>W/S</b> move · <b>A/D</b> turn ·
+  <b>Q</b> neon dimension · <b>R</b> rain (mirror streets) · <b>N/M</b> move the sun.
+</p>
+<script>
+'use strict';
+const WORLD_W = 3200, WORLD_H = 2400, BLOCK = 400, ROAD = 90;
+const AIRPORT = { x: 2450, y: 1950, w: 660, h: 380 };
+const IRONSMOKE = { x: 1300, y: 1000, w: 200, h: 120 };
+let seed = 20260707;
+function srnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+function srange(a, b) { return a + srnd() * (b - a); }
+
+// same seeded city as the other modes, reduced to boxes
+const buildings = [];
+for (let bx = 0; bx < WORLD_W / BLOCK; bx++) for (let by = 0; by < WORLD_H / BLOCK; by++) {
+  const x0 = bx * BLOCK + ROAD, y0 = by * BLOCK + ROAD;
+  if (x0 + BLOCK > AIRPORT.x && x0 < AIRPORT.x + AIRPORT.w && y0 + BLOCK > AIRPORT.y && y0 < AIRPORT.y + AIRPORT.h) continue;
+  const bw = BLOCK - ROAD, bh = BLOCK - ROAD;
+  const n = 1 + Math.floor(srnd() * 3);
+  for (let k = 0; k < n; k++) {
+    const w = srange(70, bw / (n > 1 ? 2.2 : 1.4)), h = srange(70, bh / (n > 1 ? 2.2 : 1.4));
+    buildings.push({ x: x0 + srange(8, bw - w - 8), y: y0 + srange(8, bh - h - 8), w, h, ht: srange(45, 170), tone: Math.floor(srange(0, 3)), emis: 1 });
+  }
+}
+for (let i = buildings.length - 1; i >= 0; i--) {
+  const b = buildings[i];
+  if (b.x + b.w > IRONSMOKE.x - 24 && b.x < IRONSMOKE.x + IRONSMOKE.w + 24 && b.y + b.h > IRONSMOKE.y - 24 && b.y < IRONSMOKE.y + IRONSMOKE.h + 44) buildings.splice(i, 1);
+}
+buildings.push({ x: IRONSMOKE.x, y: IRONSMOKE.y, w: IRONSMOKE.w, h: IRONSMOKE.h, ht: 34, tone: 3, emis: 0 });
+
+const rendEl = document.getElementById('rend'), sppEl = document.getElementById('spp'),
+      wxEl = document.getElementById('wx'), dimEl = document.getElementById('dim'),
+      note = document.getElementById('note'), noteBody = document.getElementById('noteBody'),
+      noteTitle = document.getElementById('noteTitle');
+
+const cam = { x: BLOCK + 60, z: BLOCK + 60, yaw: 0.6, wet: 0, neon: 0, sunT: 0.9 };
+const keys = {};
+addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+const WGSL = `// Liberty Bay RTX — WebGPU path/ray tracer (validated offline with naga).
+// Two pipelines share this module: \`vs\` (fullscreen triangle) + \`fsTrace\`
+// (accumulating ray tracer) and \`vs\` + \`fsPresent\` (tonemap to swapchain).
+
+struct Cam {
+  originWet : vec4<f32>,  // xyz camera origin, w = wetness (0..1)
+  right     : vec4<f32>,  // xyz camera right,  w = tan(halfFov)
+  up        : vec4<f32>,  // xyz camera up,     w = aspect
+  fwd       : vec4<f32>,  // xyz camera forward,w = accumulation count
+  sunNeon   : vec4<f32>,  // xyz sun direction, w = neon flag (0/1)
+  misc      : vec4<f32>,  // x resW, y resH, z frameSeed, w boxCount
+  misc2     : vec4<f32>,  // x time
+};
+
+struct Box { mn : vec3<f32>, tone : f32, mx : vec3<f32>, emis : f32 };
+
+@group(0) @binding(0) var<uniform> cam : Cam;
+@group(0) @binding(1) var<storage, read> boxes : array<Box>;
+@group(0) @binding(2) var prevTex : texture_2d<f32>;
+
+struct VSOut { @builtin(position) pos : vec4<f32> };
+
+@vertex
+fn vs(@builtin(vertex_index) vi : u32) -> VSOut {
+  var pts = array<vec2<f32>, 3>(vec2<f32>(-1.0, -1.0), vec2<f32>(3.0, -1.0), vec2<f32>(-1.0, 3.0));
+  var o : VSOut;
+  o.pos = vec4<f32>(pts[vi], 0.0, 1.0);
+  return o;
+}
+
+// ---- rng ----
+fn hash21(p : vec2<f32>) -> f32 {
+  var q = fract(p * vec2<f32>(123.34, 456.21));
+  q = q + dot(q, q + 45.32);
+  return fract(q.x * q.y);
+}
+fn hash11(n : f32) -> f32 { return fract(sin(n * 12.9898) * 43758.5453); }
+
+// ---- ray vs axis-aligned box, returns t (or -1) and sets normal ----
+fn hitBox(ro : vec3<f32>, rd : vec3<f32>, mn : vec3<f32>, mx : vec3<f32>, nrm : ptr<function, vec3<f32>>) -> f32 {
+  // safe inverse: never divide by a zero component (that makes Inf/NaN)
+  let safe = select(rd, vec3<f32>(1e-6, 1e-6, 1e-6), abs(rd) < vec3<f32>(1e-6, 1e-6, 1e-6));
+  let inv = 1.0 / safe;
+  let t0 = (mn - ro) * inv;
+  let t1 = (mx - ro) * inv;
+  let tsmall = min(t0, t1);
+  let tbig = max(t0, t1);
+  let tn = max(max(tsmall.x, tsmall.y), tsmall.z);
+  let tf = min(min(tbig.x, tbig.y), tbig.z);
+  if (tn > tf || tf < 0.0) { return -1.0; }
+  let t = select(tn, tf, tn < 0.0);
+  // normal = axis where tn was achieved
+  var n = vec3<f32>(0.0, 0.0, 0.0);
+  if (tsmall.x >= tsmall.y && tsmall.x >= tsmall.z) { n = vec3<f32>(-sign(rd.x), 0.0, 0.0); }
+  else if (tsmall.y >= tsmall.z) { n = vec3<f32>(0.0, -sign(rd.y), 0.0); }
+  else { n = vec3<f32>(0.0, 0.0, -sign(rd.z)); }
+  *nrm = n;
+  return t;
+}
+
+struct Hit { t : f32, n : vec3<f32>, tone : f32, emis : f32, isGround : f32, id : f32 };
+
+fn trace(ro : vec3<f32>, rd : vec3<f32>) -> Hit {
+  var h : Hit;
+  h.t = 1e9; h.n = vec3<f32>(0.0, 1.0, 0.0); h.tone = 0.0; h.emis = 0.0; h.isGround = 0.0; h.id = -1.0;
+  // ground plane y = 0 (guard against near-horizontal rays -> huge/Inf t)
+  if (rd.y < -1e-4) {
+    let tg = -ro.y / rd.y;
+    if (tg > 0.001 && tg < 8000.0) { h.t = tg; h.n = vec3<f32>(0.0, 1.0, 0.0); h.isGround = 1.0; }
+  }
+  let n = i32(cam.misc.w);
+  for (var i = 0; i < n; i = i + 1) {
+    var nrm : vec3<f32>;
+    let b = boxes[i];
+    let t = hitBox(ro, rd, b.mn, b.mx, &nrm);
+    if (t > 0.001 && t < h.t) {
+      h.t = t; h.n = nrm; h.tone = b.tone; h.emis = b.emis; h.isGround = 0.0; h.id = f32(i);
+    }
+  }
+  return h;
+}
+
+// shadow ray: is the point lit by the sun?
+fn sunVis(p : vec3<f32>, sun : vec3<f32>) -> f32 {
+  let h = trace(p + sun * 0.05, sun);
+  if (h.t < 1e8) { return 0.25; } // soft ambient occlusion of direct light
+  return 1.0;
+}
+
+fn skyColor(rd : vec3<f32>, sun : vec3<f32>) -> vec3<f32> {
+  let neon = cam.sunNeon.w;
+  let up = clamp(rd.y * 0.5 + 0.5, 0.0, 1.0);
+  var top = vec3<f32>(0.05, 0.12, 0.28);
+  var bot = vec3<f32>(0.35, 0.45, 0.62);
+  if (neon > 0.5) { top = vec3<f32>(0.10, 0.0, 0.18); bot = vec3<f32>(0.45, 0.05, 0.55); }
+  var col = mix(bot, top, up);
+  let s = max(dot(rd, sun), 0.0);
+  col = col + vec3<f32>(1.0, 0.85, 0.6) * pow(s, 350.0) * 1.2;      // sun disk
+  col = col + vec3<f32>(1.0, 0.8, 0.55) * pow(s, 8.0) * 0.12;        // glow
+  return col;
+}
+
+// window emission on a building face
+fn windows(p : vec3<f32>, nrm : vec3<f32>, id : f32) -> vec3<f32> {
+  // pick the two axes on the face
+  var u : f32; var v : f32;
+  if (abs(nrm.y) > 0.5) { return vec3<f32>(0.0); }             // roofs: no windows
+  if (abs(nrm.x) > 0.5) { u = p.z; v = p.y; } else { u = p.x; v = p.y; }
+  let cell = vec2<f32>(floor(u / 8.0), floor(v / 9.0));
+  let lit = hash21(cell + vec2<f32>(id * 3.1, id * 1.7));
+  let inU = fract(u / 8.0); let inV = fract(v / 9.0);
+  let frame = f32(inU > 0.16 && inU < 0.84 && inV > 0.16 && inV < 0.84);
+  let neon = cam.sunNeon.w;
+  var wc = vec3<f32>(1.0, 0.9, 0.6);
+  if (neon > 0.5) {
+    let pick = hash11(id + cell.x);
+    wc = select(select(vec3<f32>(0.0, 0.9, 1.0), vec3<f32>(1.0, 0.15, 0.85), pick > 0.33), vec3<f32>(0.6, 0.3, 1.0), pick > 0.66);
+  }
+  let on = f32(lit > 0.55) * frame;
+  return wc * on * select(1.2, 3.0, neon > 0.5);
+}
+
+fn albedo(tone : f32) -> vec3<f32> {
+  if (tone < 0.5) { return vec3<f32>(0.14, 0.18, 0.25); }
+  if (tone < 1.5) { return vec3<f32>(0.11, 0.15, 0.22); }
+  if (tone < 2.5) { return vec3<f32>(0.16, 0.20, 0.29); }
+  return vec3<f32>(0.18, 0.15, 0.14); // iron / restaurant
+}
+
+fn shade(ro : vec3<f32>, rd : vec3<f32>, h : Hit, sun : vec3<f32>) -> vec3<f32> {
+  let p = ro + rd * h.t;
+  if (h.t > 1e8) { return skyColor(rd, sun); }
+  var base : vec3<f32>;
+  if (h.isGround > 0.5) {
+    let checker = 0.5 + 0.02 * sin(p.x * 0.05) + 0.02 * sin(p.z * 0.05);
+    base = vec3<f32>(0.06, 0.07, 0.09);
+  } else {
+    base = albedo(h.tone);
+  }
+  let ndl = max(dot(h.n, sun), 0.0);
+  let vis = sunVis(p, sun);
+  let sky = skyColor(h.n, sun) * 0.25;                       // hemispheric ambient
+  var col = base * (sky + vec3<f32>(1.0, 0.9, 0.7) * ndl * vis);
+  if (h.isGround < 0.5) { col = col + windows(p, h.n, h.id); }  // emissive windows
+  return col;
+}
+
+@fragment
+fn fsTrace(@builtin(position) fc : vec4<f32>) -> @location(0) vec4<f32> {
+  let res = cam.misc.xy;
+  let seed = cam.misc.z;
+  let jitter = vec2<f32>(hash21(fc.xy + seed), hash21(fc.xy + seed + 7.0)) - 0.5;
+  var uv = (vec2<f32>(fc.x, res.y - fc.y) + jitter) / res * 2.0 - 1.0;
+  uv.x = uv.x * cam.up.w;                                   // aspect
+  let thf = cam.right.w;
+  let ro = cam.originWet.xyz;
+  let rd = normalize(cam.fwd.xyz + uv.x * thf * cam.right.xyz + uv.y * thf * cam.up.xyz);
+  let sun = normalize(cam.sunNeon.xyz);
+
+  let h = trace(ro, rd);
+  var col = shade(ro, rd, h, sun);
+  if (h.t < 1e8) {
+    let p = ro + rd * h.t;
+    let refl = reflect(rd, h.n);
+    let wet = cam.originWet.w;
+    var k = 0.04;
+    if (h.isGround > 0.5) { k = mix(0.12, 0.85, wet); }
+    let h2 = trace(p + h.n * 0.05, refl);
+    let rc = shade(p, refl, h2, sun);
+    let fres = k + (1.0 - k) * pow(1.0 - max(dot(-rd, h.n), 0.0), 5.0);
+    col = mix(col, rc, clamp(fres, 0.0, 0.95));
+  }
+
+  // kill any stray Inf/NaN, then bound radiance so tonemapping stays stable
+  col = select(col, vec3<f32>(0.0, 0.0, 0.0), col != col);
+  col = clamp(col, vec3<f32>(0.0), vec3<f32>(20.0));
+
+  // temporal accumulation
+  let count = cam.fwd.w;
+  let prev = textureLoad(prevTex, vec2<i32>(fc.xy), 0).rgb;
+  let outc = select(mix(prev, col, 1.0 / count), col, count <= 1.5);
+  return vec4<f32>(outc, 1.0);
+}
+
+fn aces(x : vec3<f32>) -> vec3<f32> {
+  return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), vec3<f32>(0.0), vec3<f32>(1.0));
+}
+
+@fragment
+fn fsPresent(@builtin(position) fc : vec4<f32>) -> @location(0) vec4<f32> {
+  var c = textureLoad(prevTex, vec2<i32>(fc.xy), 0).rgb;
+  c = aces(c * 0.9);
+  // teal/orange grade + vignette
+  let l = dot(c, vec3<f32>(0.299, 0.587, 0.114));
+  c = c + mix(vec3<f32>(0.0, 0.14, 0.20), vec3<f32>(0.26, 0.12, 0.0), smoothstep(0.15, 0.85, l)) * 0.12;
+  let res = cam.misc.xy;
+  let d = vec2<f32>(fc.x, fc.y) / res - 0.5;
+  c = c * mix(0.6, 1.0, smoothstep(1.0, 0.4, length(d)));
+  c = pow(clamp(c, vec3<f32>(0.0), vec3<f32>(1.0)), vec3<f32>(1.0 / 2.2));
+  return vec4<f32>(c, 1.0);
+}
+`;
+
+async function main() {
+  const canvas = document.getElementById('cv');
+  if (!navigator.gpu) {
+    noteBody.textContent = 'This browser has no WebGPU. The full ray tracer needs Chrome/Edge 113+ or Safari 26. Your verified WebGL city runs everywhere:';
+    note.classList.remove('hidden'); rendEl.textContent = 'unavailable';
+    return;
+  }
+  let device, context, format;
+  try {
+    const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+    if (!adapter) throw new Error('no adapter');
+    device = await adapter.requestDevice();
+    context = canvas.getContext('webgpu');
+    format = navigator.gpu.getPreferredCanvasFormat();
+    context.configure({ device, format, alphaMode: 'opaque' });
+  } catch (e) {
+    noteBody.textContent = 'WebGPU is present but could not start a GPU device (' + e.message + '). Falling back:';
+    note.classList.remove('hidden'); rendEl.textContent = 'device error';
+    return;
+  }
+  rendEl.textContent = 'WebGPU path tracer';
+
+  const module = device.createShaderModule({ code: WGSL });
+  const info = await module.getCompilationInfo();
+  window.__wgslMsgs = info.messages.map(m => `${m.type} L${m.lineNum}:${m.linePos} ${m.message}`);
+  const errs = info.messages.filter(m => m.type === 'error');
+  if (errs.length) {
+    console.error('WGSL compile errors', errs);
+    noteBody.textContent = 'Shader failed to compile on this GPU. Falling back:';
+    note.classList.remove('hidden'); rendEl.textContent = 'shader error';
+    return;
+  }
+
+  const bgl = device.createBindGroupLayout({
+    entries: [
+      { binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+      { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
+      { binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'unfilterable-float' } },
+    ],
+  });
+  const layout = device.createPipelineLayout({ bindGroupLayouts: [bgl] });
+  const mk = (entry, fmt) => device.createRenderPipeline({
+    layout,
+    vertex: { module, entryPoint: 'vs' },
+    fragment: { module, entryPoint: entry, targets: [{ format: fmt }] },
+    primitive: { topology: 'triangle-list' },
+  });
+  const tracePipe = mk('fsTrace', 'rgba16float');
+  const presentPipe = mk('fsPresent', format);
+
+  const W = canvas.width, H = canvas.height;
+  const texDesc = { size: [W, H], format: 'rgba16float', usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING };
+  let accA = device.createTexture(texDesc), accB = device.createTexture(texDesc);
+  let viewA = accA.createView(), viewB = accB.createView();
+
+  const uniformBuf = device.createBuffer({ size: 7 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const MAXB = 128;
+  const boxBuf = device.createBuffer({ size: MAXB * 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const boxData = new Float32Array(MAXB * 8);
+  const uni = new Float32Array(7 * 4);
+
+  const bindTrace = () => device.createBindGroup({ layout: bgl, entries: [
+    { binding: 0, resource: { buffer: uniformBuf } },
+    { binding: 1, resource: { buffer: boxBuf } },
+    { binding: 2, resource: read === accA ? viewA : viewB },
+  ] });
+  let read = accB, write = accA;
+  const bindPresent = () => device.createBindGroup({ layout: bgl, entries: [
+    { binding: 0, resource: { buffer: uniformBuf } },
+    { binding: 1, resource: { buffer: boxBuf } },
+    { binding: 2, resource: write === accA ? viewA : viewB },
+  ] });
+
+  let count = 0, frame = 0, last = 0;
+  let prev = { x: cam.x, z: cam.z, yaw: cam.yaw, wet: cam.wet, neon: cam.neon, sunT: cam.sunT };
+  let qL = false, rL = false;
+
+  function nearestBoxes() {
+    const list = buildings.map(b => ({ b, d: (b.x + b.w / 2 - cam.x) ** 2 + (b.y + b.h / 2 - cam.z) ** 2 }))
+      .sort((a, z) => a.d - z.d).slice(0, MAXB);
+    for (let i = 0; i < list.length; i++) {
+      const b = list[i].b, o = i * 8;
+      boxData[o] = b.x; boxData[o + 1] = 0; boxData[o + 2] = b.y; boxData[o + 3] = b.tone;
+      boxData[o + 4] = b.x + b.w; boxData[o + 5] = b.ht; boxData[o + 6] = b.y + b.h; boxData[o + 7] = b.emis;
+    }
+    device.queue.writeBuffer(boxBuf, 0, boxData, 0, list.length * 8);
+    return list.length;
+  }
+
+  function step(dt) {
+    const turn = (keys['a'] || keys['arrowleft'] ? 1 : 0) - (keys['d'] || keys['arrowright'] ? 1 : 0);
+    const fwd = (keys['w'] || keys['arrowup'] ? 1 : 0) - (keys['s'] || keys['arrowdown'] ? 1 : 0);
+    cam.yaw += turn * 1.6 * dt;
+    cam.x += Math.sin(cam.yaw) * fwd * 90 * dt;
+    cam.z += Math.cos(cam.yaw) * fwd * 90 * dt;
+    cam.x = Math.max(20, Math.min(WORLD_W - 20, cam.x));
+    cam.z = Math.max(20, Math.min(WORLD_H - 20, cam.z));
+    if (keys['q'] && !qL) { qL = true; cam.neon = cam.neon ? 0 : 1; dimEl.textContent = cam.neon ? 'V' : 'PRIME'; } if (!keys['q']) qL = false;
+    if (keys['r'] && !rL) { rL = true; cam.wet = cam.wet ? 0 : 1; wxEl.textContent = cam.wet ? 'RAIN' : 'CLEAR'; } if (!keys['r']) rL = false;
+    if (keys['n']) cam.sunT += 0.4 * dt;
+    if (keys['m']) cam.sunT -= 0.4 * dt;
+  }
+
+  function frameLoop(t) {
+    const dt = Math.min(0.05, (t - last) / 1000 || 0); last = t;
+    step(dt);
+    // reset accumulation when the view or lighting changes
+    const moved = Math.abs(prev.x - cam.x) + Math.abs(prev.z - cam.z) > 0.01 ||
+                  Math.abs(prev.yaw - cam.yaw) > 0.0001 || prev.wet !== cam.wet ||
+                  prev.neon !== cam.neon || Math.abs(prev.sunT - cam.sunT) > 0.0001;
+    if (moved) count = 0;
+    prev = { x: cam.x, z: cam.z, yaw: cam.yaw, wet: cam.wet, neon: cam.neon, sunT: cam.sunT };
+    count++;
+
+    const nb = nearestBoxes();
+
+    // chase camera: behind + above the walker, looking at head height
+    const px = cam.x, pz = cam.z, py = 18;
+    const dist = 46, height = 34;
+    const ox = px - Math.sin(cam.yaw) * dist, oz = pz - Math.cos(cam.yaw) * dist, oy = height;
+    let fx = px - ox, fy = py - oy, fz = pz - oz;
+    const fl = Math.hypot(fx, fy, fz) || 1; fx /= fl; fy /= fl; fz /= fl;
+    // right = normalize(cross(fwd, worldUp(0,1,0))) = normalize((-fz, 0, fx))
+    let rx = -fz, ry = 0, rz = fx; const rl = Math.hypot(rx, ry, rz) || 1; rx /= rl; ry /= rl; rz /= rl;
+    // up = cross(right, fwd)
+    const ux = ry * fz - rz * fy, uy = rz * fx - rx * fz, uz = rx * fy - ry * fx;
+    const sunT = cam.sunT;
+    const sx = Math.cos(sunT) * 0.5, sy = Math.max(0.15, Math.sin(sunT)), sz = Math.sin(sunT) * 0.35;
+
+    uni.set([ox, oy, oz, cam.wet, rx, ry, rz, Math.tan(0.55), ux, uy, uz, W / H, fx, fy, fz, count,
+             sx, sy, sz, cam.neon, W, H, frame % 4096, nb, t * 0.001, 0, 0, 0]);
+    device.queue.writeBuffer(uniformBuf, 0, uni);
+
+    const enc = device.createCommandEncoder();
+    const p1 = enc.beginRenderPass({ colorAttachments: [{ view: write === accA ? viewA : viewB, loadOp: 'clear', storeOp: 'store', clearValue: { r: 0, g: 0, b: 0, a: 1 } }] });
+    p1.setPipeline(tracePipe); p1.setBindGroup(0, bindTrace()); p1.draw(3); p1.end();
+    const p2 = enc.beginRenderPass({ colorAttachments: [{ view: context.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store', clearValue: { r: 0, g: 0, b: 0, a: 1 } }] });
+    p2.setPipeline(presentPipe); p2.setBindGroup(0, bindPresent()); p2.draw(3); p2.end();
+    device.queue.submit([enc.finish()]);
+
+    const tmp = read; read = write; write = tmp;
+    sppEl.textContent = count;
+    frame++;
+    requestAnimationFrame(frameLoop);
+  }
+  requestAnimationFrame(frameLoop);
+  window.__rtxReady = true;
+}
+window.__rtxError = null;
+main().catch(e => { window.__rtxError = String(e); console.error(e); noteBody.textContent = 'Renderer error: ' + e.message + '. Falling back:'; note.classList.remove('hidden'); rendEl.textContent = 'error'; });
+</script>
+</body>
+</html>
