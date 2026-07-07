@@ -8,6 +8,11 @@
 
 ## Target platforms (canon)
 
+> Engine-rung PC hardware targets — the four PAUDC tiers (Minimum → Future-proof)
+> mapped to the community-predicted GTA-6-class PC spec (July 2026), with example
+> builds — live in [`../engine/PC_HARDWARE_TARGETS.md`](../engine/PC_HARDWARE_TARGETS.md).
+
+
 | Tier | Devices | What they get |
 |---|---|---|
 | **ULTRA** | PC / desktop browsers | render scale up to 1.75x, 2048px shadows, full bloom, 380 palms |
