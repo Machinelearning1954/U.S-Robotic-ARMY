@@ -47,7 +47,7 @@
   <div id="overlay">
     <h2 id="ovTitle">LIBERTY BAY</h2>
     <p id="ovBody">The war is over. ARES-7 walks free in Liberty Bay — a city of robots that never asked who won. Jack a car, cruise the grid, cause trouble. The RoboCops are watching, and five stars means the whole precinct comes for you.</p>
-    <p class="hint">WASD — move / drive · mouse + click — shoot · E — enter/exit car · cars: W gas, S brake/reverse, A/D steer · crime raises your wanted level, lay low to drop it · earn cash on the streets — a $15,000 first-class jet waits at the airport (southeast)</p>
+    <p class="hint">WASD — move / drive · mouse + click — shoot · E — enter/exit car · cars: W gas, S brake/reverse, A/D steer · crime raises your wanted level, lay low to drop it · earn cash on the streets — a $15,000 first-class jet waits at the airport (southeast) · hurt? dinner at the IRONSMOKE restaurant (orange on minimap) restores full HP for $50</p>
     <button id="ovBtn">HIT THE STREETS</button>
   </div>
 </div>
@@ -70,6 +70,8 @@ function onRoad(x, y) { return (x % BLOCK) < ROAD || (y % BLOCK) < ROAD; }
 
 // ---------- city generation ----------
 const AIRPORT = { x: 2450, y: 1950, w: 660, h: 380 }; // southeast runway — no buildings here
+const IRONSMOKE = { x: 1300, y: 1000, w: 200, h: 120 }; // the restaurant — $50 buys full HP
+const IRON_DOOR = { x: IRONSMOKE.x + IRONSMOKE.w / 2, y: IRONSMOKE.y + IRONSMOKE.h + 14 };
 const buildings = [];
 for (let bx = 0; bx < WORLD_W / BLOCK; bx++) {
   for (let by = 0; by < WORLD_H / BLOCK; by++) {
@@ -86,6 +88,13 @@ for (let bx = 0; bx < WORLD_W / BLOCK; bx++) {
     }
   }
 }
+// clear space for the Ironsmoke, then place it (it collides like any building)
+for (let i = buildings.length - 1; i >= 0; i--) {
+  const b = buildings[i];
+  if (b.x + b.w > IRONSMOKE.x - 24 && b.x < IRONSMOKE.x + IRONSMOKE.w + 24 && b.y + b.h > IRONSMOKE.y - 24 && b.y < IRONSMOKE.y + IRONSMOKE.h + 44) buildings.splice(i, 1);
+}
+buildings.push({ ...IRONSMOKE, tone: 0, iron: true });
+
 function hitsBuilding(p, r) {
   return buildings.some(b => p.x + r > b.x && p.x - r < b.x + b.w && p.y + r > b.y && p.y - r < b.y + b.h);
 }
@@ -199,6 +208,10 @@ function update(dt, now) {
       player.x = v.x + Math.cos(v.angle + Math.PI / 2) * 34;
       player.y = v.y + Math.sin(v.angle + Math.PI / 2) * 34;
       if (hitsBuilding(player, player.r)) { player.x = v.x; player.y = v.y - 34; }
+    } else if (dist(player, IRON_DOOR) < 36) {
+      // dinner at the Ironsmoke
+      if (money >= 50) { money -= 50; player.hp = player.maxHp; say('IRONSMOKE SPECIAL — FULLY RESTORED (-$50)'); }
+      else say("IRONSMOKE: DINNER'S $50, ROBOT. COME BACK WITH MONEY.");
     } else {
       const v = cars.find(c => dist(player, c) < c.r + 26);
       if (v && v.jet && !v.owned) {
@@ -372,7 +385,36 @@ function draw() {
   // buildings (only visible ones)
   const TONES = [['#232f40', '#31435c'], ['#1e2938', '#2b3a50'], ['#28344a', '#39496a']];
   for (const b of buildings) {
-    if (b.x + b.w < camX || b.x > camX + VW || b.y + b.h < camY || b.y > camY + VH) continue;
+    if (b.x + b.w < camX - 60 || b.x > camX + VW || b.y + b.h < camY - 60 || b.y > camY + VH) continue;
+    if (b.iron) {
+      // the Ironsmoke Restaurant — riveted iron, warm light, chimney smoke
+      cx.fillStyle = '#2e2624'; cx.fillRect(b.x, b.y, b.w, b.h);
+      cx.strokeStyle = '#5a4438'; cx.lineWidth = 2; cx.strokeRect(b.x, b.y, b.w, b.h);
+      cx.fillStyle = '#5a4438';
+      for (let rx = b.x + 12; rx < b.x + b.w; rx += 24) cx.fillRect(rx, b.y + 2, 3, 3); // rivets
+      cx.fillStyle = '#ffb04f'; // warm windows
+      for (let wx = b.x + 16; wx < b.x + b.w - 20; wx += 30) cx.fillRect(wx, b.y + 34, 16, 20);
+      cx.fillStyle = '#1a1412'; cx.fillRect(b.x + b.w / 2 - 16, b.y + b.h - 26, 32, 26); // door
+      cx.fillStyle = '#ffb04f'; cx.fillRect(b.x + b.w / 2 - 2, b.y + b.h - 18, 4, 10);
+      // sign
+      cx.fillStyle = '#0f0c0a'; cx.fillRect(b.x + b.w / 2 - 66, b.y + 6, 132, 20);
+      cx.fillStyle = '#ff8c42'; cx.font = 'bold 13px Courier New'; cx.textAlign = 'center';
+      cx.fillText('IRONSMOKE', b.x + b.w / 2, b.y + 21); cx.textAlign = 'left';
+      // chimney smoke
+      cx.fillStyle = '#4a4a52';
+      cx.fillRect(b.x + b.w - 30, b.y - 12, 12, 12);
+      for (let k = 0; k < 3; k++) {
+        const ph = (tSec * 22 + k * 26) % 80;
+        cx.fillStyle = 'rgba(160,160,170,' + (0.35 * (1 - ph / 80)) + ')';
+        cx.beginPath(); cx.arc(b.x + b.w - 24 + Math.sin((tSec + k) * 2) * 5, b.y - 16 - ph, 6 + ph / 10, 0, 7); cx.fill();
+      }
+      // door prompt glow
+      cx.strokeStyle = 'rgba(61,220,132,' + (0.5 + Math.sin(tSec * 4) * 0.3) + ')';
+      cx.beginPath(); cx.arc(IRON_DOOR.x, IRON_DOOR.y, 18, 0, 7); cx.stroke();
+      cx.fillStyle = '#3ddc84'; cx.font = '11px Courier New'; cx.textAlign = 'center';
+      cx.fillText('EAT $50 (E)', IRON_DOOR.x, IRON_DOOR.y + 34); cx.textAlign = 'left';
+      continue;
+    }
     cx.fillStyle = TONES[b.tone][0]; cx.fillRect(b.x, b.y, b.w, b.h);
     cx.strokeStyle = TONES[b.tone][1]; cx.strokeRect(b.x, b.y, b.w, b.h);
     // windows
@@ -481,6 +523,8 @@ function draw() {
   for (const b of buildings) cx.fillRect(MX + b.x * sx, MY + b.y * sy, Math.max(1, b.w * sx), Math.max(1, b.h * sy));
   cx.fillStyle = '#3ddc84'; // airport marker
   cx.fillRect(MX + AIRPORT.x * sx, MY + AIRPORT.y * sy, AIRPORT.w * sx, AIRPORT.h * sy);
+  cx.fillStyle = '#ff8c42'; // Ironsmoke marker
+  cx.fillRect(MX + IRONSMOKE.x * sx - 1, MY + IRONSMOKE.y * sy - 1, Math.max(3, IRONSMOKE.w * sx), Math.max(3, IRONSMOKE.h * sy));
   cx.fillStyle = '#3d5a99';
   for (const c of police) cx.fillRect(MX + c.x * sx - 1, MY + c.y * sy - 1, 3, 3);
   cx.fillStyle = '#7fd4ff';
@@ -490,6 +534,7 @@ function draw() {
 // ---------- debug hooks ----------
 window.__state = () => ({ x: player.x, y: player.y, hp: player.hp, inVehicle: !!player.veh, inJet: !!(player.veh && player.veh.jet), airborne: !!(player.veh && player.veh.airborne), vel: player.veh ? player.veh.vel : 0, money, heat, stars: stars(), police: police.length, peds: peds.length, cars: cars.length, running });
 window.__cash = n => { money = n; };
+window.__hp = n => { player.hp = n; };
 window.__teleport = (x, y) => { if (player.veh) { player.veh.x = x; player.veh.y = y; } player.x = x; player.y = y; };
 window.__wanted = n => { heat = n * 5; lastCrime = tSec; };
 

@@ -11,6 +11,8 @@ Two modes:
 
   There's also money in Liberty Bay: cash lies in the streets and drops from your victims. Save up **$15,000** and head to Liberty Bay Intl (southeast, green on the minimap) — a first-class private jet is waiting. Throttle past 90 MPH and it goes wheels-up, flying clean over the whole city while the cops shake their fists below.
 
+  Hungry or shot up? The **Ironsmoke Restaurant** (orange on the minimap, chimney always smoking) serves a $50 dinner that restores full HP — walk to the glowing door and press E.
+
 ## Controls
 
 | Input | Action |
