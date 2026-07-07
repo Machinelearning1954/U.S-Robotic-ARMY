@@ -68,6 +68,11 @@ our *island* doesn't.
   a legal codebase to learn open-world architecture from.
 - **Script Hook V / OpenIV:** legitimate single-player modding tools; useful for
   understanding how GTA structures missions and assets without touching source.
+- **OpenBOR:** the open-source Beats-of-Rage engine — a legal codebase for studying
+  beat-em-up/fighting feel (hitboxes, frame data, juggle logic) for YARDCLASH.
+  **The distinction that matters:** the engine is open; the fan *game packs* built
+  on it that repackage ripped commercial sprites (Bloody Roar ports and the like)
+  are exactly what Rule Zero forbids — study the engine, never ship the packs.
 
 ## The mobile track — trained on the 2025 high-graphics mobile wave
 

@@ -363,6 +363,35 @@ betting canteen credits, OnWatch drones filming every knockout for the island fe
 | **The Mudfish** | Engineer tank, slow, armored, wrench normals | "Dry Dock" — ground-quake knockdown |
 | **Kingfisher** *(unlockable)* | Mysterious masked champion from the Numbers Station storyline | "Static Choir" — screen-wide broadcast burst |
 
+### Beast Night (the transformation variant)
+Once a month the selector kills the string lights, the crowd goes quiet, and the
+Yard runs **Beast Night** — YARDCLASH's answer to the classic *transformation
+fighter* subgenre (fighters who morph into beast forms mid-match). Everything is
+built from **Jamaican folklore**, all original designs:
+
+- **How it works:** your Riddim meter becomes the **Yard Meter**. Fill it by
+  fighting flashy and it doesn't fire a super — it **transforms you**: your fighter
+  channels a folklore form for the rest of the round. Bigger silhouette, new
+  normals, double pressure — and the crowd absolutely loses it.
+- **The forms (launch four, one per fighter archetype):**
+  | Form | Folklore root | In the ring |
+  |---|---|---|
+  | **Rolling Calf** | the chain-dragging bull duppy of country roads | charging bull rushes, unstoppable momentum, chains crack like whips |
+  | **Anansi** | the trickster spider | wall-cling mixups, web feints, eight-limb flurries |
+  | **River Mumma** | the river guardian | flowing counter stance, drags opponents into "deep water" slow zones |
+  | **Ol' Higue** | the skin-shedding night hag | afterimage teleports, meter drain on touch |
+- **The counterplay:** transformed fighters are stronger but *louder* — every move
+  telegraphs harder, and landing a clean counter on a beast pays triple meter. A
+  human fighter who outboxes a beast for a full round triggers the crowd's
+  **"Man Beat Duppy!"** chant and an instant style bonus.
+- **Boundary note:** the subgenre inspiration (morphing fighters) is taken as a
+  *design pattern only* — every character, form, name, move and sprite here is
+  original PAUDC folklore-fiction. No asset, character or name from any existing
+  fighting game is used. Fan ports that repackage commercial fighting-game art
+  (e.g. ripped-sprite OpenBOR packs) are exactly what Rule Zero forbids us to
+  touch — the open-source OpenBOR *engine* itself is a legitimate study resource
+  for beat-em-up feel, and that distinction is the whole point.
+
 ### Progression & Rewards
 - Weekly **Yard Rankings** posted beside the Crucible leaderboard; the reigning champ
   gets a custom entrance (fireworks, anthem, crowd chant) until dethroned.

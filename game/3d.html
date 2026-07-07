@@ -39,7 +39,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.17</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.18</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4252,6 +4252,71 @@ function updateTraffic(dt){
     c.g.rotation.y=Math.atan2(-dz,dx);
   }
 }
+// ---------------- YARDCLASH Beast Night: the Yard ring at the Crucible ----------------
+const YARD={X:mx(1250)+22,Z:mz(1020)+10};
+{const ry=Math.max(height(YARD.X,YARD.Z),0.2);
+ const plat=new THREE.Mesh(new THREE.CylinderGeometry(7.5,7.8,0.5,20),new THREE.MeshLambertMaterial({color:0x3a2f28}));
+ plat.position.set(YARD.X,ry+0.25,YARD.Z);plat.receiveShadow=true;scene.add(plat);
+ const rim=new THREE.Mesh(new THREE.CylinderGeometry(7.9,7.9,0.28,20,1,true),new THREE.MeshBasicMaterial({color:0xffb84d,side:THREE.DoubleSide}));
+ rim.position.set(YARD.X,ry+0.62,YARD.Z);scene.add(rim);
+ for(let i=0;i<4;i++){const ang=i*Math.PI/2+0.4;
+   const box=new THREE.Mesh(new THREE.BoxGeometry(4.5,2.6,2),new THREE.MeshLambertMaterial({color:[0xc94f4f,0x4fa3c9,0x4fc98a,0xd8a13c][i]}));
+   const bx=YARD.X+Math.cos(ang)*11,bz=YARD.Z+Math.sin(ang)*11;
+   box.position.set(bx,Math.max(height(bx,bz),0.2)+1.3,bz);box.rotation.y=-ang;box.castShadow=true;scene.add(box);} // container walls
+ const lamp=new THREE.PointLight(0xffd98a,1.5,60);lamp.position.set(YARD.X,ry+9,YARD.Z);scene.add(lamp);
+ label('THE YARD',YARD.X,ry+13,YARD.Z);}
+// the challenger: an original brawler, red wraps
+const brawler=new THREE.Group();
+{const legs=new THREE.Mesh(new THREE.BoxGeometry(0.46,0.8,0.54),new THREE.MeshLambertMaterial({color:0x1c2630}));legs.position.y=0.4;brawler.add(legs);
+ const torso=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.8,0.7),new THREE.MeshLambertMaterial({color:0xc23b4b}));torso.position.y=1.2;brawler.add(torso);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(0.26,10,8),new THREE.MeshLambertMaterial({color:0x6b4630}));head.position.y=1.88;brawler.add(head);}
+brawler.traverse(o=>{if(o.isMesh)o.castShadow=true;});brawler.visible=false;scene.add(brawler);
+// the Rolling Calf beast form — folklore bull duppy, all original
+const beastG=new THREE.Group();
+{const body=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.1,0.95),new THREE.MeshLambertMaterial({color:0x0c0e12}));body.position.y=1.0;beastG.add(body);
+ const head=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.6,0.6),new THREE.MeshLambertMaterial({color:0x0c0e12}));head.position.set(0.95,1.5,0);beastG.add(head);
+ for(const dz of[0.28,-0.28]){const horn=new THREE.Mesh(new THREE.ConeGeometry(0.09,0.5,6),new THREE.MeshLambertMaterial({color:0xd8d0c0}));
+   horn.position.set(1.1,1.92,dz);horn.rotation.z=-0.5;beastG.add(horn);
+   const eye=new THREE.Mesh(new THREE.SphereGeometry(0.07,6,6),new THREE.MeshBasicMaterial({color:0xff2b2b}));eye.position.set(1.32,1.55,dz*0.7);beastG.add(eye);}
+ const chain=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.4,6).rotateZ(1.2),new THREE.MeshBasicMaterial({color:0x9aa4ad}));chain.position.set(-0.6,0.6,0);beastG.add(chain);}
+beastG.traverse(o=>{if(o.isMesh)o.castShadow=true;});beastG.visible=false;scene.add(beastG);
+let fightOn=false,fightWon=false,hp=3,ehp=3,hype=0,beast=false,windup=0,strikeCd=0,beastTitle=false;
+function endBeast(){if(!beast)return;beast=false;VEH[WALKER].g=walker;VEH[WALKER].vmax=5.5;
+  beastG.visible=false;if(veh===WALKER)walker.visible=true;}
+function startFight(){fightOn=true;hp=3;ehp=6;hype=0;windup=0;strikeCd=0;
+  brawler.visible=true;
+  brawler.position.set(YARD.X+5,Math.max(height(YARD.X+5,YARD.Z),0.2)+0.55,YARD.Z);
+  toast('YARDCLASH — BEAST NIGHT  ·  SPACE to strike, fill the Yard Meter');}
+function endFight(won){fightOn=false;brawler.visible=false;endBeast();
+  if(won){fightWon=true;addClout(40);if(!beastTitle){beastTitle=true;}
+    toast('YARD CHAMPION — MAN BEAT DUPPY!  +40 CLOUT');}
+  else{P.x=YARD.X+16;P.z=YARD.Z+16;P.v=0;toast('COUNTED OUT — walk it off and come again');}}
+function updateFight(dt){
+  if(!fightOn){
+    if(veh===WALKER&&!fightWon&&Math.hypot(P.x-YARD.X,P.z-YARD.Z)<7)startFight();
+    return;}
+  if(veh!==WALKER){endFight(false);return;} // drove off — forfeit
+  strikeCd=Math.max(0,strikeCd-dt);
+  // brawler stalks the player around the ring
+  const dx=P.x-brawler.position.x,dz=P.z-brawler.position.z,d=Math.hypot(dx,dz);
+  if(d>2.2){brawler.position.x+=dx/d*3.4*dt;brawler.position.z+=dz/d*3.4*dt;}
+  brawler.position.y=Math.max(height(brawler.position.x,brawler.position.z),0.2)+0.55;
+  brawler.lookAt(P.x,brawler.position.y,P.z);
+  // windup -> strike if you linger in range
+  if(d<3.2){windup+=dt;
+    brawler.children[1].material.color.set(windup>0.7?0xff7a3c:0xc23b4b);
+    if(windup>1.3){windup=0;hp--;toast('CAUGHT YOU — '+hp+' ♥ left');
+      if(hp<=0){endFight(false);return;}}}
+  else{windup=Math.max(0,windup-dt*2);brawler.children[1].material.color.set(0xc23b4b);}
+  // player strike: SPACE in range
+  if(keys[' ']&&d<3.2&&strikeCd<=0){strikeCd=0.55;keys[' ']=false;
+    const dmg=beast?2:1;ehp-=dmg;hype=Math.min(3,hype+1);windup=0;
+    toast((beast?'ROLLING CALF CHARGE':'CLEAN HANDS')+'  — challenger '+Math.max(0,ehp)+' ♥');
+    if(!beast&&hype>=3){beast=true;walker.visible=false;beastG.visible=true;
+      VEH[WALKER].g=beastG;VEH[WALKER].vmax=7.5;
+      toast('YARD METER FULL — THE ROLLING CALF COMES OUT');}
+    if(ehp<=0){endFight(true);return;}}
+}
 // ---------------- mission props: crocs, sanctuary, curry pot ----------------
 function orangeBeacon(X,Z){
   const p=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.4,70,10,1,true),
@@ -4608,7 +4673,7 @@ function tick(t){
    planeG.rotation.y=-pa-Math.PI/2;
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);
   moon.position.set(P.x-140,210,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -4704,6 +4769,7 @@ function tick(t){
       progText='FREE ROAM — INSTRUCTOR · COACH · IRIE  ·  the island is yours';
     }
   }
+  if(fightOn)progText='YARDCLASH  you '+hp+' ♥  vs  challenger '+ehp+' ♥'+(beast?'  —  ROLLING CALF':'  —  yard meter '+hype+' / 3');
   $('prog').textContent=progText;
   const arrow=$('arrow');
   if(target){
@@ -4724,7 +4790,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length}),setRain,setStatic,presence,traffic,walker,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast}),setRain,setStatic,presence,traffic,walker,YARD,brawler,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

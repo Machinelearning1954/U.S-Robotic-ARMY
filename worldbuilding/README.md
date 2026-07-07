@@ -24,7 +24,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.17**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.18**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -85,7 +85,16 @@ biggest missing GTA staples: **on-foot mode** (`F` / the FOOT button steps out �
 the ride parks where it stands, you walk, swim, and turn in place; `E` boards
 any parked ride; first-person `V` works on foot too) and **NPC traffic** — seven
 amphibious commuter cars looping the district ring road with lit headlights and
-tail-lights, so the island finally has other people on it.
+tail-lights, so the island finally has other people on it. v0.18 makes YARDCLASH
+playable: walk on foot into **the Yard** — the container-walled fight ring at the
+Crucible — and **Beast Night** begins. Trade strikes with the challenger (`SPACE`
+in range; back off before his wind-up flashes), fill the three-segment **Yard
+Meter** with clean hands, and it doesn't fire a super — it **transforms you into
+the Rolling Calf**, the chain-dragging bull duppy of Jamaican folklore: double
+damage, faster on your feet, red eyes in the dark. Win for clout and the *Man
+Beat Duppy* call; get counted out and you can walk right back in. The
+transformation-fighter variant is canon in the base design doc (§10, Beast
+Night) — genre pattern only, every form original folklore-fiction.
 
 
 [`../game/index.html`](../game/index.html) — **PAUDC: Neon Harbor v0.1**, a
