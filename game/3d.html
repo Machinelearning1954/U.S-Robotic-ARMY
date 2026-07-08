@@ -5002,6 +5002,64 @@ function updateRace(dt){
   }
 }
 addEventListener('keydown',e=>{if(e.key.toLowerCase()==='b'&&veh===BIKE&&!raceOn&&Math.hypot(P.x-TRAIL[0].X,P.z-TRAIL[0].Z)<9)startRace();});
+// ---------------- Housing: Anchor Row — the player's own place (first ownable interior) ----------------
+const HOME={X:mx(400),Z:mz(650)}; // a quiet stretch of coast, well clear of the district ring
+{const gy=Math.max(height(HOME.X,HOME.Z),0.2);
+ const walls=new THREE.Mesh(new THREE.BoxGeometry(6,3.2,5),new THREE.MeshLambertMaterial({color:0xd8cdb0,map:facadeTex}));
+ walls.position.set(HOME.X,gy+1.6,HOME.Z);walls.castShadow=true;scene.add(walls);
+ const roof=new THREE.Mesh(new THREE.BoxGeometry(6.7,0.6,5.7),new THREE.MeshLambertMaterial({color:0x5a3c2a}));
+ roof.position.set(HOME.X,gy+3.5,HOME.Z);scene.add(roof);
+ const door=new THREE.Mesh(new THREE.BoxGeometry(1.1,2,0.15),new THREE.MeshBasicMaterial({color:0x2a6b52}));
+ door.position.set(HOME.X,gy+1,HOME.Z+2.55);scene.add(door);
+ glowSprite(HOME.X,gy+2.3,HOME.Z+2.8,6,0xffd98a);
+ label('ANCHOR ROW — your place',HOME.X,gy+5.8,HOME.Z);}
+const HOMEINT={X:mx(1900),Z:mz(1300)}; // the interior — a physically separate pocket, teleported into
+const homeWinTex=canvasTex(160,120,(g,w,h)=>{
+  g.fillStyle='#0c2230';g.fillRect(0,0,w,h);
+  g.fillStyle='#123246';g.fillRect(0,h*0.55,w,h*0.45);
+  g.fillStyle='#fbe38a';for(let i=0;i<4;i++)g.fillRect(20+i*32,h*0.5+6,10,14);
+  g.strokeStyle='#0a1620';g.lineWidth=6;g.strokeRect(3,3,w-6,h-6);
+});
+{const iy=Math.max(height(HOMEINT.X,HOMEINT.Z),0.2)+0.15;
+ const floor=new THREE.Mesh(new THREE.BoxGeometry(11,0.3,9),new THREE.MeshLambertMaterial({color:0xb89a6f}));
+ floor.position.set(HOMEINT.X,iy,HOMEINT.Z);scene.add(floor);
+ const wallM=new THREE.MeshLambertMaterial({color:0xe8e0cf});
+ const wN=new THREE.Mesh(new THREE.BoxGeometry(11,3.4,0.3),wallM);wN.position.set(HOMEINT.X,iy+1.85,HOMEINT.Z-4.5);scene.add(wN);
+ const wS=wN.clone();wS.position.z=HOMEINT.Z+4.5;scene.add(wS);
+ const wW=new THREE.Mesh(new THREE.BoxGeometry(0.3,3.4,9),wallM);wW.position.set(HOMEINT.X-5.5,iy+1.85,HOMEINT.Z);scene.add(wW);
+ const wE=wW.clone();wE.position.x=HOMEINT.X+5.5;scene.add(wE);
+ const ceil=new THREE.Mesh(new THREE.BoxGeometry(11,0.3,9),new THREE.MeshLambertMaterial({color:0xcfc6ac}));
+ ceil.position.set(HOMEINT.X,iy+3.55,HOMEINT.Z);scene.add(ceil);
+ const win=new THREE.Mesh(new THREE.PlaneGeometry(2.4,1.6),new THREE.MeshBasicMaterial({map:homeWinTex}));
+ win.position.set(HOMEINT.X-5.44,iy+2,HOMEINT.Z);win.rotation.y=Math.PI/2;scene.add(win);
+ const bed=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.7,3.6),new THREE.MeshLambertMaterial({color:0x3af5d8}));
+ bed.position.set(HOMEINT.X+3,iy+0.5,HOMEINT.Z-2.4);bed.castShadow=true;scene.add(bed);
+ const pillow=new THREE.Mesh(new THREE.BoxGeometry(2,0.3,0.8),new THREE.MeshLambertMaterial({color:0xf4ecd8}));
+ pillow.position.set(HOMEINT.X+3,iy+0.95,HOMEINT.Z-3.9);scene.add(pillow);
+ const wardrobe=new THREE.Mesh(new THREE.BoxGeometry(1.6,2.6,0.8),new THREE.MeshLambertMaterial({color:0x2a2f36}));
+ wardrobe.position.set(HOMEINT.X-4,iy+1.3,HOMEINT.Z+3.4);wardrobe.castShadow=true;scene.add(wardrobe);
+ const lamp=new THREE.PointLight(0xffd98a,1.2,26);lamp.position.set(HOMEINT.X,iy+3,HOMEINT.Z);scene.add(lamp);
+ label('ANCHOR ROW — inside',HOMEINT.X,iy+4.4,HOMEINT.Z);}
+let inHouse=false,outX=0,outZ=0,outA=0,homeHintT=0,bedT=0,sleptOnce=false;
+function enterHouse(){outX=P.x;outZ=P.z;outA=P.a;
+  P.x=HOMEINT.X;P.z=HOMEINT.Z+3.2;P.a=Math.PI/2;P.v=0;inHouse=true;sleptOnce=false;
+  toast('ANCHOR ROW — press E to leave, walk to the bed to sleep');}
+function exitHouse(){P.x=outX;P.z=outZ;P.a=outA;P.v=0;inHouse=false;
+  toast('BACK OUTSIDE — Anchor Row');}
+function sleepHouse(){tod=0.27;paranoia=0;if(stat)setStatic(false);
+  toast('SLEPT THROUGH TO MORNING — clear head, clean slate');}
+function updateHouse(dt){
+  if(!inHouse){
+    if(veh===WALKER&&Math.hypot(P.x-HOME.X,P.z-HOME.Z)<4&&perf>homeHintT){homeHintT=perf+4000;toast('ANCHOR ROW — press E to go inside');}
+    return;
+  }
+  const nearBed=Math.hypot(P.x-(HOMEINT.X+3),P.z-(HOMEINT.Z-2.4))<2.6;
+  if(nearBed&&!sleptOnce){bedT+=dt;if(bedT>1.4){sleptOnce=true;bedT=0;sleepHouse();}}
+  else if(!nearBed){sleptOnce=false;bedT=0;}
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='e')return;
+  if(!inHouse&&veh===WALKER&&Math.hypot(P.x-HOME.X,P.z-HOME.Z)<4)enterHouse();
+  else if(inHouse&&Math.hypot(P.x-HOMEINT.X,P.z-(HOMEINT.Z+3.2))<3)exitHouse();});
 // ---------------- input ----------------
 const keys={};
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.startsWith('Arrow')||e.key===' ')e.preventDefault();});
@@ -5236,7 +5294,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5354,7 +5412,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
