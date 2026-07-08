@@ -32,7 +32,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.29**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.30**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -161,7 +161,13 @@ within about 10 m (invisible at night and in storms, same as the roosting
 gulls), and **sea turtles and dolphins** now loop the reef spots and the outer
 coast — the dolphins genuinely leap on their circuit — spooking wider when a
 boat closes in and sitting out the Static Hour along with the rest of the
-island's animal life. v0.26 arms the Field Kit: press `G` to
+island's animal life. v0.30 adds **Ol' Fathom** — a rare storm-season legend:
+during the roughest storms something enormous breaks the surface of the
+harbor for a few seconds, three curling limbs and a pair of dim eyes, then
+it's gone. No fight, no threat — just a filmable moment that banks a raw
+clip and a big clout spike, feeding straight into the Chromelab's "NUH REAL!"
+debate (systems doc §4.4): the better the enhanced replay looks, the less
+anyone on OnWatch believes it happened. v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
 seconds (lights on, wheels off — your escape window) and a dazzled **Yard

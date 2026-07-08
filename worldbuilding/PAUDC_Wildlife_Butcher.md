@@ -324,3 +324,36 @@ Wildlife rescue during storm events (Croc Wrangler generalizes), the illegal
 animal-trade bust chain (BII + black-market modules, no-glorification rule),
 photo-safari contracts (doctor-bird set), reef-health side quests feeding the
 Reef School.
+
+### 8.7 Ol' Fathom — the storm-season legend (rare spectacle event)
+
+*Original folklore, built for the storm ladder and the Chromelab Re-Render Queue
+(systems doc §4.4) to share a punchline. No real creature, myth, or place is
+depicted — this is a brand-new island legend in the Rolling Calf / River Mumma
+naming tradition ("Ol' " + name, matching Ol' Boots and Ol' Higue).*
+
+- **What it is:** during the roughest storms, something enormous surfaces
+  briefly in the harbor — three massive curling limbs breaking the water,
+  a pair of dim orange eyes, gone again inside a few seconds. Nobody's ever
+  gotten a clean shot of the whole thing. That's the point.
+- **Trigger:** rare, storm-gated — Ol' Fathom only *can* surface while it's
+  raining, and even then only sometimes; the harbour goes conspicuously quiet
+  first (a diegetic warning, no UI marker).
+- **The reward is the clip, not a fight.** No combat, no threat to the
+  player — this is a filmable moment. Being nearby when it surfaces banks a
+  **RAW CLIP** automatically (the same currency the Re-Render Queue spends) and
+  pays a clout spike well above a normal splashdown.
+- **The AI-video-era joke:** every Ol' Fathom clip is exactly the kind of
+  clip that gets run through the Chromelab and comes back suspiciously
+  crisper than the raw footage ever was — which is precisely when OnWatch's
+  **"NUH REAL!"** flag (§4.4) starts arguing in the replies. The island's
+  running debate about whether the sighting was real or "just AI-glazed
+  again" is the satire: the more convincing the enhanced clip, the less
+  anyone believes it. *Mix any reference, describe the change, get the
+  result* — sure, and so did whoever "enhanced" this one.
+- **Design intent:** a legend the island argues about is worth more than a
+  boss fight — nobody Ol' Fathom encounters ends in combat, and nobody's
+  clip ever definitively proves anything either way.
+
+> All fictional: an original folklore creature and event, built to comment
+> on AI video tools in-world rather than depict any real technology.

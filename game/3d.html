@@ -39,7 +39,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>H</b> haul · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.29</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.30</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4635,6 +4635,46 @@ function updateMarine(dt){
     m.g.position.set(x,y,z);m.g.rotation.y=-m.ph;
   }
 }
+// ---------------- Ol' Fathom: the storm-season sea-monster legend ----------------
+const FATHOMP={X:mx(1010),Z:mz(700)}; // open harbor water, off the pier
+const fathom=new THREE.Group();
+{const wetM=new THREE.MeshLambertMaterial({color:0x0c2b2e});
+ const eyeM=new THREE.MeshBasicMaterial({color:0xff6b3c});
+ for(let i=0;i<3;i++){ // three curling limbs, each a bent stack of cylinder segments
+   const limb=new THREE.Group();
+   const segs=5;
+   for(let j=0;j<segs;j++){
+     const r=0.5-j*0.07,seg=new THREE.Mesh(new THREE.CylinderGeometry(r,r+0.07,1.3,8),wetM);
+     seg.position.y=j*1.15;seg.rotation.z=j*0.28;seg.castShadow=true;limb.add(seg);
+   }
+   limb.rotation.z=(i-1)*0.7;limb.position.set(Math.cos(i*2.1)*2.2,0,Math.sin(i*2.1)*2.2);
+   fathom.add(limb);
+ }
+ const eye1=new THREE.Mesh(new THREE.SphereGeometry(0.16,8,8),eyeM);eye1.position.set(0.3,5.6,0.4);fathom.add(eye1);
+ const eye2=eye1.clone();eye2.position.x=-0.3;fathom.add(eye2);}
+fathom.position.set(FATHOMP.X,-9,FATHOMP.Z);fathom.visible=false;scene.add(fathom);
+let fathomState=0,fathomT=45,fathomClipT=0; // 0 idle, 1 rising, 2 up, 3 sinking
+function updateFathom(dt){
+  if(fathomState===0){
+    fathomT-=dt;
+    if(fathomT<=0){
+      if(rain&&Math.random()<0.4){fathomState=1;fathom.visible=true;fathom.position.y=-9;
+        toast('THE HARBOUR GOES QUIET — something is surfacing');}
+      fathomT=90+Math.random()*60;
+    }
+    return;
+  }
+  if(fathomState===1){fathom.position.y=Math.min(1,fathom.position.y+dt*3);
+    if(fathom.position.y>=1){fathomState=2;fathomClipT=4.5;}}
+  else if(fathomState===2){
+    fathomClipT-=dt;fathom.rotation.y+=dt*0.15;
+    if(Math.hypot(P.x-FATHOMP.X,P.z-FATHOMP.Z)<140){rawClips=rawClips||0;
+      if(!fathom.userData.clipped){fathom.userData.clipped=true;rawClips++;addClout(35);
+        toast("OL' FATHOM SIGHTED — RAW CLIP BANKED  +35 CLOUT  ·  soon come, soon gone");}}
+    if(fathomClipT<=0)fathomState=3;
+  }else if(fathomState===3){fathom.position.y-=dt*2;
+    if(fathom.position.y<-9){fathomState=0;fathom.visible=false;fathom.userData.clipped=false;}}
+}
 // ---------------- GRIDFALL arcade cabinet (the rec room, by the Yard) ----------------
 const ARC={X:mx(1250)-20,Z:mz(1020)-14};
 {const gy=Math.max(height(ARC.X,ARC.Z),0.2);
@@ -5112,7 +5152,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5230,7 +5270,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
