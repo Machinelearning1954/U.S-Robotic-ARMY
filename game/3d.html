@@ -4675,6 +4675,55 @@ function updateFathom(dt){
   }else if(fathomState===3){fathom.position.y-=dt*2;
     if(fathom.position.y<-9){fathomState=0;fathom.visible=false;fathom.userData.clipped=false;}}
 }
+// ---------------- OBIE Billboard — "The Choir", the coworker that never sleeps ----------------
+const OBIEP={X:mx(560),Z:mz(1000)}; // Silver Springs, a block from the Chromelab
+const obieTex=canvasTex(256,256,(g,w,h)=>{
+  g.fillStyle='#0a0d12';g.fillRect(0,0,w,h);
+  g.strokeStyle='#bcd9ff';g.lineWidth=2;
+  g.beginPath();g.ellipse(w/2,66,58,38,0,0,Math.PI*2);g.stroke();
+  for(let i=0;i<12;i++){g.beginPath();g.moveTo(38+Math.random()*10,48+Math.random()*38);
+    g.quadraticCurveTo(w/2,58+Math.random()*20,w-38-Math.random()*10,48+Math.random()*38);g.stroke();}
+  g.strokeStyle='rgba(188,217,255,0.55)';
+  for(let i=0;i<10;i++){const dx=24+i*((w-48)/9);
+    g.beginPath();g.moveTo(w/2,104);g.lineTo(dx,188);g.stroke();
+    g.fillStyle='#1a2530';g.fillRect(dx-9,188,18,12);
+    g.fillStyle='#7fd4ff';g.fillRect(dx-6,190,12,4);}
+  g.fillStyle='#e8eef5';g.font='bold 22px sans-serif';g.textAlign='center';g.fillText('OBIE',w/2,236);
+  g.fillStyle='#9fb3c8';g.font='11px sans-serif';g.fillText('the coworker that never sleeps',w/2,252);
+});
+const obieGlitchTex=canvasTex(256,256,(g,w,h)=>{
+  g.fillStyle='#12060a';g.fillRect(0,0,w,h);
+  g.strokeStyle='#ff5f6b';g.lineWidth=2;
+  for(let y=0;y<h;y+=4){g.beginPath();g.moveTo(0,y);g.lineTo(w,y+(Math.random()*4-2));g.stroke();}
+  g.fillStyle='#ffdede';g.font='bold 18px sans-serif';g.textAlign='center';g.fillText('GOSPEL HOUR',w/2,118);
+  g.fillStyle='#ff8f97';g.font='bold 22px sans-serif';g.fillText('OBIE',w/2,236);
+  g.fillStyle='#ffb3ba';g.font='11px sans-serif';g.fillText('you already know how this ends',w/2,252);
+});
+const obieBoard=new THREE.Group();
+{const by=Math.max(height(OBIEP.X,OBIEP.Z),0.2);
+ const post=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.3,7,8),new THREE.MeshLambertMaterial({color:0x2a2f36}));
+ post.position.y=3.5;post.castShadow=true;obieBoard.add(post);
+ const panel=new THREE.Mesh(new THREE.PlaneGeometry(7,7),new THREE.MeshBasicMaterial({map:obieTex,side:THREE.DoubleSide}));
+ panel.position.set(0,7.2,0.05);obieBoard.add(panel);
+ const frame=new THREE.Mesh(new THREE.BoxGeometry(7.3,7.3,0.2),new THREE.MeshLambertMaterial({color:0x05070a}));
+ frame.position.set(0,7.2,-0.08);obieBoard.add(frame);
+ glowSprite(OBIEP.X,by+7.2,OBIEP.Z+0.3,10,0x7fd4ff);
+ label('OBIE — "THE CHOIR"',OBIEP.X,by+11.5,OBIEP.Z);
+ obieBoard.position.set(OBIEP.X,by,OBIEP.Z);
+ obieBoard.userData.panel=panel;
+ scene.add(obieBoard);}
+let obieSeenT=0,obieSeen=false;
+function updateObie(dt){
+  const p=obieBoard.userData.panel;
+  const wantGlitch=!!stat;
+  if(wantGlitch&&p.material.map!==obieGlitchTex){p.material.map=obieGlitchTex;p.material.needsUpdate=true;}
+  else if(!wantGlitch&&p.material.map!==obieTex){p.material.map=obieTex;p.material.needsUpdate=true;}
+  if(stat&&Math.hypot(P.x-OBIEP.X,P.z-OBIEP.Z)<14){
+    obieSeenT+=dt;
+    if(obieSeenT>2.2&&!obieSeen){obieSeen=true;addClout(25);
+      toast('YOU SEE IT NOW — THE CHOIR WAS NEVER HIRING  +25 CLOUT');}
+  }else{obieSeenT=0;obieSeen=false;}
+}
 // ---------------- GRIDFALL arcade cabinet (the rec room, by the Yard) ----------------
 const ARC={X:mx(1250)-20,Z:mz(1020)-14};
 {const gy=Math.max(height(ARC.X,ARC.Z),0.2);
@@ -5152,7 +5201,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5270,7 +5319,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

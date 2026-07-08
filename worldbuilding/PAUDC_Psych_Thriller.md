@@ -173,6 +173,16 @@ service whose ads look exactly like this), and the Act-2 reveal is that OBIE's a
 buy is a Weathermen conditioning funnel — the Gospel Hour dressed in startup
 clothes. The player has been scrolling past the villain the whole game.
 
+**Live in the prototype (v0.31):** the **OBIE Billboard** stands in Silver
+Springs, a block from the Chromelab — an original procedural rendering of the
+Choir key art (a canvas-drawn brain haloed over ranked desk-lights, no traced
+or copied ad art). By daylight it's just startup signage. Cross into the
+Static Hour and its panel swaps to a glitched read — scanlines, "GOSPEL HOUR"
+bleeding through under the OBIE mark, the whisper-line's own "you already
+know how this ends" printed as ad copy. Linger near it while the Static holds
+and the game banks the Act-2 reveal early as a clout payout: **"YOU SEE IT
+NOW — THE CHOIR WAS NEVER HIRING."**
+
 ## 9b. Content boundary note
 
 - **Everything here is invented fiction.** The "conditioning broadcast" is a genre
