@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.33**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.34**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -193,8 +193,11 @@ sleep: time jumps to dawn, paranoia clears, and the Static Hour lifts if it
 was running — a clean-slate reset, no clout attached. Press `E` again to
 step back outside exactly where you left. See
 [`PAUDC_Housing_Interiors.md`](PAUDC_Housing_Interiors.md) for the property-
-tier/decoration/NPC-visit roadmap beyond this first house. v0.26 arms the
-Field Kit: press `G` to
+tier/decoration/NPC-visit roadmap beyond this first house. v0.34 adds
+**ambient foot traffic**: pedestrians now walk the sidewalks island-wide,
+and a vehicle passing close at speed scatters them — a quick hustle clear,
+then back to a stroll, no bystander-gawking loop
+(`JAMAICA_NPC_CULTURE.md` §2.3). v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
 seconds (lights on, wheels off — your escape window) and a dazzled **Yard

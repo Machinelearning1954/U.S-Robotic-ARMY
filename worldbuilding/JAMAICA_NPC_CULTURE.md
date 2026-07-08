@@ -47,6 +47,10 @@
 - **Sirens/gunshots (fictional-faction events):** civilians clear honestly — no
   bystander gawking loops; children are pulled indoors first.
 - **Festivals:** streets close, food lines triple, everyone's reputation checks soften.
+- **Fast traffic close by:** pedestrians hustle clear of a vehicle passing near them
+  at speed, then settle back to a stroll — **live in the prototype (v0.34)**: ambient
+  foot traffic loops the sidewalks island-wide and scatters on proximity, no
+  bystander-gawking loop, matching the "sirens/gunshots" rule above.
 
 ### 2.4 Player-reaction model (reputation-driven)
 Four ambient stances — **friendly / curious / wary / hostile** — selected by:

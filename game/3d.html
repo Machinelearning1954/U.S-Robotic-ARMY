@@ -4299,6 +4299,38 @@ function updateTraffic(dt){
     c.g.rotation.y=Math.atan2(-dz,dx);
   }
 }
+// ---------------- Ambient pedestrians: foot traffic on the sidewalks ----------------
+const PEDN=TIER?8:4;
+const peds=[];
+{const skinT=[0x8a5a3c,0x6b4226,0xc99a72,0x4a2f1a];
+ const wearT=[0xd8a13c,0x4fa3c9,0x9c6fd8,0x4fc98a,0xe86b8a,0x3af5d8];
+ for(let i=0;i<PEDN;i++){
+   const g=new THREE.Group();
+   const skin=new THREE.MeshLambertMaterial({color:skinT[i%skinT.length]});
+   const wear=new THREE.MeshLambertMaterial({color:wearT[i%wearT.length]});
+   const legs=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.8,0.24),skin);legs.position.y=0.4;g.add(legs);
+   const torso=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.62,0.26),wear);torso.position.y=1.02;g.add(torso);
+   const head=new THREE.Mesh(new THREE.SphereGeometry(0.17,8,7),skin);head.position.y=1.5;g.add(head);
+   g.traverse(o=>{if(o.isMesh)o.castShadow=true;});scene.add(g);
+   const side=(i%2)?1:-1,baseSpd=1.3+Math.random()*0.7;
+   peds.push({g,seg:(i*ring.length/PEDN)|0,f:Math.random()*0.9,side,baseSpd,scatter:0});
+ }}
+function updatePeds(dt){
+  for(const p of peds){
+    const a=ring[p.seg%ring.length],b=ring[(p.seg+1)%ring.length];
+    const dx=b.X-a.X,dz=b.Z-a.Z,len=Math.hypot(dx,dz)||1;
+    const px=a.X+dx*p.f+dz/len*4.5*p.side,pz=a.Z+dz*p.f-dx/len*4.5*p.side;
+    // a fast vehicle passing close scatters pedestrians — they hustle clear, then settle back to a stroll
+    if(Math.hypot(P.x-px,P.z-pz)<11&&Math.abs(P.v)>9&&veh!==WALKER)p.scatter=1.4;
+    else p.scatter=Math.max(0,p.scatter-dt);
+    const spd=p.scatter>0?p.baseSpd*3.2:p.baseSpd;
+    p.f+=spd*dt/len;
+    if(p.f>=1){p.f=0;p.seg=(p.seg+1)%ring.length;continue;}
+    const x=a.X+dx*p.f+dz/len*4.5*p.side,z=a.Z+dz*p.f-dx/len*4.5*p.side;
+    p.g.position.set(x,Math.max(height(x,z),0.15),z);
+    p.g.rotation.y=Math.atan2(-dz,dx)+(p.side<0?Math.PI:0);
+  }
+}
 // ---------------- Plantin Airways: the island-hop jet (fictional flag carrier) ----------------
 const jet=new THREE.Group();
 {const fus=new THREE.Mesh(new THREE.BoxGeometry(9,1.6,1.6),new THREE.MeshLambertMaterial({color:0xf4f0e8}));jet.add(fus);
@@ -5294,7 +5326,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5340,7 +5372,7 @@ function tick(t){
         toast('DELIVERED HOT — WELL FED! NEXT: REEF SCHOOL');}
       target=EARP;
     }else{
-      if(Math.hypot(P.x-FORTP.X,P.z-FORTP.Z)<12){hasPot=true;potT=90;beaconTo(potPil,EARP.X,EARP.Z);toast('POT SECURED — 90s, and keep it DRY');}
+      if(Math.hypot(P.x-FORTP.X,P.z-FORTP.Z)<12){hasPot=true;potT=90;beaconTo(potPil,EARP.X,EARP.Z);toast("LOW HEAT SEH: \"MIND THE THYME NUH BURN — HOLD IT TILL DI END\"  ·  90s, keep it DRY");}
       target=FORTP;
     }
     progText=hasPot?'LOW & SLOW  deliver to THE EAR  '+(potT|0)+'s':'LOW & SLOW  pick up the pot at FORT FLAVOR';
@@ -5412,7 +5444,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

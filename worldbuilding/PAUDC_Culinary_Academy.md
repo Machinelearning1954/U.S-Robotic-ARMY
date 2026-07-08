@@ -73,14 +73,21 @@ side-dish modifiers that upgrade any plate.
 
 ### Example Recipe Cards (moderate detail, as shown in-game)
 
-**Curry Goat** — *Instructor Palmer's capstone.* Season cubed goat (or mutton)
-overnight with Jamaican curry powder, scotch bonnet, scallion, thyme, garlic,
-ginger, and pimento (allspice) berries. "Burn the curry": toast more curry powder
-in hot oil till fragrant before the meat goes in. Brown the meat, then simmer low
-and slow 2-3 hours until falling apart, adding water as needed; drop in cubed
-potato near the end to thicken the gravy. Serve over rice and peas. *In-game: the
-long simmer is real time — players leave the pot and come back, and rushing the
-heat ruins the tier.*
+**Curry Goat** — *Instructor Palmer's capstone.* Wash the cubed goat (or mutton)
+in cold water first — Palmer's one hard rule: no vinegar, "cold water and patience
+is all it needs." Season overnight with Jamaican curry powder, turmeric, scotch
+bonnet, scallion, garlic, ginger, and pimento (allspice) berries, worked in with
+a garlic-oil massage so the coating holds. "Burn the curry": toast more curry
+powder in hot oil till fragrant before the meat goes in. Brown the meat, then
+simmer low and slow in Granny 2-3 hours until falling apart, adding hot water as
+needed (never cold — don't slow the pot down); drop in cubed carrot and potato
+partway through to thicken the gravy without a drop of added oil or sugar. *The
+secret, and Palmer only tells capstone students:* fresh thyme goes in **last**,
+right before the pot comes off — cooked any earlier and the herb "denatures,"
+which is Palmer's word for a sin. Serve over rice and peas. *In-game: the long
+simmer is real time — players leave the pot and come back, and rushing the heat
+ruins the tier; adding the thyme too early silently caps the dish at Nice, never
+Granny-Approved.*
 
 **Jerk Chicken** — Marinate chicken overnight in a blended jerk paste: scotch
 bonnet, scallion, thyme, pimento, ginger, garlic, brown sugar, soy, lime. Grill
