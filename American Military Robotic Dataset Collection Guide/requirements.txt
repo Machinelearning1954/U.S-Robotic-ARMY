@@ -1,0 +1,30 @@
+# Core dependencies for data collection and processing
+kaggle>=1.5.16
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+pillow>=10.0.0
+
+# Computer vision and deep learning
+opencv-python>=4.8.0
+torch>=2.0.0
+torchvision>=0.15.0
+ultralytics>=8.0.0
+
+# Data processing and augmentation
+albumentations>=1.3.0
+scikit-learn>=1.3.0
+
+# Jupyter notebook support
+jupyter>=1.0.0
+ipykernel>=6.25.0
+
+# AWS SageMaker support
+sagemaker>=2.180.0
+boto3>=1.28.0
+
+# Utilities
+tqdm>=4.66.0
+pyyaml>=6.0
+
