@@ -4966,7 +4966,42 @@ const VEH=[
   {g:bike,pose:bikeP,name:'NIGHTHAWK — POV ride, press V',      acc:40,vmax:35,wacc:3, wmax:3, camd:20,camh:8, eye:1.8},
   {g:walker,pose:walkP,name:'ON FOOT — E near a ride to board', acc:16,vmax:5.5,wacc:4,wmax:2.4,camd:13,camh:6.5,eye:1.6},
 ];
-const WALKER=3;
+const WALKER=3,BIKE=2;
+// ---------------- Dirt Bike Racing: the Mud Run circuit (NIGHTHAWK, mudflat trail) ----------------
+const TRAIL=[[70,0],[35,60],[-35,60],[-70,0],[-35,-60],[35,-60]].map(([dx,dz])=>({X:bikeP.x+dx,Z:bikeP.z+dz}));
+const trailGates=TRAIL.map((t,i)=>{
+  const g=new THREE.Group();const gy=Math.max(height(t.X,t.Z),0.2);
+  const col=i===0?0xffd23c:0x8f6b3c;
+  for(const dx of[-3.4,3.4]){const post=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,3.6,6),new THREE.MeshLambertMaterial({color:0x3a2f22}));
+    post.position.set(dx,1.8,0);post.castShadow=true;g.add(post);}
+  const beam=new THREE.Mesh(new THREE.BoxGeometry(7.2,0.4,0.4),new THREE.MeshBasicMaterial({color:col}));
+  beam.position.set(0,3.5,0);g.add(beam);
+  g.position.set(t.X,gy,t.Z);scene.add(g);
+  glowSprite(t.X,gy+3.5,t.Z,6,col);
+  return g;
+});
+label('MUD RUN — dirt bike circuit',bikeP.x,Math.max(height(bikeP.x,bikeP.z),0)+6,bikeP.z);
+let raceOn=false,raceCP=0,raceT=0,raceBest=null,raceHintT=0;
+function startRace(){raceOn=true;raceCP=0;raceT=0;toast('MUD RUN — GO! follow the gates  ·  '+TRAIL.length+' checkpoints');}
+function updateRace(dt){
+  if(veh!==BIKE){if(raceOn){raceOn=false;toast('MUD RUN ABANDONED — dismounted the Nighthawk');}return;}
+  if(!raceOn){
+    const d0=Math.hypot(P.x-TRAIL[0].X,P.z-TRAIL[0].Z);
+    if(d0<9&&Math.abs(P.v)<10&&perf>raceHintT){raceHintT=perf+4000;toast('MUD RUN start gate — press B to race the circuit');}
+    return;
+  }
+  raceT+=dt;
+  const cp=TRAIL[raceCP];
+  if(Math.hypot(P.x-cp.X,P.z-cp.Z)<9){
+    raceCP++;
+    if(raceCP>=TRAIL.length){
+      raceOn=false;const improved=raceBest===null||raceT<raceBest;if(improved)raceBest=raceT;
+      const pay=improved?60:30;addClout(pay);
+      toast('MUD RUN FINISH — '+raceT.toFixed(1)+'s'+(improved?'  ·  NEW BEST':'')+'  +'+pay+' CLOUT');
+    }else toast('GATE '+raceCP+'/'+TRAIL.length);
+  }
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='b'&&veh===BIKE&&!raceOn&&Math.hypot(P.x-TRAIL[0].X,P.z-TRAIL[0].Z)<9)startRace();});
 // ---------------- input ----------------
 const keys={};
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.startsWith('Arrow')||e.key===' ')e.preventDefault();});
@@ -5201,7 +5236,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5319,7 +5354,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

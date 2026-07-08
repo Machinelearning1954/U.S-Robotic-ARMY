@@ -28,11 +28,12 @@
 | [`PAUDC_Combat_System.md`](PAUDC_Combat_System.md) | The **combat module** — the Field Kit arsenal extended (less-lethal-forward, fictional makes only), game-feel ballistics, melee generalized from YARDCLASH, AI combat behavior, non-lethal damage floor, de-escalation as the strongest verb. The Dazzler puck is live. |
 | [`PAUDC_Dialogue_Voice.md`](PAUDC_Dialogue_Voice.md) | The **dialogue & voice module** — regional registers, conversation states, ambient chatter beds on the world clock, five player stances (de-escalation strongest), emotional delivery rules, mission dialogue framework, binding authenticity rules. |
 | [`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md) | The **police/wanted module** — the satirical BII five-star ladder (Noted → The Full Apology), courtesy-first non-lethal philosophy, pursuit AI mapping, consequences table. Tier ★★★ is playable in the prototype. |
+| [`PAUDC_Side_Activities.md`](PAUDC_Side_Activities.md) | The **side-activities module** — Half Court basketball, Nine Ball pool, Duppy Links mini-golf, and **The Mud Run** dirt-bike circuit (live in the prototype). Cage fighting is already covered by YARDCLASH Beast Night, not duplicated here. |
 | [`DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) | How the project ships legally: no leaked Rockstar code ever, the prototype→engine ladder, Godot 4 next / UE5 later, FiveM gamemode option, legal study resources. |
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.31**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.32**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -175,8 +176,15 @@ By day it's just startup signage; cross into the Static Hour and the panel
 glitches to its true read — scanlines, "GOSPEL HOUR" bleeding through under
 the OBIE mark. Linger near it while the Static holds and the game banks the
 Act-2 reveal early: **"YOU SEE IT NOW — THE CHOIR WAS NEVER HIRING," +25
-clout** — the whole game, you'd been scrolling past the villain. v0.26 arms
-the Field Kit: press `G` to
+clout** — the whole game, you'd been scrolling past the villain. v0.32 adds
+**The Mud Run** — a six-gate dirt-bike circuit on the NIGHTHAWK, out past
+the wetland. Board the bike, roll up to the start gate, press `B` to go;
+clear all six gates in order (no time limit but your own) for **+30 clout**,
+or **+60** if you beat your own best. Dismount or swap rides mid-run and it
+just quietly ends — no penalty, try again from the gate. See
+[`PAUDC_Side_Activities.md`](PAUDC_Side_Activities.md) for the rest of the
+island's downtime activities (Half Court, Nine Ball, Duppy Links) still on
+the spec-only list. v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
 seconds (lights on, wheels off — your escape window) and a dazzled **Yard
