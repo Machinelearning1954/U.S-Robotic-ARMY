@@ -290,6 +290,15 @@ never attacks unprovoked; the capture loop stays the humane canon above.*
   the player closes within ~18 m**, fly wider/faster while spooked, **half the
   flock roosts in deep night**, and **all shelter during storms and the Static
   Hour** — the empty sky is part of both moods.
+- **Iguanas are live (v0.29):** nine sun-baskers seeded along the ring road's
+  landward side; motionless until the player closes within ~10 m, then scurry
+  off at speed for a couple of seconds. Sun-baskers only — invisible at night
+  and in storms, same rule as the roosting birds.
+- **Marine life is live (v0.29):** sea turtles and dolphins loop the reef
+  fishing spots and the outer coast, surfacing and diving; dolphins arc into a
+  real leap on their circuit. Both spook wider when a boat closes within 16 m,
+  and both sit out the Static Hour (the empty water is part of the mood, same
+  as the empty sky).
 - Engine rung adds: flocking (boids), wire/roof perching, fish schools that part
   around hulls, insect density by hour (fireflies at dusk, cicada beds by day).
 

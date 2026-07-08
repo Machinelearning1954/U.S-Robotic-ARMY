@@ -39,7 +39,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>H</b> haul · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.28</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.29</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4571,6 +4571,70 @@ for(let i=0;i<ring.length;i++){
   glowSprite(x,gy+7.6,z,9,0xffd98a);
   if(i%2===0&&LAMPL&&i/2<LAMPL){const pl=new THREE.PointLight(0xffd08a,1.1,42);pl.position.set(x,gy+7.2,z);scene.add(pl);}
 }
+// ---------------- land wildlife: iguanas (bask, then scurry off) ----------------
+const iguanas=[];
+{const bm=new THREE.MeshLambertMaterial({color:0x4a7a3d});
+ const spots=ROADPTS.filter((_,i)=>i%7===0).slice(0,9);
+ for(const rp of spots){
+   const g=new THREE.Group();
+   const bod=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.26,0.3),bm);bod.position.y=0.18;g.add(bod);
+   const tail=new THREE.Mesh(new THREE.ConeGeometry(0.11,0.85,6).rotateZ(Math.PI/2),bm);tail.position.set(-0.8,0.18,0);g.add(tail);
+   const head=new THREE.Mesh(new THREE.BoxGeometry(0.26,0.2,0.22),bm);head.position.set(0.52,0.22,0);g.add(head);
+   g.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+   const ox=rp.x+(Math.random()-0.5)*10,oz=rp.z+(Math.random()-0.5)*10;
+   g.position.set(ox,Math.max(height(ox,oz),0.25),oz);scene.add(g);
+   iguanas.push({g,fl:0});
+ }}
+function updateIguanas(dt){
+  for(const ig of iguanas){
+    ig.g.visible=!(rain||stat)&&!(DARK>0.9); // sun-baskers: gone at night and in storms
+    if(!ig.g.visible)continue;
+    const pd=Math.hypot(P.x-ig.g.position.x,P.z-ig.g.position.z);
+    if(pd<10)ig.fl=2.2;
+    ig.fl=Math.max(0,ig.fl-dt);
+    if(ig.fl>0){
+      const dx=ig.g.position.x-P.x,dz=ig.g.position.z-P.z,d=Math.hypot(dx,dz)||1;
+      ig.g.position.x+=dx/d*6*dt;ig.g.position.z+=dz/d*6*dt;
+      ig.g.position.y=Math.max(height(ig.g.position.x,ig.g.position.z),0.25);
+      ig.g.rotation.y=Math.atan2(-dz,dx);}
+  }
+}
+// ---------------- marine life: sea turtles + dolphins ----------------
+const marine=[];
+{const turtleM=new THREE.MeshLambertMaterial({color:0x2f6b4f});
+ const dolphinM=new THREE.MeshLambertMaterial({color:0x6b7a85});
+ const anchors=[[430,455],[1010,640],[1690,470]].map(([fx,fy])=>({X:mx(fx),Z:mz(fy)})).concat([{X:mx(1560),Z:mz(1260)},{X:mx(300),Z:mz(360)}]);
+ anchors.forEach((a,i)=>{
+   const kind=i%2===0?'turtle':'dolphin';
+   const g=new THREE.Group();
+   if(kind==='turtle'){
+     const shell=new THREE.Mesh(new THREE.SphereGeometry(0.5,10,8),turtleM);shell.scale.y=0.45;g.add(shell);
+     const head=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.16,0.22),turtleM);head.position.set(0.55,-0.05,0);g.add(head);
+   }else{
+     const bod=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.34,0.34),dolphinM);g.add(bod);
+     const nose=new THREE.Mesh(new THREE.ConeGeometry(0.17,0.4,8).rotateZ(-Math.PI/2),dolphinM);nose.position.x=0.75;g.add(nose);
+     const fin=new THREE.Mesh(new THREE.ConeGeometry(0.16,0.3,6),dolphinM);fin.position.y=0.3;g.add(fin);
+   }
+   g.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+   g.position.set(a.X,0.3,a.Z);scene.add(g);
+   marine.push({g,kind,ax:a.X,az:a.Z,r:10+Math.random()*8,ph:Math.random()*6.28,sp:0.3+Math.random()*0.25,jump:0});
+ });}
+function updateMarine(dt){
+  for(const m of marine){
+    const wet=isWater(m.ax,m.az);
+    m.g.visible=wet&&!stat;
+    if(!m.g.visible)continue;
+    const pd=Math.hypot(P.x-m.g.position.x,P.z-m.g.position.z);
+    const fleeing=pd<16;
+    m.ph+=m.sp*dt*(fleeing?2:1);
+    const r=m.r+(fleeing?10:0);
+    const x=m.ax+Math.cos(m.ph)*r,z=m.az+Math.sin(m.ph)*r;
+    let y=0.15+0.1*Math.sin(m.ph*3);
+    if(m.kind==='dolphin'){m.jump=(m.jump+dt*(fleeing?2.2:1))%4;
+      y=0.15+Math.max(0,Math.sin(m.jump*Math.PI/2))*1.6;}
+    m.g.position.set(x,y,z);m.g.rotation.y=-m.ph;
+  }
+}
 // ---------------- GRIDFALL arcade cabinet (the rec room, by the Yard) ----------------
 const ARC={X:mx(1250)-20,Z:mz(1020)-14};
 {const gy=Math.max(height(ARC.X,ARC.Z),0.2);
@@ -5048,7 +5112,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5166,7 +5230,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1)}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

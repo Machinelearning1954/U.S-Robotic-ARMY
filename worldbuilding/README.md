@@ -32,7 +32,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.28**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.29**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -155,7 +155,13 @@ and you drag it the length of the island to Pelican Key for a big clout payout.
 Get caught mid-haul and the crate is seized — try again after a 90s cooldown.
 Every system in the game shows up in one run: surfaces, traffic, weather, the
 day/night cycle, the Dazzler, and the Courtesy Interceptor, all at once. See
-[`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md). v0.26 arms the Field Kit: press `G` to
+[`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md). v0.29 doubles the wildlife
+roster: nine **iguanas** bask along the ring road and scurry off if you get
+within about 10 m (invisible at night and in storms, same as the roosting
+gulls), and **sea turtles and dolphins** now loop the reef spots and the outer
+coast — the dolphins genuinely leap on their circuit — spooking wider when a
+boat closes in and sitting out the Static Hour along with the rest of the
+island's animal life. v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
 seconds (lights on, wheels off — your escape window) and a dazzled **Yard
