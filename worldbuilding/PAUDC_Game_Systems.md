@@ -459,10 +459,24 @@ All fictional, all stylized — severity in ★:
 | **Declining an Invitation** | evading arrest | +★ on top of anything |
 | **Services, Theft of** | dine-and-dash at Fort Flavor | ★★ |
 | **The Whole Charge Sheet** | armed robbery of a Syndicate front | ★★★★ (mission content only) |
+| **Unsolicited Attention** | stalking / harassment — following a local too close, too long | ★ *(pays no clout — see below)* |
 
 - **The OnWatch irony is the system:** every infraction that raises Watch Level
   also pays clout — the island loves a show. The BII confiscates clout... never.
   They subpoena the clips as evidence and accidentally make them go viral again.
+- **The one exception:** **Unsolicited Attention** breaks the irony on purpose.
+  Following a pedestrian too closely for too long isn't a stunt anyone's filming
+  — it costs **−15 clout** outright, no viral upside, because harassing an NPC
+  isn't content, it's just harassment. Every other infraction on this ledger is
+  the island laughing at victimless mischief; this one is the game drawing a
+  line. Matches the NPC culture doc's dignity rule (`JAMAICA_NPC_CULTURE.md`
+  §2.4: *"personality varies, dignity is constant"*) and the non-lethal,
+  de-escalation-rewarding design pillar running through the whole combat/wanted
+  system. **Live in the prototype (v0.35):** stay within ~3.5 m of the same
+  pedestrian, on foot, for 6+ continuous seconds and the BII takes the report —
+  the pedestrian bolts, Watch Level rises a star, and clout drops immediately.
+  A 20-second cooldown per pedestrian stops it from re-triggering on the walk
+  away.
 - **Decay:** stars fade after a clean minute; sleeping (Well Rested) clears one
   extra; a YARDCLASH appearance resets petty stars ("community service").
 - **In the prototype (v0.7):** four ledger entries are playable. Sustained

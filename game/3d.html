@@ -4313,16 +4313,27 @@ const peds=[];
    const head=new THREE.Mesh(new THREE.SphereGeometry(0.17,8,7),skin);head.position.y=1.5;g.add(head);
    g.traverse(o=>{if(o.isMesh)o.castShadow=true;});scene.add(g);
    const side=(i%2)?1:-1,baseSpd=1.3+Math.random()*0.7;
-   peds.push({g,seg:(i*ring.length/PEDN)|0,f:Math.random()*0.9,side,baseSpd,scatter:0});
+   peds.push({g,seg:(i*ring.length/PEDN)|0,f:Math.random()*0.9,side,baseSpd,scatter:0,followT:0,harassCd:0});
  }}
+let harassCount=0;
+function harassInfraction(name,n=1){watch=Math.min(5,watch+n);watchT=perf+60000;
+  addClout(-Math.min(15,clout));harassCount++;
+  toast(name+' — a local’s had enough, BII’s been called  ·  WATCH '+'★'.repeat(watch)+'  ·  −15 CLOUT');}
 function updatePeds(dt){
   for(const p of peds){
     const a=ring[p.seg%ring.length],b=ring[(p.seg+1)%ring.length];
     const dx=b.X-a.X,dz=b.Z-a.Z,len=Math.hypot(dx,dz)||1;
     const px=a.X+dx*p.f+dz/len*4.5*p.side,pz=a.Z+dz*p.f-dx/len*4.5*p.side;
+    const dPlayer=Math.hypot(P.x-px,P.z-pz);
     // a fast vehicle passing close scatters pedestrians — they hustle clear, then settle back to a stroll
-    if(Math.hypot(P.x-px,P.z-pz)<11&&Math.abs(P.v)>9&&veh!==WALKER)p.scatter=1.4;
+    if(dPlayer<11&&Math.abs(P.v)>9&&veh!==WALKER)p.scatter=1.4;
     else p.scatter=Math.max(0,p.scatter-dt);
+    // sustained close following on foot reads as harassment — the BII takes the report, no style points here
+    if(p.harassCd>0)p.harassCd-=dt;
+    if(veh===WALKER&&dPlayer<3.5&&p.harassCd<=0){
+      p.followT+=dt;
+      if(p.followT>6){p.followT=0;p.harassCd=20;p.scatter=2.2;harassInfraction('UNSOLICITED ATTENTION');}
+    }else p.followT=Math.max(0,p.followT-dt*2);
     const spd=p.scatter>0?p.baseSpd*3.2:p.baseSpd;
     p.f+=spd*dt/len;
     if(p.f>=1){p.f=0;p.seg=(p.seg+1)%ring.length;continue;}
@@ -5444,7 +5455,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

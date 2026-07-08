@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.34**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.35**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -197,7 +197,14 @@ tier/decoration/NPC-visit roadmap beyond this first house. v0.34 adds
 **ambient foot traffic**: pedestrians now walk the sidewalks island-wide,
 and a vehicle passing close at speed scatters them — a quick hustle clear,
 then back to a stroll, no bystander-gawking loop
-(`JAMAICA_NPC_CULTURE.md` §2.3). v0.26 arms the Field Kit: press `G` to
+(`JAMAICA_NPC_CULTURE.md` §2.3). v0.35 gives the BII a new ledger entry:
+**Unsolicited Attention**. Stay within arm's reach of the same pedestrian, on
+foot, for 6+ straight seconds and it's stalking, not sightseeing — the local
+bolts, Watch Level rises a star, and it's the ledger's one entry that pays
+**no clout, only a −15 penalty** (`PAUDC_Game_Systems.md` §12). Every other
+infraction on the books is the island laughing at victimless mischief; this
+one is the game drawing a line — matches the culture doc's rule that
+personality varies but dignity is constant. v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
 seconds (lights on, wheels off — your escape window) and a dazzled **Yard
