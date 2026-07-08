@@ -4,17 +4,18 @@ A landing page featuring an embedded Instagram Reel.
 
 ## Contents
 
-- `index.html` — Standalone page that embeds the featured Instagram Reel
-  ([reel/DaB2WCzTrtP](https://www.instagram.com/reel/DaB2WCzTrtP/)) using
+- `index.html` — Standalone page that embeds the featured Instagram Reels
+  ([reel/DaB2WCzTrtP](https://www.instagram.com/reel/DaB2WCzTrtP/) and
+  [reel/DZwL33cy45c](https://www.instagram.com/reel/DZwL33cy45c/)) using
   Instagram's official embed markup and `embed.js` script.
 
-## The embed
+## The embeds
 
-The reel is embedded with Instagram's supported `blockquote.instagram-media`
+Each reel is embedded with Instagram's supported `blockquote.instagram-media`
 markup plus the async `//www.instagram.com/embed.js` loader, which transforms
-the blockquote into the rich, interactive player. A plain link inside the
-blockquote acts as a graceful fallback if the script is blocked or fails to
-load.
+the blockquotes into the rich, interactive players. A single `embed.js` loader
+processes every blockquote on the page. A plain link inside each blockquote acts
+as a graceful fallback if the script is blocked or fails to load.
 
 ## Running locally
 
