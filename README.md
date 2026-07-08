@@ -6,8 +6,9 @@ A landing page featuring an embedded Instagram Reel.
 
 - `index.html` — Standalone page that embeds the featured Instagram Reels
   ([reel/DaB2WCzTrtP](https://www.instagram.com/reel/DaB2WCzTrtP/),
-  [reel/DZwL33cy45c](https://www.instagram.com/reel/DZwL33cy45c/), and
-  [reel/DaGa2lWiUli](https://www.instagram.com/reel/DaGa2lWiUli/)) using
+  [reel/DZwL33cy45c](https://www.instagram.com/reel/DZwL33cy45c/),
+  [reel/DaGa2lWiUli](https://www.instagram.com/reel/DaGa2lWiUli/), and
+  [reel/DaHsXw_C_B_](https://www.instagram.com/reel/DaHsXw_C_B_/)) using
   Instagram's official embed markup and `embed.js` script.
 
 ## The embeds
