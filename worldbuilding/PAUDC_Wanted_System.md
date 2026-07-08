@@ -61,3 +61,37 @@
 
 > All fictional. The BII, its interceptors, and every procedure above are invented
 > for a comedy-forward game; nothing depicts real law enforcement.
+
+---
+
+## Vault Drag — the signature heist chase
+
+*A set-piece mission built at The Vault (base design doc, canon location), pairing
+directly with the Courtesy Interceptor above. Original take on the classic
+"drag the score, outrun the law" heist beat — our own MacGuffin, our own island,
+our own chase.*
+
+### The loop
+1. **Hook it.** Pull up slow beside the crate at The Vault and press `H`. The
+   moment it's hooked, the BII is notified — an automatic ★★★ dispatch, same
+   Courtesy Interceptor as any other pursuit.
+2. **Haul it.** The crate trails your ride on a visible chain. Top speed drops
+   (~38%) while hauling — every vehicle in the ring becomes a heavier, more
+   deliberate drive, and cornering matters more than raw horsepower.
+3. **Outrun it.** Standard pursuit rules apply (wanted-system doc above): the
+   amphibious escape valve still works, the Dazzler still stuns the interceptor.
+   Get caught (a courtesy stop) and the crate is seized on the spot — mission
+   busted, ledger cleared, try again after cooldown.
+4. **Drop it.** Reach Pelican Key — the far side of the island, deliberately the
+   longest possible haul — and the crate releases clean: a big clout payout and
+   a 90-second cooldown before the crate resets at the Vault for the next run.
+
+### Why Pelican Key
+The Vault sits deep in the island's interior; Pelican Key is the opposite shore.
+The full-island crossing *while towing and while wanted* is the point — every
+surface, every district, the day/night cycle, and the storm lader all factor
+into a single drag run, making it the game's best showcase of everything else
+in this document working together at once.
+
+> All fictional: the crate, the Vault, and the getaway are original PAUDC
+> content — no real heist, vehicle, or location is depicted.

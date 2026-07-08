@@ -32,7 +32,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.27**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.28**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -148,7 +148,14 @@ with `E` while it's docked, ride the deck around the bay, step off anywhere —
 and **route-taxi stands** at Palm Line, The Strip, and Silver Springs (hold at
 the yellow sign on foot and you're run to the next stand, *"small up
 yuhself"*). Fast travel that's part of the world, per
-[`PAUDC_Transit.md`](PAUDC_Transit.md). v0.26 arms the Field Kit: press `G` to
+[`PAUDC_Transit.md`](PAUDC_Transit.md). v0.28 adds **Vault Drag**, the signature
+heist chase: pull up slow beside the crate at The Vault and press `H` to hook
+it — the BII dispatches instantly (★★★), your top speed drops while hauling,
+and you drag it the length of the island to Pelican Key for a big clout payout.
+Get caught mid-haul and the crate is seized — try again after a 90s cooldown.
+Every system in the game shows up in one run: surfaces, traffic, weather, the
+day/night cycle, the Dazzler, and the Courtesy Interceptor, all at once. See
+[`PAUDC_Wanted_System.md`](PAUDC_Wanted_System.md). v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
 seconds (lights on, wheels off — your escape window) and a dazzled **Yard

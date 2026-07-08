@@ -38,8 +38,8 @@
 <canvas id="game"></canvas>
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
-<div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.27</div>
+<div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>H</b> haul · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.28</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
@@ -4422,6 +4422,47 @@ function updateBirds(dt){
     const r=b.r+(b.fl>0?14:0),h=b.h+(b.fl>0?9:0);
     b.g.position.set(b.ax+Math.cos(b.ph)*r,h,b.az+Math.sin(b.ph)*r);
     b.g.rotation.y=-b.ph;}}
+// ---------------- Vault Drag: hook the crate, haul it, outrun the law ----------------
+const VAULTP={X:mx(1150),Z:mz(1408)};
+const DROP={X:mx(240),Z:mz(300)}; // Pelican Key — the getaway drop
+const crate=new THREE.Group();
+{const bd=new THREE.Mesh(new THREE.BoxGeometry(2.6,2.2,2.6),new THREE.MeshLambertMaterial({color:0x39434d}));bd.position.y=1.1;crate.add(bd);
+ const band=new THREE.Mesh(new THREE.BoxGeometry(2.7,0.3,2.7),new THREE.MeshBasicMaterial({color:0x3af5d8}));band.position.y=1.1;crate.add(band);
+ crate.traverse(o=>{if(o.isMesh)o.castShadow=true;});}
+crate.position.set(VAULTP.X,Math.max(height(VAULTP.X,VAULTP.Z),0.3)+1.1,VAULTP.Z);scene.add(crate);
+const chainG=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,1,6),new THREE.MeshBasicMaterial({color:0x9aa4ad}));
+chainG.visible=false;scene.add(chainG);
+const dropPil=orangeBeacon(DROP.X,DROP.Z);
+let hauling=false,haulCd=0;
+function hookVaultDrag(){
+  if(hauling||haulCd>0||veh===WALKER)return;
+  if(Math.hypot(P.x-VAULTP.X,P.z-VAULTP.Z)>9||Math.abs(P.v)>=4){toast('VAULT DRAG — pull up slow beside the crate, then H');return;}
+  hauling=true;crate.visible=false;chainG.visible=true;dropPil.visible=true;
+  watch=Math.max(watch,3);watchT=perf+60000;
+  toast('VAULT DRAG — HOOKED! Drag it to Pelican Key, mind the law');
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='h')hookVaultDrag();});
+function updateVaultDrag(dt){
+  haulCd=Math.max(0,haulCd-dt);
+  if(!hauling){crate.visible=haulCd<=0;dropPil.visible=false;return;}
+  // hauling: crate trails the vehicle on a visible chain
+  const behind=VEH[veh].camd*0.55;
+  const tx=P.x-Math.cos(P.a)*behind,tz=P.z+Math.sin(P.a)*behind;
+  crate.position.x+=(tx-crate.position.x)*Math.min(1,4*dt);
+  crate.position.z+=(tz-crate.position.z)*Math.min(1,4*dt);
+  crate.position.y=Math.max(height(crate.position.x,crate.position.z),0.3)+1.1;
+  crate.rotation.y=P.a;crate.visible=true;
+  const hd=Math.hypot(P.x-crate.position.x,P.z-crate.position.z);
+  chainG.position.set((P.x+crate.position.x)/2,0.7,(P.z+crate.position.z)/2);
+  chainG.scale.y=Math.max(0.3,hd);chainG.rotation.z=Math.PI/2;chainG.rotation.y=-P.a;
+  if(Math.hypot(P.x-DROP.X,P.z-DROP.Z)<14){
+    hauling=false;chainG.visible=false;dropPil.visible=false;haulCd=90;
+    addClout(60);toast('VAULT DRAG — CLEAN GETAWAY AT PELICAN KEY  +60 CLOUT');
+  }
+}
+function bustVaultDrag(){if(!hauling)return;
+  hauling=false;chainG.visible=false;dropPil.visible=false;haulCd=90;
+  toast('VAULT DRAG BUSTED — crate seized');}
 // ---------------- BII pursuit: the Courtesy Interceptor (active at 3+ stars) ----------------
 const patrol=new THREE.Group();
 {const bd=new THREE.Mesh(new THREE.BoxGeometry(4.2,1.15,2.1),new THREE.MeshLambertMaterial({color:0xe8eef2}));bd.position.y=1.0;patrol.add(bd);
@@ -4466,7 +4507,7 @@ function spawnPatrol(){pursuit=true;stopT=0;escT=0;patrolV=0;patrol.visible=true
   toast('BII COURTESY INTERCEPTOR DISPATCHED — ★★★');}
 function endPursuit(caught){pursuit=false;patrol.visible=false;
   if(caught){watch=0;clout=Math.max(0,clout-15);try{localStorage.setItem('paudc_clout',clout);}catch(e){}
-    $('clout').textContent='ONWATCH  '+clout+' CLOUT';P.v=0;
+    $('clout').textContent='ONWATCH  '+clout+' CLOUT';P.v=0;bustVaultDrag();
     toast('COURTESY STOP — words were had, ledger cleared, -15 clout');}
   else{watch=Math.min(watch,2);watchT=perf+30000;toast('LOST THEM — stars cooling');}}
 function updatePursuit(dt){
@@ -4944,7 +4985,7 @@ function tick(t){
     else if(gy2<3.0){surf='SAND';grip=0.8;}
     if(rain)grip*=(surf==='ASPHALT'?0.78:0.9); // wet asphalt is the slickest
   }
-  const VMAX=V.vmax*(veh===WALKER?1:(surf==='ASPHALT'?1.08:surf==='SAND'?0.85:1));
+  const VMAX=V.vmax*(veh===WALKER?1:(surf==='ASPHALT'?1.08:surf==='SAND'?0.85:1))*(hauling?0.62:1);
   P.v+=thr*(wet?WACC:ACC)*dt;P.v*=wet?0.965:0.975;P.v=Math.max(-9,Math.min((wet?WMAX:VMAX)*(wellFed?1.12:1),P.v));
   if(veh===WALKER)P.a+=str*2.8*dt*(P.v<-0.2?-1:1); // on foot you can turn in place
   else if(Math.abs(P.v)>0.6)P.a+=str*1.9*grip*dt*Math.sign(P.v);
@@ -5007,7 +5048,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5125,7 +5166,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2)}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1)}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
