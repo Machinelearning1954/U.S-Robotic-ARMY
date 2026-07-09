@@ -1,0 +1,22 @@
+# Core scientific stack
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+
+# Machine learning / computer vision
+scikit-learn>=1.3
+opencv-python>=4.8
+Pillow>=10.0
+
+# Deep learning (choose the build that matches your CUDA setup)
+torch>=2.0
+torchvision>=0.15
+
+# Data / experiment tooling
+matplotlib>=3.7
+seaborn>=0.12
+tqdm>=4.65
+
+# Notebooks
+jupyter>=1.0
+ipykernel>=6.25
