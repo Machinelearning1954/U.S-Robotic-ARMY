@@ -1,0 +1,47 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Environment variables / secrets
+.env
+*.env
+
+# Datasets & large binaries (track with Git LFS or DVC instead)
+data/raw/
+data/interim/
+data/processed/
+*.tar.gz
+*.zip
+*.h5
+*.pt
+*.pth
+*.ckpt
+
+# Logs & temp
+*.log
+.cache/
+tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
