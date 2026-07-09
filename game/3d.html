@@ -4953,6 +4953,16 @@ try{new THREE.GLTFLoader().load(MUDFISH_GLB,g=>{
   }catch(e){}
 },undefined,()=>{/* offline or blocked: box jeep stays */});}catch(e){}
 const gx=new THREE.Group();
+const marlinBadgeTex=canvasTex(64,64,(g,w,h)=>{ // original "Marlin GX" fish emblem — no real marque badge
+  g.fillStyle='#1c232b';g.fillRect(0,0,w,h);
+  g.fillStyle='#0a0c0e';g.beginPath();g.arc(w/2,h/2,w/2-3,0,Math.PI*2);g.fill();
+  g.strokeStyle='#3af5d8';g.lineWidth=2.5;g.beginPath();g.arc(w/2,h/2,w/2-5,0,Math.PI*2);g.stroke();
+  g.fillStyle='#3af5d8';
+  g.beginPath();g.moveTo(w*0.24,h*0.5);g.quadraticCurveTo(w*0.42,h*0.3,w*0.7,h*0.42);
+  g.quadraticCurveTo(w*0.82,h*0.46,w*0.88,h*0.5);g.quadraticCurveTo(w*0.82,h*0.54,w*0.7,h*0.58);
+  g.quadraticCurveTo(w*0.42,h*0.7,w*0.24,h*0.5);g.closePath();g.fill();
+  g.beginPath();g.moveTo(w*0.24,h*0.5);g.lineTo(w*0.1,h*0.36);g.lineTo(w*0.1,h*0.64);g.closePath();g.fill();
+});
 {
   const body=new THREE.Mesh(new THREE.BoxGeometry(4.6,1.5,2.3),new THREE.MeshPhongMaterial({color:0x0b0d10,shininess:120,specular:0x8899aa}));body.position.y=1.25;gx.add(body);
   const cab=new THREE.Mesh(new THREE.BoxGeometry(2.6,0.9,2.1),new THREE.MeshPhongMaterial({color:0x11151a,shininess:160,specular:0xaabbcc}));cab.position.set(-0.2,2.25,0);gx.add(cab);
@@ -4965,6 +4975,23 @@ const gx=new THREE.Group();
   const tr2=tl2.clone();tr2.position.z=-0.8;gx.add(tr2);
   const hlT=new THREE.Group();hlT.position.set(20,-0.6,0);gx.add(hlT);
   const hl2=new THREE.SpotLight(0xf2f6ff,2.0,75,0.5,0.45,1.1);hl2.position.set(2.3,1.5,0);hl2.target=hlT;gx.add(hl2);
+  // Widebody kit — fictional aftermarket look (fender flares, splitter, hood vents, GT wing)
+  const flareM=new THREE.MeshPhongMaterial({color:0x0e1013,shininess:80});
+  for(const[dx,dz]of[[1.55,1.15],[1.55,-1.15],[-1.55,1.15],[-1.55,-1.15]]){
+    const flare=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.5,0.34),flareM);
+    flare.position.set(dx,0.85,dz+(dz>0?0.22:-0.22));gx.add(flare);}
+  const splitter=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.14,2.5),new THREE.MeshLambertMaterial({color:0x101316}));
+  splitter.position.set(2.55,0.5,0);gx.add(splitter);
+  const vent1=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.06,0.3),new THREE.MeshBasicMaterial({color:0x05070a}));
+  vent1.position.set(1.4,2.0,0.55);gx.add(vent1);
+  const vent2=vent1.clone();vent2.position.z=-0.55;gx.add(vent2);
+  const wingStrutM=new THREE.MeshLambertMaterial({color:0x151a1f});
+  for(const dz of[0.75,-0.75]){const strut=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.55,0.1),wingStrutM);
+    strut.position.set(-2.05,2.95,dz);gx.add(strut);}
+  const wing=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.08,2.0),new THREE.MeshLambertMaterial({color:0x0c0e11}));
+  wing.position.set(-2.05,3.25,0);gx.add(wing);
+  const badge=new THREE.Mesh(new THREE.PlaneGeometry(0.42,0.42),new THREE.MeshBasicMaterial({map:marlinBadgeTex}));
+  badge.position.set(2.39,1.35,0);badge.rotation.y=Math.PI/2;gx.add(badge);
 }
 gx.traverse(o=>{if(o.isMesh)o.castShadow=true;});
 const gxP={x:mx(1430),z:mz(650),a:2.6},mudP={x:mx(700),z:mz(860),a:Math.PI};

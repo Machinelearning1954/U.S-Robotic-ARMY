@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.35**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.36**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -204,7 +204,12 @@ bolts, Watch Level rises a star, and it's the ledger's one entry that pays
 **no clout, only a −15 penalty** (`PAUDC_Game_Systems.md` §12). Every other
 infraction on the books is the island laughing at victimless mischief; this
 one is the game drawing a line — matches the culture doc's rule that
-personality varies but dignity is constant. v0.26 arms the Field Kit: press `G` to
+personality varies but dignity is constant. v0.36 gives the **MARLIN GX** a
+widebody kit — fictional aftermarket flares, a front splitter, hood vents,
+and a GT wing — plus its first-ever badge: an original teal fish emblem on
+the nose, replacing any real manufacturer mark (the reference image was a
+modded real-world car; the logo is ours, drawn from scratch, per Rule Zero).
+v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
 seconds (lights on, wheels off — your escape window) and a dazzled **Yard
