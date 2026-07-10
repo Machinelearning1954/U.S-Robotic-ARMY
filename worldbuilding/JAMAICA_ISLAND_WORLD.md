@@ -115,6 +115,36 @@ and `engine/MOBILE_RENDER_DOCTRINE.md`; the browser build stays the instant-play
    cam, market steadicam, storm-wall approach; POV ride cam already shipped (v0.12).
 6. Mission hooks — §7.
 
+## 9. Turf Standing — the island's own "gang war," fought with amps not guns
+
+Fan discourse keeps asking Rockstar for San Andreas-style territorial gang
+wars. PAUDC's answer to that design question, on-canon: **sound-clash
+territory, not armed turf**. Jamaica's real sound-system culture — rival
+crews competing for a district's ear, not its blood — is the authentic,
+already-celebrated version of "whose colors fly here," and it's the one that
+fits this game's non-lethal, courtesy-first design floor without touching a
+real gang aesthetic or a real firearm.
+
+- **The setup:** each of the ten districts starts under one of three
+  fictional sound crews — **Wharf FM**, **Cutlass Sound**, **Tidewater
+  Crew** — each with its own color, flown on a small banner at the
+  district's beacon.
+- **The flip:** stand your ground on foot, unarmed, near a rival-held
+  beacon for 8 continuous seconds — you make your case, the block listens —
+  and it flips permanently to **Your Signal**, the player's own colors.
+  No fight, no gun; the contest is presence and nerve, the same "hold a
+  beat" language the game already uses for the Static Hour's escape trigger
+  and the Wheaton Night School's classes.
+- **Live in the prototype (v0.37):** all ten beacons are flippable this way;
+  a HUD readout tracks `TURF n/10`; each flip pays **+30 clout**, permanent
+  once won (matches the recon tour's own one-way completion model).
+- **Why not a literal gang-war system:** armed territorial conflict is
+  exactly the real-world genre trope this package has declined to depict
+  anywhere else (the Wanted System doc's non-lethal floor, YARDCLASH's
+  folklore-fighter reframe of "underground fight club"). Sound clash is the
+  same competitive-territory beat, minus the part that would break Rule Zero
+  and the content-boundary mandate.
+
 > Fictional game world. Real-place names are geographic reference in the tradition of
 > open-world games set in real regions; everything operational, commercial, military,
 > or personal is invented.

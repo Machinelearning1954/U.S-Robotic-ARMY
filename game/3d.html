@@ -4583,6 +4583,28 @@ function glowSprite(x,y,z,scale,color){
 // halo every district beacon (the neon pops even off-ULTRA, no bloom needed)
 for(const b of beacons){const h=Math.max(height(b.X,b.Z),0.5);glowSprite(b.X,h+8,b.Z,26);}
 glowSprite(mx(240),Math.max(height(mx(240),mz(272)),0)+9.5,mz(272),30,0xff5fd2); // Pelican Key sign halo
+// ---------------- Turf Standing: sound-crew territory (the island's own "gang war," fought with amps not guns) ----------------
+const CREWS=[{name:'WHARF FM',color:0x3af5d8},{name:'CUTLASS SOUND',color:0xffb84d},{name:'TIDEWATER CREW',color:0xff5fd2}];
+const PLAYER_CREW={name:'YOUR SIGNAL',color:0xf4f8ff};
+beacons.forEach((b,i)=>{
+  b.crew=i%CREWS.length;b.turfT=0;
+  const gy=Math.max(height(b.X,b.Z),0.5);
+  const flag=new THREE.Mesh(new THREE.BoxGeometry(0.5,1.4,0.08),new THREE.MeshBasicMaterial({color:CREWS[b.crew].color}));
+  flag.position.set(b.X+3.5,gy+2.2,b.Z+3.5);scene.add(flag);
+  b.flag=flag;
+});
+function paintTurf(b){b.flag.material.color.set(b.crew===CREWS.length?PLAYER_CREW.color:CREWS[b.crew].color);}
+function updateTurf(dt){
+  for(const b of beacons){
+    if(b.crew===CREWS.length)continue; // already flipped to the player — held for good
+    const d=Math.hypot(P.x-b.X,P.z-b.Z);
+    if(veh===WALKER&&d<10&&Math.abs(P.v)<3){
+      b.turfT+=dt;
+      if(b.turfT>8){b.turfT=0;const was=CREWS[b.crew].name;b.crew=CREWS.length;paintTurf(b);addClout(30);
+        toast(b.name+' FLIPS TO YOU — '+was+' just lost the block  ·  +30 CLOUT');}
+    }else b.turfT=Math.max(0,b.turfT-dt*2);
+  }
+}
 // the ring ROAD itself — asphalt ribbon with dashed centerline, chunked to hug terrain
 let roadChunks=0;const ROADPTS=[];
 {const rm=new THREE.MeshLambertMaterial({color:0xffffff,map:roadTex});
@@ -5364,7 +5386,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);updateTurf(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5471,7 +5493,8 @@ function tick(t){
     $('dist').textContent=(nd2|0)+' m';}
   else{arrow.style.display='none';$('dist').textContent='';}
   const clk=String(Math.floor(tod*24)).padStart(2,'0')+':'+String(Math.floor(tod*24%1*60)).padStart(2,'0');
-  $('tele').textContent=clk+'  ·  '+(veh===WALKER?(wet?'SWIMMING  ':'ON FOOT  '):(wet?'HULL MODE  ':'ENGINE OK  '))+Math.abs(P.v*3.6|0)+' km/h  ·  '+surf+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(rawClips?'  ·  '+rawClips+' RAW CLIP'+(rawClips>1?'S':''):'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'');
+  const turfHeld=beacons.filter(b=>b.crew===CREWS.length).length;
+  $('tele').textContent=clk+'  ·  '+(veh===WALKER?(wet?'SWIMMING  ':'ON FOOT  '):(wet?'HULL MODE  ':'ENGINE OK  '))+Math.abs(P.v*3.6|0)+' km/h  ·  '+surf+(wellFed?'  ·  WELL FED':'')+(irie?'  ·  IRIE':'')+(rawClips?'  ·  '+rawClips+' RAW CLIP'+(rawClips>1?'S':''):'')+(watch?'  ·  BII '+'\u2605'.repeat(watch):'')+(turfHeld?'  ·  TURF '+turfHeld+'/'+beacons.length:'');
   if(perf>toastT)$('toast').style.opacity=0;
   radarTarget=target;drawRadar();
   const w=innerWidth,h=innerHeight;
@@ -5482,7 +5505,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

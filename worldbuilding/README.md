@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.36**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.37**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -209,6 +209,15 @@ widebody kit — fictional aftermarket flares, a front splitter, hood vents,
 and a GT wing — plus its first-ever badge: an original teal fish emblem on
 the nose, replacing any real manufacturer mark (the reference image was a
 modded real-world car; the logo is ours, drawn from scratch, per Rule Zero).
+v0.37 answers the fan-discourse question "should GTA 6 bring back San
+Andreas-style gang wars" with PAUDC's own take: **Turf Standing**, sound-
+clash territory instead of armed turf. Each of the ten districts starts
+under one of three fictional sound crews (Wharf FM, Cutlass Sound,
+Tidewater Crew); stand your ground on foot near a rival-held beacon for 8
+seconds and it flips permanently to **Your Signal**, +30 clout, tracked on
+the HUD as `TURF n/10`. See
+[`JAMAICA_ISLAND_WORLD.md`](JAMAICA_ISLAND_WORLD.md) §9 for why sound clash
+— not armed gang conflict — is the on-canon version of this design ask.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
