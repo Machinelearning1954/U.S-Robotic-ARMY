@@ -47,7 +47,7 @@
   <div id="overlay">
     <h2 id="ovTitle">LIBERTY BAY</h2>
     <p id="ovBody">The war is over. ARES-7 walks free in Liberty Bay — a city of robots that never asked who won. Jack a car, cruise the grid, cause trouble. The RoboCops are watching, and five stars means the whole precinct comes for you.</p>
-    <p class="hint">WASD — move / drive · mouse + click — shoot · E — enter/exit car · cars: W gas, S brake/reverse, A/D steer · crime raises your wanted level, lay low to drop it · earn cash on the streets — a $15,000 first-class jet waits at the airport (southeast) · hurt? dinner at the IRONSMOKE restaurant (orange on minimap) restores full HP for $50</p>
+    <p class="hint">WASD — move / drive · mouse + click — shoot · E — enter/exit car · cars: W gas, S brake/reverse, A/D steer · crime raises your wanted level, lay low to drop it · earn cash on the streets — a $15,000 first-class jet waits at the airport (southeast) · hurt? dinner at the IRONSMOKE restaurant (orange on minimap) restores full HP for $50 · press H to summon a HURRICANE — streets flood, wind howls · walk into the ocean (south coast) to SURF the swell</p>
     <button id="ovBtn">HIT THE STREETS</button>
   </div>
 </div>
@@ -72,6 +72,7 @@ function onRoad(x, y) { return (x % BLOCK) < ROAD || (y % BLOCK) < ROAD; }
 const AIRPORT = { x: 2450, y: 1950, w: 660, h: 380 }; // southeast runway — no buildings here
 const IRONSMOKE = { x: 1300, y: 1000, w: 200, h: 120 }; // the restaurant — $50 buys full HP
 const IRON_DOOR = { x: IRONSMOKE.x + IRONSMOKE.w / 2, y: IRONSMOKE.y + IRONSMOKE.h + 14 };
+const SEA_Y = WORLD_H - 260; // ocean along the south coast — surfable
 const buildings = [];
 for (let bx = 0; bx < WORLD_W / BLOCK; bx++) {
   for (let by = 0; by < WORLD_H / BLOCK; by++) {
@@ -129,6 +130,7 @@ for (let i = 0; i < 30; i++) {
 }
 let heat = 0, lastCrime = -999, tSec = 0, running = false, ammo = { smg: 0 };
 let eLatch = false, lastShot = 0, money = 0, msg = '', msgT = 0;
+let stormOn = false, storm = 0, floodH = 0, hLatch = false, windPhase = 0, windX = 0, windY = 0;
 function say(text) { msg = text; msgT = 3.5; }
 
 function stars() { return Math.min(5, Math.floor(heat / 5)); }
@@ -199,6 +201,17 @@ function update(dt, now) {
   // wanted decay: 8s clean, then it bleeds off
   if (tSec - lastCrime > 8) heat = Math.max(0, heat - dt * 1.2);
 
+  // ---- hurricane system (H): storm ramps, streets flood, wind shoves everything ----
+  if (keys['h'] && !hLatch) { hLatch = true; stormOn = !stormOn; say(stormOn ? 'HURRICANE WARNING — LEONIDA UNDER SIEGE' : 'THE STORM IS PASSING'); }
+  if (!keys['h']) hLatch = false;
+  storm += ((stormOn ? 1 : 0) - storm) * Math.min(1, dt * 0.3);
+  floodH = storm;
+  windPhase += dt;
+  const gust = storm * (0.8 + 0.4 * Math.sin(windPhase * 1.3));
+  windX = Math.cos(windPhase * 0.2) * gust * 2.4;
+  windY = Math.sin(windPhase * 0.15) * gust * 1.2;
+  player.surf = !player.veh && player.y > SEA_Y;
+
   // enter / exit car
   if (keys['e'] && !eLatch) {
     eLatch = true;
@@ -243,20 +256,32 @@ function update(dt, now) {
     else { if (fast) { v.hp -= 20; explode(v.x, v.y, 10); } v.vel *= -0.3; }
     if (v.jet && !v.airborne && hitsBuilding(v, v.r)) { v.vel = 0; } // landed on a rooftop: stuck until you throttle up
     player.x = v.x; player.y = v.y;
+    if (storm > 0.3 && !v.airborne) { // hurricane buffets the car
+      v.x = Math.max(v.r, Math.min(WORLD_W - v.r, v.x + windX * 0.35));
+      v.y = Math.max(v.r, Math.min(WORLD_H - v.r, v.y + windY * 0.35));
+    }
     // roadkill (not from the air)
     if (!v.airborne && Math.abs(v.vel) > 1.2) {
       for (let i = peds.length - 1; i >= 0; i--) if (dist(v, peds[i]) < v.r + peds[i].r) killPed(i);
       for (let i = police.length - 1; i >= 0; i--) if (dist(v, police[i]) < v.r + police[i].r) { killCop(i); v.hp -= 12; }
     }
     if (v.hp <= 0) { explode(v.x, v.y, 46); player.veh = null; player.hp -= 30; cars.splice(cars.indexOf(v), 1); }
+  } else if (player.surf) {
+    // SURFING — ride the swell; waves shove you back toward the beach, steer to hold the line
+    const dx = strafe, dy = -fwd;
+    const swell = 0.9 + Math.sin(tSec * 2 + player.x * 0.01) * 0.7 + storm * 1.4;
+    player.x = Math.max(player.r, Math.min(WORLD_W - player.r, player.x + dx * 3.6));
+    player.y = Math.max(SEA_Y - 40, Math.min(WORLD_H - player.r, player.y + dy * 2.4 - swell * 0.7));
   } else {
-    // on foot
+    // on foot — floodwater slows you, hurricane wind shoves you sideways
     let dx = strafe, dy = -fwd;
     if (dx || dy) { const l = Math.hypot(dx, dy); dx /= l; dy /= l; }
-    const sp = 3.1;
-    const nx = { x: player.x + dx * sp, y: player.y }, ny = { x: player.x, y: player.y + dy * sp };
+    const flooded = floodH > 0.35 && onRoad(player.x, player.y);
+    const sp = flooded ? 1.5 : 3.1;
+    const nx = { x: player.x + dx * sp + windX, y: player.y }, ny = { x: player.x, y: player.y + dy * sp + windY };
     if (!hitsBuilding(nx, player.r)) player.x = Math.max(player.r, Math.min(WORLD_W - player.r, nx.x));
     if (!hitsBuilding(ny, player.r)) player.y = Math.max(player.r, Math.min(WORLD_H - player.r, ny.y));
+    if (flooded && floodH > 0.7) player.hp -= dt * 2; // deep floodwater erodes the robot
   }
 
   if (mouse.down) shoot(now);
@@ -350,8 +375,9 @@ function update(dt, now) {
   if (msgT > 0) msgT -= dt;
   hudHp.textContent = Math.max(0, player.hp | 0);
   document.getElementById('cash').textContent = money.toLocaleString();
-  hudRide.textContent = player.veh ? (player.veh.jet ? (player.veh.airborne ? 'FLYING FIRST CLASS · ' : 'TAXIING · ') : 'DRIVING · ') + Math.abs(player.veh.vel * 18 | 0) + ' MPH'
-                      : ammo.smg > 0 ? 'ON FOOT · SMG ' + ammo.smg : 'ON FOOT · PISTOL';
+  hudRide.textContent = player.surf ? '🏄 SURFING THE SWELL'
+                      : player.veh ? (player.veh.jet ? (player.veh.airborne ? 'FLYING FIRST CLASS · ' : 'TAXIING · ') : 'DRIVING · ') + Math.abs(player.veh.vel * 18 | 0) + ' MPH'
+                      : (floodH > 0.35 && onRoad(player.x, player.y)) ? 'WADING · FLOODED' : ammo.smg > 0 ? 'ON FOOT · SMG ' + ammo.smg : 'ON FOOT · PISTOL';
   hudStars.textContent = stars() ? 'WANTED ' + '★'.repeat(stars()) + '☆'.repeat(5 - stars()) : 'CLEAN';
 }
 
@@ -363,6 +389,20 @@ function draw() {
   // asphalt
   cx.fillStyle = '#171d28';
   cx.fillRect(camX, camY, VW, VH);
+  // ocean along the south coast (surf zone)
+  if (SEA_Y < camY + VH) {
+    const seaTop = Math.max(camY, SEA_Y);
+    cx.fillStyle = '#c8b487'; cx.fillRect(camX, SEA_Y - 12, VW, 14); // beach
+    cx.fillStyle = storm > 0.3 ? '#173540' : '#1d5f74';
+    cx.fillRect(camX, seaTop, VW, camY + VH - seaTop);
+    cx.strokeStyle = 'rgba(205,238,248,0.4)'; cx.lineWidth = 2;
+    for (let wy = SEA_Y + 24; wy < WORLD_H; wy += 32) {
+      if (wy < camY - 10 || wy > camY + VH + 10) continue;
+      cx.beginPath();
+      for (let wx = camX - 20; wx < camX + VW + 20; wx += 26) cx.lineTo(wx, wy + Math.sin(wx * 0.05 + tSec * 3 + wy) * (5 + storm * 8));
+      cx.stroke();
+    }
+  }
   // road markings
   cx.strokeStyle = '#2a344a'; cx.lineWidth = 2; cx.setLineDash([18, 22]);
   for (let gx = 0; gx <= WORLD_W; gx += BLOCK) {
@@ -505,7 +545,42 @@ function draw() {
     cx.strokeStyle = '#ffd166'; cx.lineWidth = 4;
     cx.beginPath(); cx.moveTo(player.x, player.y); cx.lineTo(player.x + Math.cos(a) * 22, player.y + Math.sin(a) * 22); cx.stroke();
   }
+  // surfboard under the player
+  if (player.surf) {
+    cx.save(); cx.translate(player.x, player.y + 4); cx.rotate(Math.sin(tSec * 3) * 0.2);
+    cx.fillStyle = '#ff6b3c'; cx.beginPath(); cx.ellipse(0, 0, 8, 20, 0, 0, 7); cx.fill();
+    cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(0, -18); cx.lineTo(0, 18); cx.stroke();
+    cx.restore();
+  }
+  // rising floodwater over the streets during the storm (world space)
+  if (floodH > 0.05) {
+    cx.fillStyle = 'rgba(46,98,128,' + (0.16 + floodH * 0.4) + ')';
+    for (let gx = Math.floor(camX / BLOCK) * BLOCK; gx < camX + VW; gx += BLOCK) cx.fillRect(gx, camY, ROAD, VH);
+    for (let gy = Math.floor(camY / BLOCK) * BLOCK; gy < camY + VH; gy += BLOCK) cx.fillRect(camX, gy, VW, ROAD);
+    if (floodH > 0.4) { // reflective sheen streaks
+      cx.strokeStyle = 'rgba(180,220,240,' + (floodH * 0.25) + ')'; cx.lineWidth = 1;
+      for (let gx = Math.floor(camX / BLOCK) * BLOCK; gx < camX + VW; gx += BLOCK) {
+        cx.beginPath(); cx.moveTo(gx + ROAD / 2 + Math.sin(tSec * 2) * 4, camY); cx.lineTo(gx + ROAD / 2 + Math.sin(tSec * 2 + 2) * 4, camY + VH); cx.stroke();
+      }
+    }
+  }
   cx.restore();
+
+  // ---- screen-space hurricane: darkening, driving rain, flying debris ----
+  if (storm > 0.02) {
+    cx.fillStyle = 'rgba(10,16,26,' + (storm * 0.42) + ')'; cx.fillRect(0, 0, VW, VH);
+    cx.strokeStyle = 'rgba(150,180,210,' + (0.2 + storm * 0.4) + ')'; cx.lineWidth = 1;
+    const rn = (storm * 300) | 0;
+    for (let i = 0; i < rn; i++) {
+      const rx = (i * 97 + tSec * 950) % VW, ry = (i * 53 + tSec * 1500) % VH;
+      cx.beginPath(); cx.moveTo(rx, ry); cx.lineTo(rx - (6 + storm * 10), ry + 16); cx.stroke();
+    }
+    for (let i = 0; i < (storm * 16 | 0); i++) {
+      const dx2 = (i * 211 + tSec * 720) % (VW + 60) - 30, dy2 = (i * 133 + Math.sin(tSec + i) * 40 + tSec * 130) % VH;
+      cx.fillStyle = i % 2 ? 'rgba(120,100,70,0.75)' : 'rgba(70,110,70,0.7)';
+      cx.save(); cx.translate(dx2, dy2); cx.rotate(tSec * 4 + i); cx.fillRect(-4, -2, 8, 4); cx.restore();
+    }
+  }
 
   // on-screen message
   if (msgT > 0) {
@@ -519,6 +594,8 @@ function draw() {
   const MW = 170, MH = 128, MX = VW - MW - 10, MY = 10, sx = MW / WORLD_W, sy = MH / WORLD_H;
   cx.fillStyle = 'rgba(10,14,20,0.8)'; cx.fillRect(MX - 2, MY - 2, MW + 4, MH + 4);
   cx.strokeStyle = '#2b3a4e'; cx.strokeRect(MX - 2, MY - 2, MW + 4, MH + 4);
+  cx.fillStyle = storm > 0.3 ? '#173540' : '#1d5f74'; // ocean on the minimap
+  cx.fillRect(MX, MY + SEA_Y * sy, MW, (WORLD_H - SEA_Y) * sy);
   cx.fillStyle = '#1c2534';
   for (const b of buildings) cx.fillRect(MX + b.x * sx, MY + b.y * sy, Math.max(1, b.w * sx), Math.max(1, b.h * sy));
   cx.fillStyle = '#3ddc84'; // airport marker
@@ -537,6 +614,8 @@ window.__cash = n => { money = n; };
 window.__hp = n => { player.hp = n; };
 window.__teleport = (x, y) => { if (player.veh) { player.veh.x = x; player.veh.y = y; } player.x = x; player.y = y; };
 window.__wanted = n => { heat = n * 5; lastCrime = tSec; };
+window.__storm = on => { stormOn = !!on; };
+window.__env = () => ({ storm: +storm.toFixed(2), floodH: +floodH.toFixed(2), surfing: !!player.surf, stormOn });
 
 // ---------- loop ----------
 function loop(t) {
