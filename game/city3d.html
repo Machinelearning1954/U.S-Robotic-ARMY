@@ -53,7 +53,7 @@
   <div id="overlay">
     <h2>LIBERTY BAY — FULL 3D</h2>
     <p>The same city. A third dimension. ARES-7 walks the streets in real perspective now — day turns to night above the towers (the 4th dimension), and if reality gets boring, press <b>Q</b> to shift into DIMENSION V (the 5th). Cars drive, the jet flies, the Ironsmoke serves dinner, and the RoboCops still hate you.</p>
-    <p class="hint">W/S — forward/back · A/D — turn · click — fire · E — car / jet / restaurant · Q — dimension shift · R — rain · in cars: W gas, S brake, A/D steer · $15,000 jet at the airport · $50 dinner at the Ironsmoke</p>
+    <p class="hint">W/S — forward/back · A/D — turn · click — fire · E — car / boat / jet / restaurant · Q — dimension shift · R — rain · $15,000 jet at the airport · $50 dinner at the Ironsmoke · boats wait on the south coast — take one out past the leaping dolphins</p>
     <button id="ovBtn">ENTER THE THIRD DIMENSION</button>
   </div>
 </div>
@@ -428,6 +428,46 @@ cars.push(jet);
 const priceTag = textSprite('$15,000 (E)', '#3ddc84', 90, 22, 30);
 priceTag.position.set(jet.x, 50, jet.z); scene.add(priceTag);
 
+// ---------- the real-world coast: reflective ocean, boats, leaping dolphins ----------
+const SEA_Z = WORLD_H - 260;
+const oceanMat = new THREE.MeshStandardMaterial({ color: 0x1a5568, metalness: 0.5, roughness: 0.12, envMap: reflectTex, transparent: true, opacity: 0.92 });
+const ocean = new THREE.Mesh(new THREE.PlaneGeometry(5200, 2800, 40, 24), oceanMat);
+ocean.rotation.x = -Math.PI / 2;
+ocean.position.set(WORLD_W / 2, 0.6, SEA_Z + 1150);
+ocean.receiveShadow = true; scene.add(ocean);
+const oceanBase = ocean.geometry.attributes.position.array.slice(); // for wave animation
+const beach = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_W + 600, 44), new THREE.MeshStandardMaterial({ color: 0xc8b487, roughness: 0.95 }));
+beach.rotation.x = -Math.PI / 2; beach.position.set(WORLD_W / 2, 0.45, SEA_Z - 8); scene.add(beach);
+
+function boatMesh() {
+  const g = new THREE.Group();
+  const hullMat = new THREE.MeshPhysicalMaterial({ color: 0xf0f0f0, metalness: 0.3, roughness: 0.25, envMap: reflectTex, clearcoat: 0.6 });
+  const hull = new THREE.Mesh(new THREE.BoxGeometry(60, 12, 26), hullMat); hull.position.y = 8; g.add(hull);
+  const bow = new THREE.Mesh(new THREE.ConeGeometry(13, 26, 4), hullMat); bow.rotation.z = -Math.PI / 2; bow.rotation.y = Math.PI / 4; bow.position.set(40, 8, 0); g.add(bow);
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 20), new THREE.MeshPhysicalMaterial({ color: 0x223046, metalness: 0.5, roughness: 0.1, envMap: reflectTex })); cabin.position.set(-8, 18, 0); g.add(cabin);
+  return shadowize(g);
+}
+for (let i = 0; i < 3; i++) {
+  const b = { x: srange(400, WORLD_W - 400), z: SEA_Z + srange(140, 760), r: 30, angle: srange(0, 7), vel: 0, hp: 300, maxHp: 300, boat: true };
+  b.mesh = boatMesh(); scene.add(b.mesh); cars.push(b);
+}
+
+function dolphinMesh() {
+  const skin = new THREE.MeshStandardMaterial({ color: 0x5a6b7a, roughness: 0.35, metalness: 0.25, envMap: reflectTex });
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(5, 20, 4, 8), skin); body.rotation.z = Math.PI / 2; g.add(body);
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(4.6, 8, 8), new THREE.MeshStandardMaterial({ color: 0xcdd6de })); belly.position.set(0, -1.6, 0); belly.scale.set(1.7, 0.7, 1); g.add(belly);
+  const fin = new THREE.Mesh(new THREE.ConeGeometry(3, 9, 4), skin); fin.position.set(-2, 6, 0); g.add(fin);
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(6, 9, 4), skin); tail.rotation.z = Math.PI / 2; tail.position.set(-15, 0, 0); tail.scale.set(1, 1, 0.3); g.add(tail);
+  const snout = new THREE.Mesh(new THREE.ConeGeometry(2.4, 8, 6), skin); snout.rotation.z = -Math.PI / 2; snout.position.set(14, 0, 0); g.add(snout);
+  return g;
+}
+const dolphins = [];
+for (let i = 0; i < 4; i++) {
+  const d = { x: srange(300, WORLD_W - 300), z: SEA_Z + srange(220, 1300), phase: srange(0, 3), speed: srange(0.4, 0.8), dir: srnd() < 0.5 ? 1 : -1 };
+  d.mesh = dolphinMesh(); scene.add(d.mesh); dolphins.push(d);
+}
+
 const peds = [];
 for (let i = 0; i < 40; i++) {
   const p = roadPoint();
@@ -747,8 +787,30 @@ function update(dt, now) {
   playerMesh.position.set(player.x, player.veh ? -100 : 0, player.z); // hide under map while riding
   playerMesh.rotation.y = player.yaw;
   for (const c of cars) {
-    c.mesh.position.set(c.x, c.jet ? (c.lift || 0) : 0, c.z);
+    const y = c.jet ? (c.lift || 0) : c.boat ? 0.6 + Math.sin(tSec * 1.5 + c.x * 0.02) * 1.6 : 0;
+    c.mesh.position.set(c.x, y, c.z);
     c.mesh.rotation.y = c.angle - Math.PI / 2; // meshes are modeled +X-forward; motion forward is (sin a, cos a)
+    if (c.boat) c.mesh.rotation.z = Math.sin(tSec * 1.2 + c.z * 0.02) * 0.05; // gentle roll
+  }
+  // ocean waves (animate the plane vertices) + leaping dolphins
+  {
+    const pos = ocean.geometry.attributes.position, arr = pos.array;
+    for (let i = 0; i < arr.length; i += 3) {
+      const bx = oceanBase[i], by = oceanBase[i + 1];
+      arr[i + 2] = oceanBase[i + 2] + Math.sin(bx * 0.01 + tSec * 1.6) * 3 + Math.cos(by * 0.012 + tSec * 1.1) * 2.5;
+    }
+    pos.needsUpdate = true; ocean.geometry.computeVertexNormals();
+  }
+  for (const d of dolphins) {
+    d.x += d.dir * d.speed;
+    if (d.x < 200 || d.x > WORLD_W - 200) d.dir *= -1;
+    const cyc = ((tSec * 0.55 + d.phase) % 3) / 3; // a leap every ~5.5s
+    let y = -6, pitch = 0;
+    if (cyc > 0.18 && cyc < 0.62) { const a = (cyc - 0.18) / 0.44; y = Math.sin(a * Math.PI) * 42 - 3; pitch = Math.cos(a * Math.PI) * 0.95; }
+    d.mesh.position.set(d.x, y + 1, d.z);
+    d.mesh.rotation.y = d.dir > 0 ? 0 : Math.PI;
+    d.mesh.rotation.z = pitch * d.dir;
+    d.mesh.visible = y > -4;
   }
   // smoke
   for (const s of smokes) {
@@ -782,7 +844,7 @@ function update(dt, now) {
   document.getElementById('hp').textContent = Math.max(0, player.hp | 0);
   document.getElementById('cash').textContent = money.toLocaleString();
   document.getElementById('ride').textContent = player.veh
-    ? (player.veh.jet ? (player.veh.lift > 30 ? 'FLYING FIRST CLASS · ' : 'TAXIING · ') : 'DRIVING · ') + Math.abs(player.veh.vel * 18 | 0) + ' MPH'
+    ? (player.veh.jet ? (player.veh.lift > 30 ? 'FLYING FIRST CLASS · ' : 'TAXIING · ') : player.veh.boat ? '🚤 BOATING · ' : 'DRIVING · ') + Math.abs(player.veh.vel * 18 | 0) + ' MPH'
     : ammoSmg > 0 ? 'ON FOOT · SMG ' + ammoSmg : 'ON FOOT · PISTOL';
   document.getElementById('stars').textContent = stars() ? 'WANTED ' + '★'.repeat(stars()) + '☆'.repeat(5 - stars()) : 'CLEAN';
 
