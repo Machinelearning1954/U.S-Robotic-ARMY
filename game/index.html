@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>U.S. Robotic Army — Stealth Run</title>
+<style>
+  :root { --pink:#ff2fb9; --cyan:#22d3ee; --purple:#7c3aed; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: #0a0016;
+    color: #fff;
+    font-family: "Trebuchet MS", system-ui, sans-serif;
+    overflow: hidden;
+    -webkit-user-select: none; user-select: none;
+    touch-action: none;
+  }
+  #wrap {
+    position: relative;
+    width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  canvas {
+    display: block;
+    width: 100%; height: 100%;
+    background:
+      linear-gradient(180deg,#2a0b3f 0%,#5b0f6e 32%,#b02a7a 55%,#ff5f6d 74%,#ffb56b 100%);
+    image-rendering: pixelated;
+  }
+  .overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+    background: rgba(6,0,18,.55);
+    backdrop-filter: blur(2px);
+  }
+  .overlay.hidden { display: none; }
+  h1 {
+    font-size: clamp(28px, 8vw, 68px);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 0 12px var(--pink), 0 0 28px var(--purple);
+    line-height: 1.05;
+  }
+  h1 span { color: var(--cyan); text-shadow: 0 0 12px var(--cyan); }
+  p.sub { margin-top: 10px; color: #ffd7f2; font-size: clamp(13px,3.5vw,18px); }
+  .btn {
+    margin-top: 26px; padding: 14px 30px;
+    font-size: clamp(16px,4.5vw,22px); font-weight: bold;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: #14001f; cursor: pointer;
+    background: linear-gradient(90deg,var(--cyan),var(--pink));
+    border: none; border-radius: 999px;
+    box-shadow: 0 0 24px var(--pink);
+  }
+  .btn:active { transform: scale(.96); }
+  .hint { margin-top: 16px; font-size: 13px; color: #c9a9ff; }
+  .hud {
+    position: absolute; top: 14px; left: 0; right: 0;
+    display: flex; justify-content: space-between;
+    padding: 0 18px; font-weight: bold;
+    font-size: clamp(15px,4vw,22px);
+    text-shadow: 0 0 8px #000; pointer-events: none;
+  }
+  .hud .cash { color: #7CFC9A; text-shadow: 0 0 10px #2fff8a; }
+  .tag { margin-top: 20px; font-size: 12px; color:#9d7bd8; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+
+  <div class="hud" id="hud" hidden>
+    <div>SCORE <span id="score">0</span></div>
+    <div class="cash">$<span id="cash">0.00</span>B</div>
+  </div>
+
+  <div class="overlay" id="startScreen">
+    <h1>Stealth Run<br><span>Vice&nbsp;City</span></h1>
+    <p class="sub">Pilot the B-2 Spirit. Grab the cash, dodge the towers.</p>
+    <button class="btn" id="startBtn">Start Mission</button>
+    <div class="hint">Tap / hold or press ▲ SPACE to climb &nbsp;·&nbsp; release to dive</div>
+    <div class="tag">U.S. Robotic Army — $2.1 Billion Stealth Program</div>
+  </div>
+
+  <div class="overlay hidden" id="overScreen">
+    <h1 id="overTitle">Down Over Miami</h1>
+    <p class="sub" id="overMsg">You banked <b>$0.00B</b>.</p>
+    <button class="btn" id="againBtn">Fly Again</button>
+    <div class="tag" id="best">Best: $0.00B</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const cvs = document.getElementById('c');
+  const ctx = cvs.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const cashEl  = document.getElementById('cash');
+  const hud = document.getElementById('hud');
+  const startScreen = document.getElementById('startScreen');
+  const overScreen  = document.getElementById('overScreen');
+  const overMsg = document.getElementById('overMsg');
+  const overTitle = document.getElementById('overTitle');
+  const bestEl = document.getElementById('best');
+
+  let W = 0, H = 0, DPR = 1;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = cvs.clientWidth; H = cvs.clientHeight;
+    cvs.width = Math.floor(W * DPR);
+    cvs.height = Math.floor(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---- Game state ----
+  const state = {
+    running: false,
+    t: 0,
+    plane: { x: 0, y: 0, vy: 0, r: 22 },
+    thrust: false,
+    towers: [],
+    coins: [],
+    stars: [],
+    spawnT: 0,
+    coinT: 0,
+    score: 0,
+    cash: 0,
+    speed: 3.2,
+    sunGlow: 0,
+  };
+
+  const GRAV = 0.42;
+  const LIFT = -0.85;
+  const MAXV = 8;
+
+  function best() { return parseFloat(localStorage.getItem('sr_best') || '0'); }
+  function setBest(v) { if (v > best()) localStorage.setItem('sr_best', v.toFixed(2)); }
+
+  function reset() {
+    state.t = 0;
+    state.plane.x = W * 0.28;
+    state.plane.y = H * 0.42;
+    state.plane.vy = 0;
+    state.towers = [];
+    state.coins = [];
+    state.spawnT = 0;
+    state.coinT = 40;
+    state.score = 0;
+    state.cash = 0;
+    state.speed = 3.2;
+    state.stars = Array.from({length: 46}, () => ({
+      x: Math.random()*W, y: Math.random()*H*0.55,
+      s: Math.random()*1.8+0.4, tw: Math.random()*Math.PI*2
+    }));
+  }
+
+  function start() {
+    reset();
+    state.running = true;
+    startScreen.classList.add('hidden');
+    overScreen.classList.add('hidden');
+    hud.hidden = false;
+  }
+
+  function gameOver() {
+    state.running = false;
+    setBest(state.cash);
+    overTitle.textContent = state.cash >= 2.1 ? 'Program Funded!' : 'Down Over Miami';
+    overMsg.innerHTML = `You banked <b>$${state.cash.toFixed(2)}B</b> · Score ${state.score}`;
+    bestEl.textContent = `Best: $${best().toFixed(2)}B`;
+    overScreen.classList.remove('hidden');
+    hud.hidden = true;
+  }
+
+  // ---- Input ----
+  function press(e){ if(e && e.cancelable) e.preventDefault(); state.thrust = true; }
+  function release(){ state.thrust = false; }
+  cvs.addEventListener('mousedown', press);
+  window.addEventListener('mouseup', release);
+  cvs.addEventListener('touchstart', press, {passive:false});
+  window.addEventListener('touchend', release);
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') { press(e);
+      if (!state.running && overScreen.classList.contains('hidden') === false) start();
+    }
+  });
+  window.addEventListener('keyup', e => { if (e.code==='Space'||e.code==='ArrowUp') release(); });
+  document.getElementById('startBtn').addEventListener('click', start);
+  document.getElementById('againBtn').addEventListener('click', start);
+
+  // ---- Spawning ----
+  function spawnTowers() {
+    const gap = Math.max(150, 230 - state.t*0.02);
+    const minTop = 40, maxTop = H - gap - 90;
+    const top = minTop + Math.random()*(maxTop - minTop);
+    const w = 54 + Math.random()*26;
+    const hueTop = Math.random()*360;
+    state.towers.push({ x: W + w, w, top, gap, hue: hueTop, scored:false });
+  }
+  function spawnCoin() {
+    state.coins.push({ x: W + 30, y: 80 + Math.random()*(H-200), r: 13, got:false, ph: Math.random()*6 });
+  }
+
+  // ---- Update ----
+  function update() {
+    state.t++;
+    state.speed = 3.2 + state.t * 0.0016;
+    const p = state.plane;
+
+    p.vy += GRAV;
+    if (state.thrust) p.vy += LIFT;
+    p.vy = Math.max(-MAXV, Math.min(MAXV, p.vy));
+    p.y += p.vy;
+
+    if (p.y < p.r) { p.y = p.r; p.vy = 0; }
+    if (p.y > H - p.r) { gameOver(); return; }
+
+    state.spawnT -= 1;
+    if (state.spawnT <= 0) { spawnTowers(); state.spawnT = 95 - Math.min(35, state.t*0.01); }
+    state.coinT -= 1;
+    if (state.coinT <= 0) { spawnCoin(); state.coinT = 70 + Math.random()*50; }
+
+    for (const t of state.towers) {
+      t.x -= state.speed;
+      if (!t.scored && t.x + t.w < p.x) {
+        t.scored = true; state.score++;
+        scoreEl.textContent = state.score;
+      }
+      // collision
+      if (p.x + p.r*0.6 > t.x && p.x - p.r*0.6 < t.x + t.w) {
+        if (p.y - p.r*0.5 < t.top || p.y + p.r*0.5 > t.top + t.gap) { gameOver(); return; }
+      }
+    }
+    state.towers = state.towers.filter(t => t.x + t.w > -10);
+
+    for (const c of state.coins) {
+      c.x -= state.speed;
+      const dx = c.x - p.x, dy = c.y - p.y;
+      if (!c.got && dx*dx + dy*dy < (c.r + p.r)*(c.r + p.r)) {
+        c.got = true;
+        state.cash += 0.05;
+        cashEl.textContent = state.cash.toFixed(2);
+      }
+    }
+    state.coins = state.coins.filter(c => !c.got && c.x > -20);
+
+    for (const s of state.stars) { s.tw += 0.05; s.x -= state.speed*0.15; if (s.x < 0){ s.x = W; s.y = Math.random()*H*0.55; } }
+    state.sunGlow = (Math.sin(state.t*0.03)+1)*0.5;
+  }
+
+  // ---- Draw ----
+  function drawPlane(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    const tilt = Math.max(-0.5, Math.min(0.6, p.vy*0.06));
+    ctx.rotate(tilt);
+    // glow
+    ctx.shadowColor = '#ff2fb9'; ctx.shadowBlur = 18;
+    // B-2 flying-wing silhouette
+    ctx.fillStyle = '#141018';
+    ctx.beginPath();
+    ctx.moveTo(26, 0);
+    ctx.lineTo(-6, -6);
+    ctx.lineTo(-26, -16);
+    ctx.lineTo(-18, -3);
+    ctx.lineTo(-30, 0);
+    ctx.lineTo(-18, 3);
+    ctx.lineTo(-26, 16);
+    ctx.lineTo(-6, 6);
+    ctx.closePath();
+    ctx.fill();
+    // cockpit / edge light
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#22d3ee';
+    ctx.beginPath(); ctx.arc(10, 0, 2.4, 0, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(124,58,237,.7)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(26,0); ctx.lineTo(-30,0); ctx.stroke();
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+
+    // sun
+    const sunY = H*0.62, sunX = W*0.5;
+    const g = ctx.createRadialGradient(sunX, sunY, 8, sunX, sunY, H*0.5);
+    g.addColorStop(0, `rgba(255,230,150,${0.55+state.sunGlow*0.25})`);
+    g.addColorStop(0.4, 'rgba(255,120,80,0.25)');
+    g.addColorStop(1, 'rgba(255,120,80,0)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+    // stars
+    for (const s of state.stars) {
+      ctx.globalAlpha = 0.5 + Math.sin(s.tw)*0.4;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(s.x, s.y, s.s, s.s);
+    }
+    ctx.globalAlpha = 1;
+
+    // horizon neon line
+    ctx.strokeStyle = '#ff2fb9'; ctx.lineWidth = 3; ctx.shadowColor='#ff2fb9'; ctx.shadowBlur=16;
+    ctx.beginPath(); ctx.moveTo(0, H*0.6); ctx.lineTo(W, H*0.6); ctx.stroke();
+    // grid
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(34,211,238,.35)'; ctx.shadowBlur=0;
+    for (let i=0;i<10;i++){ const y = H*0.6 + Math.pow(i/10,2)*H*0.4; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+    for (let i=-8;i<=8;i++){ const x = W*0.5 + i*(W*0.06); ctx.beginPath(); ctx.moveTo(W*0.5 + i*8, H*0.6); ctx.lineTo(x, H); ctx.stroke(); }
+
+    // towers (neon skyscrapers)
+    for (const t of state.towers) {
+      const glow = `hsl(${t.hue},90%,60%)`;
+      ctx.shadowColor = glow; ctx.shadowBlur = 14;
+      ctx.fillStyle = 'rgba(20,10,30,.92)';
+      ctx.strokeStyle = glow; ctx.lineWidth = 2;
+      // top building
+      ctx.fillRect(t.x, 0, t.w, t.top);
+      ctx.strokeRect(t.x, 0, t.w, t.top);
+      // bottom building
+      ctx.fillRect(t.x, t.top + t.gap, t.w, H - (t.top + t.gap));
+      ctx.strokeRect(t.x, t.top + t.gap, t.w, H - (t.top + t.gap));
+      // lit windows
+      ctx.shadowBlur = 0; ctx.fillStyle = glow; ctx.globalAlpha = 0.5;
+      for (let wy = 8; wy < t.top-6; wy += 14)
+        for (let wx = 6; wx < t.w-6; wx += 12) ctx.fillRect(t.x+wx, wy, 5, 6);
+      for (let wy = t.top+t.gap+8; wy < H-6; wy += 14)
+        for (let wx = 6; wx < t.w-6; wx += 12) ctx.fillRect(t.x+wx, wy, 5, 6);
+      ctx.globalAlpha = 1;
+    }
+    ctx.shadowBlur = 0;
+
+    // coins ($ money)
+    for (const c of state.coins) {
+      const bob = Math.sin(state.t*0.1 + c.ph)*3;
+      ctx.save(); ctx.translate(c.x, c.y + bob);
+      ctx.shadowColor = '#2fff8a'; ctx.shadowBlur = 14;
+      ctx.fillStyle = '#0f2a17'; ctx.strokeStyle = '#7CFC9A'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0,0,c.r,0,7); ctx.fill(); ctx.stroke();
+      ctx.shadowBlur = 0; ctx.fillStyle = '#7CFC9A';
+      ctx.font = 'bold 16px Trebuchet MS'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('$', 0, 1);
+      ctx.restore();
+    }
+
+    if (state.running) drawPlane(state.plane);
+  }
+
+  function loop() {
+    if (state.running) update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  bestEl.textContent = `Best: $${best().toFixed(2)}B`;
+  loop();
+})();
+</script>
+</body>
+</html>

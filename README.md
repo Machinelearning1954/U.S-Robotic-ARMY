@@ -27,6 +27,13 @@ The goal of this project is to develop an end-to-end pipeline for:
 
 > Note: some directories are created as the project grows. See the documentation in `docs/` for the current state of each pipeline stage.
 
+## 🎮 Play the Game
+
+This repo ships with **Stealth Run — Vice City**, a neon arcade game where you
+pilot the B-2 Spirit stealth bomber and grab cash toward the $2.1B program
+budget. Open [`game/index.html`](game/index.html) in a browser, or see
+[`game/README.md`](game/README.md) for details.
+
 ## Getting Started
 
 ### Prerequisites
@@ -52,6 +59,7 @@ pip install -r requirements.txt
 ## Roadmap
 
 - [x] Repository setup
+- [x] Playable browser game (Stealth Run — Vice City)
 - [ ] Step 1: Data collection
 - [ ] Step 2: Dataset documentation and cleaning
 - [ ] Step 3: Model training
