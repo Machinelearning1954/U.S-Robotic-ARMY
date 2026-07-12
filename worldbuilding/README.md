@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.38**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.39**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -225,6 +225,13 @@ a few seconds to bring up the chest, **+45 clout**, one-time per wreck (see
 Coastal Line**, a commuter train on its own elevated viaduct linking three
 stations; board on foot with `E` while docked, ride it, step off with `E`
 wherever you like (see [`PAUDC_Transit.md`](PAUDC_Transit.md)).
+v0.39 fills a gap every other system had left open: nothing in the game
+ever asked the player to *spend* clout, only earn it. **The Wardrobe** at
+Anchor Row is the fix — stand at it and press `E` to cycle outfits; three
+colorways beyond the default cost 25/40/60 clout to unlock the first time,
+free to re-wear after. The game's first real clout sink, and the first
+live interaction from the economy doc's shop model
+(`PAUDC_Economy.md` §2, `PAUDC_Housing_Interiors.md` §3).
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

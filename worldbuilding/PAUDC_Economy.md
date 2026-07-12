@@ -25,7 +25,11 @@
   Academy doc).
 - **Retail:** clothes (cosmetics), electronics (Quatrefold dealers), convenience,
   pharmacies, craft markets; **Green Cross** dispensaries (licensed medical, canon
-  v0.14).
+  v0.14). **Live in the prototype (v0.39):** Anchor Row's Wardrobe is the first
+  real clothes-shop interaction — three colorway unlocks at escalating clout
+  cost, owned fits free to re-wear (`PAUDC_Housing_Interiors.md` §3). It's the
+  game's first genuine clout *sink* — every other system to this point only
+  ever paid clout out.
 - **Services:** barbers/salons (style = clout multipliers), auto repair (damage
   spec), taxi stands, boat rental, fuel.
 - **Tourism:** tour ops, dive shops, rafting, beach chairs — tourist NPCs pay

@@ -5117,7 +5117,7 @@ const walker=new THREE.Group(),wLimbs={};
  for(const[k,zz]of[['lL',0.14],['lR',-0.14]]){ // legs pivot at the hip
    const leg=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.8,0.22).translate(0,-0.4,0),pants);
    leg.position.set(0,0.82,zz);walker.add(leg);wLimbs[k]=leg;}
- const torso=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.75,0.62),new THREE.MeshLambertMaterial({color:0x3af5d8}));torso.position.y=1.2;walker.add(torso);
+ const torso=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.75,0.62),new THREE.MeshLambertMaterial({color:0x3af5d8}));torso.position.y=1.2;walker.add(torso);wLimbs.torso=torso;
  for(const[k,zz]of[['aL',0.42],['aR',-0.42]]){ // arms pivot at the shoulder
    const arm=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.68,0.18).translate(0,-0.34,0),skin);
    arm.position.set(0,1.52,zz);walker.add(arm);wLimbs[k]=arm;}
@@ -5224,6 +5224,23 @@ function updateHouse(dt){
 addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='e')return;
   if(!inHouse&&veh===WALKER&&Math.hypot(P.x-HOME.X,P.z-HOME.Z)<4)enterHouse();
   else if(inHouse&&Math.hypot(P.x-HOMEINT.X,P.z-(HOMEINT.Z+3.2))<3)exitHouse();});
+// ---------------- The Wardrobe — Anchor Row's clout sink (cosmetic outfit colors) ----------------
+const WARDROBE_COLORS=[0x3af5d8,0xffb84d,0xff5fd2,0x37d867];
+const WARDROBE_NAMES=['REEF TEAL','CUTLASS GOLD','TIDEWATER PINK','PALM GREEN'];
+const WARDROBE_COST=[0,25,40,60];
+let wardrobeIdx=0;
+const wardrobeUnlocked=[true,false,false,false];
+function cycleWardrobe(){
+  const next=(wardrobeIdx+1)%WARDROBE_COLORS.length;
+  if(!wardrobeUnlocked[next]){
+    const cost=WARDROBE_COST[next];
+    if(clout<cost){toast('NOT ENOUGH CLOUT — '+WARDROBE_NAMES[next]+' needs '+cost);return;}
+    addClout(-cost);wardrobeUnlocked[next]=true;
+    toast('NEW FIT UNLOCKED — '+WARDROBE_NAMES[next]+'  ·  −'+cost+' CLOUT');
+  }else toast('WEARING — '+WARDROBE_NAMES[next]);
+  wardrobeIdx=next;wLimbs.torso.material.color.set(WARDROBE_COLORS[wardrobeIdx]);
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='e'&&inHouse&&Math.hypot(P.x-(HOMEINT.X-4),P.z-(HOMEINT.Z+3.4))<2.2)cycleWardrobe();});
 // ---------------- input ----------------
 const keys={};
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.startsWith('Arrow')||e.key===' ')e.preventDefault();});
@@ -5577,7 +5594,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
