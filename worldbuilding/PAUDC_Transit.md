@@ -14,6 +14,7 @@
 | **The Harbour Hopper ferry** | coastal moorings | *(live in the prototype, v0.25)* loops the bay buoys on a fixed schedule; free deck passage; the storm-condition ladder cancels sailings at SC-2 |
 | **Coasters/knutes (small boats)** | fishing beaches ↔ reef | rentable; the Reef School's fleet; hurricane-season haul-out behavior |
 | **JUTC-class metro buses** *(fictional operator)* | Kingston core | dense urban headways, bus lanes, pickpocket mission surface |
+| **The Coastal Line** | three inland stations, elevated viaduct | *(live in the prototype, v0.38)* a commuter train on its own concrete-pillar track, free deck passage, dwells at each station before departing |
 | **Domestic air** | two airports (fictional operators) | scheduled hops MoBay ↔ Kingston; the flyover as fast travel with a view |
 | **PAUDC shuttle** | base ring (canon) | rank-gated stops, the commute where campaign gossip happens |
 
@@ -43,6 +44,12 @@ stands on schedule — the transit network is the NPC economy's circulatory syst
   early, captain's amusement implied.
 - **Route-taxi stands** at Palm Line, The Strip, and Silver Springs: hold on foot
   at the sign and you're run to the next stand on the loop.
+- **The Coastal Line (v0.38):** three elevated stations — Palm Line Halt, Crucible
+  Junction, Ear Terminus — linked by a viaduct on concrete pillars. Board on foot
+  with `E` while a train is docked, ride it the same way as the Harbour Hopper
+  (the game hides the rider model for this one rather than clipping it through
+  the elevated floor — a rendering choice, not a design one), step off with `E`
+  at any station.
 - Engine rung adds: schedules on the world clock, fares, bus lines, boat rental,
   and the airport hop.
 

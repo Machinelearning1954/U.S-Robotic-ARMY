@@ -4444,6 +4444,47 @@ function updateTaxi(dt){
       toast('ROUTE TAXI — reach '+nx.name+'  ·  "small up yuhself"');}}
   else taxiT=Math.max(0,taxiT-dt);
 }
+// ---------------- transit: the Coastal Line commuter train (elevated, 3 stations) ----------------
+const train={g:new THREE.Group(),stations:[],leg:0,f:0,docked:true,dwell:0,aboard:false};
+{const bodyM=new THREE.MeshPhongMaterial({color:0xd8dde2,shininess:90,specular:0xaabbcc});
+ const stripeM=new THREE.MeshBasicMaterial({color:0x3af5d8});
+ const car=new THREE.Mesh(new THREE.BoxGeometry(10,2.2,2.4),bodyM);car.position.y=1.2;train.g.add(car);
+ const stripe=new THREE.Mesh(new THREE.BoxGeometry(10.02,0.4,2.42),stripeM);stripe.position.y=0.7;train.g.add(stripe);
+ const nose=new THREE.Mesh(new THREE.ConeGeometry(1.2,2.6,6),bodyM);nose.rotation.z=Math.PI/2;nose.position.set(5.6,1.2,0);train.g.add(nose);
+ for(const dz of[1.05,-1.05])for(const dx of[-3,0,3]){const win=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.9,0.05),new THREE.MeshBasicMaterial({color:0x1c2a33}));win.position.set(dx,1.5,dz);train.g.add(win);}
+ train.g.traverse(o=>{if(o.isMesh)o.castShadow=true;});scene.add(train.g);
+ train.stations=[{x:700,y:780,name:'PALM LINE HALT'},{x:1250,y:900,name:'CRUCIBLE JUNCTION'},{x:1560,y:1200,name:'EAR TERMINUS'}]
+   .map(t=>{const X=mx(t.x),Z=mz(t.y),gy=Math.max(height(X,Z),0.3);
+     const plat=new THREE.Mesh(new THREE.BoxGeometry(6,0.6,3),new THREE.MeshLambertMaterial({color:0x8a8f96}));
+     plat.position.set(X,gy+8.8,Z);plat.castShadow=plat.receiveShadow=true;scene.add(plat);
+     label(t.name,X,gy+11.5,Z);
+     return{...t,X,Z,gy};});
+ // viaduct pillars along each leg — just enough to read as elevated track
+ for(let i=0;i<train.stations.length;i++){
+   const a=train.stations[i],b=train.stations[(i+1)%train.stations.length];
+   for(const f of[0.33,0.66]){
+     const px=a.X+(b.X-a.X)*f,pz=a.Z+(b.Z-a.Z)*f,pgy=Math.max(height(px,pz),0.3);
+     const pillar=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.5,9,8),new THREE.MeshLambertMaterial({color:0x5a6068}));
+     pillar.position.set(px,pgy+4.5,pz);pillar.castShadow=true;scene.add(pillar);}}
+ train.g.position.set(train.stations[0].X,train.stations[0].gy+9.4,train.stations[0].Z);}
+function updateTrain(dt){
+  const a=train.stations[train.leg],b=train.stations[(train.leg+1)%train.stations.length];
+  if(train.docked){train.dwell+=dt;
+    if(train.dwell>5){train.docked=false;train.dwell=0;}}
+  else{const dx=b.X-a.X,dz=b.Z-a.Z,len=Math.hypot(dx,dz);
+    train.f+=16*dt/len;
+    if(train.f>=1){train.f=0;train.leg=(train.leg+1)%train.stations.length;train.docked=true;
+      if(train.aboard)toast('COASTAL LINE — '+train.stations[train.leg].name+'  ·  E to step off');}
+    else{const gy=a.gy+(b.gy-a.gy)*train.f;
+      train.g.position.set(a.X+dx*train.f,gy+9.4,a.Z+dz*train.f);
+      train.g.rotation.y=Math.atan2(-dz,dx);}}
+  if(train.aboard){P.x=train.g.position.x;P.z=train.g.position.z;P.v=0;} // the elevated deck rides well above the walker's ground-height render, so the rider stays tucked inside the car (window silhouettes stand in) rather than clipping through the floor
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='e')return;
+  if(train.aboard){train.aboard=false;walker.visible=true;const s=train.stations[train.leg];
+    P.x=s.X+5;P.z=s.Z+5;P.v=0;toast('OFF AT '+s.name);return;}
+  if(veh===WALKER&&train.docked&&Math.hypot(P.x-train.stations[train.leg].X,P.z-train.stations[train.leg].Z)<7){
+    train.aboard=true;walker.visible=false;toast('ABOARD THE COASTAL LINE — free ride, E to step off');}});
 // ---------------- seabirds: ambient wildlife AI (day/night + storm aware) ----------------
 const birds=[];
 {const bm=new THREE.MeshBasicMaterial({color:0xf2f6f8});
@@ -4698,6 +4739,37 @@ function updateMarine(dt){
     if(m.kind==='dolphin'){m.jump=(m.jump+dt*(fleeing?2.2:1))%4;
       y=0.15+Math.max(0,Math.sin(m.jump*Math.PI/2))*1.6;}
     m.g.position.set(x,y,z);m.g.rotation.y=-m.ph;
+  }
+}
+// ---------------- Wreck Dive: shipwreck treasure hunt ----------------
+const WRECKS=[{X:250,Z:-150},{X:-400,Z:-175},{X:50,Z:-225}];
+const wreckMeshes=WRECKS.map((w,i)=>{
+  const gy=Math.max(height(w.X,w.Z),-18);
+  const g=new THREE.Group();
+  const hullM=new THREE.MeshLambertMaterial({color:0x2a3138});
+  const hull=new THREE.Mesh(new THREE.BoxGeometry(9,2.4,3.2),hullM);hull.rotation.z=0.22;g.add(hull);
+  const bow=new THREE.Mesh(new THREE.ConeGeometry(1.8,4,4),hullM);bow.rotation.z=Math.PI/2;bow.position.set(4.6,0.3,0);g.add(bow);
+  const mast=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,5,6),new THREE.MeshLambertMaterial({color:0x1c2126}));
+  mast.position.set(-1,2.4,0);mast.rotation.z=0.3;g.add(mast);
+  const chest=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.6,0.6),new THREE.MeshLambertMaterial({color:0x6b3f1f}));
+  chest.position.set(3,0.2,1.3);g.add(chest);
+  g.rotation.y=i*1.4;g.position.set(w.X,gy+1.6,w.Z);scene.add(g);
+  const glint=glowSprite(w.X,gy+2.2,w.Z,7,0xffd23c); // a faint glint of gold through the water
+  return{chest,glint,found:false,diveT:0};
+});
+let wrecksFound=0,wreckHint=0;
+function updateWrecks(dt){
+  if(veh!==WALKER||!isWater(P.x,P.z))return;
+  for(let i=0;i<WRECKS.length;i++){
+    const w=WRECKS[i],wm=wreckMeshes[i];
+    if(wm.found)continue;
+    const d=Math.hypot(P.x-w.X,P.z-w.Z);
+    if(d<9){
+      if(perf>wreckHint){wreckHint=perf+3500;toast('SHIPWRECK BELOW — hold position to dive');}
+      wm.diveT+=dt;
+      if(wm.diveT>4.5){wm.found=true;wm.glint.visible=false;wm.chest.rotation.x=-0.7;wrecksFound++;addClout(45);
+        toast('TREASURE RECOVERED — wreck '+wrecksFound+'/'+WRECKS.length+'  +45 CLOUT');}
+    }else wm.diveT=Math.max(0,wm.diveT-dt*2);
   }
 }
 // ---------------- Ol' Fathom: the storm-season sea-monster legend ----------------
@@ -5386,7 +5458,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);updateTurf(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);updateTurf(dt);updateWrecks(dt);updateTrain(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -5505,7 +5577,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

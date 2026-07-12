@@ -65,7 +65,20 @@ entry) had no dedicated reason to leave the asphalt until now.
   consistent with every other minigame shipped so far (Croc Wrangler, Low &
   Slow, the fitness sets).
 
-## 6. Content boundary note
+## 6. Wreck Dive — live in the prototype (v0.38)
+
+Three sunken-ship sites scattered in the island's open water, each with a
+half-buried hull and a glint of gold visible from the surface. Swim out on
+foot (on foot in deep water reads as swimming, per the existing surface
+model), hold position over the wreck for a few seconds, and the chest comes
+up — **+45 clout**, one-time per wreck, the gold glint gone once it's
+found. No depth gauge or oxygen meter yet — the prototype's water model is
+surface-only, so "diving" is presence-based (hold your position over the
+wreck) rather than a true submersion mechanic; the engine rung can add
+real vertical diving, a breath meter, and current/visibility effects once
+the water column is a real 3D space rather than a 2D surface flag.
+
+## 7. Content boundary note
 
 All venues, activities, and names above are original PAUDC content. No real
 sports league, venue chain, or wagering system is depicted; nothing here
