@@ -1,5 +1,7 @@
 # U.S. Robotic Army
 
+![U.S. Robotic Army banner](docs/assets/banner.jpg)
+
 A machine learning project focused on **military vehicle recognition and tactical AI**. This repository hosts the datasets, data-collection tooling, models, and documentation for building a computer-vision system capable of identifying and classifying military vehicles.
 
 ## Overview
