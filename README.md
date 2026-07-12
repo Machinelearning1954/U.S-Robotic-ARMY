@@ -5,12 +5,13 @@ capstone project, featuring an embedded field-demonstration Instagram Reel.
 
 ## Instagram Reel Integration
 
-The featured reel is embedded on `index.html` using Instagram's official embed:
+The featured reels are embedded on `index.html` using Instagram's official embed:
 
-- **Reel:** https://www.instagram.com/reel/Dap2yhMRnur/
-- **Method:** an `.instagram-media` blockquote processed by `https://www.instagram.com/embed.js`,
-  which Instagram renders into the full reel player client-side.
-- A plain-link fallback is shown if the embed script is blocked or fails to load.
+- **Reel 1:** https://www.instagram.com/reel/Dap2yhMRnur/
+- **Reel 2:** https://www.instagram.com/reel/DaQV4vdyCTq/
+- **Method:** `.instagram-media` blockquotes processed by `https://www.instagram.com/embed.js`,
+  which Instagram renders into the full reel players client-side.
+- Plain-link fallbacks are shown if the embed script is blocked or fails to load.
 
 ### Viewing
 
