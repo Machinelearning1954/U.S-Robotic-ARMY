@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>U.S. Robotic Army — Autonomous Military Vehicle Recognition</title>
+  <meta name="description" content="Autonomous Military Vehicle Recognition and Tactical AI System — featured field demonstration reel." />
+  <style>
+    :root {
+      --bg: #0b0f0a;
+      --panel: #12180f;
+      --panel-2: #1a2113;
+      --line: #2c3a20;
+      --text: #e7efe0;
+      --muted: #9db081;
+      --accent: #78a22f;
+      --accent-2: #b7d34a;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(120,162,47,0.12), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 20px 64px; }
+    header.site {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 0 26px; border-bottom: 1px solid var(--line);
+    }
+    .badge {
+      width: 46px; height: 46px; flex: 0 0 46px;
+      border: 2px solid var(--accent); border-radius: 10px;
+      display: grid; place-items: center;
+      font-weight: 800; letter-spacing: 1px; color: var(--accent-2);
+      background: var(--panel-2);
+    }
+    .title h1 { margin: 0; font-size: 1.25rem; letter-spacing: 0.5px; }
+    .title p { margin: 2px 0 0; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; }
+
+    .hero { padding: 40px 0 20px; }
+    .hero h2 { font-size: clamp(1.6rem, 4vw, 2.6rem); margin: 0 0 10px; line-height: 1.15; }
+    .hero .accent { color: var(--accent-2); }
+    .hero p { color: var(--muted); max-width: 62ch; }
+
+    .grid {
+      display: grid; gap: 28px;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start; margin-top: 22px;
+    }
+    @media (min-width: 860px) {
+      .grid { grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr); }
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px;
+    }
+    .card h3 { margin: 0 0 8px; font-size: 1.05rem; color: var(--accent-2); }
+    .card ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); }
+    .card li { margin: 4px 0; }
+
+    .reel-panel {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 14px; padding: 16px; display: flex; flex-direction: column;
+    }
+    .reel-panel .label {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px; color: var(--muted);
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px;
+    }
+    .reel-panel .label .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(120,162,47,0.2); display: inline-block; margin-right: 8px;
+    }
+    /* Instagram embed keeps its own light styling; center it and cap width */
+    .instagram-media { margin: 0 auto !important; min-width: 0 !important; }
+
+    .fallback {
+      margin-top: 12px; text-align: center; font-size: 0.85rem; color: var(--muted);
+    }
+    .fallback a { color: var(--accent-2); font-weight: 600; text-decoration: none; }
+    .fallback a:hover { text-decoration: underline; }
+
+    footer.site {
+      margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line);
+      color: var(--muted); font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 6px 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <div class="badge">USR</div>
+      <div class="title">
+        <h1>U.S. Robotic Army</h1>
+        <p>Autonomous Military Vehicle Recognition</p>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h2>Tactical AI, <span class="accent">in the field.</span></h2>
+      <p>
+        A computer-vision system for real-time recognition of military and civilian vehicles,
+        built on 76,000+ annotated images across 29 vehicle classes. Watch the featured
+        field demonstration reel below.
+      </p>
+    </section>
+
+    <div class="grid">
+      <div class="reel-panel">
+        <div class="label"><span><span class="dot"></span>Featured Reel</span><span>Instagram</span></div>
+
+        <!-- Instagram official embed -->
+        <blockquote
+          class="instagram-media"
+          data-instgrm-permalink="https://www.instagram.com/reel/Dap2yhMRnur/?utm_source=ig_embed&amp;utm_campaign=loading"
+          data-instgrm-version="14"
+          style="background:#FFF; border:0; border-radius:12px; box-shadow:0 1px 12px rgba(0,0,0,0.35); margin:0 auto; max-width:540px; min-width:326px; width:100%;">
+          <a href="https://www.instagram.com/reel/Dap2yhMRnur/?utm_source=ig_embed&amp;utm_campaign=loading" target="_blank" rel="noopener">
+            View this reel on Instagram
+          </a>
+        </blockquote>
+
+        <p class="fallback">
+          Not loading?
+          <a href="https://www.instagram.com/reel/Dap2yhMRnur/" target="_blank" rel="noopener">Open the reel on Instagram &rarr;</a>
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Project at a glance</h3>
+        <ul>
+          <li><strong>Datasets:</strong> Indian Vehicle (50k+) &amp; Military Assets (26k+, 12 classes)</li>
+          <li><strong>Task:</strong> Object detection &amp; classification (YOLO / COCO / PASCAL-VOC)</li>
+          <li><strong>Goal:</strong> Real-time tactical vehicle recognition</li>
+          <li><strong>Status:</strong> Step 2 — Data Collection complete</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer class="site">
+      <span>&copy; 2026 U.S. Robotic Army Project</span>
+      <span>Autonomous Military Vehicle Recognition &amp; Tactical AI System</span>
+    </footer>
+  </div>
+
+  <!-- Instagram embed processor -->
+  <script async src="https://www.instagram.com/embed.js"></script>
+</body>
+</html>
