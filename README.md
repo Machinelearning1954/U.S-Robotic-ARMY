@@ -98,6 +98,16 @@ Codes: `comet`, `zaggero`, `mc13`, `patrol`, `sunburst`, `scooter`… and one hi
 gold machine that only exists as a model code. The **VISUAL V+** mod adds enhanced
 warm grading and a vignette (the graphics-enhancement mod from the same tutorial).
 
+### Weather & A/B compare
+
+From a decoded graphics-mods comparison showcase:
+
+- **WEATHER ENGINE** (mod terminal) cycles CLEAR → RAIN → STORM: rain particles,
+  wet-road handling (20% less steering grip), and storm lightning with screen flash
+  and rumble.
+- **A/B COMPARE** renders the showcase's split-screen format live: enhanced grading
+  on the left half, stock on the right, with a labeled divider.
+
 ## SYSTEM OPTIMIZER — the FPS-tutorial layer
 
 Press **`O`** to open the optimizer (an original take on the decoded

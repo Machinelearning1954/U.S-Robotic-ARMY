@@ -49,6 +49,13 @@ Suite is now 46 checks, adding: mod/optimizer menu mutual exclusion,
 notifications-off muting SYSTEM radio, temp cleanup purging traffic, a restore-point
 save/teleport-away/restore round-trip, and the ultimate-performance preset.
 
+## Weather / A-B compare pass
+
+No new defects found — the suite grew to 56 checks: weather cycling
+(CLEAR→RAIN→STORM→CLEAR), measurably reduced steering authority on wet roads,
+storm lightning scheduling, and the split-screen compare mode rendering error-free
+(including simultaneously with a storm).
+
 ## Spawn-console pass
 
 No new defects found in this pass — the suite grew to 52 checks: hidden-model spawn

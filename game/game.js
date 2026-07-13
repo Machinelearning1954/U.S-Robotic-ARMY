@@ -39,7 +39,10 @@ const MODS = [
   { id: 'chrome', name: 'CHROME CYCLER',  desc: 'animated rainbow paint job',       on: false },
   { id: 'jack',   name: 'CARJACK PROTOCOL', desc: 'E near stopped traffic: take it', on: false },
   { id: 'visual', name: 'VISUAL V+',      desc: 'enhanced grading & vignette',      on: false },
+  { id: 'compare', name: 'A/B COMPARE',   desc: 'split-screen: enhanced vs stock',  on: false },
 ];
+
+const WEATHERS = ['CLEAR', 'RAIN', 'STORM'];
 const modOn = (id) => { const m = MODS.find(m => m.id === id); return !!(m && m.on); };
 
 // wardrobe presets (decoded: the closet outfit-changer menu)
@@ -365,6 +368,9 @@ const G = {
   modMenu: { open: false, idx: 0 },
   optMenu: { open: false, idx: 0 },
   console: { open: false, text: '' },
+  weather: 'CLEAR',
+  lightning: 0,       // flash intensity 0..1
+  lightningIn: 5,     // seconds until next strike (storm only)
   restorePoint: null,
   fps: 60,
   forgeIdx: 0,
@@ -445,6 +451,14 @@ function toggleMod(id) {
   if (m.on) G.stats.modsUsed = true;
   if (m.id === 'chrome' && !m.on) G.player.color = G.player.baseColor || G.player.color;
   radio('SYSTEM', `MOD ${m.name}: ${m.on ? 'ENABLED' : 'DISABLED'}.`);
+}
+
+function cycleWeather() {
+  const i = (WEATHERS.indexOf(G.weather) + 1) % WEATHERS.length;
+  G.weather = WEATHERS[i];
+  G.lightningIn = 3 + G.rnd() * 5;
+  G.stats.modsUsed = true;
+  radio('SYSTEM', `WEATHER ENGINE: ${G.weather} conditions loaded.`);
 }
 
 function forgeCycle() {
@@ -706,7 +720,8 @@ function updatePlayerCar(dt, locked) {
   // nitro keeps the pipes lit at speed
   p.flame = (thr > 0 && (Math.abs(p.speed) < 40 || nitro)) ? 1 : Math.max(0, p.flame - 3 * dt);
 
-  const grip = moon ? clamp(Math.abs(p.speed) / 60, 0, 1.4) : clamp(Math.abs(p.speed) / 130, 0, 1);
+  let grip = moon ? clamp(Math.abs(p.speed) / 60, 0, 1.4) : clamp(Math.abs(p.speed) / 130, 0, 1);
+  if (G.weather !== 'CLEAR') grip *= 0.8; // wet roads
   const dir = p.speed >= 0 ? 1 : -1;
   p.angle += steer * (hb ? 3.4 : 2.4) * grip * dir * dt;
 
@@ -966,19 +981,31 @@ function update(dt) {
   }
   if (G.modMenu.open) {
     const mm = G.modMenu;
-    const rows = MODS.length + 2; // mods + vehicle forge + wardrobe
+    const rows = MODS.length + 3; // mods + vehicle forge + wardrobe + weather
     if (pressed.ArrowUp || pressed.KeyW) mm.idx = (mm.idx + rows - 1) % rows;
     if (pressed.ArrowDown || pressed.KeyS) mm.idx = (mm.idx + 1) % rows;
     if (pressed.KeyE || pressed.Enter) {
       if (mm.idx < MODS.length) toggleMod(MODS[mm.idx].id);
       else if (mm.idx === MODS.length) forgeCycle();
-      else cycleOutfit();
+      else if (mm.idx === MODS.length + 1) cycleOutfit();
+      else cycleWeather();
     }
     // the menu owns these keys this frame
     delete pressed.KeyE; delete pressed.Enter;
     delete pressed.ArrowUp; delete pressed.ArrowDown;
     delete pressed.KeyW; delete pressed.KeyS;
   }
+
+  // storm lightning scheduler
+  if (G.weather === 'STORM') {
+    G.lightningIn -= dt;
+    if (G.lightningIn <= 0) {
+      G.lightning = 1;
+      G.lightningIn = 4 + G.rnd() * 6;
+      G.shake = Math.max(G.shake, 5);
+    }
+  }
+  G.lightning = Math.max(0, G.lightning - 4 * dt);
 
   // CHROME CYCLER paint job
   if (modOn('chrome')) {
@@ -1572,15 +1599,60 @@ function drawWorld() {
     ctx.fillRect(0, 0, VW, VH);
   }
 
-  // VISUAL V+ mod: warm grade + vignette (skipped in optimizer game mode)
-  if (modOn('visual') && !OPT.gameMode) {
-    ctx.fillStyle = 'rgba(255,190,90,0.07)';
+  // weather layer: rain streaks, wet tint, lightning
+  if (G.weather !== 'CLEAR') {
+    const storm = G.weather === 'STORM';
+    ctx.fillStyle = storm ? 'rgba(16,20,38,0.24)' : 'rgba(20,26,44,0.13)';
     ctx.fillRect(0, 0, VW, VH);
+    ctx.strokeStyle = 'rgba(200,220,245,0.4)';
+    ctx.lineWidth = 1;
+    const drops = storm ? 170 : 110;
+    ctx.beginPath();
+    for (let i = 0; i < drops; i++) {
+      const speed = 520 + (i % 5) * 70;
+      const x = ((i * 97.3) % (VW + 40)) - 20 + Math.sin(i) * 8;
+      const y = ((i * 53.7) + G.time * speed) % (VH + 30) - 15;
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - 3, y + (storm ? 16 : 11));
+    }
+    ctx.stroke();
+    if (G.lightning > 0.02) {
+      ctx.fillStyle = `rgba(235,240,255,${0.55 * G.lightning})`;
+      ctx.fillRect(0, 0, VW, VH);
+    }
+  }
+
+  // VISUAL V+ / A-B COMPARE grading (skipped in optimizer game mode)
+  const grade = (x0, w) => {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x0, 0, w, VH); ctx.clip();
+    ctx.fillStyle = 'rgba(255,190,90,0.07)';
+    ctx.fillRect(x0, 0, w, VH);
     const vg = ctx.createRadialGradient(VW / 2, VH / 2, Math.min(VW, VH) * 0.42, VW / 2, VH / 2, Math.max(VW, VH) * 0.72);
     vg.addColorStop(0, 'rgba(0,0,0,0)');
     vg.addColorStop(1, 'rgba(10,6,20,0.38)');
     ctx.fillStyle = vg;
-    ctx.fillRect(0, 0, VW, VH);
+    ctx.fillRect(x0, 0, w, VH);
+    ctx.restore();
+  };
+  if (!OPT.gameMode) {
+    if (modOn('compare')) {
+      // decoded showcase format: enhanced on the left, stock on the right
+      grade(0, VW / 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(VW / 2, 0); ctx.lineTo(VW / 2, VH); ctx.stroke();
+      ctx.fillStyle = 'rgba(8,12,18,0.75)';
+      ctx.fillRect(VW / 2 - 110, VH - 30, 100, 20);
+      ctx.fillRect(VW / 2 + 10, VH - 30, 100, 20);
+      ctx.fillStyle = '#ffd9a0';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText('ENHANCED', VW / 2 - 88, VH - 16);
+      ctx.fillStyle = '#9aa5b1';
+      ctx.fillText('STOCK', VW / 2 + 42, VH - 16);
+    } else if (modOn('visual')) {
+      grade(0, VW);
+    }
   }
 }
 
@@ -1728,7 +1800,7 @@ function drawHUD() {
 
   // MOD TERMINAL overlay
   if (G.modMenu.open) {
-    const rows = MODS.length + 2;
+    const rows = MODS.length + 3;
     const pw = 340, ph = 96 + rows * 30;
     const px = VW - pw - 14, py = 72;
     ctx.fillStyle = 'rgba(6,10,16,0.92)';
@@ -1769,7 +1841,7 @@ function drawHUD() {
         ctx.font = 'bold 12px monospace';
         ctx.fillStyle = '#ffd23f';
         ctx.fillText(FORGE[G.forgeIdx].name, px + pw - 176, y);
-      } else {
+      } else if (i === MODS.length + 1) {
         ctx.fillStyle = sel ? '#e8eef4' : '#b9c2cc';
         ctx.font = 'bold 13px monospace';
         ctx.fillText('WARDROBE', px + 20, y);
@@ -1779,6 +1851,16 @@ function drawHUD() {
         ctx.font = 'bold 12px monospace';
         ctx.fillStyle = '#ffd23f';
         ctx.fillText(OUTFITS[G.outfitIdx].name, px + pw - 176, y);
+      } else {
+        ctx.fillStyle = sel ? '#e8eef4' : '#b9c2cc';
+        ctx.font = 'bold 13px monospace';
+        ctx.fillText('WEATHER ENGINE', px + 20, y);
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#7d8794';
+        ctx.fillText('cycle clear / rain / storm', px + 20, y + 11);
+        ctx.font = 'bold 12px monospace';
+        ctx.fillStyle = '#ffd23f';
+        ctx.fillText(G.weather, px + pw - 176, y);
       }
     }
   }
@@ -2032,7 +2114,7 @@ requestAnimationFrame(frame);
 // ---------- debug / test hooks ----------
 window.__ra = {
   G, PHASE, enterPhase, update, MODS, FORGE, OUTFITS, OPT, PARKED,
-  toggleMod, applyForge, cycleOutfit, forgeCycle, execSpawnCode,
+  toggleMod, applyForge, cycleOutfit, forgeCycle, execSpawnCode, cycleWeather,
   createRestorePoint, systemRestore, tempCleanup, ultimatePerformance,
   teleport(x, y) { const p = G.player; p.x = x; p.y = y; p.px = x; p.py = y; p.speed = 0; },
   walkTo(x, y) { G.walker.x = x; G.walker.y = y; },

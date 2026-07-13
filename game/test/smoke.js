@@ -359,6 +359,63 @@ function ok(name, cond, extra) {
   await page.waitForTimeout(500);
   ok('visual v+ enabled', await page.evaluate(() => window.__ra.MODS.find(m => m.id === 'visual').on === true));
 
+  // ---- WEATHER + A/B COMPARE ----
+  // weather cycles clear -> rain -> storm -> clear
+  const weather = await page.evaluate(() => {
+    const ra = window.__ra;
+    const seq = [ra.G.weather];
+    ra.cycleWeather(); seq.push(ra.G.weather);
+    ra.cycleWeather(); seq.push(ra.G.weather);
+    ra.cycleWeather(); seq.push(ra.G.weather);
+    return seq.join('>');
+  });
+  ok('weather cycles', weather === 'CLEAR>RAIN>STORM>CLEAR', weather);
+
+  // wet roads reduce steering authority
+  const wetGrip = await page.evaluate(() => {
+    const ra = window.__ra;
+    const turn = () => {
+      ra.teleport(2000, 1650);
+      ra.G.player.angle = 0; ra.G.player.speed = 300;
+      ra.setKey('KeyD', true); ra.setKey('KeyW', true);
+      for (let i = 0; i < 30; i++) ra.step(1 / 60);
+      ra.setKey('KeyD', false); ra.setKey('KeyW', false);
+      return ra.G.player.angle;
+    };
+    ra.G.weather = 'CLEAR';
+    const dry = turn();
+    ra.G.weather = 'RAIN';
+    const wet = turn();
+    ra.G.weather = 'CLEAR';
+    return { dry, wet };
+  });
+  ok('rain reduces grip', wetGrip.wet < wetGrip.dry && wetGrip.wet > 0, JSON.stringify(wetGrip));
+
+  // storm schedules lightning strikes
+  const strike = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.G.weather = 'STORM';
+    ra.G.lightningIn = 0.01;
+    for (let i = 0; i < 5; i++) ra.step(1 / 60);
+    const flashed = ra.G.lightning > 0;
+    ra.G.weather = 'CLEAR'; ra.G.lightning = 0;
+    return flashed;
+  });
+  ok('storm lightning fires', strike);
+
+  // A/B compare toggles and renders (storm + compare simultaneously)
+  await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.toggleMod('compare'); ra.G.weather = 'STORM'; ra.step(1 / 60);
+  });
+  await page.waitForTimeout(600);
+  ok('a/b compare renders', await page.evaluate(() => {
+    const ra = window.__ra;
+    const on = ra.MODS.find(m => m.id === 'compare').on;
+    ra.toggleMod('compare'); ra.G.weather = 'CLEAR';
+    return on;
+  }));
+
   // failure + checkpoint restore path
   await page.reload();
   await page.waitForTimeout(300);

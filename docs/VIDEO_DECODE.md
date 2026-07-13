@@ -120,6 +120,20 @@ Integrated as the game's **mod-loader layer** (all original):
 | Graphics-enhancement mod | VISUAL V+ mod: warm grade + vignette |
 | Keep mods offline caution | MODS USED vs CLEAN RUN stat (already tracked) |
 
+## Sixth decode — the graphics-mods A/B showcase
+
+A ~15-minute side-by-side comparison of two rival graphics enhancement mods, decoded
+in 24 scenes: split-screen shots of night rain reflections, neon-lit streets, light
+bloom, draw distance, dusk sky transitions, wet tunnels, burnout smoke particles,
+thunderstorm lightning, underwater visuals, road textures, and foliage density.
+
+| Decoded beat | In the game |
+|---|---|
+| The split-screen A/B format itself | A/B COMPARE mod: enhanced grading left, stock right, labeled divider |
+| Rain, wet asphalt, reflections | WEATHER ENGINE: RAIN — particles, wet tint, 20% less steering grip |
+| Thunderstorm with lightning flashes | WEATHER ENGINE: STORM — heavier rain, lightning flash + screen rumble |
+| Grading/bloom differences | Reuses and showcases the VISUAL V+ grade in the split view |
+
 ## Image intel decode
 
 A second source (a social-media comparison image) provided the tech/lore layer:
