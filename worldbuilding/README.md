@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.39**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.40**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -232,6 +232,13 @@ colorways beyond the default cost 25/40/60 clout to unlock the first time,
 free to re-wear after. The game's first real clout sink, and the first
 live interaction from the economy doc's shop model
 (`PAUDC_Economy.md` §2, `PAUDC_Housing_Interiors.md` §3).
+v0.40 settles a genre-discourse question (should online be a separate release
+from the single-player campaign) for PAUDC's own roadmap: **story first,
+always** — see `DEVELOPMENT_ROADMAP.md`'s new section for the full answer.
+The prototype's seed of that: the Mud Run's best time now **persists across
+sessions** the same way clout does — a single-player "beat your own ghost"
+loop today, and exactly the stat a real leaderboard would read from once the
+FiveM multiplayer path (Path B) exists.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

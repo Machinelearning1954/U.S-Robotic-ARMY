@@ -5145,7 +5145,8 @@ const trailGates=TRAIL.map((t,i)=>{
   return g;
 });
 label('MUD RUN — dirt bike circuit',bikeP.x,Math.max(height(bikeP.x,bikeP.z),0)+6,bikeP.z);
-let raceOn=false,raceCP=0,raceT=0,raceBest=null,raceHintT=0;
+let raceOn=false,raceCP=0,raceT=0,raceHintT=0;
+let raceBest=(()=>{try{const v=localStorage.getItem('paudc_racebest');return v===null?null:+v;}catch(e){return null;}})(); // persists like clout — a single-player "beat your own ghost" loop
 function startRace(){raceOn=true;raceCP=0;raceT=0;toast('MUD RUN — GO! follow the gates  ·  '+TRAIL.length+' checkpoints');}
 function updateRace(dt){
   if(veh!==BIKE){if(raceOn){raceOn=false;toast('MUD RUN ABANDONED — dismounted the Nighthawk');}return;}
@@ -5159,7 +5160,8 @@ function updateRace(dt){
   if(Math.hypot(P.x-cp.X,P.z-cp.Z)<9){
     raceCP++;
     if(raceCP>=TRAIL.length){
-      raceOn=false;const improved=raceBest===null||raceT<raceBest;if(improved)raceBest=raceT;
+      raceOn=false;const improved=raceBest===null||raceT<raceBest;
+      if(improved){raceBest=raceT;try{localStorage.setItem('paudc_racebest',raceBest);}catch(e){}}
       const pay=improved?60:30;addClout(pay);
       toast('MUD RUN FINISH — '+raceT.toFixed(1)+'s'+(improved?'  ·  NEW BEST':'')+'  +'+pay+' CLOUT');
     }else toast('GATE '+raceCP+'/'+TRAIL.length);

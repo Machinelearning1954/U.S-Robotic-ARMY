@@ -74,6 +74,33 @@ our *island* doesn't.
   on it that repackage ripped commercial sprites (Bloody Roar ports and the like)
   are exactly what Rule Zero forbids — study the engine, never ship the packs.
 
+## Story first, PAUDC Online later — settling the launch-order question
+
+Genre discourse keeps asking whether a GTA-scale game should ship its online
+mode alongside the campaign or hold it back for a separate release. PAUDC's
+answer, on record: **single-player first, always** — every rung on the ladder
+above (2D prototype, 3D prototype, engine slice) is built story-and-systems-first
+with zero networking assumptions baked in, so nothing about a later online
+layer can compromise the campaign's pacing or scope.
+
+- **Path A (own engine) stays solo.** The full campaign, all districts, all
+  missions — no netcode, no live-service pressure on content decisions.
+- **Path B (FiveM) *is* the online answer, and it's already a separate release
+  by construction.** A "PAUDC roleplay server" (§ above) runs as its own
+  gamemode on its own schedule, built once Path A's systems have proven out —
+  exactly the "online later, standalone" shape this debate keeps landing on,
+  except we reach it through an existing legal multiplayer ecosystem instead
+  of building netcode from scratch.
+- **What "online" means for us has nothing to do with real money or live
+  ops.** No loot boxes, no FOMO events — PAUDC Online would be the same
+  courtesy-first, non-lethal systems already documented, played together.
+- **The prototype's seed of this:** local best-time tracking (the Mud Run's
+  `raceBest`, live since v0.32) now persists across sessions
+  (`localStorage`, v0.40) the same way clout does — a single-player "beat your
+  own ghost" loop today, and exactly the stat a real leaderboard would read
+  from once Path B exists. Nothing here is multiplayer; it's the honest,
+  buildable step toward it.
+
 ## The mobile track — trained on the 2025 high-graphics mobile wave
 
 The current crop of "realistic graphics" Android/iOS games proves a console look on
