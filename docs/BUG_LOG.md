@@ -49,6 +49,13 @@ Suite is now 46 checks, adding: mod/optimizer menu mutual exclusion,
 notifications-off muting SYSTEM radio, temp cleanup purging traffic, a restore-point
 save/teleport-away/restore round-trip, and the ultimate-performance preset.
 
+## Safehouse / district pass
+
+No new defects found — the suite grew to 60 checks: the full-mission earnings tally
+($2,550 across five income beats), a safehouse purchase flipping RUMORED to
+CONFIRMED with correct change, resting at an owned property (full repair + auto
+restore point), and an insufficient-funds rejection.
+
 ## Weather / A-B compare pass
 
 No new defects found — the suite grew to 56 checks: weather cycling

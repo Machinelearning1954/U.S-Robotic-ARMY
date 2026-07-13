@@ -123,6 +123,23 @@ const BUILDINGS = [
   { x: 5150, y: 1744, w: 1100, h: 12, rail: true },
 ];
 
+// districts (named per the project owner's brief) with ground tint + label
+const DISTRICTS = [
+  { name: 'LITTLE JAMAICA', x: 700,  y: 3900, w: 1100, h: 800,  tint: 'rgba(60,160,70,0.10)',  accent: '#3fae4e' },
+  { name: 'SILVER SPRINGS', x: 1400, y: 2600, w: 2300, h: 1100, tint: 'rgba(170,190,210,0.10)', accent: '#aebecd' },
+  { name: 'ALEXANDRIA',     x: 6300, y: 1500, w: 880,  h: 1600, tint: 'rgba(190,120,80,0.10)',  accent: '#c9825a' },
+];
+
+// safehouse ledger (decoded infographic: rumored until purchased, then confirmed)
+const SAFEHOUSES = [
+  { name: 'KINGSTON VILLA',    district: 'LITTLE JAMAICA', x: 1450, y: 4450, price: 800,
+    perk: 'island tuning: +5% top speed', owned: false },
+  { name: 'SPRING MANOR',      district: 'SILVER SPRINGS', x: 3550, y: 2350, price: 1200,
+    perk: 'all-weather tires: wet grip penalty halved', owned: false },
+  { name: 'OLD TOWN ROWHOUSE', district: 'ALEXANDRIA',     x: 6740, y: 2600, price: 1500,
+    perk: 'harbor connections: +$500 delivery bonus', owned: false },
+];
+
 // billboards decoded from the source image (V vs VI comparison)
 const BILLBOARDS = [
   { x: 1420, y: 3060, w: 300, era: 'V',  lines: ['GRAND EPOCH V', '2013-2018', 'BUDGET $265,000,000', 'BUILD TIME: 5 YEARS'] },
@@ -371,6 +388,7 @@ const G = {
   weather: 'CLEAR',
   lightning: 0,       // flash intensity 0..1
   lightningIn: 5,     // seconds until next strike (storm only)
+  cash: 0,
   restorePoint: null,
   fps: 60,
   forgeIdx: 0,
@@ -451,6 +469,34 @@ function toggleMod(id) {
   if (m.on) G.stats.modsUsed = true;
   if (m.id === 'chrome' && !m.on) G.player.color = G.player.baseColor || G.player.color;
   radio('SYSTEM', `MOD ${m.name}: ${m.on ? 'ENABLED' : 'DISABLED'}.`);
+}
+
+function earn(amount, why) {
+  G.cash += amount;
+  radio('SYSTEM', `+$${amount.toLocaleString()} — ${why}. Balance: $${G.cash.toLocaleString()}.`);
+}
+
+function safehousePerkOwned(name) {
+  const h = SAFEHOUSES.find(h => h.name === name);
+  return !!(h && h.owned);
+}
+
+// buy an unowned safehouse, or use an owned one (full repair + auto restore point)
+function safehouseInteract(h) {
+  if (!h.owned) {
+    if (G.cash < h.price) {
+      radio('SYSTEM', `${h.name}: still RUMORED — you need $${h.price.toLocaleString()} (have $${G.cash.toLocaleString()}).`);
+      return false;
+    }
+    G.cash -= h.price;
+    h.owned = true;
+    radio('SYSTEM', `${h.name} CONFIRMED — deed registered in ${h.district}. Perk online: ${h.perk}.`);
+    return true;
+  }
+  G.player.damage = 0;
+  const saved = createRestorePoint();
+  radio('SYSTEM', `${h.name}: hull refinished${saved ? ', run saved' : ''}. Home sweet safehouse.`);
+  return true;
 }
 
 function cycleWeather() {
@@ -701,7 +747,7 @@ function updatePlayerCar(dt, locked) {
 
   const nitro = modOn('nitro');
   const moon = modOn('moon');
-  const topMul = (p.forgeTop || 1) * (nitro ? 1.45 : 1);
+  const topMul = (p.forgeTop || 1) * (nitro ? 1.45 : 1) * (safehousePerkOwned('KINGSTON VILLA') ? 1.05 : 1);
   const accMul = (p.forgeAcc || 1) * (nitro ? 1.35 : 1);
   const paved = onPavement(p.x, p.y);
   const maxF = (paved ? 620 : 220) * topMul;
@@ -721,7 +767,7 @@ function updatePlayerCar(dt, locked) {
   p.flame = (thr > 0 && (Math.abs(p.speed) < 40 || nitro)) ? 1 : Math.max(0, p.flame - 3 * dt);
 
   let grip = moon ? clamp(Math.abs(p.speed) / 60, 0, 1.4) : clamp(Math.abs(p.speed) / 130, 0, 1);
-  if (G.weather !== 'CLEAR') grip *= 0.8; // wet roads
+  if (G.weather !== 'CLEAR') grip *= safehousePerkOwned('SPRING MANOR') ? 0.9 : 0.8; // wet roads
   const dir = p.speed >= 0 ? 1 : -1;
   p.angle += steer * (hb ? 3.4 : 2.4) * grip * dir * dt;
 
@@ -769,7 +815,8 @@ function updatePlayerCar(dt, locked) {
       if (!j.taken && dist(p.x, p.y, j.x, j.y) < 42) {
         j.taken = true;
         p.damage = Math.max(0, p.damage - 25);
-        radio('SYSTEM', `${BRAND} applied — hull finish restored (+25).`);
+        G.cash += 50;
+        radio('SYSTEM', `${BRAND} applied — hull +25, resale value +$50.`);
       }
     }
   }
@@ -901,6 +948,7 @@ function updateRacers(dt) {
         p.x = 5730; p.y = 1620; p.angle = 0; p.speed = 0;
         G.racers.forEach(r => { r.busted = true; });
         enterPhase(PHASE.DELIVER);
+        earn(750, 'targets secured on the bridge');
       });
     }
   }
@@ -1012,6 +1060,21 @@ function update(dt) {
     G.player.color = `hsl(${Math.round((G.time * 90) % 360)},85%,60%)`;
   }
 
+  // safehouse interaction: stop at a marker and press E
+  if (pressed.KeyE && !G.dialog && !G.modMenu.open && !G.optMenu.open && !G.console.open &&
+      ![PHASE.BOOT, PHASE.INTEL, PHASE.PASSED, PHASE.FAILED].includes(G.phase)) {
+    const t = G.onFoot ? G.walker : G.player;
+    if (G.onFoot || Math.abs(G.player.speed) < 12) {
+      for (const h of SAFEHOUSES) {
+        if (dist(t.x, t.y, h.x, h.y) < 70) {
+          safehouseInteract(h);
+          delete pressed.KeyE;
+          break;
+        }
+      }
+    }
+  }
+
   // CARJACK PROTOCOL: commandeer the nearest stopped traffic car
   const DRIVING = [PHASE.CRUISE, PHASE.PULLOVER, PHASE.MEET_DRIVE, PHASE.GAS_DRIVE, PHASE.RACE, PHASE.DELIVER];
   if (modOn('jack') && pressed.KeyE && !G.dialog && !G.modMenu.open && !G.onFoot && DRIVING.includes(G.phase)) {
@@ -1081,7 +1144,10 @@ function update(dt) {
       updateCop(dt);
       if (checkObjective()) {
         G.phase = PHASE.MEET_TALK; G.phaseTime = 0;
-        say(DLG.meet, () => enterPhase(PHASE.GAS_DRIVE));
+        say(DLG.meet, () => {
+          enterPhase(PHASE.GAS_DRIVE);
+          earn(250, 'advance on expenses');
+        });
       }
       break;
     case PHASE.MEET_TALK:
@@ -1136,9 +1202,14 @@ function update(dt) {
         if (G.starlet && G.starlet.state === 'riding') {
           G.starlet.state = 'done';
           G.stats.fareRescued = true;
-          radio('STARLET', "A repo shop. Perfect — nobody will look here. You're a lifesaver.");
+          G.cash += 500;
+          radio('STARLET', "A repo shop. Perfect — nobody will look here. You're a lifesaver. Here's $500.");
         }
-        say(DLG.deliver, () => enterPhase(PHASE.PASSED));
+        say(DLG.deliver, () => {
+          const bonus = safehousePerkOwned('OLD TOWN ROWHOUSE') ? 500 : 0;
+          G.cash += 1000 + bonus;
+          enterPhase(PHASE.PASSED);
+        });
       }
       break;
     case PHASE.DELIVER_TALK:
@@ -1283,6 +1354,14 @@ function drawWorld() {
         }
       }
     }
+  }
+
+  // district ground tints
+  for (const d of DISTRICTS) {
+    const [dx, dy] = worldToScreen(d.x, d.y);
+    if (dx > VW || dy > VH || dx + d.w < 0 || dy + d.h < 0) continue;
+    ctx.fillStyle = d.tint;
+    ctx.fillRect(dx, dy, d.w, d.h);
   }
 
   // lots
@@ -1497,6 +1576,48 @@ function drawWorld() {
     ctx.fillText(`a ${CREATOR} original`, ax + 104, ay - 40);
     ctx.fillStyle = '#9c8a6e';
     ctx.fillText(`[${frame + 1}/5]`, ax + ad.w - 44, ay - 12);
+  }
+
+  // district labels
+  ctx.textAlign = 'center';
+  for (const d of DISTRICTS) {
+    const [lx, ly] = worldToScreen(d.x + d.w / 2, d.y + 60);
+    if (lx > -300 && lx < VW + 300 && ly > -40 && ly < VH + 40) {
+      ctx.fillStyle = 'rgba(255,255,255,0.28)';
+      ctx.font = 'bold 26px monospace';
+      ctx.fillText(d.name, lx, ly);
+    }
+  }
+  ctx.textAlign = 'left';
+
+  // safehouses (rumored until purchased, then confirmed)
+  const nearT = G.onFoot ? G.walker : G.player;
+  for (const h of SAFEHOUSES) {
+    const [hx, hy] = worldToScreen(h.x, h.y);
+    if (hx < -80 || hy < -80 || hx > VW + 80 || hy > VH + 80) continue;
+    const col = h.owned ? '#7be382' : '#ffd23f';
+    const pulse = 1 + 0.15 * Math.sin(G.time * 3.5);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(hx, hy, 30 * pulse, 0, TAU); ctx.stroke();
+    // little house glyph
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy - 14); ctx.lineTo(hx + 11, hy - 3); ctx.lineTo(hx - 11, hy - 3);
+    ctx.closePath(); ctx.fill();
+    ctx.fillRect(hx - 7, hy - 3, 14, 11);
+    if (dist(nearT.x, nearT.y, h.x, h.y) < 190) {
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(8,12,18,0.8)';
+      ctx.fillRect(hx - 120, hy - 62, 240, 34);
+      ctx.fillStyle = col;
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText(h.name + (h.owned ? ' — CONFIRMED' : ' — RUMORED'), hx, hy - 48);
+      ctx.fillStyle = '#e8eef4';
+      ctx.font = '11px monospace';
+      ctx.fillText(h.owned ? '[E] rest: repair + save' : `[E] buy for $${h.price.toLocaleString()}`, hx, hy - 34);
+      ctx.textAlign = 'left';
+    }
   }
 
   // sponsor jar pickups
@@ -1720,6 +1841,15 @@ function drawHUD() {
     ctx.fillRect(116, 89, (1 - frac) * 126, 12);
     ctx.strokeStyle = '#9aa5b1';
     ctx.strokeRect(116, 89, 126, 12);
+  }
+
+  // cash (above speedometer)
+  if (![PHASE.BOOT, PHASE.INTEL].includes(G.phase)) {
+    ctx.fillStyle = 'rgba(8,12,18,0.72)';
+    ctx.fillRect(VW - 170, VH - 108, 158, 24);
+    ctx.fillStyle = '#7be382';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText('$ ' + G.cash.toLocaleString(), VW - 158, VH - 91);
   }
 
   // speed + damage (bottom right)
@@ -1984,6 +2114,7 @@ function drawBoot() {
     'IMAGE INTEL DECODE ..... V-vs-VI SPEC SHEET',
     'SPONSOR DECODE ......... ' + BRAND + ' (5/5 SCENES)',
     'OPTIMIZER DECODE ....... FPS TUTORIAL (42 SCENES)',
+    'PROPERTY DECODE ........ SAFEHOUSE LEDGER (3 DISTRICTS)',
     'MISSION SYNTHESIS ...... COMPLETE',
   ];
   const shown = clamp(Math.floor(G.phaseTime * 2.5) + 1, 1, lines.length);
@@ -2061,6 +2192,8 @@ function drawPassed() {
     `${BRAND} JARS  ${jars}/${JARS.length}`,
     `STARLET FARE  ${G.stats.fareRescued ? 'RESCUED' : 'MISSED'}`,
     `MODS          ${G.stats.modsUsed ? 'USED' : 'CLEAN RUN'}`,
+    `EARNINGS      $${G.cash.toLocaleString()}`,
+    `SAFEHOUSES    ${SAFEHOUSES.filter(h => h.owned).length}/${SAFEHOUSES.length} CONFIRMED`,
     '',
     'NEXT CONTRACT DECODED: Z-TYPE // LOCKUP // HAWICK',
   ];
@@ -2113,8 +2246,8 @@ requestAnimationFrame(frame);
 
 // ---------- debug / test hooks ----------
 window.__ra = {
-  G, PHASE, enterPhase, update, MODS, FORGE, OUTFITS, OPT, PARKED,
-  toggleMod, applyForge, cycleOutfit, forgeCycle, execSpawnCode, cycleWeather,
+  G, PHASE, enterPhase, update, MODS, FORGE, OUTFITS, OPT, PARKED, SAFEHOUSES, DISTRICTS,
+  toggleMod, applyForge, cycleOutfit, forgeCycle, execSpawnCode, cycleWeather, safehouseInteract,
   createRestorePoint, systemRestore, tempCleanup, ultimatePerformance,
   teleport(x, y) { const p = G.player; p.x = x; p.y = y; p.px = x; p.py = y; p.speed = 0; },
   walkTo(x, y) { G.walker.x = x; G.walker.y = y; },

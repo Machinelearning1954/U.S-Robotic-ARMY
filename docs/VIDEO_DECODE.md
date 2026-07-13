@@ -134,6 +134,26 @@ thunderstorm lightning, underwater visuals, road textures, and foliage density.
 | Thunderstorm with lightning flashes | WEATHER ENGINE: STORM — heavier rain, lightning flash + screen rumble |
 | Grading/bloom differences | Reuses and showcases the VISUAL V+ grade in the split view |
 
+## Second image decode — the safehouse infographic
+
+A fan infographic about a next-gen title's safehouse system, split into confirmed
+facts (the two leads use places throughout the story; multiple interiors such as
+homes, motel rooms, and apartments; the system's workings unannounced) versus rumors
+(purchasable safehouses across the map, customization, properties unlocking unique
+gameplay benefits or businesses, more properties unlocking as the story progresses,
+a shared main home).
+
+Integrated as the game's original **district & property layer**, with districts named
+per the project owner's brief:
+
+| Decoded beat | In the game |
+|---|---|
+| Confirmed vs rumored framing | Unowned safehouses read RUMORED; purchasing flips them to CONFIRMED |
+| Purchasable safehouses across the map | Three properties: Kingston Villa (Little Jamaica), Spring Manor (Silver Springs), Old Town Rowhouse (Alexandria) |
+| Properties unlock unique gameplay benefits | Real perks: +5% top speed, halved wet-grip penalty, +$500 delivery bonus |
+| Places used throughout the story | Owned safehouses offer rest: full repair + automatic restore point |
+| More properties as the story progresses | A cash economy earned across mission beats gates the purchases |
+
 ## Image intel decode
 
 A second source (a social-media comparison image) provided the tech/lore layer:

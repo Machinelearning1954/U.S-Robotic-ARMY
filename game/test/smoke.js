@@ -127,6 +127,10 @@ function ok(name, cond, extra) {
   await skipDialog();
   ok('mission passed', (await phase()) === 'PASSED');
 
+  // cash economy: advance 250 + jar 50 + bust 750 + starlet 500 + delivery 1000
+  const cash = await page.evaluate(() => window.__ra.G.cash);
+  ok('mission earnings tally', cash === 2550, 'cash=' + cash);
+
   // ---- MOD TERMINAL ----
   await page.reload();
   await page.waitForTimeout(300);
@@ -358,6 +362,34 @@ function ok(name, cond, extra) {
   await page.evaluate(() => { window.__ra.toggleMod('visual'); window.__ra.step(1 / 60); });
   await page.waitForTimeout(500);
   ok('visual v+ enabled', await page.evaluate(() => window.__ra.MODS.find(m => m.id === 'visual').on === true));
+
+  // ---- SAFEHOUSES ----
+  const buy = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.G.cash = 1000;
+    ra.teleport(1450, 4450); // Kingston Villa, Little Jamaica
+    ra.press('KeyE'); ra.step(1 / 60);
+    const kingston = ra.SAFEHOUSES[0];
+    return { owned: kingston.owned, cash: ra.G.cash };
+  });
+  ok('safehouse purchase confirms rumor', buy.owned && buy.cash === 200, JSON.stringify(buy));
+
+  const rest = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.G.player.damage = 70;
+    ra.G.restorePoint = null;
+    ra.press('KeyE'); ra.step(1 / 60); // rest at the owned villa
+    return { dmg: ra.G.player.damage, saved: !!ra.G.restorePoint };
+  });
+  ok('owned safehouse repairs and saves', rest.dmg === 0 && rest.saved, JSON.stringify(rest));
+
+  const broke = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.teleport(3550, 2350); // Spring Manor costs 1200, we have 200
+    ra.press('KeyE'); ra.step(1 / 60);
+    return ra.SAFEHOUSES[1].owned === false && ra.G.cash === 200;
+  });
+  ok('cannot buy without funds', broke);
 
   // ---- WEATHER + A/B COMPARE ----
   // weather cycles clear -> rain -> storm -> clear

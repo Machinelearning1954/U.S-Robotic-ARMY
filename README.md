@@ -124,6 +124,25 @@ Windows-for-gaming tuning guide). Every tweak genuinely works:
 | TEMP CLEANUP | purge background traffic processes |
 | ULTIMATE PERFORMANCE | the secret plan — flips everything at once |
 
+## Districts & safehouses — the property layer
+
+The map is divided into three named districts — **Little Jamaica**, **Silver
+Springs**, and **Alexandria** — each with its own ground tint, label, and one
+purchasable safehouse. The decoded safehouse infographic's confirmed-vs-rumored
+framing is the mechanic: an unowned property reads **RUMORED**; buy it and it
+flips to **CONFIRMED**, unlocking a real perk.
+
+| Safehouse | District | Price | Perk |
+|---|---|---|---|
+| Kingston Villa | Little Jamaica | $800 | island tuning: +5% top speed |
+| Spring Manor | Silver Springs | $1,200 | all-weather tires: wet grip penalty halved |
+| Old Town Rowhouse | Alexandria | $1,500 | harbor connections: +$500 delivery bonus |
+
+Cash is earned through the mission (briefing advance, glow jars, the bridge bust,
+the starlet's tip, the delivery fee). Stop at any **owned** safehouse and press `E`
+to rest: full hull repair plus an automatic restore point. Earnings and confirmed
+properties appear in the Mission Passed stats.
+
 ## Quality
 
 The game ships with a headless Playwright smoke suite that drives **every mission
