@@ -221,6 +221,11 @@ production pipeline — all of it an invented in-world service:
 - **Boundary note:** the Chromelab queue is a fictional in-game service; no real
   AI product is depicted or named in-world. (Production-side, AI video tools are
   listed as legitimate trailer/pre-viz options in the graphics research doc.)
+- **The re-render sweep — live in the prototype (v0.44).** Handing in clips now has
+  a visual beat to match: a teal scan-bar sweeps the screen while the lab works,
+  the same "watch it get cleaner in real time" idea the AI-enhancement demo wave
+  trades on, built as an original screen-space effect (no tool's UI, footage, or
+  branding is reproduced). It clears the moment the payout lands or you walk away.
 
 ### 4.5 Downsides of Fame
 

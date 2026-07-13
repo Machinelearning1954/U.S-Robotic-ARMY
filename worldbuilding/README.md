@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.43**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.44**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -257,6 +257,11 @@ deck, island superstructure, and the signature neon-lit well deck cut into
 the stern. Drive any vehicle into the well deck by water and it banks a raw
 clip — "MAROON THUNDER ROLLS OUT," +50 clout, one-time. No real carrier
 class or hardware is depicted (`PAUDC_Base_Design.md` §Zone 4).
+v0.44 gives the Chromelab Re-Render Queue a visual beat: a teal scan-bar now
+sweeps the screen while a hand-in is processing, echoing the "watch it get
+cleaner in real time" hook from the AI-enhancement demo wave — built as an
+original screen-space effect, no tool UI or footage reproduced. Clears the
+moment the payout lands or you walk away (`PAUDC_Game_Systems.md` §Chromelab).
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

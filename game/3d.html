@@ -32,6 +32,9 @@
   #cine{position:fixed;inset:0;pointer-events:none;z-index:3;display:none;mix-blend-mode:soft-light;background:linear-gradient(180deg,rgba(255,158,64,.22) 0%,rgba(255,120,50,.08) 34%,rgba(0,64,92,.14) 70%,rgba(0,42,64,.30) 100%),radial-gradient(ellipse at 50% 50%,transparent 52%,rgba(2,8,14,.55) 100%);}
   #grain{position:fixed;inset:0;pointer-events:none;z-index:7;display:none;mix-blend-mode:overlay;opacity:.11;image-rendering:pixelated;width:100vw;height:100vh;}
   #whisper{position:fixed;top:33%;left:50%;transform:translateX(-50%);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.28em;color:#c7d2db;opacity:0;transition:opacity .6s;text-shadow:0 0 12px #000,0 0 3px #7fa;z-index:6;pointer-events:none;text-align:center;max-width:92vw;}
+  #scan{position:fixed;inset:0;pointer-events:none;z-index:8;display:none;overflow:hidden;}
+  #scan i{position:absolute;top:0;bottom:0;width:7%;left:-12%;background:linear-gradient(90deg,transparent,rgba(63,245,216,.8),transparent);filter:blur(1px);animation:scansweep 1.05s linear infinite;font-style:normal;}
+  @keyframes scansweep{from{left:-12%}to{left:112%}}
   @media (pointer:coarse){.tb{display:block}#keys{display:none}#mini{bottom:100px}}
   @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
@@ -41,6 +44,7 @@
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>H</b> haul · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
 <div class="hud" id="fine">Fictional game world · PAUDC 3D v0.30</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
+<div id="scan"><i></i></div>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
 <button class="tb" id="tl">&#8634;</button><button class="tb" id="tr">&#8635;</button><button class="tb" id="tf">&#9650;</button><button class="tb" id="tb">&#9660;</button><button class="tb" id="gq">HD</button><button class="tb" id="fx">GRADE</button><button class="tb" id="mm">MAP</button><button class="tb" id="rn">RAIN</button><button class="tb" id="thr">THRLLR</button><button class="tb" id="ft">FOOT</button>
@@ -5463,9 +5467,11 @@ function tick(t){
   if(wet&&!prevWet&&Math.abs(P.v)>18){const n=grade?10:5;addClout(n);rawClips++;toast('SPLASHDOWN CLIP  +'+n+' CLOUT'+(grade?' — GRADED':'')+'  ·  RAW CLIP BANKED');}
   // Chromelab Re-Render queue: bring raw clips to the Polytech's AI enhancer
   if(rawClips>0&&Math.hypot(P.x-CHROME.X,P.z-CHROME.Z)<12&&Math.abs(P.v)<4){rrT+=dt;
+    const sc=$('scan');if(sc)sc.style.display='block';
     if(rrT>2){rrT=0;const pay=8*rawClips;addClout(pay);
-      toast('CHROMELAB RE-RENDER — '+rawClips+' CLIP'+(rawClips>1?'S':'')+' ENHANCED  +'+pay+' CLOUT');rawClips=0;}}
-  else rrT=Math.max(0,rrT-dt);
+      toast('CHROMELAB RE-RENDER — '+rawClips+' CLIP'+(rawClips>1?'S':'')+' ENHANCED  +'+pay+' CLOUT');rawClips=0;
+      if(sc)sc.style.display='none';}}
+  else{rrT=Math.max(0,rrT-dt);const sc=$('scan');if(sc&&rrT<=0)sc.style.display='none';}
   prevWet=wet;
   const thr=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?0.6:0);
   const str=(keys.a||keys.arrowleft?1:0)-(keys.d||keys.arrowright?1:0);
