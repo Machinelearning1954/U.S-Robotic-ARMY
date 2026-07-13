@@ -43,6 +43,39 @@ Gameplay integration: four B.PATTY GLOW jars sit on the mission routes; driving 
 one restores 25 hull ("nano-cream finish"). Collected jars are tallied on the
 Mission Passed screen.
 
+## Third decode — the mods request (two source videos)
+
+Two more sources drove the MOD TERMINAL feature set. As always the table paraphrases
+the footage in our own words, and everything in the game is an original re-creation.
+
+**Source A — a story-mode walkthrough segment ("Part 19")**, decoded in 16 scenes:
+a character wakes in a mansion, cycles outfits in a walk-in closet via an on-screen
+menu, gags on a green health juice, then takes a black-and-orange supercar through
+city traffic; later a starlet hiding in an alley asks for a ride to escape the
+paparazzi.
+
+| Decoded beat | In the game |
+|---|---|
+| Closet outfit-changer menu | WARDROBE row in the MOD TERMINAL (4 platings) |
+| Supercar morning drive | VEHICLE FORGE presets |
+| Starlet asking for a ride past the paparazzi | Random event on the delivery leg — stop for her near Hayes Auto, drop her at the shop (Mission Passed stat) |
+
+**Source B — a free-roam chaos/mods showcase**, decoded in 16 scenes: repeated
+car-jacking (sedan, police SUV, sports car), a rampage sequence, a comedic scooter
+chase, and a customs-shop scene where a silver car gets a yellow secondary paint job
+and new wheels.
+
+| Decoded beat | In the game |
+|---|---|
+| Car-jacking loop | CARJACK PROTOCOL mod (E near stopped traffic) |
+| Customs shop: silver + yellow livery | SUNBURST CUSTOM forge preset (stripe color support) |
+| Scooter chase | SCOOTER BROTHER forge preset (tiny, slow, glorious) |
+| Rampage/weapons sequence | Deliberately not integrated — outside this game's tone; noted for completeness |
+
+The trainer-menu concept itself (toggleable script mods: god mode, nitro, moon
+gravity, slow motion, ghost traffic, paint cycler) is the game's original homage to
+the PC modding scene.
+
 ## Image intel decode
 
 A second source (a social-media comparison image) provided the tech/lore layer:

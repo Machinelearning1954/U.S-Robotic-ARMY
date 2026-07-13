@@ -69,6 +69,27 @@ application, macro texture, sunlit glow, call-to-action) — was integrated as a
 All ad art is procedural and all copy is original — nothing is reproduced from the
 source commercial.
 
+## MOD TERMINAL — the GTA-V-mods layer
+
+Press **`T`** in any driving phase to open the trainer-style mod menu (an original
+homage to the PC modding scene; everything is implemented natively):
+
+| Mod | Effect |
+|---|---|
+| HULL SHIELD | god mode — chassis takes zero damage |
+| NITRO INJECT | +45% top speed, lower drag, pipes stay lit |
+| MOON GRAVITY | floaty low-grip drift physics |
+| BULLET TIME | the whole world runs at half speed |
+| GHOST TRAFFIC | traffic turns intangible (and translucent) |
+| CHROME CYCLER | animated rainbow paint job |
+| CARJACK PROTOCOL | stop near traffic and press `E` to take the car |
+| VEHICLE FORGE | cycle six original spawned vehicles — incl. SUNBURST CUSTOM (silver/yellow customs build) and the SCOOTER BROTHER |
+| WARDROBE | cycle unit plating — the decoded closet outfit-changer |
+
+Mission stats mark the run **MODS USED** vs **CLEAN RUN**. There's also a decoded
+random event: a starlet hides near Hayes Auto on the delivery leg — stop for her and
+sneak her past the paparazzi for a bonus stat.
+
 ## Quality
 
 The game ships with a headless Playwright smoke suite that drives **every mission

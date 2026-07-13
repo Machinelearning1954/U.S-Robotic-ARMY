@@ -26,6 +26,19 @@ on any browser console or page error.
 Suite grew to 27 checks: sponsor radio spot fires during the Route 68 drive, and a
 glow-jar pickup verifiably repairs the hull (60 → 35 damage).
 
+## MOD TERMINAL pass
+
+| # | Severity | Bug | Fix |
+|---|---|---|---|
+| 9 | Medium — logic | Disabling CHROME CYCLER restored `baseColor`, but `makeCar()` never initialized it — the "restore" kept the rainbow paint forever on a stock car. | `makeCar()` now sets `baseColor` alongside `color`. Regression check: chrome off returns a non-hsl color. |
+| 10 | Medium — design/logic | NITRO INJECT raised the speed *cap* to ~900 but drag physics set terminal velocity at ~628 — the mod was nearly a no-op. | Nitro now also cuts drag 30%; terminal ≈ 770. Regression check: top speed must exceed stock 640. |
+| 11 | Low — test design | Mod checks ran during `CRUISE`, where the scripted pull-over hijacks the phase and its dialog consumed the `E` press, silently breaking the carjack check. | Mod tests run in `MEET_DRIVE`; nitro run wraps in GHOST TRAFFIC so collisions don't cap the measurement. |
+| 12 | Cosmetic | MOD TERMINAL hint line clipped at the panel edge. | Shortened the hint text. |
+
+Suite is now 41 checks: menu open/close, all seven script mods (god, nitro, bullet
+time, ghost, chrome on/off restore, carjack, moon implicitly via physics paths),
+vehicle forge, wardrobe, and the starlet random event (pickup + rescue stat).
+
 ## Verified clean
 
 - All 25 smoke checks pass: boot → intel → walk → cruise → pull-over → meet →

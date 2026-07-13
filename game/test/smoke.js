@@ -109,12 +109,132 @@ function ok(name, cond, extra) {
   const blue = await page.evaluate(() => window.__ra.G.player.color);
   ok('swapped to blue car', blue === '#2757c9', blue);
 
+  // starlet random event: stop next to her, then deliver with her aboard
+  const starletState = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.teleport(6740, 2060);
+    for (let i = 0; i < 10; i++) ra.step(1 / 60);
+    return ra.G.starlet && ra.G.starlet.state;
+  });
+  ok('starlet picked up', starletState === 'riding', String(starletState));
+
   // DELIVER
   await page.evaluate(() => window.__ra.teleport(6610, 2930));
   await stepMany(10);
   ok('deliver talk', (await phase()) === 'DELIVER_TALK');
+  const rescued = await page.evaluate(() => window.__ra.G.stats.fareRescued === true);
+  ok('starlet fare rescued', rescued);
   await skipDialog();
   ok('mission passed', (await phase()) === 'PASSED');
+
+  // ---- MOD TERMINAL ----
+  await page.reload();
+  await page.waitForTimeout(300);
+  await pressE(); await pressE(); // BOOT -> INTEL -> WALK
+  await page.evaluate(() => { const p = window.__ra.G.player; window.__ra.walkTo(p.x, p.y + 30); });
+  await stepMany(30); // -> CRUISE
+  // run mod tests in a phase without the scripted pull-over (it opens a dialog that eats E)
+  await page.evaluate(() => window.__ra.enterPhase('MEET_DRIVE'));
+
+  // menu opens with T and owns navigation keys
+  await page.evaluate(() => { window.__ra.press('KeyT'); window.__ra.step(1 / 60); });
+  ok('mod menu opens', await page.evaluate(() => window.__ra.G.modMenu.open === true));
+  await page.evaluate(() => { window.__ra.press('KeyT'); window.__ra.step(1 / 60); });
+  ok('mod menu closes', await page.evaluate(() => window.__ra.G.modMenu.open === false));
+
+  // god mode: ram a building, take zero damage
+  const godDmg = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.toggleMod('god'); ra.step(1 / 60);
+    ra.teleport(1260, 3900);
+    ra.G.player.angle = Math.PI; // west toward the plaza-side building
+    ra.G.player.speed = 500;
+    for (let i = 0; i < 120; i++) ra.step(1 / 60);
+    return { dmg: ra.G.player.damage, phase: ra.G.phase };
+  });
+  ok('god mode blocks damage', godDmg.dmg === 0 && godDmg.phase !== 'FAILED', JSON.stringify(godDmg));
+
+  // nitro raises the speed cap past stock 620
+  const nitroSpeed = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.toggleMod('nitro'); ra.toggleMod('ghost'); ra.step(1 / 60); // ghost keeps the run collision-free
+    ra.teleport(1000, 1620); ra.G.player.angle = 0;
+    ra.setKey('KeyW', true);
+    for (let i = 0; i < 600; i++) ra.step(1 / 60);
+    ra.setKey('KeyW', false);
+    ra.toggleMod('ghost'); ra.step(1 / 60);
+    return ra.G.stats.top;
+  });
+  ok('nitro exceeds stock top speed', nitroSpeed > 640, 'top=' + Math.round(nitroSpeed));
+
+  // bullet time halves the world clock
+  const slow = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.toggleMod('slowmo'); ra.step(1 / 60);
+    const t0 = ra.G.time;
+    for (let i = 0; i < 60; i++) ra.step(1 / 60);
+    ra.toggleMod('slowmo'); ra.step(1 / 60);
+    return ra.G.time - t0;
+  });
+  ok('bullet time halves clock', slow > 0.4 && slow < 0.62, 'dt=' + slow.toFixed(3));
+
+  // ghost traffic: standing inside a traffic car causes no hits
+  const ghostHits = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.toggleMod('ghost'); ra.step(1 / 60);
+    ra.G.traffic.push({ x: 2000, y: 1645, px: 2000, py: 1645, angle: 0, speed: 0, cruise: 0,
+      color: '#888', damage: 0, radius: 21, flame: 0, ai: true,
+      lane: { axis: 'h', pos: 1645, from: 400, to: 6800, sign: 1 } });
+    const hits0 = ra.G.stats.hits;
+    ra.teleport(2000, 1645);
+    ra.G.player.speed = 300;
+    for (let i = 0; i < 30; i++) ra.step(1 / 60);
+    ra.toggleMod('ghost'); ra.step(1 / 60);
+    return ra.G.stats.hits - hits0;
+  });
+  ok('ghost traffic intangible', ghostHits === 0, 'hits=' + ghostHits);
+
+  // chrome cycler animates the paint, restores base color on disable
+  const chrome = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.toggleMod('chrome'); ra.step(1 / 60);
+    const painted = ra.G.player.color;
+    ra.toggleMod('chrome'); ra.step(1 / 60);
+    return { painted, restored: ra.G.player.color };
+  });
+  ok('chrome cycler paints hsl', chrome.painted.startsWith('hsl'), chrome.painted);
+  ok('chrome restores base color', !chrome.restored.startsWith('hsl'), chrome.restored);
+
+  // vehicle forge cycles presets and applies stats
+  const forge = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.applyForge(1); ra.step(1 / 60);
+    return { color: ra.G.player.color, top: ra.G.player.forgeTop, name: ra.FORGE[ra.G.forgeIdx].name };
+  });
+  ok('vehicle forge applies preset', forge.color === '#b3261e' && forge.top === 1.08, JSON.stringify(forge));
+
+  // wardrobe cycles outfits
+  const outfit = await page.evaluate(() => {
+    const ra = window.__ra;
+    const i0 = ra.G.outfitIdx;
+    ra.cycleOutfit();
+    return ra.G.outfitIdx !== i0;
+  });
+  ok('wardrobe cycles outfit', outfit);
+
+  // carjack protocol: E near a stopped commuter takes the car
+  const jack = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.toggleMod('jack'); ra.step(1 / 60);
+    ra.G.traffic.push({ x: 2400, y: 1695, px: 2400, py: 1695, angle: 0, speed: 0, cruise: 0,
+      color: '#6e5d8c', damage: 0, radius: 21, flame: 0, ai: true,
+      lane: { axis: 'h', pos: 1695, from: 400, to: 6800, sign: 1 } });
+    const n0 = ra.G.traffic.length;
+    ra.teleport(2400, 1660);
+    ra.press('KeyE'); ra.step(1 / 60);
+    return { took: ra.G.traffic.length === n0 - 1, color: ra.G.player.color };
+  });
+  ok('carjack takes the vehicle', jack.took && jack.color === '#6e5d8c', JSON.stringify(jack));
 
   // failure + checkpoint restore path
   await page.reload();

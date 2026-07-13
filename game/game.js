@@ -29,6 +29,36 @@ function mulberry32(seed) {
 const CREATOR = 'Machinelearning1954';
 const BRAND = 'B.PATTY GLOW';
 
+// ---------- MOD TERMINAL (original trainer-style script mods) ----------
+const MODS = [
+  { id: 'god',    name: 'HULL SHIELD',    desc: 'chassis takes zero damage',        on: false },
+  { id: 'nitro',  name: 'NITRO INJECT',   desc: '+45% top speed, hotter throttle',  on: false },
+  { id: 'moon',   name: 'MOON GRAVITY',   desc: 'floaty low-grip drift physics',    on: false },
+  { id: 'slowmo', name: 'BULLET TIME',    desc: 'world runs at half speed',         on: false },
+  { id: 'ghost',  name: 'GHOST TRAFFIC',  desc: 'traffic turns intangible',         on: false },
+  { id: 'chrome', name: 'CHROME CYCLER',  desc: 'animated rainbow paint job',       on: false },
+  { id: 'jack',   name: 'CARJACK PROTOCOL', desc: 'E near stopped traffic: take it', on: false },
+];
+const modOn = (id) => { const m = MODS.find(m => m.id === id); return !!(m && m.on); };
+
+// wardrobe presets (decoded: the closet outfit-changer menu)
+const OUTFITS = [
+  { name: 'FIELD PLATES',   body: '#20242b' },
+  { name: 'DENIM WORKSHIRT', body: '#3b6ea5' },
+  { name: 'MIDNIGHT SUIT',  body: '#101216' },
+  { name: 'ROAD LEATHERS',  body: '#4a3226' },
+];
+
+// vehicle forge presets (original vehicles)
+const FORGE = [
+  { name: 'STOCK COMET S',      color: '#cfd3d8', top: 1.00, acc: 1.00, stripe: false, siren: false },
+  { name: 'CRIMSON ZAGGERO',    color: '#b3261e', top: 1.08, acc: 1.06, stripe: false, siren: false },
+  { name: 'AZZURRO MC-13',      color: '#2757c9', top: 1.12, acc: 1.10, stripe: true,  siren: false },
+  { name: 'PATROL INTERCEPTOR', color: '#1c1f24', top: 1.05, acc: 1.04, stripe: false, siren: true  },
+  { name: 'SUNBURST CUSTOM',    color: '#c0c4c9', top: 1.10, acc: 1.08, stripe: true,  siren: false, stripeColor: '#ffd23f' },
+  { name: 'SCOOTER BROTHER',    color: '#c0392b', top: 0.55, acc: 0.80, stripe: false, siren: false, tiny: true },
+];
+
 // ---------- world layout ----------
 const WORLD = { w: 7200, h: 5000 };
 
@@ -167,7 +197,7 @@ function actionPressed() { return !!(pressed.KeyE || pressed.Enter); }
   if (!el) return;
   if (!('ontouchstart' in window) && navigator.maxTouchPoints === 0) return;
   el.style.display = 'block';
-  const map = { tLeft: 'KeyA', tRight: 'KeyD', tGas: 'KeyW', tBrake: 'KeyS', tAct: 'KeyE' };
+  const map = { tLeft: 'KeyA', tRight: 'KeyD', tGas: 'KeyW', tBrake: 'KeyS', tAct: 'KeyE', tMod: 'KeyT' };
   for (const [id, code] of Object.entries(map)) {
     const b = document.getElementById(id);
     if (!b) continue;
@@ -214,7 +244,7 @@ const AudioSys = {
 
 // ---------- entities ----------
 function makeCar(x, y, angle, color) {
-  return { x, y, px: x, py: y, angle, speed: 0, color, damage: 0, radius: 21, flame: 0 };
+  return { x, y, px: x, py: y, angle, speed: 0, color, baseColor: color, damage: 0, radius: 21, flame: 0 };
 }
 
 const CAR_COLORS = ['#7c8894', '#5b6c7d', '#8d5f4a', '#b8b2a7', '#43555f', '#6e5d8c', '#a34d4d', '#4d7a5a'];
@@ -223,7 +253,7 @@ const CAR_COLORS = ['#7c8894', '#5b6c7d', '#8d5f4a', '#b8b2a7', '#43555f', '#6e5
 const SPEAKER_COLOR = {
   'FRNK-13': '#6fd3ff', 'OFFICER': '#8ecae6', 'WESTON': '#ffd166',
   'MOLLY': '#f4a0c0', 'MIKE': '#9be07c', 'T': '#ff9e6d', 'RICH KID': '#e0c3fc',
-  'SYSTEM': '#9aa5b1', 'RADIO': '#ffd9a0',
+  'SYSTEM': '#9aa5b1', 'RADIO': '#ffd9a0', 'STARLET': '#f7c8e0',
 };
 
 const DLG = {
@@ -307,6 +337,10 @@ const G = {
   shake: 0,
   deerDone: false,
   adPlayed: false,
+  modMenu: { open: false, idx: 0 },
+  forgeIdx: 0,
+  outfitIdx: 0,
+  starlet: null, // decoded random event: escort a starlet past the paparazzi
   rnd: mulberry32(20260713),
 };
 
@@ -320,8 +354,39 @@ const PARKED = [
   makeCar(1120, 3850, -Math.PI / 2, '#2b4a8f'),
 ];
 
-function say(lines, onDone) { G.dialog = { lines, i: 0, timer: 0, onDone }; }
+function say(lines, onDone) { G.modMenu.open = false; G.dialog = { lines, i: 0, timer: 0, onDone }; }
 function radio(s, t) { G.subtitle = { s, t, timer: 5 }; }
+
+function toggleMod(id) {
+  const m = MODS.find(m => m.id === id);
+  if (!m) return;
+  m.on = !m.on;
+  if (m.on) G.stats.modsUsed = true;
+  if (m.id === 'chrome' && !m.on) G.player.color = G.player.baseColor || G.player.color;
+  radio('SYSTEM', `MOD ${m.name}: ${m.on ? 'ENABLED' : 'DISABLED'}.`);
+}
+
+function cycleOutfit() {
+  G.outfitIdx = (G.outfitIdx + 1) % OUTFITS.length;
+  G.stats.modsUsed = true;
+  radio('SYSTEM', `WARDROBE: ${OUTFITS[G.outfitIdx].name} equipped.`);
+}
+
+function applyForge(i) {
+  const f = FORGE[((i % FORGE.length) + FORGE.length) % FORGE.length];
+  G.forgeIdx = ((i % FORGE.length) + FORGE.length) % FORGE.length;
+  const p = G.player;
+  p.baseColor = f.color;
+  if (!modOn('chrome')) p.color = f.color;
+  p.stripe = f.stripe;
+  p.stripeColor = f.stripeColor || null;
+  p.siren = f.siren;
+  p.tiny = !!f.tiny;
+  p.forgeTop = f.top;
+  p.forgeAcc = f.acc;
+  G.stats.modsUsed = true;
+  radio('SYSTEM', `VEHICLE FORGE: ${f.name} deployed.`);
+}
 
 function setObjective(text, target, radius, needStop) {
   G.objective = { text, target: target || null, radius: radius || 60, needStop: !!needStop };
@@ -408,6 +473,8 @@ function enterPhase(p, fromCheckpoint) {
       break;
     case PHASE.DELIVER:
       setObjective('Deliver the car to Hayes Auto on Little Big Horn.', { x: 6610, y: 2930 }, 90, true);
+      // decoded random event: a starlet hides off the garage street, dodging paparazzi
+      G.starlet = { x: 6740, y: 2050, state: 'waiting' };
       saveCheckpoint();
       break;
     case PHASE.PASSED:
@@ -501,27 +568,33 @@ function updateTraffic(dt) {
 function updatePlayerCar(dt, locked) {
   const p = G.player;
   p.px = p.x; p.py = p.y;
+  locked = locked || G.modMenu.open;
   const thr = locked ? 0 : throttleInput();
   const steer = locked ? 0 : axisSteer();
   const hb = !locked && keys.Space;
 
+  const nitro = modOn('nitro');
+  const moon = modOn('moon');
+  const topMul = (p.forgeTop || 1) * (nitro ? 1.45 : 1);
+  const accMul = (p.forgeAcc || 1) * (nitro ? 1.35 : 1);
   const paved = onPavement(p.x, p.y);
-  const maxF = paved ? 620 : 220;
+  const maxF = (paved ? 620 : 220) * topMul;
   const maxR = -140;
 
-  if (thr > 0) p.speed += 340 * dt * (1 - clamp(p.speed / maxF, 0, 1) * 0.55);
+  if (thr > 0) p.speed += 340 * accMul * dt * (1 - clamp(p.speed / maxF, 0, 1) * 0.55);
   else if (thr < 0) p.speed -= (p.speed > 0 ? 640 : 180) * dt;
   // drag
-  const drag = paved ? 0.45 : 1.6;
+  const drag = (paved ? 0.45 : 1.6) * (moon ? 0.25 : 1) * (nitro ? 0.7 : 1);
   p.speed -= p.speed * drag * dt;
-  if (hb) p.speed -= p.speed * 2.4 * dt;
+  if (hb) p.speed -= p.speed * (moon ? 0.9 : 2.4) * dt;
   p.speed = clamp(p.speed, maxR, maxF);
   if (Math.abs(p.speed) < 2 && thr === 0) p.speed = 0;
 
-  // rev flame when stationary + throttle (decoded: exhaust flames at the curb)
-  p.flame = (thr > 0 && Math.abs(p.speed) < 40) ? 1 : Math.max(0, p.flame - 3 * dt);
+  // rev flame when stationary + throttle (decoded: exhaust flames at the curb);
+  // nitro keeps the pipes lit at speed
+  p.flame = (thr > 0 && (Math.abs(p.speed) < 40 || nitro)) ? 1 : Math.max(0, p.flame - 3 * dt);
 
-  const grip = clamp(Math.abs(p.speed) / 130, 0, 1);
+  const grip = moon ? clamp(Math.abs(p.speed) / 60, 0, 1.4) : clamp(Math.abs(p.speed) / 130, 0, 1);
   const dir = p.speed >= 0 ? 1 : -1;
   p.angle += steer * (hb ? 3.4 : 2.4) * grip * dir * dt;
 
@@ -542,7 +615,9 @@ function updatePlayerCar(dt, locked) {
 
   // vehicle collisions
   if (!locked) {
-    const others = G.traffic.concat(G.racers, PARKED, (G.cop && G.phase !== PHASE.PULLOVER && G.phase !== PHASE.PULLOVER_TALK) ? [G.cop] : []);
+    const ghost = modOn('ghost');
+    const god = modOn('god');
+    const others = (ghost ? [] : G.traffic).concat(G.racers, PARKED, (G.cop && G.phase !== PHASE.PULLOVER && G.phase !== PHASE.PULLOVER_TALK) ? [G.cop] : []);
     for (const o of others) {
       const d = dist(p.x, p.y, o.x, o.y);
       const min = p.radius + o.radius;
@@ -553,7 +628,7 @@ function updatePlayerCar(dt, locked) {
         if (o.ai) { o.x -= nx * push; o.y -= ny * push; o.speed *= 0.4; }
         const impact = Math.abs(p.speed);
         if (impact > 120) {
-          p.damage = clamp(p.damage + (impact - 100) * 0.045, 0, 100);
+          if (!god) p.damage = clamp(p.damage + (impact - 100) * 0.045, 0, 100);
           G.stats.hits++;
           G.shake = Math.min(14, 4 + impact / 60);
         }
@@ -588,7 +663,7 @@ function resolveSolids(body, damaging) {
       if (d2 === 0) { body.x = body.px; body.y = body.py; }
       else { body.x += (dx / d) * push; body.y += (dy / d) * push; }
       if (damaging && Math.abs(body.speed) > 160) {
-        body.damage = clamp(body.damage + (Math.abs(body.speed) - 140) * 0.03, 0, 100);
+        if (!modOn('god')) body.damage = clamp(body.damage + (Math.abs(body.speed) - 140) * 0.03, 0, 100);
         G.stats.hits++;
         G.shake = 8;
       }
@@ -694,7 +769,8 @@ function updateRacers(dt) {
       say(DLG.bust, () => {
         // swap into the blue target car (decoded: protagonist leaves in the blue one)
         const p = G.player;
-        p.color = '#2757c9'; p.stripe = true; p.damage = Math.min(p.damage, 20);
+        p.color = '#2757c9'; p.baseColor = '#2757c9'; p.stripe = true; p.stripeColor = null;
+        p.siren = false; p.tiny = false; p.damage = Math.min(p.damage, 20);
         p.x = 5730; p.y = 1620; p.angle = 0; p.speed = 0;
         G.racers.forEach(r => { r.busted = true; });
         enterPhase(PHASE.DELIVER);
@@ -713,7 +789,7 @@ function updateDeer(dt) {
   const p = G.player;
   if (!G.onFoot && dist(p.x, p.y, d.x, d.y) < 30 && Math.abs(p.speed) > 60) {
     p.speed *= 0.5;
-    p.damage = clamp(p.damage + 8, 0, 100);
+    if (!modOn('god')) p.damage = clamp(p.damage + 8, 0, 100);
     G.stats.hits++;
     G.shake = 10;
     G.deer = null;
@@ -733,10 +809,61 @@ function checkObjective() {
 
 // ---------- update ----------
 function update(dt) {
+  if (modOn('slowmo')) dt *= 0.5; // BULLET TIME mod
   G.time += dt;
   G.phaseTime += dt;
   G.shake = Math.max(0, G.shake - 30 * dt);
   if (pressed.KeyM) AudioSys.toggle();
+
+  // MOD TERMINAL input
+  if (pressed.KeyT && !G.dialog && ![PHASE.BOOT, PHASE.INTEL, PHASE.PASSED, PHASE.FAILED].includes(G.phase)) {
+    G.modMenu.open = !G.modMenu.open;
+  }
+  if (G.modMenu.open) {
+    const mm = G.modMenu;
+    const rows = MODS.length + 2; // mods + vehicle forge + wardrobe
+    if (pressed.ArrowUp || pressed.KeyW) mm.idx = (mm.idx + rows - 1) % rows;
+    if (pressed.ArrowDown || pressed.KeyS) mm.idx = (mm.idx + 1) % rows;
+    if (pressed.KeyE || pressed.Enter) {
+      if (mm.idx < MODS.length) toggleMod(MODS[mm.idx].id);
+      else if (mm.idx === MODS.length) applyForge(G.forgeIdx + 1);
+      else cycleOutfit();
+    }
+    // the menu owns these keys this frame
+    delete pressed.KeyE; delete pressed.Enter;
+    delete pressed.ArrowUp; delete pressed.ArrowDown;
+    delete pressed.KeyW; delete pressed.KeyS;
+  }
+
+  // CHROME CYCLER paint job
+  if (modOn('chrome')) {
+    G.player.color = `hsl(${Math.round((G.time * 90) % 360)},85%,60%)`;
+  }
+
+  // CARJACK PROTOCOL: commandeer the nearest stopped traffic car
+  const DRIVING = [PHASE.CRUISE, PHASE.PULLOVER, PHASE.MEET_DRIVE, PHASE.GAS_DRIVE, PHASE.RACE, PHASE.DELIVER];
+  if (modOn('jack') && pressed.KeyE && !G.dialog && !G.modMenu.open && !G.onFoot && DRIVING.includes(G.phase)) {
+    const p = G.player;
+    if (Math.abs(p.speed) < 60) {
+      let best = null, bestD = 70;
+      for (const c of G.traffic) {
+        const d = dist(p.x, p.y, c.x, c.y);
+        if (d < bestD) { best = c; bestD = d; }
+      }
+      if (best) {
+        p.x = best.x; p.y = best.y; p.px = best.x; p.py = best.y;
+        p.angle = best.angle; p.speed = 0;
+        p.baseColor = best.color;
+        if (!modOn('chrome')) p.color = best.color;
+        p.stripe = false; p.stripeColor = null; p.siren = false; p.tiny = false;
+        p.forgeTop = 0.92; p.forgeAcc = 0.95; // commuter cars are no supercars
+        G.traffic.splice(G.traffic.indexOf(best), 1);
+        G.stats.modsUsed = true;
+        delete pressed.KeyE;
+        radio('SYSTEM', 'CARJACK PROTOCOL: vehicle commandeered. Previous occupant is furious.');
+      }
+    }
+  }
 
   // dialogue advance
   if (G.dialog) {
@@ -825,9 +952,20 @@ function update(dt) {
       break;
     case PHASE.DELIVER:
       updatePlayerCar(dt, false);
+      // starlet pickup (stop next to her)
+      if (G.starlet && G.starlet.state === 'waiting' &&
+          dist(G.player.x, G.player.y, G.starlet.x, G.starlet.y) < 80 && Math.abs(G.player.speed) < 12) {
+        G.starlet.state = 'riding';
+        radio('STARLET', 'You! Please — roll me past those lens-goblins before they spot me. Anywhere but here.');
+      }
       if (checkObjective()) {
         G.phase = PHASE.DELIVER_TALK; G.phaseTime = 0;
         G.player.speed = 0;
+        if (G.starlet && G.starlet.state === 'riding') {
+          G.starlet.state = 'done';
+          G.stats.fareRescued = true;
+          radio('STARLET', "A repo shop. Perfect — nobody will look here. You're a lifesaver.");
+        }
         say(DLG.deliver, () => enterPhase(PHASE.PASSED));
       }
       break;
@@ -892,7 +1030,7 @@ function drawCarShape(c, w, h) {
   roundRect(-w / 2, -h / 2, w, h, 5);
   ctx.fill();
   if (c.stripe) {
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillStyle = c.stripeColor || 'rgba(255,255,255,0.85)';
     ctx.fillRect(-w / 2 + 4, -2.5, w - 8, 5);
   }
   // cabin
@@ -925,9 +1063,10 @@ function drawCar(c) {
   ctx.translate(sx, sy);
   ctx.rotate(c.angle);
   // shadow
+  const cs = c.tiny ? 0.62 : 1;
   ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  ctx.beginPath(); ctx.ellipse(0, 3, 26, 15, 0, 0, TAU); ctx.fill();
-  drawCarShape(c, 46, 24);
+  ctx.beginPath(); ctx.ellipse(0, 3, 26 * cs, 15 * cs, 0, 0, TAU); ctx.fill();
+  drawCarShape(c, 46 * cs, 24 * cs);
   // exhaust flame
   if (c.flame > 0.3) {
     ctx.fillStyle = `rgba(255,${140 + Math.floor(Math.random() * 80)},40,${0.6 * c.flame})`;
@@ -1218,9 +1357,27 @@ function drawWorld() {
     ctx.restore();
   }
 
+  // starlet random event NPC
+  if (G.starlet && G.starlet.state === 'waiting') {
+    const [nx, ny] = worldToScreen(G.starlet.x, G.starlet.y);
+    if (nx > -40 && ny > -40 && nx < VW + 40 && ny < VH + 40) {
+      const pulse = 1 + 0.18 * Math.sin(G.time * 4.5);
+      ctx.strokeStyle = 'rgba(247,200,224,0.85)';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(nx, ny, 26 * pulse, 0, TAU); ctx.stroke();
+      ctx.fillStyle = '#3a2a22'; // leather jacket
+      ctx.beginPath(); ctx.arc(nx, ny, 8, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#e6c86e'; // blonde hair
+      ctx.beginPath(); ctx.arc(nx, ny - 4, 5, 0, TAU); ctx.fill();
+    }
+  }
+
   // vehicles
   for (const c of PARKED) drawCar(c);
+  const ghostTraffic = modOn('ghost');
+  if (ghostTraffic) ctx.globalAlpha = 0.45;
   for (const c of G.traffic) drawCar(c);
+  if (ghostTraffic) ctx.globalAlpha = 1;
   for (const r of G.racers) drawCar(r);
   if (G.cop) drawCar(G.cop);
   if (!G.onFoot) drawCar(G.player);
@@ -1244,7 +1401,7 @@ function drawWorld() {
     const [wx, wy] = worldToScreen(G.walker.x, G.walker.y);
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.beginPath(); ctx.ellipse(wx, wy + 3, 9, 5, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#20242b';
+    ctx.fillStyle = OUTFITS[G.outfitIdx].body;
     ctx.beginPath(); ctx.arc(wx, wy, 8, 0, TAU); ctx.fill();
     ctx.fillStyle = '#6fd3ff';
     ctx.beginPath(); ctx.arc(wx + Math.cos(G.walker.angle) * 5, wy + Math.sin(G.walker.angle) * 5, 3, 0, TAU); ctx.fill();
@@ -1271,7 +1428,17 @@ function drawHUD() {
   ctx.font = 'bold 13px monospace';
   ctx.fillText('U.S. ROBOTIC ARMY // UNIT FRNK-13 // REPO PROTOCOL 02: "I FOUGHT THE LAW"', 12, 20);
   ctx.fillStyle = '#9aa5b1';
-  ctx.fillText('[M] sound', VW - 90, 20);
+  ctx.fillText('[T] mods  [M] sound', VW - 168, 20);
+
+  // active-mods badge
+  const activeMods = MODS.filter(m => m.on).length;
+  if (activeMods > 0 && !G.modMenu.open) {
+    ctx.fillStyle = 'rgba(8,12,18,0.72)';
+    ctx.fillRect(VW - 150, 38, 138, 24);
+    ctx.fillStyle = '#ffd23f';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText(`MODS ACTIVE: ${activeMods}`, VW - 140, 55);
+  }
 
   // objective
   if (G.objective.text && !G.dialog && ![PHASE.BOOT, PHASE.INTEL, PHASE.PASSED, PHASE.FAILED].includes(G.phase)) {
@@ -1384,6 +1551,63 @@ function drawHUD() {
     ctx.fillStyle = '#e8eef4';
     ctx.font = '14px monospace';
     wrapText(G.subtitle.t, bx + 16, by + 42, bw - 32, 18);
+  }
+
+  // MOD TERMINAL overlay
+  if (G.modMenu.open) {
+    const rows = MODS.length + 2;
+    const pw = 340, ph = 96 + rows * 30;
+    const px = VW - pw - 14, py = 72;
+    ctx.fillStyle = 'rgba(6,10,16,0.92)';
+    roundRect(px, py, pw, ph, 8); ctx.fill();
+    ctx.strokeStyle = '#6fd3ff'; ctx.lineWidth = 1.5;
+    roundRect(px, py, pw, ph, 8); ctx.stroke();
+    ctx.fillStyle = '#6fd3ff';
+    ctx.font = 'bold 15px monospace';
+    ctx.fillText('MOD TERMINAL v1.9', px + 16, py + 26);
+    ctx.fillStyle = '#9aa5b1';
+    ctx.font = '11px monospace';
+    ctx.fillText('W/S select · E toggle · T close', px + 16, py + 44);
+    for (let i = 0; i < rows; i++) {
+      const y = py + 66 + i * 30;
+      const sel = i === G.modMenu.idx;
+      if (sel) {
+        ctx.fillStyle = 'rgba(111,211,255,0.14)';
+        ctx.fillRect(px + 8, y - 18, pw - 16, 26);
+      }
+      if (i < MODS.length) {
+        const m = MODS[i];
+        ctx.fillStyle = sel ? '#e8eef4' : '#b9c2cc';
+        ctx.font = 'bold 13px monospace';
+        ctx.fillText(m.name, px + 20, y);
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#7d8794';
+        ctx.fillText(m.desc, px + 20, y + 11);
+        ctx.font = 'bold 13px monospace';
+        ctx.fillStyle = m.on ? '#7be382' : '#66707c';
+        ctx.fillText(m.on ? '[ON]' : '[OFF]', px + pw - 62, y);
+      } else if (i === MODS.length) {
+        ctx.fillStyle = sel ? '#e8eef4' : '#b9c2cc';
+        ctx.font = 'bold 13px monospace';
+        ctx.fillText('VEHICLE FORGE', px + 20, y);
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#7d8794';
+        ctx.fillText('cycle spawned vehicle', px + 20, y + 11);
+        ctx.font = 'bold 12px monospace';
+        ctx.fillStyle = '#ffd23f';
+        ctx.fillText(FORGE[G.forgeIdx].name, px + pw - 176, y);
+      } else {
+        ctx.fillStyle = sel ? '#e8eef4' : '#b9c2cc';
+        ctx.font = 'bold 13px monospace';
+        ctx.fillText('WARDROBE', px + 20, y);
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#7d8794';
+        ctx.fillText('cycle unit plating (decoded closet menu)', px + 20, y + 11);
+        ctx.font = 'bold 12px monospace';
+        ctx.fillStyle = '#ffd23f';
+        ctx.fillText(OUTFITS[G.outfitIdx].name, px + pw - 176, y);
+      }
+    }
   }
 
   // countdown
@@ -1516,6 +1740,8 @@ function drawPassed() {
     `TOP SPEED     ${Math.round(G.stats.top / 4.4)} MPH`,
     `COLLISIONS    ${G.stats.hits}`,
     `${BRAND} JARS  ${jars}/${JARS.length}`,
+    `STARLET FARE  ${G.stats.fareRescued ? 'RESCUED' : 'MISSED'}`,
+    `MODS          ${G.stats.modsUsed ? 'USED' : 'CLEAN RUN'}`,
     '',
     'NEXT CONTRACT DECODED: Z-TYPE // LOCKUP // HAWICK',
   ];
@@ -1566,10 +1792,13 @@ requestAnimationFrame(frame);
 
 // ---------- debug / test hooks ----------
 window.__ra = {
-  G, PHASE, enterPhase, update,
+  G, PHASE, enterPhase, update, MODS, FORGE, OUTFITS,
+  toggleMod, applyForge, cycleOutfit,
   teleport(x, y) { const p = G.player; p.x = x; p.y = y; p.px = x; p.py = y; p.speed = 0; },
   walkTo(x, y) { G.walker.x = x; G.walker.y = y; },
   pressE() { pressed.KeyE = true; },
+  press(code) { pressed[code] = true; },
+  setKey(code, down) { keys[code] = !!down; },
   step(dt) { update(dt || 1 / 60); },
 };
 
