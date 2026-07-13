@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>U.S. Robotic Army — Vice Patrol</title>
+<style>
+  html, body { margin:0; padding:0; height:100%; background:#0b0f0a; overflow:hidden; font-family:"Segoe UI",system-ui,sans-serif; }
+  canvas { display:block; }
+  #hud { position:fixed; top:14px; left:14px; color:#e7efe0; z-index:5; pointer-events:none; }
+  #hud .panel {
+    background:rgba(11,15,10,0.78); border:1px solid #2c3a20; border-radius:10px;
+    padding:10px 14px; margin-bottom:8px; min-width:230px;
+  }
+  #hud .mission b { color:#b7d34a; }
+  #hud .stars { color:#ff5c5c; letter-spacing:2px; }
+  #season {
+    position:fixed; top:14px; right:14px; z-index:5; color:#e7efe0; text-align:right; pointer-events:none;
+    background:rgba(11,15,10,0.78); border:1px solid #2c3a20; border-radius:10px; padding:10px 14px;
+  }
+  #season .name { font-size:1.1rem; font-weight:700; }
+  #season .fx { color:#9db081; font-size:0.75rem; }
+  #feed {
+    position:fixed; left:14px; bottom:14px; z-index:5; color:#9db081; font-size:0.8rem; pointer-events:none; max-width:420px;
+  }
+  #feed .msg {
+    background:rgba(11,15,10,0.78); border:1px solid #2c3a20; border-radius:8px;
+    padding:6px 10px; margin-top:6px;
+  }
+  #feed .msg b { color:#b7d34a; }
+  #controls {
+    position:fixed; right:14px; bottom:14px; z-index:5; color:#9db081; font-size:0.75rem; text-align:right;
+    background:rgba(11,15,10,0.78); border:1px solid #2c3a20; border-radius:8px; padding:8px 12px; pointer-events:none;
+  }
+  #banner {
+    position:fixed; top:40%; left:0; right:0; text-align:center; z-index:6; pointer-events:none;
+    color:#fff; font-size:2rem; font-weight:800; text-shadow:0 2px 12px #000; opacity:0; transition:opacity .3s;
+  }
+  a.back { position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:5; color:#9db081; font-size:0.75rem; text-decoration:none;
+    background:rgba(11,15,10,0.78); border:1px solid #2c3a20; border-radius:8px; padding:6px 10px; }
+  a.back:hover { color:#b7d34a; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud">
+  <div class="panel mission">TARGET: <b id="target">—</b><br/>Drive close &amp; hold <b>SPACE</b> to scan</div>
+  <div class="panel">SCORE <b id="score">0</b> &nbsp;|&nbsp; WANTED <span class="stars" id="stars"></span></div>
+</div>
+<div id="season"><div class="name" id="seasonName">SUMMER</div><div class="fx" id="seasonFx"></div></div>
+<div id="feed"></div>
+<div id="controls">WASD / Arrows — drive<br/>SPACE — scan vehicle<br/>Escape police by outrunning them</div>
+<div id="banner"></div>
+<a class="back" href="index.html">&larr; back to base</a>
+
+<script>
+(() => {
+"use strict";
+const cvs = document.getElementById('game');
+const ctx = cvs.getContext('2d');
+let VW = 0, VH = 0;
+function resize(){ VW = cvs.width = innerWidth; VH = cvs.height = innerHeight; }
+addEventListener('resize', resize); resize();
+
+// ---------- world ----------
+const WORLD = 2400;                 // wrapped square world
+const ROAD_GAP = 300, ROAD_W = 96;
+const wrap = v => ((v % WORLD) + WORLD) % WORLD;
+// shortest wrapped delta
+const wdel = (a, b) => { let d = a - b; if (d > WORLD/2) d -= WORLD; if (d < -WORLD/2) d += WORLD; return d; };
+const dist = (ax, ay, bx, by) => Math.hypot(wdel(ax,bx), wdel(ay,by));
+const onRoad = v => Math.abs(wrap(v) % ROAD_GAP - ROAD_GAP/2) > ROAD_GAP/2 - ROAD_W/2 ? false : true;
+const nearestLane = v => Math.round((v - ROAD_GAP/2) / ROAD_GAP) * ROAD_GAP + ROAD_GAP/2;
+
+// ---------- seasons (from the "Seasonal Changes" blueprint) ----------
+const SEASONS = [
+  { name:'SUMMER', fx:'Heat shimmer · beach crowds · dry grip', grip:1.00, sky:'rgba(255,190,80,0.06)',  ground:'#173417', particles:'none',  npcDensity:26 },
+  { name:'AUTUMN', fx:'Wet streets · falling leaves · slippery', grip:0.82, sky:'rgba(214,120,40,0.10)', ground:'#2b2413', particles:'leaf',  npcDensity:22 },
+  { name:'WINTER', fx:'Snow cover · icy car physics · fog',      grip:0.58, sky:'rgba(190,215,255,0.14)',ground:'#3a4048', particles:'snow',  npcDensity:16 },
+  { name:'SPRING', fx:'Fresh rain · puddles · blossoms',         grip:0.80, sky:'rgba(120,200,140,0.08)',ground:'#1c3a20', particles:'rain',  npcDensity:22 },
+];
+const SEASON_LEN = 45; // seconds each
+let seasonT = 0, seasonIdx = 0;
+
+// ---------- vehicle classes (recognition targets — ties into the project) ----------
+const CLASSES = [
+  { id:'CAR',       w:34, h:18, color:'#c9c9c9', pts:50,  weight:5 },
+  { id:'VAN',       w:40, h:20, color:'#8fb3d9', pts:75,  weight:3 },
+  { id:'TRUCK',     w:52, h:22, color:'#d9a05b', pts:100, weight:3 },
+  { id:'PICKUP',    w:40, h:19, color:'#a8d98f', pts:75,  weight:3 },
+  { id:'AMBULANCE', w:44, h:21, color:'#f2f2f2', pts:150, weight:1 },
+  { id:'HUMVEE',    w:42, h:22, color:'#6b7a4f', pts:200, weight:2 },
+  { id:'TANK',      w:56, h:26, color:'#4f5a3c', pts:400, weight:1 },
+];
+function pickClass(){
+  const total = CLASSES.reduce((s,c)=>s+c.weight,0);
+  let r = Math.random()*total;
+  for (const c of CLASSES){ if ((r -= c.weight) <= 0) return c; }
+  return CLASSES[0];
+}
+
+// ---------- entities ----------
+const player = { x:ROAD_GAP/2, y:ROAD_GAP/2, a:0, v:0 };
+let npcs = [], police = [], particles = [];
+let score = 0, heat = 0, target = null, scanT = 0, escapeT = 0;
+
+function spawnNPC(){
+  const cls = pickClass();
+  const horiz = Math.random() < 0.5;
+  const lane = nearestLane(Math.random()*WORLD);
+  const pos = Math.random()*WORLD;
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  const off = dir * ROAD_W/4;
+  return {
+    cls, horiz, dir,
+    x: horiz ? pos : lane + (horiz ? 0 : -off),
+    y: horiz ? lane + off : pos,
+    speed: 40 + Math.random()*50,
+    scanned: false,
+  };
+}
+function syncNPCCount(){
+  const want = SEASONS[seasonIdx].npcDensity;
+  while (npcs.length < want) npcs.push(spawnNPC());
+  if (npcs.length > want) npcs.length = want;
+}
+function newTarget(){
+  target = CLASSES[Math.floor(Math.random()*CLASSES.length)];
+  document.getElementById('target').textContent = target.id;
+  feed(`New mission: scan a <b>${target.id}</b> (+${target.pts})`);
+}
+function spawnPolice(){
+  const ang = Math.random()*Math.PI*2;
+  police.push({ x:wrap(player.x + Math.cos(ang)*900), y:wrap(player.y + Math.sin(ang)*900), a:0, v:0 });
+}
+
+// ---------- feed (in-game "social media" from the blueprint) ----------
+const feedEl = document.getElementById('feed');
+function feed(html){
+  const d = document.createElement('div');
+  d.className = 'msg'; d.innerHTML = html;
+  feedEl.appendChild(d);
+  while (feedEl.children.length > 4) feedEl.removeChild(feedEl.firstChild);
+  setTimeout(()=>{ if (d.parentNode) d.parentNode.removeChild(d); }, 9000);
+}
+const bannerEl = document.getElementById('banner');
+let bannerT = 0;
+function banner(text, color){
+  bannerEl.textContent = text; bannerEl.style.color = color || '#fff';
+  bannerEl.style.opacity = 1; bannerT = 2.2;
+}
+
+// ---------- input ----------
+const keys = {};
+addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
+addEventListener('keyup',   e => { keys[e.code] = false; });
+
+// ---------- update ----------
+function update(dt){
+  // seasons
+  seasonT += dt;
+  if (seasonT >= SEASON_LEN){
+    seasonT = 0; seasonIdx = (seasonIdx+1) % SEASONS.length;
+    const s = SEASONS[seasonIdx];
+    document.getElementById('seasonName').textContent = s.name;
+    document.getElementById('seasonFx').textContent = s.fx;
+    feed(`Season changed: <b>${s.name}</b> — ${s.fx}`);
+    syncNPCCount();
+  }
+  const season = SEASONS[seasonIdx];
+
+  // player physics — grip changes with season (icy winter, slippery autumn)
+  const grip = season.grip;
+  const up = keys.KeyW || keys.ArrowUp, dn = keys.KeyS || keys.ArrowDown;
+  const lf = keys.KeyA || keys.ArrowLeft, rt = keys.KeyD || keys.ArrowRight;
+  const accel = 260, maxV = 340, drag = 0.985;
+  if (up) player.v += accel*dt;
+  if (dn) player.v -= accel*0.8*dt;
+  player.v *= Math.pow(drag, dt*60 * (2 - grip));
+  player.v = Math.max(-maxV*0.4, Math.min(maxV, player.v));
+  const steer = 2.4 * grip * Math.min(1, Math.abs(player.v)/90) * (player.v < 0 ? -1 : 1);
+  if (lf) player.a -= steer*dt;
+  if (rt) player.a += steer*dt;
+  player.x = wrap(player.x + Math.cos(player.a)*player.v*dt);
+  player.y = wrap(player.y + Math.sin(player.a)*player.v*dt);
+  // off-road slowdown
+  if (!onRoad(player.x) && !onRoad(player.y)) player.v *= Math.pow(0.94, dt*60);
+
+  // NPCs cruise their lanes
+  for (const n of npcs){
+    const sp = n.speed * (season.name === 'WINTER' ? 0.7 : 1) * n.dir;
+    if (n.horiz) n.x = wrap(n.x + sp*dt); else n.y = wrap(n.y + sp*dt);
+    // collision with player -> bump + heat
+    if (dist(n.x,n.y,player.x,player.y) < 30){
+      player.v *= -0.4;
+      heat = Math.min(5, heat + 0.5);
+      banner('COLLISION! Heat rising', '#ff5c5c');
+      n.x = wrap(n.x + (n.horiz ? 80*n.dir : 0));
+      n.y = wrap(n.y + (n.horiz ? 0 : 80*n.dir));
+    }
+  }
+
+  // scanning
+  scanT = keys.Space ? scanT + dt : 0;
+  if (scanT > 0.9){
+    scanT = 0;
+    let best = null, bd = 140;
+    for (const n of npcs){
+      const d = dist(n.x,n.y,player.x,player.y);
+      if (d < bd && !n.scanned){ bd = d; best = n; }
+    }
+    if (best){
+      best.scanned = true;
+      if (best.cls.id === target.id){
+        score += best.cls.pts;
+        banner(`${best.cls.id} IDENTIFIED +${best.cls.pts}`, '#b7d34a');
+        feed(`Confirmed <b>${best.cls.id}</b> · dataset +1 · score ${score+0}`);
+        newTarget();
+      } else {
+        heat = Math.min(5, heat + 1);
+        banner(`WRONG CLASS: ${best.cls.id} — POLICE ALERTED`, '#ff5c5c');
+        feed(`Misidentification (<b>${best.cls.id}</b>) — patrol dispatched`);
+      }
+    }
+  }
+
+  // police chase (from the "Police Chases" blueprint)
+  const wantCops = Math.floor(heat);
+  while (police.length < wantCops) spawnPolice();
+  while (police.length > wantCops) police.pop();
+  let anyClose = false;
+  for (const p of police){
+    const ta = Math.atan2(wdel(player.y,p.y), wdel(player.x,p.x));
+    let da = ta - p.a; while (da > Math.PI) da -= 2*Math.PI; while (da < -Math.PI) da += 2*Math.PI;
+    p.a += Math.max(-2.2*dt, Math.min(2.2*dt, da));
+    p.v = Math.min(300, p.v + 220*dt);
+    p.x = wrap(p.x + Math.cos(p.a)*p.v*dt);
+    p.y = wrap(p.y + Math.sin(p.a)*p.v*dt);
+    const d = dist(p.x,p.y,player.x,player.y);
+    if (d < 700) anyClose = true;
+    if (d < 26){
+      banner('BUSTED — fined 200', '#ff5c5c');
+      feed('Unit intercepted you. <b>-200</b> and released.');
+      score = Math.max(0, score - 200);
+      heat = 0; police.length = 0;
+      break;
+    }
+  }
+  if (heat > 0){
+    escapeT = anyClose ? 0 : escapeT + dt;
+    if (escapeT > 8){
+      escapeT = 0; heat = Math.max(0, heat - 1);
+      if (heat === 0){ banner('CHASE ESCAPED', '#b7d34a'); feed('You lost the patrol. Heat cleared.'); }
+    }
+  }
+
+  // weather particles (screen space)
+  const kind = season.particles;
+  if (kind !== 'none' && particles.length < 120){
+    particles.push({ x:Math.random()*VW, y:-10, vy: kind==='rain'?520: kind==='snow'?60:40, vx: kind==='leaf'? (Math.random()*60-30) : (kind==='snow'? Math.random()*30-15 : 0), kind });
+  }
+  for (const pt of particles){ pt.x += pt.vx*dt; pt.y += pt.vy*dt; }
+  particles = particles.filter(pt => pt.y < VH+12 && pt.kind === kind);
+
+  // banner fade
+  if (bannerT > 0){ bannerT -= dt; if (bannerT <= 0) bannerEl.style.opacity = 0; }
+
+  // hud
+  document.getElementById('score').textContent = score;
+  document.getElementById('stars').textContent = '★'.repeat(Math.floor(heat)) + '☆'.repeat(5-Math.floor(heat));
+}
+
+// ---------- draw ----------
+function drawVehicle(x, y, ang, w, h, color, isPolice, scanned){
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(ang);
+  ctx.fillStyle = color;
+  ctx.fillRect(-w/2, -h/2, w, h);
+  ctx.fillStyle = 'rgba(20,25,35,0.85)';
+  ctx.fillRect(-w/6, -h/2+3, w/3, h-6); // cabin
+  if (isPolice){
+    ctx.fillStyle = (performance.now()%400 < 200) ? '#ff4040' : '#4090ff';
+    ctx.fillRect(-4, -h/2-3, 8, 3);
+  }
+  if (scanned){
+    ctx.strokeStyle = 'rgba(183,211,74,0.9)'; ctx.lineWidth = 2;
+    ctx.strokeRect(-w/2-3, -h/2-3, w+6, h+6);
+  }
+  ctx.restore();
+}
+
+function draw(){
+  const season = SEASONS[seasonIdx];
+  const camX = player.x - VW/2, camY = player.y - VH/2;
+  // ground
+  ctx.fillStyle = season.ground; ctx.fillRect(0,0,VW,VH);
+
+  // roads (world is wrapped; draw all lanes crossing the view)
+  ctx.fillStyle = season.name === 'WINTER' ? '#5b6470' : '#2a2d31';
+  for (let gx = Math.floor(camX/ROAD_GAP)*ROAD_GAP; gx < camX+VW+ROAD_GAP; gx += ROAD_GAP){
+    ctx.fillRect(gx + ROAD_GAP/2 - ROAD_W/2 - camX, 0, ROAD_W, VH);
+  }
+  for (let gy = Math.floor(camY/ROAD_GAP)*ROAD_GAP; gy < camY+VH+ROAD_GAP; gy += ROAD_GAP){
+    ctx.fillRect(0, gy + ROAD_GAP/2 - ROAD_W/2 - camY, VW, ROAD_W);
+  }
+  // lane dashes
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.setLineDash([18,22]); ctx.lineWidth = 2;
+  for (let gx = Math.floor(camX/ROAD_GAP)*ROAD_GAP; gx < camX+VW+ROAD_GAP; gx += ROAD_GAP){
+    const sx = gx + ROAD_GAP/2 - camX;
+    ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, VH); ctx.stroke();
+  }
+  for (let gy = Math.floor(camY/ROAD_GAP)*ROAD_GAP; gy < camY+VH+ROAD_GAP; gy += ROAD_GAP){
+    const sy = gy + ROAD_GAP/2 - camY;
+    ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(VW, sy); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // palms on block corners
+  ctx.fillStyle = season.name==='WINTER' ? '#7d8b6a' : season.name==='AUTUMN' ? '#b07a2a' : '#3f7a33';
+  for (let gx = Math.floor(camX/ROAD_GAP)*ROAD_GAP; gx < camX+VW+ROAD_GAP; gx += ROAD_GAP){
+    for (let gy = Math.floor(camY/ROAD_GAP)*ROAD_GAP; gy < camY+VH+ROAD_GAP; gy += ROAD_GAP){
+      const px = gx + ROAD_GAP - 70 - camX, py = gy + ROAD_GAP - 70 - camY;
+      ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  // draw entity helper with wrap-aware screen position
+  const toScreen = (x,y) => [ wdel(x, player.x) + VW/2, wdel(y, player.y) + VH/2 ];
+  for (const n of npcs){
+    const [sx, sy] = toScreen(n.x, n.y);
+    if (sx < -80 || sx > VW+80 || sy < -80 || sy > VH+80) continue;
+    drawVehicle(sx, sy, n.horiz ? (n.dir>0?0:Math.PI) : (n.dir>0?Math.PI/2:-Math.PI/2), n.cls.w, n.cls.h, n.cls.color, false, n.scanned);
+    // class label when close (recognition overlay)
+    if (dist(n.x,n.y,player.x,player.y) < 160){
+      ctx.fillStyle = n.cls.id === target.id ? '#b7d34a' : 'rgba(231,239,224,0.8)';
+      ctx.font = '10px monospace'; ctx.textAlign = 'center';
+      ctx.fillText(n.cls.id, sx, sy - n.cls.h/2 - 6);
+    }
+  }
+  for (const p of police){
+    const [sx, sy] = toScreen(p.x, p.y);
+    drawVehicle(sx, sy, p.a, 38, 20, '#1a1a1a', true, false);
+  }
+  // player
+  drawVehicle(VW/2, VH/2, player.a, 36, 19, '#b7d34a', false, false);
+  // scan ring
+  if (keys.Space){
+    ctx.strokeStyle = 'rgba(183,211,74,0.6)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(VW/2, VH/2, 140, 0, Math.PI*2); ctx.stroke();
+  }
+
+  // season tint + particles
+  ctx.fillStyle = season.sky; ctx.fillRect(0,0,VW,VH);
+  for (const pt of particles){
+    if (pt.kind === 'rain'){ ctx.strokeStyle='rgba(160,200,255,0.5)'; ctx.beginPath(); ctx.moveTo(pt.x,pt.y); ctx.lineTo(pt.x-2,pt.y+10); ctx.stroke(); }
+    else if (pt.kind === 'snow'){ ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(pt.x,pt.y,2.2,0,Math.PI*2); ctx.fill(); }
+    else { ctx.fillStyle='rgba(214,120,40,0.8)'; ctx.fillRect(pt.x,pt.y,4,3); }
+  }
+
+  // minimap
+  const M = 120, mx = VW - M - 14, my = VH - M - 60;
+  ctx.fillStyle = 'rgba(11,15,10,0.8)'; ctx.fillRect(mx-4,my-4,M+8,M+8);
+  ctx.strokeStyle = '#2c3a20'; ctx.strokeRect(mx-4,my-4,M+8,M+8);
+  const ms = M/WORLD;
+  ctx.fillStyle = '#3a4030';
+  for (let i = ROAD_GAP/2; i < WORLD; i += ROAD_GAP){
+    ctx.fillRect(mx + i*ms - 1, my, 2, M);
+    ctx.fillRect(mx, my + i*ms - 1, M, 2);
+  }
+  for (const n of npcs){
+    ctx.fillStyle = n.cls.id === target.id ? '#b7d34a' : '#777';
+    ctx.fillRect(mx + n.x*ms - 1, my + n.y*ms - 1, 2, 2);
+  }
+  ctx.fillStyle = '#ff5c5c';
+  for (const p of police) ctx.fillRect(mx + p.x*ms - 1.5, my + p.y*ms - 1.5, 3, 3);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(mx + player.x*ms - 2, my + player.y*ms - 2, 4, 4);
+}
+
+// ---------- boot ----------
+document.getElementById('seasonFx').textContent = SEASONS[0].fx;
+syncNPCCount();
+newTarget();
+feed('Welcome to <b>Vice Patrol</b> — recognition training grounds.');
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - last)/1000); last = now;
+  update(dt); draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
