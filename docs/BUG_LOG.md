@@ -39,6 +39,16 @@ Suite is now 41 checks: menu open/close, all seven script mods (god, nitro, bull
 time, ghost, chrome on/off restore, carjack, moon implicitly via physics paths),
 vehicle forge, wardrobe, and the starlet random event (pickup + rescue stat).
 
+## SYSTEM OPTIMIZER pass
+
+| # | Severity | Bug | Fix |
+|---|---|---|---|
+| 13 | Low — flaky test | The carjack check asserted `traffic.length` dropped by one, but the traffic spawner refills the pool within the same tick — the assertion was racy and failed intermittently. | Assert on the takeover signals instead: player paint, player seated at the car's position, and the specific planted car object removed. |
+
+Suite is now 46 checks, adding: mod/optimizer menu mutual exclusion,
+notifications-off muting SYSTEM radio, temp cleanup purging traffic, a restore-point
+save/teleport-away/restore round-trip, and the ultimate-performance preset.
+
 ## Verified clean
 
 - All 25 smoke checks pass: boot → intel → walk → cruise → pull-over → meet →

@@ -76,6 +76,30 @@ The trainer-menu concept itself (toggleable script mods: god mode, nitro, moon
 gravity, slow motion, ghost traffic, paint cycler) is the game's original homage to
 the PC modding scene.
 
+## Fourth decode — the FPS-optimization tutorial
+
+A ~9-minute Windows-for-gaming tuning walkthrough, decoded in 42 scenes: create a
+system restore point first; display tweaks (HDR off, native resolution, max refresh
+rate); notifications off; storage cleanup; Bluetooth off; pointer-precision off;
+Ethernet over Wi-Fi; minimal themes and a solid-color background; uninstalling and
+de-starting unused apps; Game Mode on; hardware-accelerated GPU scheduling; per-app
+graphics priorities; security and update tweaks; the "Ultimate Performance" power
+plan unlocked from a terminal command; hardware acceleration off in background apps;
+%temp% cleanup; and "adjust for best performance" visual effects.
+
+It became the in-game **SYSTEM OPTIMIZER** (`O`) — each decoded tip re-created as a
+working, game-native setting:
+
+| Decoded tip | In the game |
+|---|---|
+| Create a restore point before touching anything | CREATE RESTORE POINT / SYSTEM RESTORE — a real quicksave/load |
+| Game Mode + "best performance" visual effects | GAME MODE — actual low-detail render path |
+| Solid-color desktop background | SOLID DESKTOP — flat ground, still water |
+| Turn off notifications | NOTIFICATIONS toggle (mutes SYSTEM popups) |
+| The tutorial's FPS promise | FPS COUNTER — real measured framerate |
+| %temp% folder cleanup | TEMP CLEANUP — purges background traffic entities |
+| Secret "Ultimate Performance" power plan | ULTIMATE PERFORMANCE — one action flips every setting |
+
 ## Image intel decode
 
 A second source (a social-media comparison image) provided the tech/lore layer:

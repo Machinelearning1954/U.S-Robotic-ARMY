@@ -59,6 +59,14 @@ const FORGE = [
   { name: 'SCOOTER BROTHER',    color: '#c0392b', top: 0.55, acc: 0.80, stripe: false, siren: false, tiny: true },
 ];
 
+// ---------- SYSTEM OPTIMIZER (original take on the decoded FPS-tuning tutorial) ----------
+const OPT = {
+  gameMode: false,      // low-detail rendering: real FPS gains
+  solidDesktop: false,  // flat ground & water, no ripples
+  notifications: true,  // SYSTEM popup subtitles
+  fpsCounter: false,    // measured framerate overlay
+};
+
 // ---------- world layout ----------
 const WORLD = { w: 7200, h: 5000 };
 
@@ -197,7 +205,7 @@ function actionPressed() { return !!(pressed.KeyE || pressed.Enter); }
   if (!el) return;
   if (!('ontouchstart' in window) && navigator.maxTouchPoints === 0) return;
   el.style.display = 'block';
-  const map = { tLeft: 'KeyA', tRight: 'KeyD', tGas: 'KeyW', tBrake: 'KeyS', tAct: 'KeyE', tMod: 'KeyT' };
+  const map = { tLeft: 'KeyA', tRight: 'KeyD', tGas: 'KeyW', tBrake: 'KeyS', tAct: 'KeyE', tMod: 'KeyT', tOpt: 'KeyO' };
   for (const [id, code] of Object.entries(map)) {
     const b = document.getElementById(id);
     if (!b) continue;
@@ -338,6 +346,9 @@ const G = {
   deerDone: false,
   adPlayed: false,
   modMenu: { open: false, idx: 0 },
+  optMenu: { open: false, idx: 0 },
+  restorePoint: null,
+  fps: 60,
   forgeIdx: 0,
   outfitIdx: 0,
   starlet: null, // decoded random event: escort a starlet past the paparazzi
@@ -355,7 +366,59 @@ const PARKED = [
 ];
 
 function say(lines, onDone) { G.modMenu.open = false; G.dialog = { lines, i: 0, timer: 0, onDone }; }
-function radio(s, t) { G.subtitle = { s, t, timer: 5 }; }
+function radio(s, t) {
+  if (s === 'SYSTEM' && !OPT.notifications) return; // optimizer: notifications off
+  G.subtitle = { s, t, timer: 5 };
+}
+
+// gameplay phases where a restore point may be created
+const SAVEABLE = ['WALK', 'CRUISE', 'PULLOVER', 'MEET_DRIVE', 'GAS_DRIVE', 'RACE', 'DELIVER'];
+
+function createRestorePoint() {
+  if (G.dialog || !SAVEABLE.includes(G.phase)) {
+    radio('SYSTEM', 'RESTORE POINT: unavailable mid-scene. Try again on the road.');
+    return false;
+  }
+  G.restorePoint = {
+    phase: G.phase,
+    onFoot: G.onFoot,
+    player: { x: G.player.x, y: G.player.y, angle: G.player.angle, color: G.player.baseColor || G.player.color },
+    walker: { x: G.walker.x, y: G.walker.y },
+  };
+  radio('SYSTEM', 'RESTORE POINT created. Chassis are temperamental — now you are covered.');
+  return true;
+}
+
+function systemRestore() {
+  if (!G.restorePoint) {
+    radio('SYSTEM', 'SYSTEM RESTORE: no restore point on record.');
+    return false;
+  }
+  G.checkpoint = {
+    phase: G.restorePoint.phase,
+    onFoot: G.restorePoint.onFoot,
+    player: { ...G.restorePoint.player },
+    walker: { ...G.restorePoint.walker },
+  };
+  restoreCheckpoint();
+  radio('SYSTEM', 'SYSTEM RESTORE complete. Hopefully you never need it again.');
+  return true;
+}
+
+function tempCleanup() {
+  const n = G.traffic.length;
+  G.traffic.length = 0;
+  radio('SYSTEM', `TEMP CLEANUP: ${n} background processes deleted. Get in the habit of doing this.`);
+  return n;
+}
+
+function ultimatePerformance() {
+  OPT.gameMode = true;
+  OPT.solidDesktop = true;
+  OPT.notifications = false;
+  OPT.fpsCounter = true;
+  G.subtitle = { s: 'SYSTEM', t: 'ULTIMATE PERFORMANCE plan unlocked via the secret incantation. All effects minimized.', timer: 5 };
+}
 
 function toggleMod(id) {
   const m = MODS.find(m => m.id === id);
@@ -568,7 +631,7 @@ function updateTraffic(dt) {
 function updatePlayerCar(dt, locked) {
   const p = G.player;
   p.px = p.x; p.py = p.y;
-  locked = locked || G.modMenu.open;
+  locked = locked || G.modMenu.open || G.optMenu.open;
   const thr = locked ? 0 : throttleInput();
   const steer = locked ? 0 : axisSteer();
   const hb = !locked && keys.Space;
@@ -818,6 +881,33 @@ function update(dt) {
   // MOD TERMINAL input
   if (pressed.KeyT && !G.dialog && ![PHASE.BOOT, PHASE.INTEL, PHASE.PASSED, PHASE.FAILED].includes(G.phase)) {
     G.modMenu.open = !G.modMenu.open;
+    if (G.modMenu.open) G.optMenu.open = false;
+  }
+  // SYSTEM OPTIMIZER input
+  if (pressed.KeyO && !G.dialog && ![PHASE.BOOT, PHASE.INTEL, PHASE.PASSED, PHASE.FAILED].includes(G.phase)) {
+    G.optMenu.open = !G.optMenu.open;
+    if (G.optMenu.open) G.modMenu.open = false;
+  }
+  if (G.optMenu.open) {
+    const om = G.optMenu;
+    const rows = 8; // 4 toggles + 4 actions
+    if (pressed.ArrowUp || pressed.KeyW) om.idx = (om.idx + rows - 1) % rows;
+    if (pressed.ArrowDown || pressed.KeyS) om.idx = (om.idx + 1) % rows;
+    if (pressed.KeyE || pressed.Enter) {
+      switch (om.idx) {
+        case 0: OPT.gameMode = !OPT.gameMode; break;
+        case 1: OPT.solidDesktop = !OPT.solidDesktop; break;
+        case 2: OPT.notifications = !OPT.notifications; break;
+        case 3: OPT.fpsCounter = !OPT.fpsCounter; break;
+        case 4: createRestorePoint(); break;
+        case 5: systemRestore(); break;
+        case 6: tempCleanup(); break;
+        case 7: ultimatePerformance(); break;
+      }
+    }
+    delete pressed.KeyE; delete pressed.Enter;
+    delete pressed.ArrowUp; delete pressed.ArrowDown;
+    delete pressed.KeyW; delete pressed.KeyS;
   }
   if (G.modMenu.open) {
     const mm = G.modMenu;
@@ -1064,8 +1154,10 @@ function drawCar(c) {
   ctx.rotate(c.angle);
   // shadow
   const cs = c.tiny ? 0.62 : 1;
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  ctx.beginPath(); ctx.ellipse(0, 3, 26 * cs, 15 * cs, 0, 0, TAU); ctx.fill();
+  if (!OPT.gameMode) {
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath(); ctx.ellipse(0, 3, 26 * cs, 15 * cs, 0, 0, TAU); ctx.fill();
+  }
   drawCarShape(c, 46 * cs, 24 * cs);
   // exhaust flame
   if (c.flame > 0.3) {
@@ -1097,14 +1189,16 @@ function drawWorld() {
     const [wx, wy] = worldToScreen(WATER.x, WATER.y);
     ctx.fillStyle = `rgb(${Math.round(lerp(46, 40, dl))},${Math.round(lerp(102, 70, dl))},${Math.round(lerp(148, 120, dl))})`;
     ctx.fillRect(wx, wy, WATER.w, WATER.h);
-    // ripples
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 14; i++) {
-      const yy = ((i * 380 + G.time * 22) % WORLD.h);
-      const [rx, ry] = worldToScreen(WATER.x + 80 + (i % 4) * 240, yy);
-      if (ry > -10 && ry < VH + 10) {
-        ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + 70, ry); ctx.stroke();
+    // ripples (skipped on the optimizer's solid-desktop setting)
+    if (!OPT.solidDesktop) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 14; i++) {
+        const yy = ((i * 380 + G.time * 22) % WORLD.h);
+        const [rx, ry] = worldToScreen(WATER.x + 80 + (i % 4) * 240, yy);
+        if (ry > -10 && ry < VH + 10) {
+          ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + 70, ry); ctx.stroke();
+        }
       }
     }
   }
@@ -1189,14 +1283,16 @@ function drawWorld() {
       ctx.fillRect(bx, by, b.w, b.h);
       continue;
     }
-    ctx.fillStyle = '#565d66';
-    ctx.fillRect(bx + 6, by + 8, b.w, b.h); // shadow offset
+    if (!OPT.gameMode) {
+      ctx.fillStyle = '#565d66';
+      ctx.fillRect(bx + 6, by + 8, b.w, b.h); // shadow offset
+    }
     ctx.fillStyle = '#8a9099';
     ctx.fillRect(bx, by, b.w, b.h);
     ctx.fillStyle = '#6f7680';
     ctx.fillRect(bx + 8, by + 8, b.w - 16, b.h - 16);
-    // windows at sunset
-    if (daylight() > 0.6) {
+    // windows at sunset (a visual effect: off in game mode)
+    if (!OPT.gameMode && daylight() > 0.6) {
       ctx.fillStyle = 'rgba(255,214,120,0.5)';
       for (let wx = bx + 16; wx < bx + b.w - 16; wx += 34) {
         for (let wy = by + 16; wy < by + b.h - 16; wy += 40) {
@@ -1214,11 +1310,15 @@ function drawWorld() {
     ctx.lineWidth = 4 * p.s;
     ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 3, py - 26 * p.s); ctx.stroke();
     ctx.fillStyle = '#3f7a3a';
-    for (let i = 0; i < 5; i++) {
-      const a = (i / 5) * TAU + 0.4;
-      ctx.beginPath();
-      ctx.ellipse(px + 3 + Math.cos(a) * 10 * p.s, py - 26 * p.s + Math.sin(a) * 7 * p.s, 12 * p.s, 4.5 * p.s, a, 0, TAU);
-      ctx.fill();
+    if (OPT.gameMode) { // low-detail foliage: one blob instead of five fronds
+      ctx.beginPath(); ctx.arc(px + 3, py - 26 * p.s, 11 * p.s, 0, TAU); ctx.fill();
+    } else {
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * TAU + 0.4;
+        ctx.beginPath();
+        ctx.ellipse(px + 3 + Math.cos(a) * 10 * p.s, py - 26 * p.s + Math.sin(a) * 7 * p.s, 12 * p.s, 4.5 * p.s, a, 0, TAU);
+        ctx.fill();
+      }
     }
   }
 
@@ -1407,8 +1507,8 @@ function drawWorld() {
     ctx.beginPath(); ctx.arc(wx + Math.cos(G.walker.angle) * 5, wy + Math.sin(G.walker.angle) * 5, 3, 0, TAU); ctx.fill();
   }
 
-  // sunset tint overlay
-  if (dl > 0.15) {
+  // sunset tint overlay (a visual effect: off in game mode)
+  if (!OPT.gameMode && dl > 0.15) {
     const a = (dl - 0.15) * 0.4;
     const grad = ctx.createLinearGradient(0, 0, 0, VH);
     grad.addColorStop(0, `rgba(255,120,60,${a * 0.55})`);
@@ -1428,7 +1528,14 @@ function drawHUD() {
   ctx.font = 'bold 13px monospace';
   ctx.fillText('U.S. ROBOTIC ARMY // UNIT FRNK-13 // REPO PROTOCOL 02: "I FOUGHT THE LAW"', 12, 20);
   ctx.fillStyle = '#9aa5b1';
-  ctx.fillText('[T] mods  [M] sound', VW - 168, 20);
+  ctx.fillText('[T] mods  [O] optimize  [M] sound', VW - 280, 20);
+
+  // FPS counter (optimizer)
+  if (OPT.fpsCounter) {
+    ctx.fillStyle = '#7be382';
+    ctx.font = 'bold 13px monospace';
+    ctx.fillText(`${Math.round(G.fps)} FPS`, VW - 348, 20);
+  }
 
   // active-mods badge
   const activeMods = MODS.filter(m => m.on).length;
@@ -1610,6 +1717,49 @@ function drawHUD() {
     }
   }
 
+  // SYSTEM OPTIMIZER overlay
+  if (G.optMenu.open) {
+    const items = [
+      { n: 'GAME MODE',        d: 'low-detail rendering, real FPS',      v: OPT.gameMode ? '[ON]' : '[OFF]', on: OPT.gameMode },
+      { n: 'SOLID DESKTOP',    d: 'flat ground & still water',           v: OPT.solidDesktop ? '[ON]' : '[OFF]', on: OPT.solidDesktop },
+      { n: 'NOTIFICATIONS',    d: 'system popups (off = quieter, faster)', v: OPT.notifications ? '[ON]' : '[OFF]', on: OPT.notifications },
+      { n: 'FPS COUNTER',      d: 'measured framerate overlay',          v: OPT.fpsCounter ? '[ON]' : '[OFF]', on: OPT.fpsCounter },
+      { n: 'CREATE RESTORE POINT', d: 'save your run, right here',       v: G.restorePoint ? '[SAVED]' : '[--]', on: !!G.restorePoint },
+      { n: 'SYSTEM RESTORE',   d: 'load the saved restore point',        v: '[RUN]', on: false },
+      { n: 'TEMP CLEANUP',     d: 'purge background processes (traffic)', v: '[RUN]', on: false },
+      { n: 'ULTIMATE PERFORMANCE', d: 'the secret plan: everything at once', v: '[RUN]', on: false },
+    ];
+    const pw = 350, ph = 66 + items.length * 30;
+    const px = 14, py = 86;
+    ctx.fillStyle = 'rgba(6,10,16,0.92)';
+    roundRect(px, py, pw, ph, 8); ctx.fill();
+    ctx.strokeStyle = '#7be382'; ctx.lineWidth = 1.5;
+    roundRect(px, py, pw, ph, 8); ctx.stroke();
+    ctx.fillStyle = '#7be382';
+    ctx.font = 'bold 15px monospace';
+    ctx.fillText('SYSTEM OPTIMIZER', px + 16, py + 26);
+    ctx.fillStyle = '#9aa5b1';
+    ctx.font = '11px monospace';
+    ctx.fillText('W/S select · E apply · O close', px + 16, py + 44);
+    for (let i = 0; i < items.length; i++) {
+      const y = py + 66 + i * 30;
+      const sel = i === G.optMenu.idx;
+      if (sel) {
+        ctx.fillStyle = 'rgba(123,227,130,0.14)';
+        ctx.fillRect(px + 8, y - 18, pw - 16, 26);
+      }
+      ctx.fillStyle = sel ? '#e8eef4' : '#b9c2cc';
+      ctx.font = 'bold 13px monospace';
+      ctx.fillText(items[i].n, px + 20, y);
+      ctx.font = '10px monospace';
+      ctx.fillStyle = '#7d8794';
+      ctx.fillText(items[i].d, px + 20, y + 11);
+      ctx.font = 'bold 13px monospace';
+      ctx.fillStyle = items[i].on ? '#7be382' : '#66707c';
+      ctx.fillText(items[i].v, px + pw - 76, y);
+    }
+  }
+
   // countdown
   if (G.phase === PHASE.COUNTDOWN) {
     const n = Math.ceil(G.countdown - 0.5);
@@ -1665,6 +1815,7 @@ function drawBoot() {
     'FIELD FOOTAGE DECODE ... 53/53 SCENES',
     'IMAGE INTEL DECODE ..... V-vs-VI SPEC SHEET',
     'SPONSOR DECODE ......... ' + BRAND + ' (5/5 SCENES)',
+    'OPTIMIZER DECODE ....... FPS TUTORIAL (42 SCENES)',
     'MISSION SYNTHESIS ...... COMPLETE',
   ];
   const shown = clamp(Math.floor(G.phaseTime * 2.5) + 1, 1, lines.length);
@@ -1771,8 +1922,10 @@ function drawFailed() {
 // ---------- main loop ----------
 let last = performance.now();
 function frame(now) {
-  const dt = clamp((now - last) / 1000, 0, 0.05);
+  const rawDt = (now - last) / 1000;
+  const dt = clamp(rawDt, 0, 0.05);
   last = now;
+  if (rawDt > 0.0001) G.fps = G.fps * 0.92 + (1 / rawDt) * 0.08;
   update(dt);
 
   ctx.save();
@@ -1792,8 +1945,9 @@ requestAnimationFrame(frame);
 
 // ---------- debug / test hooks ----------
 window.__ra = {
-  G, PHASE, enterPhase, update, MODS, FORGE, OUTFITS,
+  G, PHASE, enterPhase, update, MODS, FORGE, OUTFITS, OPT,
   toggleMod, applyForge, cycleOutfit,
+  createRestorePoint, systemRestore, tempCleanup, ultimatePerformance,
   teleport(x, y) { const p = G.player; p.x = x; p.y = y; p.px = x; p.py = y; p.speed = 0; },
   walkTo(x, y) { G.walker.x = x; G.walker.y = y; },
   pressE() { pressed.KeyE = true; },

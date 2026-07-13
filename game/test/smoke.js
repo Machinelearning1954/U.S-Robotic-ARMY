@@ -222,19 +222,91 @@ function ok(name, cond, extra) {
   });
   ok('wardrobe cycles outfit', outfit);
 
+  // ---- SYSTEM OPTIMIZER ----
+  // menus are mutually exclusive
+  const exclusive = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.press('KeyT'); ra.step(1 / 60);           // open mods
+    ra.press('KeyO'); ra.step(1 / 60);           // open optimizer -> mods must close
+    const optOpen = ra.G.optMenu.open && !ra.G.modMenu.open;
+    ra.press('KeyO'); ra.step(1 / 60);           // close optimizer
+    return optOpen && !ra.G.optMenu.open;
+  });
+  ok('optimizer/mod menus exclusive', exclusive);
+
+  // notifications off suppresses SYSTEM radio
+  const notif = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.OPT.notifications = false;
+    ra.G.subtitle = null;
+    ra.tempCleanup(); // radios a SYSTEM line
+    const suppressed = ra.G.subtitle === null;
+    ra.OPT.notifications = true;
+    return suppressed;
+  });
+  ok('notifications-off mutes SYSTEM radio', notif);
+
+  // temp cleanup purges traffic
+  const cleaned = await page.evaluate(() => {
+    const ra = window.__ra;
+    for (let i = 0; i < 60; i++) ra.step(1 / 60); // let traffic spawn
+    const before = ra.G.traffic.length;
+    ra.tempCleanup();
+    return { before, after: ra.G.traffic.length };
+  });
+  ok('temp cleanup purges traffic', cleaned.before > 0 && cleaned.after === 0, JSON.stringify(cleaned));
+
+  // restore point: save here, wander off, restore back
+  const restore = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.teleport(3000, 2480);
+    const saved = ra.createRestorePoint();
+    ra.teleport(900, 1620);
+    const ran = ra.systemRestore();
+    for (let i = 0; i < 3; i++) ra.step(1 / 60);
+    return { saved, ran, x: ra.G.player.x, y: ra.G.player.y, phase: ra.G.phase };
+  });
+  ok('restore point round-trip', restore.saved && restore.ran &&
+    Math.abs(restore.x - 3000) < 1 && Math.abs(restore.y - 2480) < 1 && restore.phase === 'MEET_DRIVE',
+    JSON.stringify(restore));
+
+  // ultimate performance flips every optimizer setting
+  const ultimate = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.ultimatePerformance();
+    return ra.OPT.gameMode && ra.OPT.solidDesktop && !ra.OPT.notifications && ra.OPT.fpsCounter;
+  });
+  ok('ultimate performance preset', ultimate);
+
+  // game-mode render path draws without errors
+  await page.waitForTimeout(700);
+
+  // reset optimizer so later checks see stock behavior
+  await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.OPT.gameMode = false; ra.OPT.solidDesktop = false;
+    ra.OPT.notifications = true; ra.OPT.fpsCounter = false;
+  });
+
   // carjack protocol: E near a stopped commuter takes the car
+  // (assert on takeover signals — position + paint — not on traffic count, which the
+  //  spawner refills within the same tick)
   const jack = await page.evaluate(() => {
     const ra = window.__ra;
     ra.toggleMod('jack'); ra.step(1 / 60);
-    ra.G.traffic.push({ x: 2400, y: 1695, px: 2400, py: 1695, angle: 0, speed: 0, cruise: 0,
-      color: '#6e5d8c', damage: 0, radius: 21, flame: 0, ai: true,
-      lane: { axis: 'h', pos: 1695, from: 400, to: 6800, sign: 1 } });
-    const n0 = ra.G.traffic.length;
+    const mark = { x: 2400, y: 1695, px: 2400, py: 1695, angle: 0, speed: 0, cruise: 0,
+      color: '#136f9a', damage: 0, radius: 21, flame: 0, ai: true,
+      lane: { axis: 'h', pos: 1695, from: 400, to: 6800, sign: 1 } };
+    ra.G.traffic.push(mark);
     ra.teleport(2400, 1660);
     ra.press('KeyE'); ra.step(1 / 60);
-    return { took: ra.G.traffic.length === n0 - 1, color: ra.G.player.color };
+    return {
+      color: ra.G.player.color,
+      atCar: Math.abs(ra.G.player.x - 2400) < 30 && Math.abs(ra.G.player.y - 1695) < 30,
+      removed: !ra.G.traffic.includes(mark),
+    };
   });
-  ok('carjack takes the vehicle', jack.took && jack.color === '#6e5d8c', JSON.stringify(jack));
+  ok('carjack takes the vehicle', jack.color === '#136f9a' && jack.atCar && jack.removed, JSON.stringify(jack));
 
   // failure + checkpoint restore path
   await page.reload();

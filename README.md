@@ -90,6 +90,22 @@ Mission stats mark the run **MODS USED** vs **CLEAN RUN**. There's also a decode
 random event: a starlet hides near Hayes Auto on the delivery leg — stop for her and
 sneak her past the paparazzi for a bonus stat.
 
+## SYSTEM OPTIMIZER — the FPS-tutorial layer
+
+Press **`O`** to open the optimizer (an original take on the decoded
+Windows-for-gaming tuning guide). Every tweak genuinely works:
+
+| Setting | Effect |
+|---|---|
+| GAME MODE | low-detail rendering — no shadows, lit windows, fronds, or sunset grading |
+| SOLID DESKTOP | flat ground and still water (no ripple animation) |
+| NOTIFICATIONS | toggle SYSTEM popup subtitles |
+| FPS COUNTER | real measured framerate in the header |
+| CREATE RESTORE POINT | manual quicksave of your run ("chassis are temperamental") |
+| SYSTEM RESTORE | load the saved restore point |
+| TEMP CLEANUP | purge background traffic processes |
+| ULTIMATE PERFORMANCE | the secret plan — flips everything at once |
+
 ## Quality
 
 The game ships with a headless Playwright smoke suite that drives **every mission
