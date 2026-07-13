@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.42**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.43**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -250,6 +250,13 @@ biosensing-hardware course documented in
 is now a physical bench — a rig stand, an eight-node cap, and a steadiness bar
 that runs red-to-green as you hold still. Hold position for a few seconds and
 the rig reads clean: RIG CERTIFIED, +25 clout, one-time.
+v0.43 brings the **JSV Maroon Thunder** into the prototype — the fictional
+trimaran assault carrier that's been canon since the base design doc's
+Ironbeach section, now a real landmark just offshore: trimaran hull, flight
+deck, island superstructure, and the signature neon-lit well deck cut into
+the stern. Drive any vehicle into the well deck by water and it banks a raw
+clip — "MAROON THUNDER ROLLS OUT," +50 clout, one-time. No real carrier
+class or hardware is depicted (`PAUDC_Base_Design.md` §Zone 4).
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

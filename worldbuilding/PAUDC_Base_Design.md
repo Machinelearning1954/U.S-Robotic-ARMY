@@ -106,6 +106,13 @@ trimaran assault carrier with a neon-lit well deck players can drive boats strai
 - **Gameplay function:** boat/jet-ski spawn point, smuggler-interdiction missions,
   underwater salvage dives on fictional wrecks, and a ferry that fast-travels players
   along the coast.
+- **Live in the prototype (v0.43):** the Maroon Thunder is a physical landmark just
+  offshore — a trimaran hull (main hull + two outriggers), a flight deck, an island
+  superstructure with a radar mast, and the signature neon-lit well deck cut into the
+  stern. Drive any vehicle into the well deck by water and it banks a raw clip:
+  **"MAROON THUNDER ROLLS OUT," +50 clout**, one-time. No real carrier class, hull
+  form, or hardware is depicted — the trimaran layout and open well deck are the
+  point precisely because no real fleet carrier looks like this.
 - **Vibe:** dockworker NPCs playing dominoes on ammo crates; sound of steel drums
   from a welding crew that moonlights as an actual steel band.
 
