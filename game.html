@@ -49,7 +49,7 @@
 </div>
 <div id="season"><div class="name" id="seasonName">SUMMER</div><div class="fx" id="seasonFx"></div></div>
 <div id="feed"></div>
-<div id="controls">WASD / Arrows — drive<br/>SPACE — scan vehicle<br/>Escape police by outrunning them</div>
+<div id="controls">WASD / Arrows — drive<br/>SPACE — scan vehicle<br/>Escape police by outrunning them<br/><span id="fps" style="color:#b7d34a"></span></div>
 <div id="banner"></div>
 <a class="back" href="index.html">&larr; back to base</a>
 
@@ -82,6 +82,19 @@ const SEASONS = [
 const SEASON_LEN = 45; // seconds each
 let seasonT = 0, seasonIdx = 0;
 
+// ---------- day/night lighting ----------
+const DAY_LEN = 90;              // full day-night cycle in seconds
+let dayT = 0;
+const nightFactor = () => 0.5 - 0.5*Math.cos(dayT/DAY_LEN * 2*Math.PI); // 0 = noon, 1 = midnight
+
+// deterministic per-block randomness (buildings, water, lit windows)
+function hash(ix, iy){
+  let h = (ix*374761393 + iy*668265263) | 0;
+  h = ((h ^ (h >>> 13)) * 1274126177) | 0;
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+}
+const BLOCKS = WORLD / ROAD_GAP;
+
 // ---------- vehicle classes (recognition targets — ties into the project) ----------
 const CLASSES = [
   { id:'CAR',       w:34, h:18, color:'#c9c9c9', pts:50,  weight:5 },
@@ -101,8 +114,21 @@ function pickClass(){
 
 // ---------- entities ----------
 const player = { x:ROAD_GAP/2, y:ROAD_GAP/2, a:0, v:0 };
-let npcs = [], police = [], particles = [];
+let npcs = [], police = [], particles = [], skids = [], peds = [];
 let score = 0, heat = 0, target = null, scanT = 0, escapeT = 0;
+
+function spawnPed(){
+  const horiz = Math.random() < 0.5;
+  const lane = nearestLane(Math.random()*WORLD) + (Math.random()<0.5?-1:1)*(ROAD_W/2 + 12);
+  return {
+    horiz, dir: Math.random()<0.5?1:-1,
+    x: horiz ? Math.random()*WORLD : lane,
+    y: horiz ? lane : Math.random()*WORLD,
+    phase: Math.random()*Math.PI*2,
+    hue: Math.floor(Math.random()*360),
+  };
+}
+while (peds.length < 14) peds.push(spawnPed());
 
 function spawnNPC(){
   const cls = pickClass();
@@ -185,6 +211,34 @@ function update(dt){
   player.y = wrap(player.y + Math.sin(player.a)*player.v*dt);
   // off-road slowdown
   if (!onRoad(player.x) && !onRoad(player.y)) player.v *= Math.pow(0.94, dt*60);
+
+  // day/night clock
+  dayT = (dayT + dt) % DAY_LEN;
+
+  // skid marks: hard steering at speed on a low-grip surface leaves rubber
+  if ((lf || rt) && Math.abs(player.v) > 140 && grip < 0.95){
+    const bx = player.x - Math.cos(player.a)*12, by = player.y - Math.sin(player.a)*12;
+    const side = Math.cos(player.a + Math.PI/2)*7, sideY = Math.sin(player.a + Math.PI/2)*7;
+    skids.push({ x:wrap(bx+side), y:wrap(by+sideY), a:player.a, life:1 });
+    skids.push({ x:wrap(bx-side), y:wrap(by-sideY), a:player.a, life:1 });
+    if (skids.length > 360) skids.splice(0, skids.length-360);
+  }
+  for (const s of skids) s.life -= dt*0.12;
+  skids = skids.filter(s => s.life > 0);
+
+  // pedestrians stroll the sidewalks; hitting one is serious heat
+  for (const pd of peds){
+    const sp = 26 * pd.dir;
+    if (pd.horiz) pd.x = wrap(pd.x + sp*dt); else pd.y = wrap(pd.y + sp*dt);
+    pd.phase += dt*6;
+    if (dist(pd.x,pd.y,player.x,player.y) < 20 && Math.abs(player.v) > 30){
+      heat = Math.min(5, heat + 1.5);
+      score = Math.max(0, score - 100);
+      banner('PEDESTRIAN HIT — -100, HEAT SPIKE', '#ff5c5c');
+      feed('Civilian injured. <b>-100</b> — patrols converging.');
+      Object.assign(pd, spawnPed());
+    }
+  }
 
   // NPCs cruise their lanes
   for (const n of npcs){
@@ -315,6 +369,58 @@ function draw(){
   }
   ctx.setLineDash([]);
 
+  // skid marks (rubber fades with time)
+  for (const s of skids){
+    const [sx, sy] = [ wdel(s.x, player.x) + VW/2, wdel(s.y, player.y) + VH/2 ];
+    if (sx < -20 || sx > VW+20 || sy < -20 || sy > VH+20) continue;
+    ctx.strokeStyle = `rgba(15,15,15,${0.5*s.life})`; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(sx - Math.cos(s.a)*7, sy - Math.sin(s.a)*7);
+    ctx.lineTo(sx + Math.cos(s.a)*7, sy + Math.sin(s.a)*7);
+    ctx.stroke();
+  }
+
+  // environmental detail: buildings & water districts per block (deterministic)
+  const night = nightFactor();
+  const t = performance.now()/1000;
+  for (let gx = Math.floor(camX/ROAD_GAP)*ROAD_GAP; gx < camX+VW+ROAD_GAP; gx += ROAD_GAP){
+    for (let gy = Math.floor(camY/ROAD_GAP)*ROAD_GAP; gy < camY+VH+ROAD_GAP; gy += ROAD_GAP){
+      const bwx = ((Math.round(wrap(gx)/ROAD_GAP)) % BLOCKS + BLOCKS) % BLOCKS;
+      const bwy = ((Math.round(wrap(gy)/ROAD_GAP)) % BLOCKS + BLOCKS) % BLOCKS;
+      const r = hash(bwx, bwy);
+      const x0 = gx + ROAD_GAP/2 + ROAD_W/2 - camX, y0 = gy + ROAD_GAP/2 + ROAD_W/2 - camY;
+      const inner = ROAD_GAP - ROAD_W;
+      if (r < 0.16){
+        // water block with animated waves
+        ctx.fillStyle = season.name === 'WINTER' ? '#5d7b96' : '#1d4e6e';
+        ctx.fillRect(x0, y0, inner, inner);
+        ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1.5;
+        for (let wy = 0; wy < 4; wy++){
+          const yy = y0 + 20 + wy*50 + Math.sin(t*1.4 + bwx + wy)*5;
+          ctx.beginPath(); ctx.moveTo(x0+8, yy); ctx.lineTo(x0+inner-8, yy); ctx.stroke();
+        }
+      } else if (r < 0.75){
+        // 1-2 buildings with window grids (lit at night)
+        const nb = r < 0.45 ? 1 : 2;
+        for (let b = 0; b < nb; b++){
+          const rb = hash(bwx*3 + b + 1, bwy*7 + b);
+          const bw = 60 + rb*60, bh = 60 + hash(bwy+b, bwx)*60;
+          const bx = x0 + 18 + (b===1 ? inner/2 : 0) + rb*20;
+          const by = y0 + 18 + hash(bwx+b, bwy+9)*30;
+          ctx.fillStyle = '#20261c';
+          ctx.fillRect(bx, by, bw, bh);
+          ctx.strokeStyle = '#333d2b'; ctx.lineWidth = 3;
+          ctx.strokeRect(bx, by, bw, bh);
+          for (let wx = 0; wx < 4; wx++) for (let wy = 0; wy < 3; wy++){
+            const lit = night > 0.35 && hash(bwx*13+wx+b, bwy*17+wy) > 0.5;
+            ctx.fillStyle = lit ? 'rgba(255,214,120,0.9)' : 'rgba(120,130,110,0.25)';
+            ctx.fillRect(bx + 8 + wx*(bw-16)/4 , by + 8 + wy*(bh-16)/3, 7, 7);
+          }
+        }
+      }
+    }
+  }
+
   // palms on block corners
   ctx.fillStyle = season.name==='WINTER' ? '#7d8b6a' : season.name==='AUTUMN' ? '#b07a2a' : '#3f7a33';
   for (let gx = Math.floor(camX/ROAD_GAP)*ROAD_GAP; gx < camX+VW+ROAD_GAP; gx += ROAD_GAP){
@@ -326,9 +432,18 @@ function draw(){
 
   // draw entity helper with wrap-aware screen position
   const toScreen = (x,y) => [ wdel(x, player.x) + VW/2, wdel(y, player.y) + VH/2 ];
+  const wet = season.name === 'AUTUMN' || season.name === 'SPRING';
+  const reflect = (sx, sy, w, color) => {
+    if (!wet) return;
+    ctx.save(); ctx.globalAlpha = 0.18 + 0.15*night;
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.ellipse(sx, sy + 14, w*0.6, 6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  };
   for (const n of npcs){
     const [sx, sy] = toScreen(n.x, n.y);
     if (sx < -80 || sx > VW+80 || sy < -80 || sy > VH+80) continue;
+    reflect(sx, sy, n.cls.w, n.cls.color);
     drawVehicle(sx, sy, n.horiz ? (n.dir>0?0:Math.PI) : (n.dir>0?Math.PI/2:-Math.PI/2), n.cls.w, n.cls.h, n.cls.color, false, n.scanned);
     // class label when close (recognition overlay)
     if (dist(n.x,n.y,player.x,player.y) < 160){
@@ -339,14 +454,60 @@ function draw(){
   }
   for (const p of police){
     const [sx, sy] = toScreen(p.x, p.y);
+    reflect(sx, sy, 38, '#4090ff');
     drawVehicle(sx, sy, p.a, 38, 20, '#1a1a1a', true, false);
   }
+  // pedestrians: two-tone walkers with a leg-swing animation
+  for (const pd of peds){
+    const [sx, sy] = toScreen(pd.x, pd.y);
+    if (sx < -20 || sx > VW+20 || sy < -20 || sy > VH+20) continue;
+    const swing = Math.sin(pd.phase)*3;
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(sx-2 + (pd.horiz?swing:0), sy-2 + (pd.horiz?0:swing), 3, 6); // legs
+    ctx.fillStyle = `hsl(${pd.hue},40%,60%)`;
+    ctx.beginPath(); ctx.arc(sx, sy-4, 4, 0, Math.PI*2); ctx.fill();        // body/head
+  }
   // player
+  reflect(VW/2, VH/2, 36, '#b7d34a');
   drawVehicle(VW/2, VH/2, player.a, 36, 19, '#b7d34a', false, false);
   // scan ring
   if (keys.Space){
     ctx.strokeStyle = 'rgba(183,211,74,0.6)'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(VW/2, VH/2, 140, 0, Math.PI*2); ctx.stroke();
+  }
+
+  // lighting pass: darkness overlay, then additive light sources
+  if (night > 0.05){
+    ctx.fillStyle = `rgba(8,12,34,${0.55*night})`;
+    ctx.fillRect(0,0,VW,VH);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const glow = (x, y, r, rgb, a) => {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(${rgb},${a*night})`);
+      g.addColorStop(1, `rgba(${rgb},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+    };
+    // streetlamps at every intersection
+    for (let gx = Math.floor(camX/ROAD_GAP)*ROAD_GAP; gx < camX+VW+ROAD_GAP; gx += ROAD_GAP){
+      for (let gy = Math.floor(camY/ROAD_GAP)*ROAD_GAP; gy < camY+VH+ROAD_GAP; gy += ROAD_GAP){
+        glow(gx + ROAD_GAP/2 - camX, gy + ROAD_GAP/2 - camY, 60, '255,205,110', 0.26);
+      }
+    }
+    // headlights: player + NPCs + police
+    glow(VW/2 + Math.cos(player.a)*42, VH/2 + Math.sin(player.a)*42, 70, '255,245,200', 0.5);
+    for (const n of npcs){
+      const [sx, sy] = toScreen(n.x, n.y);
+      if (sx < -100 || sx > VW+100 || sy < -100 || sy > VH+100) continue;
+      const na = n.horiz ? (n.dir>0?0:Math.PI) : (n.dir>0?Math.PI/2:-Math.PI/2);
+      glow(sx + Math.cos(na)*34, sy + Math.sin(na)*34, 46, '255,240,190', 0.35);
+    }
+    for (const p of police){
+      const [sx, sy] = toScreen(p.x, p.y);
+      glow(sx + Math.cos(p.a)*36, sy + Math.sin(p.a)*36, 55, '200,220,255', 0.45);
+    }
+    ctx.restore();
   }
 
   // season tint + particles
@@ -382,13 +543,20 @@ document.getElementById('seasonFx').textContent = SEASONS[0].fx;
 syncNPCCount();
 newTarget();
 feed('Welcome to <b>Vice Patrol</b> — recognition training grounds.');
-let last = performance.now();
+let last = performance.now(), fpsEma = 60, fpsTick = 0;
 function loop(now){
   const dt = Math.min(0.05, (now - last)/1000); last = now;
   update(dt); draw();
+  if (dt > 0) fpsEma = fpsEma*0.95 + (1/dt)*0.05;
+  if ((fpsTick += dt) > 0.5){
+    fpsTick = 0;
+    document.getElementById('fps').textContent = `NEXT-GEN ${Math.round(fpsEma)} FPS · ${nightFactor() > 0.5 ? 'NIGHT' : 'DAY'}`;
+  }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
+// dev hook for automated verification
+window.__vp = { setNight(){ dayT = DAY_LEN/2; }, setDay(){ dayT = 0; } };
 })();
 </script>
 </body>

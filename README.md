@@ -35,6 +35,10 @@ of GTA 6 feature infographics supplied as reference (mechanics only — no copyr
 - **Police chases** — misidentifications and collisions raise your wanted level; patrol cars pursue until you outrun them
 - **Full seasonal changes** — SUMMER / AUTUMN / WINTER / SPRING rotate live, changing visuals, weather particles (leaves, snow, rain), traffic density, and car grip (icy winter physics)
 - **In-game feed** — a social-media-style ticker reporting missions, seasons, and chases
+- **Graphics & technology** — day/night cycle with headlights, streetlamps and lit building
+  windows; wet-road reflections in autumn/spring; skid marks when drifting; buildings and
+  water districts for environmental detail; animated pedestrians (hitting one spikes your
+  wanted level); live FPS readout
 
 Controls: WASD / arrows to drive, hold SPACE to scan. Launch it from the landing page's
 "Play Vice Patrol" button or open `game.html` directly.
