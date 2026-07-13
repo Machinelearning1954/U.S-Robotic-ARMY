@@ -451,6 +451,20 @@ looping, homesick. The Alexandria's answer is a class, not a gadget:
   home on memory and math alone.
 - **The Duppy Compass Cup** — monthly race: SkyGrid switched off, jammers on
   (the DFS "Static Choir" bubble from the spec tree), first drone home wins.
+
+**Operation Quiet Hall — live in the prototype (v0.45).** A one-off mission for
+an original PAUDC special-detachment op (no real unit, designation, or
+historical operation is depicted): a Barometer Syndicate cell has holed up in
+the Alexandria's archive wing after a break-in. Reach all three watch posts
+around the hall on foot, slow and quiet — press **Y** near the building to
+start, hold under a walking pace at each post for a beat to clear it. Move too
+fast between posts and the op aborts (blown cover, no penalty, just start
+again). Clear all three and the mission resolves clean: **"RECOVERED, NOT A
+SHOT FIRED," +70 clout**, one-time — matching the non-lethal floor every other
+PAUDC system holds to (Wanted System doc, YARDCLASH, the Dazzler). The
+mission's shape (quiet approach, sequential posts, recover-and-extract) is the
+generic special-operations genre beat; nothing about the unit, the target, or
+the method is real.
   Graduates' drones keep working when a storm — or a Syndicate job — kills
   the grid, which is exactly when the campaign needs them.
 

@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.44**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.45**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -262,6 +262,13 @@ sweeps the screen while a hand-in is processing, echoing the "watch it get
 cleaner in real time" hook from the AI-enhancement demo wave — built as an
 original screen-space effect, no tool UI or footage reproduced. Clears the
 moment the payout lands or you walk away (`PAUDC_Game_Systems.md` §Chromelab).
+v0.45 builds **The Alexandria** (the Polytech's coral-glass great hall,
+canon since the base design doc) as a physical location, and gives it a
+mission: **Operation Quiet Hall**, an original PAUDC special-detachment op —
+no real unit or operation is depicted. Press `Y` near the hall to start, clear
+all three watch posts on foot at a walking pace (rush it and the op aborts,
+no penalty), and it resolves clean: "RECOVERED, NOT A SHOT FIRED," +70 clout,
+one-time. See `PAUDC_Base_Design.md`'s Alexandria section.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
