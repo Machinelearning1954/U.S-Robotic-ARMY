@@ -603,6 +603,17 @@ to the Gains Trade snake-oil (§14): a prescription counter, not a gym-locker de
 - It sits **opposite** the Gains Trade: the Green Cross is the honest, legal,
   regulated path (a real buff, no crash), while the snake-oil serums are the scam.
   The design point is the same as the food economy — the legitimate option wins.
+
+### The Field Medic Refresher — live in the prototype (v0.41)
+
+A second, independent reason to linger at the Green Cross: hold position at the
+clinic (on foot, unhurried) and a first-aid/anatomy refresher runs in the
+background — **CERTIFIED, +25 clout**, one-time, no buff attached (the IRIE
+pickup above is the wellness mechanic; this is flavor and a clout reward, and
+the two don't interact). Kept deliberately abstract: the toast line is "know
+your nervous system, keep steady hands" — no real clinical procedure, dosage,
+or technique is depicted, same rule as the rest of this section. This is the
+game's nod to basic first-aid literacy, not a simulation of medical training.
 - **Rating:** genre-standard for an M-rated open-world title and treated with the
   same restraint as the rest of the package — stylized, satirical where it's funny,
   clinical where it's medical, never instructional.

@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.40**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.41**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -239,6 +239,11 @@ The prototype's seed of that: the Mud Run's best time now **persists across
 sessions** the same way clout does — a single-player "beat your own ghost"
 loop today, and exactly the stat a real leaderboard would read from once the
 FiveM multiplayer path (Path B) exists.
+v0.41 adds a light nod to some real anatomy study notes sent with no
+game-design angle attached: the **Green Cross Field Medic Refresher**. Hold
+position at the clinic and it runs in the background — CERTIFIED, +25 clout,
+one-time, kept deliberately abstract (no real clinical procedure depicted).
+See `PAUDC_Game_Systems.md` §15.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
