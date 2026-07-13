@@ -58,3 +58,11 @@ gear — a legitimate data-quality engineering discipline, not surveillance:
   that framing, and this canon keeps it strictly to the engineering. All institutions
   here are fictional (Silver Springs Polytech), consistent with the package's rule
   that no real agency, program, or procedure is depicted.
+- **Live in the prototype (v0.42):** the Steady-Signal Lab is a physical bench at
+  Silver Springs Polytech — a rig stand, an eight-node cap, and a steadiness bar
+  that runs red-to-green as you hold still nearby. Hold position (on foot, still)
+  for a few seconds and the rig reads clean: **RIG CERTIFIED, +25 clout**, one-time.
+  The toast line is the four failure-mode countermeasures from this note, compressed
+  to five words: *"pre-tension, seat, calibrate, standardize."* No real clinical or
+  research procedure is simulated beyond that abstraction — see the game systems
+  doc's Green Cross section for the parallel rule this follows.

@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.41**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.42**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -243,7 +243,13 @@ v0.41 adds a light nod to some real anatomy study notes sent with no
 game-design angle attached: the **Green Cross Field Medic Refresher**. Hold
 position at the clinic and it runs in the background — CERTIFIED, +25 clout,
 one-time, kept deliberately abstract (no real clinical procedure depicted).
-See `PAUDC_Game_Systems.md` §15.
+See `PAUDC_Game_Systems.md` §15. v0.42 gives the same nod a second, more fitting
+home: the **Steady-Signal Lab** at Silver Springs Polytech (the fictional
+biosensing-hardware course documented in
+[`../Silver Springs School/EEG Cap Mechanical Drift.md`](../Silver%20Springs%20School/EEG%20Cap%20Mechanical%20Drift.md))
+is now a physical bench — a rig stand, an eight-node cap, and a steadiness bar
+that runs red-to-green as you hold still. Hold position for a few seconds and
+the rig reads clean: RIG CERTIFIED, +25 clout, one-time.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
