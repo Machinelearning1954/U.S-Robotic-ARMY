@@ -25,6 +25,10 @@ function mulberry32(seed) {
   };
 }
 
+// ---------- credits & sponsor (decoded from the second source video) ----------
+const CREATOR = 'Machinelearning1954';
+const BRAND = 'B.PATTY GLOW';
+
 // ---------- world layout ----------
 const WORLD = { w: 7200, h: 5000 };
 
@@ -75,6 +79,21 @@ const BILLBOARDS = [
   { x: 1420, y: 3060, w: 300, era: 'V',  lines: ['GRAND EPOCH V', '2013-2018', 'BUDGET $265,000,000', 'BUILD TIME: 5 YEARS'] },
   { x: 3000, y: 2140, w: 300, era: 'VI', lines: ['GRAND EPOCH VI', '2023-2026', 'BUDGET $2,000,000,000', 'BUILD TIME: 13 YEARS'] },
   { x: 3600, y: 1300, w: 340, era: 'VI', lines: ['NEXT-GEN INTEL', 'ADVANCED TRAFFIC AI', 'DYNAMIC WORLD EVENTS', 'PHOTOREAL LIGHTING'] },
+];
+
+// animated sponsor billboards — 5 procedural frames mirroring the decoded ad storyboard
+const AD_BILLBOARDS = [
+  { x: 1800, y: 2340, w: 320 },
+  { x: 2450, y: 1455, w: 320 },
+  { x: 6450, y: 1460, w: 320 },
+];
+
+// drive-through sponsor pickups: a jar of the cream restores the hull finish
+const JARS = [
+  { x: 1260, y: 2900, taken: false },
+  { x: 3500, y: 2480, taken: false },
+  { x: 4600, y: 1670, taken: false },
+  { x: 6640, y: 2400, taken: false },
 ];
 
 // palm trees (deterministic)
@@ -204,7 +223,7 @@ const CAR_COLORS = ['#7c8894', '#5b6c7d', '#8d5f4a', '#b8b2a7', '#43555f', '#6e5
 const SPEAKER_COLOR = {
   'FRNK-13': '#6fd3ff', 'OFFICER': '#8ecae6', 'WESTON': '#ffd166',
   'MOLLY': '#f4a0c0', 'MIKE': '#9be07c', 'T': '#ff9e6d', 'RICH KID': '#e0c3fc',
-  'SYSTEM': '#9aa5b1',
+  'SYSTEM': '#9aa5b1', 'RADIO': '#ffd9a0',
 };
 
 const DLG = {
@@ -287,6 +306,7 @@ const G = {
   failReason: '',
   shake: 0,
   deerDone: false,
+  adPlayed: false,
   rnd: mulberry32(20260713),
 };
 
@@ -541,6 +561,15 @@ function updatePlayerCar(dt, locked) {
       }
     }
     if (p.damage >= 100) fail('VEHICLE DESTROYED — chassis integrity zero.');
+
+    // sponsor jar pickups: nano-cream restores the hull finish
+    for (const j of JARS) {
+      if (!j.taken && dist(p.x, p.y, j.x, j.y) < 42) {
+        j.taken = true;
+        p.damage = Math.max(0, p.damage - 25);
+        radio('SYSTEM', `${BRAND} applied — hull finish restored (+25).`);
+      }
+    }
   }
 
   AudioSys.engine(p.speed);
@@ -761,6 +790,14 @@ function update(dt) {
       break;
     case PHASE.GAS_DRIVE:
       updatePlayerCar(dt, false);
+      // sponsor radio spot (original copy for the decoded ad)
+      if (!G.adPlayed && G.phaseTime > 3) {
+        G.adPlayed = true;
+        radio('RADIO', `${BRAND} whipped cloud cream — feather-light, gone in a blink, glow that clocks out when you do.`);
+      } else if (G.adPlayed === true && G.phaseTime > 9) {
+        G.adPlayed = 2;
+        radio('RADIO', `Sale ends tonight. ${BRAND} — a ${CREATOR} original.`);
+      }
       if (checkObjective()) {
         spawnRacers();
         G.phase = PHASE.GAS_TALK; G.phaseTime = 0;
@@ -1030,6 +1067,22 @@ function drawWorld() {
     }
   }
 
+  // palms (drawn before billboards so fronds never cover the panels)
+  for (const p of PALMS) {
+    const [px, py] = worldToScreen(p.x, p.y);
+    if (px < -40 || py < -60 || px > VW + 40 || py > VH + 40) continue;
+    ctx.strokeStyle = '#6e4b2a';
+    ctx.lineWidth = 4 * p.s;
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 3, py - 26 * p.s); ctx.stroke();
+    ctx.fillStyle = '#3f7a3a';
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * TAU + 0.4;
+      ctx.beginPath();
+      ctx.ellipse(px + 3 + Math.cos(a) * 10 * p.s, py - 26 * p.s + Math.sin(a) * 7 * p.s, 12 * p.s, 4.5 * p.s, a, 0, TAU);
+      ctx.fill();
+    }
+  }
+
   // billboards (decoded from source image)
   for (const bb of BILLBOARDS) {
     const [bx, by] = worldToScreen(bb.x, bb.y);
@@ -1046,20 +1099,98 @@ function drawWorld() {
     for (let i = 0; i < bb.lines.length; i++) ctx.fillText(bb.lines[i], bx + 10, by - 66 + i * 19);
   }
 
-  // palms
-  for (const p of PALMS) {
-    const [px, py] = worldToScreen(p.x, p.y);
-    if (px < -40 || py < -60 || px > VW + 40 || py > VH + 40) continue;
-    ctx.strokeStyle = '#6e4b2a';
-    ctx.lineWidth = 4 * p.s;
-    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 3, py - 26 * p.s); ctx.stroke();
-    ctx.fillStyle = '#3f7a3a';
-    for (let i = 0; i < 5; i++) {
-      const a = (i / 5) * TAU + 0.4;
-      ctx.beginPath();
-      ctx.ellipse(px + 3 + Math.cos(a) * 10 * p.s, py - 26 * p.s + Math.sin(a) * 7 * p.s, 12 * p.s, 4.5 * p.s, a, 0, TAU);
-      ctx.fill();
+  // sponsor ad billboards — animated 5-frame storyboard (decoded ad, redrawn originally)
+  for (const ad of AD_BILLBOARDS) {
+    const [ax, ay] = worldToScreen(ad.x, ad.y);
+    if (ax > VW + 220 || ay > VH + 220 || ax + ad.w < -220 || ay < -220) continue;
+    const frame = Math.floor(G.time / 3) % 5;
+    // post + panel
+    ctx.fillStyle = '#2a2e35';
+    ctx.fillRect(ax + ad.w / 2 - 5, ay, 10, 46);
+    ctx.fillStyle = '#f6efe6';
+    ctx.fillRect(ax, ay - 116, ad.w, 116);
+    ctx.strokeStyle = '#c9a24b';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(ax, ay - 116, ad.w, 116);
+    const cx = ax + 52, cy = ay - 58; // art zone center
+    const drawJar = (jx, jy, s) => {
+      ctx.fillStyle = 'rgba(190,205,215,0.85)';
+      roundRect(jx - 14 * s, jy - 8 * s, 28 * s, 20 * s, 4 * s); ctx.fill();
+      ctx.fillStyle = '#c9a24b';
+      roundRect(jx - 15 * s, jy - 16 * s, 30 * s, 9 * s, 3 * s); ctx.fill();
+    };
+    ctx.save();
+    ctx.beginPath(); ctx.rect(ax + 4, ay - 112, ad.w - 8, 108); ctx.clip();
+    if (frame === 0) {           // jar pops open
+      drawJar(cx, cy + 8, 1.4);
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(cx, cy - 18, 10, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#8a5a00';
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText('POP!', cx + 16, cy - 22);
+    } else if (frame === 1) {    // applying to the cheek
+      ctx.fillStyle = '#e8c39e';
+      ctx.beginPath(); ctx.arc(cx, cy, 22, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#6b4f3a';
+      ctx.beginPath(); ctx.arc(cx, cy - 14, 24, Math.PI, 0); ctx.fill(); // hair
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(cx - 10, cy + 6, 5, 0, TAU); ctx.fill();  // cream dab
+    } else if (frame === 2) {    // macro dollop
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(cx, cy + 8, 18, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx - 8, cy - 2, 12, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 9, cy - 4, 9, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 2, cy - 14, 6, 0, TAU); ctx.fill();  // soft peak
+    } else if (frame === 3) {    // the glow
+      ctx.fillStyle = '#e8c39e';
+      ctx.beginPath(); ctx.arc(cx, cy, 20, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,214,120,0.9)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * TAU + G.time;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(a) * 26, cy + Math.sin(a) * 26);
+        ctx.lineTo(cx + Math.cos(a) * 36, cy + Math.sin(a) * 36);
+        ctx.stroke();
+      }
+    } else {                     // call to action
+      drawJar(cx, cy, 1.2);
+      ctx.fillStyle = '#3f7a3a';
+      ctx.beginPath(); ctx.ellipse(cx + 26, cy + 10, 10, 4, -0.6, 0, TAU); ctx.fill(); // flower leaf
     }
+    ctx.restore();
+    // copy (original)
+    ctx.fillStyle = '#5a4632';
+    ctx.font = 'bold 15px monospace';
+    ctx.fillText(BRAND, ax + 104, ay - 84);
+    ctx.font = '11px monospace';
+    ctx.fillStyle = '#6d5c46';
+    const tag = [
+      'WHIPPED CLOUD CREAM',
+      'FEATHER-LIGHT. ALL DAY.',
+      'TEXTURE YOU CAN HEAR',
+      'GLOW THAT SHOWS UP',
+      'SALE ENDS TONIGHT',
+    ][frame];
+    ctx.fillText(tag, ax + 104, ay - 62);
+    ctx.fillText(`a ${CREATOR} original`, ax + 104, ay - 40);
+    ctx.fillStyle = '#9c8a6e';
+    ctx.fillText(`[${frame + 1}/5]`, ax + ad.w - 44, ay - 12);
+  }
+
+  // sponsor jar pickups
+  for (const j of JARS) {
+    if (j.taken) continue;
+    const [jx, jy] = worldToScreen(j.x, j.y);
+    if (jx < -40 || jy < -40 || jx > VW + 40 || jy > VH + 40) continue;
+    const pulse = 1 + 0.2 * Math.sin(G.time * 5);
+    ctx.strokeStyle = 'rgba(255,230,160,0.8)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(jx, jy, 22 * pulse, 0, TAU); ctx.stroke();
+    ctx.fillStyle = 'rgba(230,238,244,0.95)';
+    roundRect(jx - 8, jy - 5, 16, 12, 3); ctx.fill();
+    ctx.fillStyle = '#c9a24b';
+    roundRect(jx - 9, jy - 10, 18, 6, 2); ctx.fill();
   }
 
   // objective marker
@@ -1309,6 +1440,7 @@ function drawBoot() {
     'SYSTEM BOOT ............ OK',
     'FIELD FOOTAGE DECODE ... 53/53 SCENES',
     'IMAGE INTEL DECODE ..... V-vs-VI SPEC SHEET',
+    'SPONSOR DECODE ......... ' + BRAND + ' (5/5 SCENES)',
     'MISSION SYNTHESIS ...... COMPLETE',
   ];
   const shown = clamp(Math.floor(G.phaseTime * 2.5) + 1, 1, lines.length);
@@ -1318,6 +1450,9 @@ function drawBoot() {
     ctx.font = 'bold 17px monospace';
     ctx.fillText('[ PRESS E / ENTER TO ENGAGE ]', VW / 2, VH * 0.72);
   }
+  ctx.fillStyle = '#6d7885';
+  ctx.font = '13px monospace';
+  ctx.fillText(`a ${CREATOR} production · sponsored in-world by ${BRAND}`, VW / 2, VH * 0.86);
   ctx.textAlign = 'left';
 }
 
@@ -1375,16 +1510,20 @@ function drawPassed() {
   ctx.fillStyle = '#e8eef4';
   ctx.font = '16px monospace';
   const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const jars = JARS.filter(j => j.taken).length;
   const rows = [
     `MISSION TIME  ${mmss(Math.max(0, G.stats.t1 - G.stats.t0))}`,
     `TOP SPEED     ${Math.round(G.stats.top / 4.4)} MPH`,
     `COLLISIONS    ${G.stats.hits}`,
+    `${BRAND} JARS  ${jars}/${JARS.length}`,
     '',
     'NEXT CONTRACT DECODED: Z-TYPE // LOCKUP // HAWICK',
   ];
   rows.forEach((r, i) => ctx.fillText(r, VW / 2, VH * 0.36 + 44 + i * 26));
   ctx.fillStyle = '#9aa5b1';
   ctx.fillText('[R] replay protocol', VW / 2, VH * 0.36 + 44 + rows.length * 26 + 20);
+  ctx.fillStyle = '#6d7885';
+  ctx.fillText(`a ${CREATOR} production`, VW / 2, VH * 0.36 + 44 + rows.length * 26 + 46);
   ctx.textAlign = 'left';
 }
 

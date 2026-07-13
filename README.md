@@ -1,5 +1,7 @@
 # U.S. Robotic Army — Repo Protocol
 
+**A Machinelearning1954 production.**
+
 A self-contained HTML5 top-down driving game. The mission was **decoded from field
 footage** (a 22-minute gameplay video, analyzed scene-by-scene — see
 [`docs/VIDEO_DECODE.md`](docs/VIDEO_DECODE.md)) and the tech/lore layer was decoded
@@ -50,6 +52,22 @@ The comparison image (Epoch V: $265M / 5 years vs Epoch VI: $2B / 13 years) appe
 - actual gameplay systems from the "next-gen" feature list: smarter braking/queueing
   traffic AI, a dynamic world event (deer crossing), and day-to-sunset lighting that
   progresses with the mission.
+
+## The in-world sponsor: B.PATTY GLOW
+
+A second decoded source — a 15-second skincare commercial (5 scenes: jar-pop reveal,
+application, macro texture, sunlit glow, call-to-action) — was integrated as an
+**original in-game brand** named for the creator:
+
+- **Animated billboards** around the map cycle all 5 storyboard frames procedurally,
+  each with original taglines.
+- **A radio spot** (original copy) plays on the drive to Route 68.
+- **Gameplay**: four B.PATTY GLOW jars are placed along the mission routes — drive
+  through one and the nano-cream restores 25 hull. Jars collected show up in the
+  Mission Passed stats.
+
+All ad art is procedural and all copy is original — nothing is reproduced from the
+source commercial.
 
 ## Quality
 

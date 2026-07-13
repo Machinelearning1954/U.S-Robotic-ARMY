@@ -65,6 +65,21 @@ function ok(name, cond, extra) {
   await skipDialog();
   ok('gas drive after briefing', (await phase()) === 'GAS_DRIVE');
 
+  // sponsor radio spot plays during the drive to the gas station
+  await stepMany(200); // ~3.3 sim-seconds into GAS_DRIVE
+  const adLine = await page.evaluate(() => window.__ra.G.subtitle && window.__ra.G.subtitle.s);
+  ok('sponsor radio spot', adLine === 'RADIO', String(adLine));
+
+  // sponsor jar pickup repairs the hull
+  const jarDmg = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.G.player.damage = 60;
+    ra.teleport(1260, 2900); // jar on Alta Ave
+    for (let i = 0; i < 5; i++) ra.step(1 / 60);
+    return ra.G.player.damage;
+  });
+  ok('glow jar repairs hull', jarDmg === 35, 'damage=' + jarDmg);
+
   // GAS
   await page.evaluate(() => window.__ra.teleport(980, 1380));
   await stepMany(10);

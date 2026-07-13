@@ -25,6 +25,24 @@ Dialogue in the game is an original paraphrase — no lines are reproduced verba
 | 50–52 | 20:25–21:55 | All cars are delivered to an auto shop; the mogul withholds full payment ("the order was five cars"), and the counsel briefs the next job: a rare Z-Type hidden in a lockup. | `DELIVER_TALK` — payment scene + next-contract tease |
 | 53 | 21:55–22:50 | A big "Mission Passed" graphic ends the sequence. | `PASSED` — mission-passed screen with stats |
 
+## Second footage decode — the sponsor commercial
+
+A second source video (a ~15-second product commercial, 5 scenes decoded) supplied the
+game's in-world sponsor. It was rebuilt as an **original brand** — "B.PATTY GLOW", named
+for the project's creator — with new procedural art and original copy throughout.
+
+| Scene | Time | What happens in the footage | Where it lives in the game |
+|---|---|---|---|
+| 1 | 0:00–0:02 | Hands unscrew a frosted glass jar with a gold lid, revealing a whipped white cream. | Billboard frame 1 ("jar pop") + the jar-pickup model |
+| 2 | 0:02–0:06 | A woman applies the cream to her cheek in a bright bathroom while a voiceover praises how light it feels. | Billboard frame 2 + radio-spot line 1 (original copy) |
+| 3 | 0:06–0:09 | Macro speed-ramp shot of the airy cream texture with soft peaks. | Billboard frame 3 (procedural dollop) |
+| 4 | 0:09–0:13 | Sunlit shot showing a healthy glow on her skin; the voiceover says it lasts all afternoon. | Billboard frame 4 (radiating glow) |
+| 5 | 0:13–0:15 | Product beauty shot beside a glass of water and a flower; a sale call-to-action closes. | Billboard frame 5 + radio-spot line 2 |
+
+Gameplay integration: four B.PATTY GLOW jars sit on the mission routes; driving through
+one restores 25 hull ("nano-cream finish"). Collected jars are tallied on the
+Mission Passed screen.
+
 ## Image intel decode
 
 A second source (a social-media comparison image) provided the tech/lore layer:

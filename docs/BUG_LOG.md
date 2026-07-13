@@ -17,6 +17,15 @@ on any browser console or page error.
 | 6 | Low — perf | The `WALK` objective allocated a fresh `{x, y}` target object every frame even though the target (the parked car) never moves. | Target set once when the phase is entered. |
 | 7 | Low — dead code | Unused `dist2` helper. | Removed. |
 
+## Sponsor-integration pass (B.PATTY GLOW)
+
+| # | Severity | Bug | Fix |
+|---|---|---|---|
+| 8 | Medium — visual | Palm trees were drawn after billboard panels, so fronds rendered on top of the sponsor ad art (caught in a render screenshot). | Palms now draw before both billboard layers; re-screenshotted clean. |
+
+Suite grew to 27 checks: sponsor radio spot fires during the Route 68 drive, and a
+glow-jar pickup verifiably repairs the hull (60 → 35 damage).
+
 ## Verified clean
 
 - All 25 smoke checks pass: boot → intel → walk → cruise → pull-over → meet →
