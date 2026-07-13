@@ -308,6 +308,57 @@ function ok(name, cond, extra) {
   });
   ok('carjack takes the vehicle', jack.color === '#136f9a' && jack.atCar && jack.removed, JSON.stringify(jack));
 
+  // ---- SPAWN CONSOLE ----
+  // replace: typing the hidden model code deploys the gold AURUM 580
+  const aurum = await page.evaluate(() => {
+    const ra = window.__ra;
+    const okRun = ra.execSpawnCode('aurum580');
+    return { okRun, color: ra.G.player.color, top: ra.G.player.forgeTop };
+  });
+  ok('spawn console: hidden AURUM 580', aurum.okRun && aurum.color === '#d4af37' && aurum.top === 1.18, JSON.stringify(aurum));
+
+  // add-on: spawns a parked copy instead of replacing
+  const addon = await page.evaluate(() => {
+    const ra = window.__ra;
+    const n0 = ra.PARKED.length;
+    const okRun = ra.execSpawnCode('addon scooter');
+    return { okRun, grew: ra.PARKED.length === n0 + 1, stillGold: ra.G.player.color === '#d4af37' };
+  });
+  ok('spawn console: addon parks a copy', addon.okRun && addon.grew && addon.stillGold, JSON.stringify(addon));
+
+  // unknown model code is rejected
+  const badCode = await page.evaluate(() => window.__ra.execSpawnCode('notacar') === false);
+  ok('spawn console rejects unknown code', badCode);
+
+  // forge menu cycle skips hidden presets
+  const cycleSkips = await page.evaluate(() => {
+    const ra = window.__ra;
+    ra.applyForge(5); // SCOOTER BROTHER (last visible)
+    ra.forgeCycle();  // must wrap to 0, skipping hidden index 6
+    return ra.G.forgeIdx === 0;
+  });
+  ok('forge cycle skips hidden preset', cycleSkips);
+
+  // console opens with F8 keyboard event and captures typed text
+  const consoleTyping = await page.evaluate(() => {
+    const ra = window.__ra;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'F8' }));
+    ra.step(1 / 60);
+    const opened = ra.G.console.open;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyC', key: 'c' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyO', key: 'o' }));
+    const typed = ra.G.console.text;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape' }));
+    return { opened, typed, closed: !ra.G.console.open };
+  });
+  ok('F8 console opens/types/closes', consoleTyping.opened && consoleTyping.typed === 'co' && consoleTyping.closed,
+    JSON.stringify(consoleTyping));
+
+  // VISUAL V+ toggles and renders
+  await page.evaluate(() => { window.__ra.toggleMod('visual'); window.__ra.step(1 / 60); });
+  await page.waitForTimeout(500);
+  ok('visual v+ enabled', await page.evaluate(() => window.__ra.MODS.find(m => m.id === 'visual').on === true));
+
   // failure + checkpoint restore path
   await page.reload();
   await page.waitForTimeout(300);

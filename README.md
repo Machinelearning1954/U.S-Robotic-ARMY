@@ -90,6 +90,14 @@ Mission stats mark the run **MODS USED** vs **CLEAN RUN**. There's also a decode
 random event: a starlet hides near Hayes Auto on the delivery leg — stop for her and
 sneak her past the paparazzi for a bonus stat.
 
+### Model spawn console (`F8` or `` ` ``)
+
+Type a model code to **replace** your car, or `addon <code>` to spawn a parked copy
+beside you — the add-on/replace distinction from the decoded mod-install tutorial.
+Codes: `comet`, `zaggero`, `mc13`, `patrol`, `sunburst`, `scooter`… and one hidden
+gold machine that only exists as a model code. The **VISUAL V+** mod adds enhanced
+warm grading and a vignette (the graphics-enhancement mod from the same tutorial).
+
 ## SYSTEM OPTIMIZER — the FPS-tutorial layer
 
 Press **`O`** to open the optimizer (an original take on the decoded

@@ -38,6 +38,7 @@ const MODS = [
   { id: 'ghost',  name: 'GHOST TRAFFIC',  desc: 'traffic turns intangible',         on: false },
   { id: 'chrome', name: 'CHROME CYCLER',  desc: 'animated rainbow paint job',       on: false },
   { id: 'jack',   name: 'CARJACK PROTOCOL', desc: 'E near stopped traffic: take it', on: false },
+  { id: 'visual', name: 'VISUAL V+',      desc: 'enhanced grading & vignette',      on: false },
 ];
 const modOn = (id) => { const m = MODS.find(m => m.id === id); return !!(m && m.on); };
 
@@ -57,7 +58,14 @@ const FORGE = [
   { name: 'PATROL INTERCEPTOR', color: '#1c1f24', top: 1.05, acc: 1.04, stripe: false, siren: true  },
   { name: 'SUNBURST CUSTOM',    color: '#c0c4c9', top: 1.10, acc: 1.08, stripe: true,  siren: false, stripeColor: '#ffd23f' },
   { name: 'SCOOTER BROTHER',    color: '#c0392b', top: 0.55, acc: 0.80, stripe: false, siren: false, tiny: true },
+  { name: 'AURUM 580',          color: '#d4af37', top: 1.18, acc: 1.14, stripe: false, siren: false, hidden: true },
 ];
+
+// model codes for the spawn console (decoded: the trainer's type-a-model spawner)
+const MODEL_CODES = {
+  comet: 0, zaggero: 1, mc13: 2, patrol: 3, sunburst: 4, scooter: 5,
+  aurum580: 6, '580': 6,
+};
 
 // ---------- SYSTEM OPTIMIZER (original take on the decoded FPS-tuning tutorial) ----------
 const OPT = {
@@ -186,6 +194,15 @@ function onPavement(x, y) {
 const keys = Object.create(null);
 const pressed = Object.create(null); // edge-triggered, cleared each frame
 window.addEventListener('keydown', (e) => {
+  // spawn console captures typing while open
+  if (G && G.console && G.console.open) {
+    e.preventDefault();
+    if (e.code === 'Enter') { execSpawnCode(G.console.text); G.console.open = false; G.console.text = ''; }
+    else if (e.code === 'Escape' || e.code === 'F8' || e.code === 'Backquote') { G.console.open = false; G.console.text = ''; }
+    else if (e.code === 'Backspace') G.console.text = G.console.text.slice(0, -1);
+    else if (e.key && e.key.length === 1 && G.console.text.length < 24) G.console.text += e.key;
+    return;
+  }
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
   if (!keys[e.code]) pressed[e.code] = true;
   keys[e.code] = true;
@@ -347,6 +364,7 @@ const G = {
   adPlayed: false,
   modMenu: { open: false, idx: 0 },
   optMenu: { open: false, idx: 0 },
+  console: { open: false, text: '' },
   restorePoint: null,
   fps: 60,
   forgeIdx: 0,
@@ -427,6 +445,37 @@ function toggleMod(id) {
   if (m.on) G.stats.modsUsed = true;
   if (m.id === 'chrome' && !m.on) G.player.color = G.player.baseColor || G.player.color;
   radio('SYSTEM', `MOD ${m.name}: ${m.on ? 'ENABLED' : 'DISABLED'}.`);
+}
+
+function forgeCycle() {
+  let i = G.forgeIdx;
+  do { i = (i + 1) % FORGE.length; } while (FORGE[i].hidden);
+  applyForge(i);
+}
+
+// spawn console command: "<code>" replaces your car, "addon <code>" spawns a parked copy
+function execSpawnCode(raw) {
+  const text = String(raw).trim().toLowerCase();
+  if (!text) return false;
+  const addon = text.startsWith('addon ');
+  const code = addon ? text.slice(6).trim() : text;
+  const idx = MODEL_CODES[code];
+  if (idx === undefined) {
+    radio('SYSTEM', `SPAWNER: model '${code}' not found in dlclist.`);
+    return false;
+  }
+  const f = FORGE[idx];
+  if (addon) {
+    const p = G.player;
+    const c = makeCar(p.x + Math.cos(p.angle) * 90, p.y + Math.sin(p.angle) * 90, p.angle, f.color);
+    c.stripe = f.stripe; c.stripeColor = f.stripeColor || null; c.tiny = !!f.tiny; c.siren = f.siren;
+    PARKED.push(c);
+    G.stats.modsUsed = true;
+    radio('SYSTEM', `SPAWNER: add-on ${f.name} delivered ahead of you.`);
+  } else {
+    applyForge(idx);
+  }
+  return true;
 }
 
 function cycleOutfit() {
@@ -631,7 +680,7 @@ function updateTraffic(dt) {
 function updatePlayerCar(dt, locked) {
   const p = G.player;
   p.px = p.x; p.py = p.y;
-  locked = locked || G.modMenu.open || G.optMenu.open;
+  locked = locked || G.modMenu.open || G.optMenu.open || G.console.open;
   const thr = locked ? 0 : throttleInput();
   const steer = locked ? 0 : axisSteer();
   const hb = !locked && keys.Space;
@@ -883,6 +932,12 @@ function update(dt) {
     G.modMenu.open = !G.modMenu.open;
     if (G.modMenu.open) G.optMenu.open = false;
   }
+  // spawn console (decoded: the trainer's F8 model-code spawner)
+  if ((pressed.F8 || pressed.Backquote) && !G.dialog && !G.onFoot &&
+      ![PHASE.BOOT, PHASE.INTEL, PHASE.PASSED, PHASE.FAILED].includes(G.phase)) {
+    G.console.open = true; G.console.text = '';
+    G.modMenu.open = false; G.optMenu.open = false;
+  }
   // SYSTEM OPTIMIZER input
   if (pressed.KeyO && !G.dialog && ![PHASE.BOOT, PHASE.INTEL, PHASE.PASSED, PHASE.FAILED].includes(G.phase)) {
     G.optMenu.open = !G.optMenu.open;
@@ -916,7 +971,7 @@ function update(dt) {
     if (pressed.ArrowDown || pressed.KeyS) mm.idx = (mm.idx + 1) % rows;
     if (pressed.KeyE || pressed.Enter) {
       if (mm.idx < MODS.length) toggleMod(MODS[mm.idx].id);
-      else if (mm.idx === MODS.length) applyForge(G.forgeIdx + 1);
+      else if (mm.idx === MODS.length) forgeCycle();
       else cycleOutfit();
     }
     // the menu owns these keys this frame
@@ -1516,6 +1571,17 @@ function drawWorld() {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, VW, VH);
   }
+
+  // VISUAL V+ mod: warm grade + vignette (skipped in optimizer game mode)
+  if (modOn('visual') && !OPT.gameMode) {
+    ctx.fillStyle = 'rgba(255,190,90,0.07)';
+    ctx.fillRect(0, 0, VW, VH);
+    const vg = ctx.createRadialGradient(VW / 2, VH / 2, Math.min(VW, VH) * 0.42, VW / 2, VH / 2, Math.max(VW, VH) * 0.72);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(10,6,20,0.38)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, VW, VH);
+  }
 }
 
 // ---------- HUD ----------
@@ -1674,7 +1740,7 @@ function drawHUD() {
     ctx.fillText('MOD TERMINAL v1.9', px + 16, py + 26);
     ctx.fillStyle = '#9aa5b1';
     ctx.font = '11px monospace';
-    ctx.fillText('W/S select · E toggle · T close', px + 16, py + 44);
+    ctx.fillText('W/S select · E toggle · T close · F8 spawner', px + 16, py + 44);
     for (let i = 0; i < rows; i++) {
       const y = py + 66 + i * 30;
       const sel = i === G.modMenu.idx;
@@ -1758,6 +1824,26 @@ function drawHUD() {
       ctx.fillStyle = items[i].on ? '#7be382' : '#66707c';
       ctx.fillText(items[i].v, px + pw - 76, y);
     }
+  }
+
+  // spawn console
+  if (G.console.open) {
+    const bw = Math.min(520, VW - 40);
+    const bx = (VW - bw) / 2, by = VH * 0.32;
+    ctx.fillStyle = 'rgba(6,10,16,0.94)';
+    roundRect(bx, by, bw, 74, 8); ctx.fill();
+    ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 1.5;
+    roundRect(bx, by, bw, 74, 8); ctx.stroke();
+    ctx.fillStyle = '#d4af37';
+    ctx.font = 'bold 13px monospace';
+    ctx.fillText('MODEL SPAWNER — type a code, or "addon <code>"', bx + 16, by + 22);
+    ctx.fillStyle = '#e8eef4';
+    ctx.font = 'bold 17px monospace';
+    const caret = Math.floor(G.time * 2.5) % 2 === 0 ? '_' : ' ';
+    ctx.fillText('SPAWN> ' + G.console.text + caret, bx + 16, by + 48);
+    ctx.fillStyle = '#7d8794';
+    ctx.font = '10px monospace';
+    ctx.fillText('ENTER run · ESC close · codes: comet zaggero mc13 patrol sunburst scooter …', bx + 16, by + 66);
   }
 
   // countdown
@@ -1945,8 +2031,8 @@ requestAnimationFrame(frame);
 
 // ---------- debug / test hooks ----------
 window.__ra = {
-  G, PHASE, enterPhase, update, MODS, FORGE, OUTFITS, OPT,
-  toggleMod, applyForge, cycleOutfit,
+  G, PHASE, enterPhase, update, MODS, FORGE, OUTFITS, OPT, PARKED,
+  toggleMod, applyForge, cycleOutfit, forgeCycle, execSpawnCode,
   createRestorePoint, systemRestore, tempCleanup, ultimatePerformance,
   teleport(x, y) { const p = G.player; p.x = x; p.y = y; p.px = x; p.py = y; p.speed = 0; },
   walkTo(x, y) { G.walker.x = x; G.walker.y = y; },

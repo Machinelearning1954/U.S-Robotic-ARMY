@@ -49,6 +49,13 @@ Suite is now 46 checks, adding: mod/optimizer menu mutual exclusion,
 notifications-off muting SYSTEM radio, temp cleanup purging traffic, a restore-point
 save/teleport-away/restore round-trip, and the ultimate-performance preset.
 
+## Spawn-console pass
+
+No new defects found in this pass — the suite grew to 52 checks: hidden-model spawn
+by code, add-on spawning a parked copy without touching the player car, unknown-code
+rejection, forge-cycle skipping hidden presets, F8 open/type/escape keyboard capture,
+and the VISUAL V+ toggle rendering error-free.
+
 ## Verified clean
 
 - All 25 smoke checks pass: boot → intel → walk → cruise → pull-over → meet →

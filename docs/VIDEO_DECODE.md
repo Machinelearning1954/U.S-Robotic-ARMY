@@ -100,6 +100,26 @@ working, game-native setting:
 | %temp% folder cleanup | TEMP CLEANUP — purges background traffic entities |
 | Secret "Ultimate Performance" power plan | ULTIMATE PERFORMANCE — one action flips every setting |
 
+## Fifth decode — the mod-installation tutorial
+
+A ~8-minute "how to install PC mods" walkthrough, decoded in 39 scenes: browsing a
+mod site's categories, the difference between add-on, replace, and package-installer
+mod types; installing a mod manager tool and creating a `mods` folder; registering a
+new vehicle in the game's DLC list file; installing a script-hook library and a
+trainer; a graphics-enhancement mod; spawning the new car in-game by typing its model
+code into the trainer's spawner; and a caution to keep modded installs offline.
+
+Integrated as the game's **mod-loader layer** (all original):
+
+| Decoded beat | In the game |
+|---|---|
+| Trainer spawner: type a model code | `F8` MODEL SPAWNER console with typed codes |
+| Add-on vs replace install types | `addon <code>` parks a copy; bare code replaces your car |
+| The "580" car folder + gold intro car | Hidden AURUM 580 preset, spawnable only by model code |
+| Unknown/wrong folder names failing | Unknown codes rejected: "model not found in dlclist" |
+| Graphics-enhancement mod | VISUAL V+ mod: warm grade + vignette |
+| Keep mods offline caution | MODS USED vs CLEAN RUN stat (already tracked) |
+
 ## Image intel decode
 
 A second source (a social-media comparison image) provided the tech/lore layer:
