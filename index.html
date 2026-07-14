@@ -399,6 +399,18 @@
   var shake = 0;
   var nowT = 0;
   var muzzle = 0; // muzzle-flash timer, counts down after each shot
+
+  // Higgsfield-generated battlefield backdrop. Loaded async; if it fails
+  // (offline / source unavailable) bgReady stays false and the renderer
+  // falls back to the procedural gradient + starfield.
+  var BG_URL = "https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260714_183323_aeab613e-4e1c-4b38-a337-fd4ab68ef798.png";
+  var bgImg = new Image();
+  var bgReady = false;
+  bgImg.crossOrigin = "anonymous";
+  bgImg.onload = function () { bgReady = true; };
+  bgImg.onerror = function () { bgReady = false; };
+  bgImg.src = BG_URL;
+
   var stars = [];
   for (var si = 0; si < 90; si++) {
     stars.push({
@@ -788,8 +800,20 @@
     }
     ctx.fillRect(0, 0, W, H);
 
-    // twinkling parallax starfield
-    if (gfxEnhanced) {
+    // generated battlefield backdrop (cover-fit), when available and enhanced
+    if (gfxEnhanced && bgReady) {
+      var scale = Math.max(W / bgImg.width, H / bgImg.height);
+      var bw = bgImg.width * scale, bh = bgImg.height * scale;
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(bgImg, (W - bw) / 2, (H - bh) / 2, bw, bh);
+      ctx.globalAlpha = 1;
+      // darken slightly so sprites stay readable against the art
+      ctx.fillStyle = "rgba(6,10,14,0.28)";
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // twinkling parallax starfield (skip when the backdrop art is showing)
+    if (gfxEnhanced && !bgReady) {
       ctx.fillStyle = "#cfe6ff";
       stars.forEach(function (s) {
         var tw = Math.abs(Math.sin(nowT * s.z * 2 + s.x));
