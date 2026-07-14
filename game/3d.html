@@ -52,7 +52,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>L</b> drone · <b>O</b> dominoes/shift · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.63</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.64</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -5883,6 +5883,71 @@ function updateBali(dt){
       toast('THE LOTUS TERRACES — a breath by the lotus pond  ·  the island keeps its calm  +30');}
   }else baliT=Math.max(0,baliT-dt*1.5);
 }
+// ---------------- Gilded Bay: a Dubai-inspired waterfront district (original venue) ----------------
+// Dubai-INSPIRED, not copied — the same rule as The Lotus Terraces: a needle supertall,
+// a sail-silhouette hotel, a golden frame, a palm-shaped cay and a fountain show, all
+// original stylized geometry with invented names. No real building, skyline, or site
+// is replicated.
+const GILDED={X:300,Z:-90};
+const gildedJets=[];
+(()=>{
+  const gy=Math.max(height(GILDED.X,GILDED.Z),0.3);
+  // The Pinnacle — the island's tallest structure, a telescoping needle
+  const tiers=[[7,12],[5.4,11],[4,10],[2.8,9],[1.8,8],[1,7]];
+  let y=gy;
+  tiers.forEach(([r,h])=>{const t=new THREE.Mesh(new THREE.CylinderGeometry(r*0.82,r,h,10),
+    new THREE.MeshPhongMaterial({color:0x9fb4c4,shininess:130,specular:0xbfe8ff}));
+    t.position.set(GILDED.X,y+h/2,GILDED.Z);t.castShadow=true;scene.add(t);y+=h;});
+  const spire=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.5,9,6),new THREE.MeshLambertMaterial({color:0x8a9aa8}));
+  spire.position.set(GILDED.X,y+4.5,GILDED.Z);scene.add(spire);
+  const beaconTip=new THREE.Mesh(new THREE.SphereGeometry(0.5,8,8),new THREE.MeshBasicMaterial({color:0x3af5d8}));
+  beaconTip.position.set(GILDED.X,y+9,GILDED.Z);scene.add(beaconTip);
+  // The Sailfin — a sail-silhouette hotel on the point
+  const mast=new THREE.Mesh(new THREE.BoxGeometry(1.4,24,3),new THREE.MeshPhongMaterial({color:0xe8f2f6,shininess:90}));
+  mast.position.set(GILDED.X+36,gy+12,GILDED.Z-14);mast.castShadow=true;scene.add(mast);
+  const sail=new THREE.Mesh(new THREE.CylinderGeometry(9,9,24,14,1,true,0,Math.PI*0.62),
+    new THREE.MeshPhongMaterial({color:0xdfeef4,shininess:110,side:THREE.DoubleSide}));
+  sail.position.set(GILDED.X+31,gy+12,GILDED.Z-14);sail.rotation.y=Math.PI*1.18;scene.add(sail);
+  // The Window — a golden frame on the shore
+  const gold=new THREE.MeshPhongMaterial({color:0xd8a13c,shininess:150,specular:0xffe8a8});
+  for(const dx of[-6,6]){const pil=new THREE.Mesh(new THREE.BoxGeometry(1.6,17,1.6),gold);
+    pil.position.set(GILDED.X-34+dx,gy+8.5,GILDED.Z-6);pil.castShadow=true;scene.add(pil);}
+  const lintel=new THREE.Mesh(new THREE.BoxGeometry(13.6,1.6,1.6),gold);
+  lintel.position.set(GILDED.X-34,gy+17.3,GILDED.Z-6);scene.add(lintel);
+  // Palm Cay — a palm-shaped islet in the bay (visual spectacle)
+  const sandM=new THREE.MeshLambertMaterial({color:0xd9c48a});
+  const spineC=new THREE.Mesh(new THREE.BoxGeometry(4,0.5,34),sandM);
+  spineC.position.set(GILDED.X,0.25,GILDED.Z-62);scene.add(spineC);
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI-Math.PI/2;
+    const frond=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.45,16),sandM);
+    frond.position.set(GILDED.X+Math.sin(a)*11,0.22,GILDED.Z-76+Math.abs(Math.cos(a))*-4-(i%2)*3);
+    frond.rotation.y=a;scene.add(frond);}
+  const headC=new THREE.Mesh(new THREE.CylinderGeometry(5,5,0.5,12),sandM);
+  headC.position.set(GILDED.X,0.25,GILDED.Z-82);scene.add(headC);
+  // The Bloom — fountain show on a shore basin
+  const basin=new THREE.Mesh(new THREE.CylinderGeometry(7,7,0.3,18),new THREE.MeshPhongMaterial({color:0x155e66,shininess:120,transparent:true,opacity:0.85}));
+  basin.position.set(GILDED.X+18,gy+0.2,GILDED.Z+8);scene.add(basin);
+  for(let i=0;i<5;i++){const a=i/5*Math.PI*2;
+    const jet=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.34,6,6),
+      new THREE.MeshBasicMaterial({color:0xbfe8f4,transparent:true,opacity:0.75}));
+    jet.position.set(GILDED.X+18+Math.cos(a)*3.4,gy+3,GILDED.Z+8+Math.sin(a)*3.4);
+    jet.userData.ph=i;scene.add(jet);gildedJets.push(jet);}
+  glowSprite(GILDED.X,y+10,GILDED.Z,14,0x3af5d8);
+  label('GILDED BAY',GILDED.X,y+13,GILDED.Z);
+  label('THE BLOOM — fountain show',GILDED.X+18,gy+8,GILDED.Z+8);
+})();
+let gildedSeen=false,gildedT=0;
+function updateGilded(dt){
+  // the fountain dances all day
+  for(const j of gildedJets){const s=0.35+0.65*Math.abs(Math.sin(perf*0.0016+j.userData.ph*1.3));
+    j.scale.y=s;j.position.y=Math.max(height(GILDED.X,GILDED.Z),0.3)+0.2+3*s;}
+  if(gildedSeen||veh!==WALKER)return;
+  const near=Math.hypot(P.x-(GILDED.X+18),P.z-(GILDED.Z+8))<11&&Math.abs(P.v)<2;
+  if(near){gildedT+=dt;
+    if(gildedT>4){gildedSeen=true;addClout(30);
+      toast('THE BLOOM — you caught the full show. Gilded Bay approves.  +30');}
+  }else gildedT=Math.max(0,gildedT-dt*1.5);
+}
 // ---------------- Duppy Links: the golf green + dominoes "boardroom" ----------------
 // The country-club-satire beat: sit at the domino table and the old heads talk island
 // hustle — LLCs, grants, tax breaks — all comedy, not advice (see the flavor note in
@@ -6209,7 +6274,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);updateTurf(dt);updateWrecks(dt);updateTrain(dt);updateMedic(dt);updateSteady(dt);updateCarrier(dt);updateQuiet(dt);updateInquest(dt);updateChute(dt);updateSpout(dt);updateCards(dt);updateSwarm(dt);updateEstate(dt);updateBali(dt);updateScene(dt);updateGolf(dt);updateJob(dt);updateDrone(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);updateTurf(dt);updateWrecks(dt);updateTrain(dt);updateMedic(dt);updateSteady(dt);updateCarrier(dt);updateQuiet(dt);updateInquest(dt);updateChute(dt);updateSpout(dt);updateCards(dt);updateSwarm(dt);updateEstate(dt);updateBali(dt);updateScene(dt);updateGolf(dt);updateJob(dt);updateDrone(dt);updateGilded(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -6328,7 +6393,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),medicCert,steadyCert,wellDeckClip,quietOn,quietCP,quietDone,staticSU:smReading,inqOn,inqCP,inqDone,chuteOn:chute.on,chuteY:+chute.y.toFixed(1),chuteDone,spoutSeen,spoutVisible:spout.visible,cardsGot,wallDone,swarmT:+swarmT.toFixed(1),swarmCd:+swarmCd.toFixed(1),swarmUnlocked,estateOwned,inEstate,baliSeen,sceneActive:SCENE.active,sceneProcT:+SCENE.procT.toFixed(1),golfSeen,jobWorked,shiftsDone,jobCd:+jobCd.toFixed(1),tixActive,tixServed,tixCount,tixOrder,domActive,domOpen,domPlayerN:domPlayer.length,domOppN:domOpp.length,domResult,droneActive,dronePhase,wrecksScouted,droneCd:+droneCd.toFixed(1),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},jackCar,VEH,CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},setMedicT:v=>{medicT=v;},STEADY,setSteadyT:v=>{steadyT=v;},CARRIER,wellDeckIn,setWellDeckClip:v=>{wellDeckClip=v;},ALEXP,QUIET_PTS,startQuiet,setQuietT:v=>{quietT=v;},setQuietCP:v=>{quietCP=v;},INQ_DESK,INQ_PTS,INQ_CRATE,startInquest,setInqT:v=>{inqT=v;},setInqCP:v=>{inqCP=v;if(v>=INQ_PTS.length)inqCrate.visible=true;},DROPRING,chute,bailOut,setChuteY:v=>{chute.y=v;},forceFly:()=>{FLIGHT.flying=true;FLIGHT.flown=0;walker.visible=false;},SPOUT,spout,setSpoutT:v=>{spoutT=v;},CARDWALL,CARD_PTS,cardMeshes,deploySwarm,swarmDrones,setSwarmCd:v=>{swarmCd=v;},ESTATE,ESTATE_COST,ESTATEINT,enterEstate,exitEstate,BALI,setBaliT:v=>{baliT=v;},SCENE,spawnScene,sceneGroup,setSceneProcT:v=>{SCENE.procT=v;},DUPPY,GOLF_TALK,setGolfT:v=>{golfT=v;},YARDBIRD,startShift,serveTix,setJobCd:v=>{jobCd=v;},nextTicket,drone,deployDrone,setDroneCd:v=>{droneCd=v;},startDom,playDomTile,passDom,domForce:(pl,op,open)=>{domActive=true;domResult='';domTurns=0;domPlayer=pl.slice();domOpp=op.slice();domOpen=open;renderDom();},
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),medicCert,steadyCert,wellDeckClip,quietOn,quietCP,quietDone,staticSU:smReading,inqOn,inqCP,inqDone,chuteOn:chute.on,chuteY:+chute.y.toFixed(1),chuteDone,spoutSeen,spoutVisible:spout.visible,cardsGot,wallDone,swarmT:+swarmT.toFixed(1),swarmCd:+swarmCd.toFixed(1),swarmUnlocked,estateOwned,inEstate,baliSeen,gildedSeen,sceneActive:SCENE.active,sceneProcT:+SCENE.procT.toFixed(1),golfSeen,jobWorked,shiftsDone,jobCd:+jobCd.toFixed(1),tixActive,tixServed,tixCount,tixOrder,domActive,domOpen,domPlayerN:domPlayer.length,domOppN:domOpp.length,domResult,droneActive,dronePhase,wrecksScouted,droneCd:+droneCd.toFixed(1),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},jackCar,VEH,CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},setMedicT:v=>{medicT=v;},STEADY,setSteadyT:v=>{steadyT=v;},CARRIER,wellDeckIn,setWellDeckClip:v=>{wellDeckClip=v;},ALEXP,QUIET_PTS,startQuiet,setQuietT:v=>{quietT=v;},setQuietCP:v=>{quietCP=v;},INQ_DESK,INQ_PTS,INQ_CRATE,startInquest,setInqT:v=>{inqT=v;},setInqCP:v=>{inqCP=v;if(v>=INQ_PTS.length)inqCrate.visible=true;},DROPRING,chute,bailOut,setChuteY:v=>{chute.y=v;},forceFly:()=>{FLIGHT.flying=true;FLIGHT.flown=0;walker.visible=false;},SPOUT,spout,setSpoutT:v=>{spoutT=v;},CARDWALL,CARD_PTS,cardMeshes,deploySwarm,swarmDrones,setSwarmCd:v=>{swarmCd=v;},ESTATE,ESTATE_COST,ESTATEINT,enterEstate,exitEstate,BALI,setBaliT:v=>{baliT=v;},GILDED,gildedJets,setGildedT:v=>{gildedT=v;},SCENE,spawnScene,sceneGroup,setSceneProcT:v=>{SCENE.procT=v;},DUPPY,GOLF_TALK,setGolfT:v=>{golfT=v;},YARDBIRD,startShift,serveTix,setJobCd:v=>{jobCd=v;},nextTicket,drone,deployDrone,setDroneCd:v=>{droneCd=v;},startDom,playDomTile,passDom,domForce:(pl,op,open)=>{domActive=true;domResult='';domTurns=0;domPlayer=pl.slice();domOpp=op.slice();domOpen=open;renderDom();},
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

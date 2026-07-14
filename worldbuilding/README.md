@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.63**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.64**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -376,6 +376,13 @@ press `E` at the door to step into a luxury great room — sectional couch, big
 wall TV, a bar, a floor-to-ceiling glass wall over the night harbor, warm
 chandelier — and `E` again to leave. Same interior tech as Anchor Row, scaled
 up. See `PAUDC_Housing_Interiors.md` §3b.
+v0.64 builds **Gilded Bay**, a Dubai-inspired waterfront district: The
+Pinnacle (the island's tallest needle tower), The Sailfin (sail-silhouette
+hotel), The Window (a golden shore frame), Palm Cay (a palm-shaped islet in
+the bay), and The Bloom — a five-jet fountain show that dances all day
+(watch it on foot for a one-time +30). All original stylized geometry with
+invented names; no real building or skyline replicated. See
+`JAMAICA_ISLAND_WORLD.md` §11.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

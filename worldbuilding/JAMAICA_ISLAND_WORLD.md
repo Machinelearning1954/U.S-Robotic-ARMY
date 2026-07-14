@@ -163,6 +163,28 @@ build something invented rather than a replica.
   and pond are stylized original geometry, reimagined as a fictional island
   resort. Consistent with §0's "brands and venues are fictionalized" rule.
 
+## 11. Gilded Bay — a Dubai-inspired waterfront district (live in the prototype, v0.64)
+
+The island's answer to the Gulf-futurist skyline, built the same way §10 built
+Bali: **inspired by, never copied**. On a clear stretch of south coast:
+
+- **The Pinnacle** — the island's tallest structure, a telescoping needle
+  tower with a glowing tip, visible from most of the map.
+- **The Sailfin** — a sail-silhouette hotel on the point (a curved shell and
+  mast in original proportions — an homage to a *shape language*, not a
+  replica of any building).
+- **The Window** — a golden frame on the shore that composes the harbor view.
+- **Palm Cay** — a small palm-shaped islet in the bay, spine, fronds and
+  crown, best seen from the air on the Island Hop.
+- **The Bloom** — a fountain show on a shore basin: five animated jets that
+  dance all day. Stand by the basin on foot for a few seconds and the game
+  banks a one-time **+30** "caught the full show" beat.
+
+**Content boundary:** every structure is original stylized geometry with an
+invented name. **No real building, skyline, address, or site is replicated or
+named** — this is the map's standing fictionalize-real-places rule (§0, §10)
+applied to a second real-world inspiration.
+
 > Fictional game world. Real-place names are geographic reference in the tradition of
 > open-world games set in real regions; everything operational, commercial, military,
 > or personal is invented.
