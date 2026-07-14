@@ -130,6 +130,23 @@ trimaran assault carrier with a neon-lit well deck players can drive boats strai
   is named or depicted**, and the BII's whole shtick stays paperwork-first,
   courtesy-first, cuffs-never.
 
+### Zone 5b — Palisade Skyworks (the island's space program) — live in the prototype (v0.66)
+
+The **88th Aerospace Wing** (canon) gets a hilltop launch complex — the island's
+own **fictional** space program, added the same fictionalize-real-inspiration way
+as everything else. On the ground: a launch **gantry** over a pad, an **original
+spaceplane** (delta wings, teal trim, an invented roundel — *no real agency,
+nation, or craft markings of any kind*), a **tracking dish**, and a **station-
+module exhibit** with solar panels. Overhead: **Orbital Platform One**, a drifting
+station you can spot crossing the sky on its slow high orbit. Tour the pad on foot
+for a one-time **+35**.
+
+- **Content boundary:** this is an entirely invented island space program. **No
+  real space agency (NASA or any other), no real nation's markings, no real
+  spacecraft, station, or program is named or depicted.** The "rumored spacecraft"
+  reference image (real agency + national markings) was declined; only the general
+  idea of a space program was kept, and rebuilt original.
+
 ### Zone 5 — "The Strip": Errol Flynn Joint Airfield
 A coastal runway pointing straight out over the sea, so takeoffs blast players past
 waterfalls and landings come in low over reef water so clear you can see rays gliding
