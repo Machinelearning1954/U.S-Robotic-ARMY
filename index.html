@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Robotic Army — Sky Squadron</title>
+<style>
+  :root {
+    --accent: #4fd1ff;
+    --accent2: #ffcc4d;
+    --danger: #ff5a5a;
+    --panel: rgba(8, 16, 28, 0.86);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: #05070d;
+    color: #eaf2ff;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+  }
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    display: block;
+    background: #0a1730;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(2px);
+  }
+  .hidden { display: none !important; }
+  .card {
+    background: var(--panel);
+    border: 1px solid rgba(79, 209, 255, 0.35);
+    border-radius: 18px;
+    padding: 28px 30px;
+    width: min(900px, 96vw);
+    max-height: 94vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+  }
+  h1 {
+    font-size: clamp(26px, 4vw, 44px);
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: center;
+  }
+  .subtitle { text-align: center; opacity: 0.75; margin-top: 6px; margin-bottom: 18px; }
+  .videoWrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: #000;
+    margin-bottom: 20px;
+  }
+  .videoWrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .sectionTitle { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; margin: 14px 0 10px; }
+  .planes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .plane {
+    background: rgba(255,255,255,0.04);
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: transform 0.12s, border-color 0.12s, background 0.12s;
+  }
+  .plane:hover { transform: translateY(-3px); background: rgba(79,209,255,0.08); }
+  .plane.selected { border-color: var(--accent); background: rgba(79,209,255,0.14); }
+  .plane canvas { background: transparent; width: 100%; height: 70px; }
+  .plane .name { font-weight: 700; margin-top: 6px; }
+  .plane .tag { font-size: 11px; opacity: 0.6; }
+  .stats { display: flex; gap: 6px; margin-top: 8px; font-size: 11px; }
+  .stat { flex: 1; }
+  .bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.15); overflow: hidden; margin-top: 2px; }
+  .bar > span { display: block; height: 100%; background: var(--accent2); }
+  .flyable { font-size: 11px; color: #7CFC9A; margin-top: 6px; font-weight: 600; }
+  .btnRow { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; justify-content: center; }
+  button.play {
+    background: linear-gradient(90deg, var(--accent), #2b9dd6);
+    color: #04121f;
+    border: 0;
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    padding: 14px 34px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(79,209,255,0.35);
+  }
+  button.play:hover { filter: brightness(1.08); }
+  button.ghost {
+    background: transparent;
+    color: #eaf2ff;
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 14px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .hud {
+    position: absolute;
+    top: 14px; left: 14px;
+    display: flex; gap: 18px;
+    font-weight: 700;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+    pointer-events: none;
+  }
+  .hud .k { opacity: 0.65; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .controls { text-align: center; font-size: 13px; opacity: 0.7; margin-top: 14px; line-height: 1.7; }
+  kbd {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-family: inherit;
+    font-size: 12px;
+  }
+  .big { font-size: 40px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="game" width="960" height="540"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hud hidden">
+    <div><span class="k">Score</span> <span id="hudScore">0</span></div>
+    <div><span class="k">Distance</span> <span id="hudDist">0</span>m</div>
+    <div><span class="k">Hull</span> <span id="hudHull">100</span>%</div>
+    <div><span class="k">Plane</span> <span id="hudPlane">—</span></div>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu" class="overlay">
+    <div class="card">
+      <h1>SKY SQUADRON</h1>
+      <div class="subtitle">U.S. Robotic Army — Flight Division</div>
+
+      <div class="sectionTitle">Mission Briefing</div>
+      <div class="videoWrap">
+        <iframe
+          src="https://www.youtube.com/embed/PIJxZTaZr7U"
+          title="Mission Briefing"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+
+      <div class="sectionTitle">Select Aircraft — all planes flyable</div>
+      <div id="planes" class="planes"></div>
+
+      <div class="controls">
+        Fly with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or the <kbd>Arrow</kbd> keys &nbsp;•&nbsp;
+        <kbd>Space</kbd> boost &nbsp;•&nbsp; fly through <b>rings</b> for points, dodge <b>storms</b>.
+      </div>
+
+      <div class="btnRow">
+        <button class="play" id="startBtn">▶ Launch</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="over" class="overlay hidden">
+    <div class="card" style="text-align:center;">
+      <h1>MISSION COMPLETE</h1>
+      <div class="subtitle">Squadron report</div>
+      <div class="big" id="finalScore">0</div>
+      <div style="opacity:0.7; margin-top:6px;">points • <span id="finalDist">0</span>m flown</div>
+      <div class="btnRow">
+        <button class="play" id="againBtn">↻ Fly Again</button>
+        <button class="ghost" id="menuBtn">Change Aircraft</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- Aircraft roster: every plane is flyable (no locks) ----
+  const PLANES = [
+    { id: "falcon",  name: "F-9 Falcon",   tag: "Balanced interceptor", color: "#8fb7ff", accent: "#dfe9ff", speed: 6, handling: 6, hull: 100 },
+    { id: "raptor",  name: "X-2 Raptor",   tag: "Fast & fragile",        color: "#ff9a6b", accent: "#ffe0c9", speed: 9, handling: 7, hull: 75  },
+    { id: "titan",   name: "B-7 Titan",    tag: "Armored bomber",        color: "#9be59b", accent: "#e5ffe5", speed: 4, handling: 4, hull: 150 },
+    { id: "wraith",  name: "S-1 Wraith",   tag: "Nimble scout",          color: "#c79bff", accent: "#efe1ff", speed: 7, handling: 9, hull: 85  },
+    { id: "vulcan",  name: "A-5 Vulcan",   tag: "All-rounder",           color: "#ffd24d", accent: "#fff2c2", speed: 6, handling: 6, hull: 110 },
+    { id: "spectre", name: "R-0 Spectre",  tag: "Robotic ace",           color: "#4fd1ff", accent: "#d4f6ff", speed: 8, handling: 8, hull: 95  },
+  ];
+
+  let selectedPlane = PLANES[0];
+
+  // ---- Draw a plane (top-down-ish side silhouette) ----
+  function drawPlane(ctx, p, cx, cy, scale, propPhase) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.beginPath();
+    ctx.ellipse(0, 22, 30, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // wings
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.moveTo(-4, 0);
+    ctx.lineTo(-26, 14);
+    ctx.lineTo(-6, 6);
+    ctx.lineTo(-6, -6);
+    ctx.lineTo(-26, -14);
+    ctx.closePath();
+    ctx.fill();
+
+    // fuselage
+    ctx.fillStyle = p.accent;
+    ctx.beginPath();
+    ctx.moveTo(34, 0);
+    ctx.quadraticCurveTo(10, -9, -30, -6);
+    ctx.quadraticCurveTo(-38, 0, -30, 6);
+    ctx.quadraticCurveTo(10, 9, 34, 0);
+    ctx.fill();
+
+    // body stripe
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.moveTo(30, 0);
+    ctx.quadraticCurveTo(6, -4, -28, -3);
+    ctx.quadraticCurveTo(-32, 0, -28, 3);
+    ctx.quadraticCurveTo(6, 4, 30, 0);
+    ctx.fill();
+
+    // tail fin
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.moveTo(-24, -4);
+    ctx.lineTo(-34, -18);
+    ctx.lineTo(-22, -3);
+    ctx.closePath();
+    ctx.fill();
+
+    // cockpit
+    ctx.fillStyle = "rgba(20,40,70,0.9)";
+    ctx.beginPath();
+    ctx.ellipse(8, -2, 8, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // propeller
+    ctx.strokeStyle = "rgba(230,240,255,0.85)";
+    ctx.lineWidth = 2;
+    const blade = 12 * Math.abs(Math.sin(propPhase));
+    ctx.beginPath();
+    ctx.moveTo(35, -blade);
+    ctx.lineTo(35, blade);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // ---- Build plane picker cards ----
+  const planesEl = document.getElementById("planes");
+  PLANES.forEach((p) => {
+    const card = document.createElement("div");
+    card.className = "plane" + (p.id === selectedPlane.id ? " selected" : "");
+    card.dataset.id = p.id;
+
+    const cv = document.createElement("canvas");
+    cv.width = 160; cv.height = 70;
+    const cctx = cv.getContext("2d");
+    drawPlane(cctx, p, 90, 34, 1.15, 1.3);
+
+    const name = document.createElement("div");
+    name.className = "name"; name.textContent = p.name;
+    const tag = document.createElement("div");
+    tag.className = "tag"; tag.textContent = p.tag;
+
+    const stats = document.createElement("div");
+    stats.className = "stats";
+    stats.innerHTML =
+      statBar("SPD", p.speed, 9) + statBar("HDL", p.handling, 9) + statBar("HULL", p.hull, 150);
+
+    const fly = document.createElement("div");
+    fly.className = "flyable"; fly.textContent = "✔ Flyable";
+
+    card.append(cv, name, tag, stats, fly);
+    card.addEventListener("click", () => {
+      selectedPlane = p;
+      document.querySelectorAll(".plane").forEach((el) => el.classList.remove("selected"));
+      card.classList.add("selected");
+    });
+    planesEl.appendChild(card);
+  });
+
+  function statBar(label, val, max) {
+    const pct = Math.round((val / max) * 100);
+    return '<div class="stat">' + label +
+      '<div class="bar"><span style="width:' + pct + '%"></span></div></div>';
+  }
+
+  // ---- Game ----
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+
+  const menuEl = document.getElementById("menu");
+  const overEl = document.getElementById("over");
+  const hudEl = document.getElementById("hud");
+
+  const keys = {};
+  window.addEventListener("keydown", (e) => {
+    keys[e.key.toLowerCase()] = true;
+    if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(e.key.toLowerCase())) e.preventDefault();
+  });
+  window.addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
+
+  let state = "menu";
+  let player, rings, storms, clouds, score, distance, hull, propPhase, spawnRing, spawnStorm, worldSpeed;
+
+  function resetGame() {
+    const p = selectedPlane;
+    player = { x: 200, y: H / 2, vx: 0, vy: 0, r: 18 };
+    rings = [];
+    storms = [];
+    clouds = [];
+    for (let i = 0; i < 10; i++) {
+      clouds.push({ x: Math.random() * W, y: Math.random() * H, s: 0.3 + Math.random() * 0.9, r: 20 + Math.random() * 50 });
+    }
+    score = 0; distance = 0; hull = p.hull; propPhase = 0;
+    spawnRing = 0; spawnStorm = 90; worldSpeed = 2 + p.speed * 0.25;
+    document.getElementById("hudPlane").textContent = p.name;
+  }
+
+  function start() {
+    resetGame();
+    menuEl.classList.add("hidden");
+    overEl.classList.add("hidden");
+    hudEl.classList.remove("hidden");
+    state = "play";
+  }
+
+  function gameOver() {
+    state = "over";
+    hudEl.classList.add("hidden");
+    document.getElementById("finalScore").textContent = score;
+    document.getElementById("finalDist").textContent = Math.floor(distance);
+    overEl.classList.remove("hidden");
+  }
+
+  document.getElementById("startBtn").addEventListener("click", start);
+  document.getElementById("againBtn").addEventListener("click", start);
+  document.getElementById("menuBtn").addEventListener("click", () => {
+    overEl.classList.add("hidden");
+    menuEl.classList.remove("hidden");
+    state = "menu";
+  });
+
+  function update() {
+    if (state !== "play") return;
+    const p = selectedPlane;
+    const accel = 0.35 + p.handling * 0.05;
+    const maxV = 3 + p.speed * 0.6;
+    const boost = keys[" "] ? 1.7 : 1;
+
+    if (keys["arrowup"] || keys["w"]) player.vy -= accel;
+    if (keys["arrowdown"] || keys["s"]) player.vy += accel;
+    if (keys["arrowleft"] || keys["a"]) player.vx -= accel;
+    if (keys["arrowright"] || keys["d"]) player.vx += accel;
+
+    player.vx *= 0.92; player.vy *= 0.92;
+    player.vx = Math.max(-maxV, Math.min(maxV, player.vx)) * boost;
+    player.vy = Math.max(-maxV, Math.min(maxV, player.vy)) * boost;
+    player.x += player.vx; player.y += player.vy;
+
+    player.x = Math.max(60, Math.min(W - 120, player.x));
+    player.y = Math.max(30, Math.min(H - 30, player.y));
+
+    distance += worldSpeed * 0.15;
+    worldSpeed += 0.0009;
+    propPhase += 0.6;
+
+    // clouds parallax
+    clouds.forEach((c) => {
+      c.x -= worldSpeed * c.s * 0.4;
+      if (c.x < -c.r) { c.x = W + c.r; c.y = Math.random() * H; }
+    });
+
+    // spawn rings
+    if (--spawnRing <= 0) {
+      spawnRing = 55 + Math.random() * 45;
+      rings.push({ x: W + 40, y: 70 + Math.random() * (H - 140), r: 34, passed: false });
+    }
+    // spawn storms
+    if (--spawnStorm <= 0) {
+      spawnStorm = 80 + Math.random() * 70;
+      storms.push({ x: W + 60, y: 60 + Math.random() * (H - 120), r: 26 + Math.random() * 16 });
+    }
+
+    rings.forEach((ring) => {
+      ring.x -= worldSpeed;
+      if (!ring.passed && Math.hypot(ring.x - player.x, ring.y - player.y) < ring.r) {
+        ring.passed = true;
+        score += 10;
+      }
+    });
+    rings = rings.filter((r) => r.x > -60);
+
+    storms.forEach((s) => {
+      s.x -= worldSpeed;
+      if (Math.hypot(s.x - player.x, s.y - player.y) < s.r + player.r - 6) {
+        hull -= 0.9;
+        s.hit = true;
+      }
+    });
+    storms = storms.filter((s) => s.x > -80);
+
+    score += worldSpeed * 0.02;
+    if (hull <= 0) { hull = 0; gameOver(); }
+
+    document.getElementById("hudScore").textContent = Math.floor(score);
+    document.getElementById("hudDist").textContent = Math.floor(distance);
+    document.getElementById("hudHull").textContent = Math.max(0, Math.floor(hull));
+  }
+
+  function draw() {
+    // sky gradient
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, "#123a6b");
+    g.addColorStop(0.55, "#1f6fb0");
+    g.addColorStop(1, "#7fc3e8");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // sun
+    ctx.fillStyle = "rgba(255,240,200,0.9)";
+    ctx.beginPath();
+    ctx.arc(W - 120, 90, 46, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,240,200,0.15)";
+    ctx.beginPath();
+    ctx.arc(W - 120, 90, 80, 0, Math.PI * 2);
+    ctx.fill();
+
+    // clouds
+    if (clouds) clouds.forEach((c) => {
+      ctx.fillStyle = "rgba(255,255,255," + (0.25 + c.s * 0.3) + ")";
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.arc(c.x + c.r * 0.7, c.y + 6, c.r * 0.7, 0, Math.PI * 2);
+      ctx.arc(c.x - c.r * 0.7, c.y + 8, c.r * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    if (state === "menu") return;
+
+    // rings
+    if (rings) rings.forEach((ring) => {
+      ctx.strokeStyle = ring.passed ? "rgba(124,252,154,0.5)" : "#ffd24d";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(ring.x, ring.y, ring.r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(255,255,255,0.4)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(ring.x, ring.y, ring.r - 6, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+
+    // storms
+    if (storms) storms.forEach((s) => {
+      ctx.fillStyle = "rgba(40,40,60,0.85)";
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.arc(s.x + s.r * 0.6, s.y + 4, s.r * 0.6, 0, Math.PI * 2);
+      ctx.arc(s.x - s.r * 0.6, s.y + 6, s.r * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+      // lightning
+      ctx.strokeStyle = "#ffe94d";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x - 4, s.y + 10);
+      ctx.lineTo(s.x + 3, s.y + 12);
+      ctx.lineTo(s.x - 2, s.y + 22);
+      ctx.stroke();
+    });
+
+    // player
+    if (player) {
+      const tilt = Math.max(-0.4, Math.min(0.4, player.vy * 0.08));
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.rotate(tilt);
+      drawPlane(ctx, selectedPlane, 0, 0, 1.1, propPhase);
+      ctx.restore();
+      // boost flame
+      if (keys[" "]) {
+        ctx.fillStyle = "rgba(255,150,40,0.8)";
+        ctx.beginPath();
+        ctx.moveTo(player.x - 34, player.y);
+        ctx.lineTo(player.x - 54 - Math.random() * 10, player.y - 4);
+        ctx.lineTo(player.x - 54 - Math.random() * 10, player.y + 4);
+        ctx.fill();
+      }
+    }
+  }
+
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+</body>
+</html>
