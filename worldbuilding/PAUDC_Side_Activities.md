@@ -63,6 +63,24 @@ keep rotating while you linger.
   the dockworkers play in `PAUDC_Base_Design.md`) instead of an imported
   country-club aesthetic — courtesy-first, warm, and ours.
 
+### 4b. The Bone Yard — playable dominoes (live in the prototype, v0.60)
+
+The deal-table is now a real minigame. Stand at the Duppy Links table on foot
+and press **O** to sit down for a hand of **The Bone Yard** — a shed-race
+domino match against the table:
+
+- **How it plays:** you and the house each start with four bones. A HUD shows
+  the **open end** and your hand; press **1–4** to play a tile whose pip
+  matches the open end (playing it flips the open end to the tile's other
+  pip), or **X** to draw a bone from the yard when you're stuck. First to
+  empty their hand wins.
+- **Stakes:** win the hand for **+50 clout**; lose and you still pocket **+5**
+  for showing up — run it back as often as you like. A skill-and-luck loop, not
+  a dwell timer, so it rewards actually reading your tiles.
+- **Boundary:** standard dominoes, the island's own game — no real venue,
+  brand, or gambling service depicted; "clout" is the game's own social
+  currency, not money, and there's no wagering of real or in-world cash.
+
 ## 5. The Mud Run — live in the prototype (v0.32)
 
 The one activity built end-to-end this pass, chosen because it's the

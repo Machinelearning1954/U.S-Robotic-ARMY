@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.59**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.60**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -357,6 +357,11 @@ Walk up to the counter on foot and hold your post; a shift bar fills over
 repeatable legit-income floor beside the flashy OnWatch clout economy.
 Original invented brand — no real chain, name, logo, or recipe depicted.
 See `PAUDC_Economy.md` §6a.
+v0.60 turns the Duppy Links deal-table into **playable dominoes** ("The
+Bone Yard"): press `O` at the table for a shed-race match — 1–4 to play a
+matching tile, X to draw, first to empty their hand wins (+50, or +5 for a
+loss). A real skill-and-luck minigame, not a dwell timer. No wagering; clout
+is social currency, not money. See `PAUDC_Side_Activities.md` §4b.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
