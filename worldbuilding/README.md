@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.55**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.56**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -332,6 +332,12 @@ sessions). The "day in the life at the big house" power-fantasy payoff,
 kept fictional and courtesy-first — you earn it, nobody's evicted. From a
 luxury-lifestyle reference video; no real property, person, or brand
 depicted. See `PAUDC_Housing_Interiors.md` §3b.
+v0.56 adds **The Lotus Terraces**, a Bali-inspired resort garden: a tiered
+meru-style tower, a candi-bentar split gate, and a lotus pond on a coastal
+flat. Stand by the pond on foot and hold a few seconds for a one-time
+"serenity" beat, +30 clout. Bali-*inspired*, not copied — original stylized
+geometry, no real temple or site depicted, the way the whole map
+fictionalizes real places. See `JAMAICA_ISLAND_WORLD.md` §10.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

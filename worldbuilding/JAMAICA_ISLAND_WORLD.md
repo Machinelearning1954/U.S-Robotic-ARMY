@@ -145,6 +145,24 @@ real gang aesthetic or a real firearm.
   same competitive-territory beat, minus the part that would break Rule Zero
   and the content-boundary mandate.
 
+## 10. The Lotus Terraces — a Bali-inspired resort garden (live in the prototype, v0.56)
+
+An island resort venue **inspired by** Balinese garden-temple architecture,
+built entirely original: a tiered *meru*-style garden tower, a split
+entry gate in the *candi bentar* silhouette, and a still **lotus pond**
+with lily pads, set on a quiet coastal flat. It's the same move the whole
+map makes with real geography — draw on a real place's *atmosphere*, then
+build something invented rather than a replica.
+
+- **Live now:** stand by the lotus pond on foot and hold a few seconds and
+  the game banks a one-time **"serenity"** beat — *"the island keeps its
+  calm," +30 clout*. The same "hold a beat" language as the Static Hour's
+  escape and Turf Standing, reused for a moment of quiet instead of tension.
+- **Content boundary:** Bali-*inspired*, not depicted. **No real temple,
+  shrine, site, address, or location is copied or named** — the tower, gate,
+  and pond are stylized original geometry, reimagined as a fictional island
+  resort. Consistent with §0's "brands and venues are fictionalized" rule.
+
 > Fictional game world. Real-place names are geographic reference in the tradition of
 > open-world games set in real regions; everything operational, commercial, military,
 > or personal is invented.
