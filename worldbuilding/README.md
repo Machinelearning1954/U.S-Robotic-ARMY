@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.58**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.59**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -351,6 +351,12 @@ heads talk hustle (LLCs, grants, tax breaks) as rotating Patois banter;
 hold a few seconds to join the "domino circle," +35 one-time. All comedy,
 not advice — no real program, agency, or firm named. See
 `PAUDC_Side_Activities.md` §4a.
+v0.59 adds **Yaad Bird**, the fried-chicken joint with an honest-job loop.
+Walk up to the counter on foot and hold your post; a shift bar fills over
+~8s and pays wages (+30 first shift, +20 after, short cooldown). A
+repeatable legit-income floor beside the flashy OnWatch clout economy.
+Original invented brand — no real chain, name, logo, or recipe depicted.
+See `PAUDC_Economy.md` §6a.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

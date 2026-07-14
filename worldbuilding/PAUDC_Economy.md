@@ -69,8 +69,22 @@ hijack mission and the shop literally restocks.
 ## 6. Player money flow
 
 - **In:** missions, side jobs (taxi fares, deliveries — Low & Slow generalizes),
+  **Yaad Bird shift wages** (the honest-job loop, live in the prototype v0.59),
   fishing/butcher sales, YARDCLASH purses, OnWatch sponsorships at fame tiers,
   Re-Render payouts.
+
+### 6a. Yaad Bird — the honest-job loop (live in the prototype, v0.59)
+
+**Yaad Bird** is the island's fried-chicken quick-serve — an **original invented
+brand** in the Fort Flavor tradition (no real chain, name, logo, or recipe is
+depicted). It's the game's proof that PAUDC rewards *legit* work, not just
+stunts: walk up to the counter on foot, hold your post, and a **shift bar**
+fills over ~8 seconds — shift worked, wages paid. The first shift pays a **+30**
+welcome-to-the-crew bonus; every shift after is **+20**, on a short cooldown so
+it's a steady grind, not a clout faucet. It sits right beside the OnWatch clout
+economy as the deliberate opposite pole: fame is loud and spiky, wages are quiet
+and reliable — courtesy-first honest hustle, and a clean early-game income floor
+before the big mission payouts open up.
 - **Out:** food/buffs, cosmetics, repairs, fuel, ferries, housing (module later),
   BII courtesy-stop fines, black-market risk premiums.
 - Two currencies stay canon: **₡ canteen credits** (base) and **J$-style street
