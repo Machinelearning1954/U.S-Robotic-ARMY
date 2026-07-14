@@ -147,6 +147,15 @@ for a one-time **+35**.
   reference image (real agency + national markings) was declined; only the general
   idea of a space program was kept, and rebuilt original.
 
+**Alexandria Mission Control — live in the prototype (v0.67).** The Skyworks'
+ground annex, sited beside the canon **Alexandria** great hall at Silver Springs:
+a control hall with a wall of live-telemetry screens, rows of console desks, and
+a roof antenna tracking **Orbital Platform One**. Take a seat at the board on foot
+for a one-time **+35** ("Platform One, we have you"). Directly answers the "space
+base at Alexandria" idea while staying fully invented — **no real agency (NASA or
+otherwise), no real mission-control facility, and no real program is depicted**;
+"Alexandria" is PAUDC's own coral-glass hall, not a real-world place.
+
 ### Zone 5 — "The Strip": Errol Flynn Joint Airfield
 A coastal runway pointing straight out over the sea, so takeoffs blast players past
 waterfalls and landings come in low over reef water so clear you can see rays gliding
