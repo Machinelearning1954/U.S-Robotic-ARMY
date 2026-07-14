@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.45**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.46**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -269,6 +269,11 @@ no real unit or operation is depicted. Press `Y` near the hall to start, clear
 all three watch posts on foot at a walking pace (rush it and the op aborts,
 no penalty), and it resolves clean: "RECOVERED, NOT A SHOT FIRED," +70 clout,
 one-time. See `PAUDC_Base_Design.md`'s Alexandria section.
+v0.46 adds **Flag a Ride** — the genre-standard "commandeer a passing car"
+beat, courtesy-first: on foot, press `J` near a moving traffic car and it's
+yours, no violence depicted. The commuter's car joins your garage as a real
+ownable ride; the ambient traffic pool thins by one per flag-down. See
+`PAUDC_Driving_Physics.md` §6.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

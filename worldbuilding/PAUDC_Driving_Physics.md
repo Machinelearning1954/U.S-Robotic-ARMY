@@ -65,6 +65,15 @@ slow in rain, slide on sand, and lose the player where grip logic says they shou
 — the escape valve is physics, not scripting. (Prototype: interceptor land/water
 speed split is this rule's first slice.)
 
+**Flag a Ride — live in the prototype (v0.46).** The genre-standard "commandeer
+a passing car" beat, played courtesy-first: on foot, press **J** near a moving
+traffic car and it's yours — no violence depicted, just a flagged-down swap
+("no hard feelings," per the toast). The commuter steps out of the loop
+permanently and joins your garage as a real, ownable ride with its own
+mid-tier stats (a regular street car: no amphibious hull, moderate accel/top
+speed); the ambient traffic pool thins by exactly one car per flag-down, same
+economy of scarcity as everything else the island tracks.
+
 ## 7. Region-specific behavior (one island, many roads)
 
 - **Kingston urban:** stop-go grids, junction discipline, taxi assertiveness high.
