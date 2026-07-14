@@ -62,6 +62,9 @@ recon feeds:
 - **Feed G** — Instagram:
   [post `DQ2S0n1D4Ns`](https://www.instagram.com/p/DQ2S0n1D4Ns/)
   (@gta6latest), via Instagram's official `/embed/` player in portrait format.
+- **Feed H** — YouTube:
+  ["What's The Best Gaming GPU in 2026? (For Every Budget)"](https://youtu.be/kej44svYfc4?si=ZMdudmnJQEUcvsI4),
+  a hardware guide feed.
 
 ## Generated brand art (Higgsfield)
 
