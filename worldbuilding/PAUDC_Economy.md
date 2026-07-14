@@ -78,10 +78,14 @@ hijack mission and the shop literally restocks.
 **Yaad Bird** is the island's fried-chicken quick-serve — an **original invented
 brand** in the Fort Flavor tradition (no real chain, name, logo, or recipe is
 depicted). It's the game's proof that PAUDC rewards *legit* work, not just
-stunts: walk up to the counter on foot, hold your post, and a **shift bar**
-fills over ~8 seconds — shift worked, wages paid. The first shift pays a **+30**
-welcome-to-the-crew bonus; every shift after is **+20**, on a short cooldown so
-it's a steady grind, not a clout faucet. It sits right beside the OnWatch clout
+stunts. Walk up to the counter on foot and press **O** to clock in for a
+**shift of order-tickets** (upgraded from a dwell bar in v0.61): five orders
+come in one at a time — **2-Piece, Festival Combo, Big Bucket, Jerk Wrap** —
+and you punch the matching item (**1–4**) before each ticket expires (~3s).
+Every order served pays **+8**; a clean five-for-five shift is **+40**, plus a
+one-time **+10** first-shift bonus, on a short cooldown so it's a steady grind,
+not a clout faucet. Miss orders and you're paid only for what you served —
+a real skill loop, not a timer. It sits right beside the OnWatch clout
 economy as the deliberate opposite pole: fame is loud and spiky, wages are quiet
 and reliable — courtesy-first honest hustle, and a clean early-game income floor
 before the big mission payouts open up.

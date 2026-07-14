@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.60**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.61**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -362,6 +362,11 @@ Bone Yard"): press `O` at the table for a shed-race match — 1–4 to play a
 matching tile, X to draw, first to empty their hand wins (+50, or +5 for a
 loss). A real skill-and-luck minigame, not a dwell timer. No wagering; clout
 is social currency, not money. See `PAUDC_Side_Activities.md` §4b.
+v0.61 upgrades the **Yaad Bird** job from a dwell bar to a timed
+**order-serving minigame**: press `O` at the counter to clock in, then punch
+the matching item (1–4) for each of five tickets before it expires. +8 per
+order served, +10 first-shift bonus, short cooldown. A real skill loop. See
+`PAUDC_Economy.md` §6a.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
