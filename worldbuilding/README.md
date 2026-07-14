@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.56**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.57**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -338,6 +338,13 @@ flat. Stand by the pond on foot and hold a few seconds for a one-time
 "serenity" beat, +30 clout. Bali-*inspired*, not copied — original stylized
 geometry, no real temple or site depicted, the way the whole map
 fictionalizes real places. See `JAMAICA_ISLAND_WORLD.md` §10.
+v0.57 adds **BII Scene Response** — the "law investigates the scene you
+caused" beat, non-lethal and played for satire. Flag a ride (`J`) and the
+BII dispatches a forensics team to the spot: courtesy tape, three numbered
+evidence markers, two investigators photographing a dropped domino. Left
+alone it processes for ~12s and files ("ledger, not the morgue"); drive
+back through and the clock resets. +10 first time. No body, no blood; no
+real agency or procedure depicted. See `PAUDC_Wanted_System.md`.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

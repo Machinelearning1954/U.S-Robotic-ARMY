@@ -95,3 +95,27 @@ in this document working together at once.
 
 > All fictional: the crate, the Vault, and the getaway are original PAUDC
 > content — no real heist, vehicle, or location is depicted.
+
+## BII Scene Response — forensics process what you caused (live in the prototype, v0.57)
+
+The "the law investigates the scenes *you* caused" beat, reframed to the game's
+non-lethal, courtesy-first floor. When the Don **flags a ride** (`J`, the
+Flag-a-Ride mechanic), the BII treats it as an incident and dispatches a
+**forensics team** to the exact spot:
+
+- **What appears:** a taped-off cordon (courtesy tape), three numbered
+  **evidence markers**, and two BII investigators who work the scene — one
+  photographs, both bob over their clipboards. It's the CSI-processing tableau,
+  played for gentle satire: the "evidence" is a dropped domino, not a body.
+- **It processes and files:** left alone, the team works the scene for ~12
+  seconds and then clears — *"photographed, bagged, filed. Ledger, not the
+  morgue."* First time you trigger one, +10 clout for discovering the system.
+- **Disturb it and the clock resets:** drive back through the cordon at speed
+  and the investigators have to start over — a small, comic consequence, never
+  a pursuit escalation on its own.
+- **Why non-lethal:** the reference for this feature was a violent crime-scene
+  mock-up; PAUDC keeps the *mechanic* (the law forensically reacting to your
+  mess) and drops the gore entirely. No body, no blood, no death — consistent
+  with the whole wanted system's floor. **No real agency, forensic procedure,
+  or method is depicted** — the BII is the invented Bureau of Island Integrity,
+  and "processing" here is set-dressing and comedy, not a real technique.
