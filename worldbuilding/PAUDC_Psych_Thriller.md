@@ -220,3 +220,70 @@ NOW — THE CHOIR WAS NEVER HIRING."**
 
 > Fictional game design. Tone rule stands: cinematic and playful at the core, with
 > this one deliberate cold room down the hall.
+
+---
+
+## 10. "The Undertow Hour" — the capstone twist-campaign
+
+The finale of the Static Hour arc, unlocked after all five §5 beats. It's built by
+merging the **shared techniques** of the classic twist-thriller canon into one
+original story for the Don — the unreliable narrator, the untrustworthy memory,
+the double, the nested realities, the recontextualizing reveal, and the central
+"is the threat outside me or inside my own head" ambiguity. **None of the source
+films' plots, characters, names, or scenes are used or referenced — only the
+storytelling devices they have in common** (see the boundary note at §10d).
+
+### 10a. The device kit (what got merged, in the abstract)
+- **Unreliable narrator / the storyteller who invented it** — the Don's own mission
+  log is the game's UI, and late in the arc it's revealed the log has been *editing
+  itself.* What the player "remembers doing" and what the harbor cameras show diverge.
+- **Memory you have to reconstruct from notes** — the Don keeps a wall of index
+  cards and voice memos (an in-world mechanic) because he can no longer trust
+  recall; the player literally re-orders the cards to rebuild the true sequence.
+- **The double / second self** — a figure who seems to be an ally turns out to be
+  the Don's own conditioned response wearing a face (ties to §5.4: the Presence was
+  always him). The "partner" is the player's shadow.
+- **Nested realities / the layer you can't verify** — three "mornings" replay with
+  small differences; the player must spot which details are wrong to climb out.
+- **The investigator who is part of the case** — the Don is chasing the person who
+  seeded the Gospel-Hour funnel and slowly realizes his own name is on the roster.
+- **The recontextualizing reveal** — the final memory card flips the whole board:
+  the "homecoming" wasn't a return, it was a **de-conditioning program** he
+  volunteered for, and the island campaign has been the therapy, dramatized.
+
+### 10b. The five beats (each banks a memory card)
+1. **"The Card Wall"** — tutorial for the reconstruction mechanic: assemble scattered
+   cards into a timeline; the timeline contradicts your own log. Card: *a boarding
+   pass with no departure city.*
+2. **"Two Sets of Footprints"** — a night drive where a second vehicle mirrors your
+   every move; catch it in a mirror and the driver is you. Card: *a photo of the
+   Don shaking his own hand.*
+3. **"Three Mornings"** — the nested-reality set-piece; live the same dawn three
+   times, each subtly wrong, and escape by naming the lie. Card: *a tide chart dated
+   tomorrow.*
+4. **"The Roster"** — infiltrate the Ear and find the Gospel-Hour subject list; his
+   name is entry one, in his own handwriting. Card: *a consent form he signed.*
+5. **"The Undertow"** — resolution. Not a fight: the Don sits through one last
+   broadcast *by choice*, recognizes the startle response as his own, and lets it
+   pass without running. The Presence turns and walks into the surf. The card wall
+   assembles itself into a single sentence and the arc closes.
+
+### 10c. Why it's non-lethal and lands soft (the twist rule)
+Consistent with §6: nobody dies and no reveal is cruel. The final twist is
+**merciful, not nihilistic** — the "it was therapy all along" turn reframes the
+whole campaign as the Don choosing to heal, which is the opposite of a downer
+ending. The horror was the *not-knowing*; the payoff is *knowing, and staying.*
+Reward: the **"Undertow"** permanent plate, and the Static Hour's free-roam toggle
+gains a calm "after" state — the island at peace.
+
+### 10d. Content boundary note (capstone)
+- **Techniques merged, not works copied.** This campaign synthesizes the *general
+  grammar* of the twist-thriller genre (unreliable narration, memory reconstruction,
+  the double, nested realities, the late reveal). **No specific film's plot,
+  characters, dialogue, imagery, titles, or scene beats are reproduced or
+  referenced.** Every name, card, and beat above is original to PAUDC.
+- **No real mental-health depiction.** "Conditioning," "de-conditioning," and "the
+  Undertow" are fictional in-world devices, not clinical processes; the arc names no
+  real therapy, technique, drug, diagnosis, or institution.
+- **Non-lethal, merciful resolution** — same power-fantasy floor as the rest of the
+  game; the twist heals rather than punishes.
