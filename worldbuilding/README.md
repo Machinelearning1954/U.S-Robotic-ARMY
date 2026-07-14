@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.49**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.50**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -293,6 +293,12 @@ mid-flight to bail out under an orange canopy, steer with A/D, and aim for
 **The Drop Ring** by the airfield. First bullseye pays +40 clout; misses
 just tell you how far off you came down. No fall damage — the non-lethal
 floor holds at terminal velocity too. See `PAUDC_Transit.md`.
+v0.50 adds **Storm Watch**: toggle a storm with `R` and an offshore
+**waterspout** forms out over the bay, churning and drifting along the
+water. Stand at the seawall on foot, look seaward, and hold to "film" it —
+the crowd gathers and OnWatch overpays for the clip, +35 clout, one-time.
+Pure spectacle, no danger to the player. Fictional weather VFX, no real
+footage or location. See `PAUDC_Game_Systems.md` §7.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

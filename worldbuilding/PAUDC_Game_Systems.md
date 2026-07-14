@@ -300,6 +300,16 @@ systems driver, not set dressing.
 rare salvage, debris-clearing contracts at double ₡, blooper-clout bonanza as NPCs
 film the cleanup chaos.
 
+**Storm Watch — live in the prototype (v0.50).** During a storm an **offshore
+waterspout** forms out over the bay — a churning grey funnel drifting along the
+water, visible from the seawall. It's a pure spectacle event in the open-world
+tradition: stand at the waterline (on foot), look out to sea, and hold still a
+few seconds to "film" it — the crowd gathers, OnWatch overpays for the clip
+(+35 clout, one-time). No danger to the player and no damage system attached;
+the funnel stays out over deep water and the whole beat is watch-and-capture,
+not survive. Toggle a storm with `R` to bring it in. Entirely fictional
+weather VFX — no real storm footage or real location is depicted.
+
 ---
 
 ## 8. Live Cadence — Daily & Weekly Calendar
