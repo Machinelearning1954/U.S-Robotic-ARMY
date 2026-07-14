@@ -59,6 +59,9 @@ recon feeds:
   [reel `DaDuh0HqbCR`](https://www.instagram.com/reel/DaDuh0HqbCR/)
   (@rockstargamesfor), via Instagram's official `/embed/` player in portrait
   format.
+- **Feed G** — Instagram:
+  [post `DQ2S0n1D4Ns`](https://www.instagram.com/p/DQ2S0n1D4Ns/)
+  (@gta6latest), via Instagram's official `/embed/` player in portrait format.
 
 ## Navy SEAL fire-team support
 
