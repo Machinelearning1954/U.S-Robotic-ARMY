@@ -26,6 +26,8 @@ an enhanced renderer (on by default, toggle with **G**):
   (canvas shadow blur plus additive particle blending)
 - Twinkling parallax starfield and gradient sky
 - Impact screen shake and a pulsing power core on the player unit
+- Muzzle flash at the cannon on each shot
+- CRT scanline and vignette post-processing overlay
 
 Note: real ray tracing is a renderer feature — it can't be imported from a
 YouTube URL. The link's `Zp9qozA2bzQ` part is just the video's ID and `si=` is

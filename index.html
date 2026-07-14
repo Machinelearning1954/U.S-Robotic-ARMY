@@ -317,6 +317,7 @@
   var gfxEnhanced = true;
   var shake = 0;
   var nowT = 0;
+  var muzzle = 0; // muzzle-flash timer, counts down after each shot
   var stars = [];
   for (var si = 0; si < 90; si++) {
     stars.push({
@@ -462,9 +463,11 @@
     player.x = Math.max(player.w / 2, Math.min(W - player.w / 2, player.x));
 
     fireCooldown -= dt;
+    if (muzzle > 0) muzzle -= dt;
     if (keys.Space && fireCooldown <= 0) {
       bullets.push({ x: player.x, y: player.y - player.h / 2, vy: -520 });
       fireCooldown = 0.22;
+      muzzle = 0.08;
     }
 
     // bullets
@@ -596,6 +599,14 @@
     if (gfxEnhanced) { // pulsing power core
       ctx.fillStyle = "rgba(92,200,255," + (0.5 + 0.3 * Math.sin(nowT * 6)).toFixed(3) + ")";
       ctx.fillRect(-4, -4, 8, 8);
+    }
+    if (muzzle > 0 && alphaScale >= 1) { // muzzle flash at the barrel tip
+      var mr = 6 + (muzzle / 0.08) * 10;
+      var flash = ctx.createRadialGradient(0, -player.h / 2 - 12, 0, 0, -player.h / 2 - 12, mr);
+      flash.addColorStop(0, "rgba(214,255,158,0.95)");
+      flash.addColorStop(1, "rgba(214,255,158,0)");
+      ctx.fillStyle = flash;
+      ctx.fillRect(-mr, -player.h / 2 - 12 - mr, mr * 2, mr * 2);
     }
     ctx.restore();
 
@@ -742,7 +753,22 @@
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    ctx.restore();
+    ctx.restore(); // undo screen shake
+
+    // post-processing overlay: CRT scanlines + vignette (screen space)
+    if (gfxEnhanced) {
+      ctx.save();
+      ctx.globalAlpha = 0.05;
+      ctx.fillStyle = "#000";
+      for (var y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1); // scanlines
+      ctx.globalAlpha = 1;
+      var vig = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.85);
+      vig.addColorStop(0, "rgba(0,0,0,0)");
+      vig.addColorStop(1, "rgba(0,0,0,0.55)");
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
   }
 
   // --- Main loop --------------------------------------------------------------
