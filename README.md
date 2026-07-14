@@ -47,6 +47,9 @@ recon feeds:
 - **Feed C** — YouTube:
   ["U.S. Navy SEALs — The Russian Oil Rig Hostage Rescue Operation (Modern Warfare 2 Remastered, 8K)"](https://youtu.be/4dBjwxVKDrY?si=Bu9FoZasZ1LFRiho),
   the tactics reference for the in-game SEAL fire-team support.
+- **Feed D** — YouTube:
+  [video `DhomTNmvJ2c`](https://youtu.be/DhomTNmvJ2c?si=GneqX9j3gXw2jShx),
+  shown as the auxiliary command feed.
 
 ## Navy SEAL fire-team support
 
