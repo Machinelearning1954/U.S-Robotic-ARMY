@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.62**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.63**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -371,6 +371,11 @@ v0.62 adds **the Dragonfin ROV**, the Don's marine drone: press `L` on foot
 and it auto-pilots to the nearest un-logged shipwreck, scouts it (+15, marks
 the glint), and returns on a cooldown. The recon companion to the wreck-dive
 loop, straight from his robotics-vet backstory. See `PAUDC_Combat_System.md` §7.
+v0.63 gives **The Don's Hillside Estate** a walk-in **interior**: once owned,
+press `E` at the door to step into a luxury great room — sectional couch, big
+wall TV, a bar, a floor-to-ceiling glass wall over the night harbor, warm
+chandelier — and `E` again to leave. Same interior tech as Anchor Row, scaled
+up. See `PAUDC_Housing_Interiors.md` §3b.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

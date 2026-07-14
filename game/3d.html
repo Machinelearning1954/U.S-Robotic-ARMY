@@ -52,7 +52,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>L</b> drone · <b>O</b> dominoes/shift · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.62</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.63</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -5806,16 +5806,49 @@ let estateOwned=false,estateHintT=0;
   label('THE DON’S HILLSIDE',ESTATE.X,gy+11,ESTATE.Z);
 })();
 function updateEstate(dt){
-  if(estateOwned||veh!==WALKER)return;
-  if(Math.hypot(P.x-ESTATE.X,P.z-ESTATE.Z)<12){
+  if(veh!==WALKER||inEstate)return;
+  if(Math.hypot(P.x-ESTATE.X,P.z-ESTATE.Z)>12)return;
+  if(!estateOwned){
     if(clout>=ESTATE_COST){estateOwned=true;addClout(40);
       try{localStorage.setItem('paudc_estate','1');}catch(e){}
       toast('THE DON’S HILLSIDE — keys are yours. From Anchor Row to the hills.  +40 CLOUT');}
     else if(perf>estateHintT){estateHintT=perf+5000;
       toast('THE DON’S HILLSIDE — earn '+ESTATE_COST+' clout to claim it  (you have '+clout+')');}
-  }
+  }else if(perf>estateHintT){estateHintT=perf+5000;toast('THE DON’S HILLSIDE — press E to go inside');}
 }
 try{if(localStorage.getItem('paudc_estate')==='1')estateOwned=true;}catch(e){}
+// ---------------- Hillside Estate interior — walk-in luxury room ----------------
+const ESTATEINT={X:mx(1700),Z:mz(1700)}; // an isolated interior pocket, teleported into
+{const iy=Math.max(height(ESTATEINT.X,ESTATEINT.Z),0.2)+0.15;
+ const floor=new THREE.Mesh(new THREE.BoxGeometry(15,0.3,12),new THREE.MeshLambertMaterial({color:0x2a2620}));
+ floor.position.set(ESTATEINT.X,iy,ESTATEINT.Z);scene.add(floor);
+ const rug=new THREE.Mesh(new THREE.BoxGeometry(7,0.05,5),new THREE.MeshLambertMaterial({color:0x1c6b5e}));
+ rug.position.set(ESTATEINT.X,iy+0.18,ESTATEINT.Z);scene.add(rug);
+ const wallM=new THREE.MeshLambertMaterial({color:0x30281f});
+ const wN=new THREE.Mesh(new THREE.BoxGeometry(15,4.2,0.3),wallM);wN.position.set(ESTATEINT.X,iy+2.25,ESTATEINT.Z-6);scene.add(wN);
+ const wW=new THREE.Mesh(new THREE.BoxGeometry(0.3,4.2,12),wallM);wW.position.set(ESTATEINT.X-7.5,iy+2.25,ESTATEINT.Z);scene.add(wW);
+ const wE=wW.clone();wE.position.x=ESTATEINT.X+7.5;scene.add(wE);
+ const ceil=new THREE.Mesh(new THREE.BoxGeometry(15,0.3,12),new THREE.MeshLambertMaterial({color:0x1a1712}));
+ ceil.position.set(ESTATEINT.X,iy+4.4,ESTATEINT.Z);scene.add(ceil);
+ // floor-to-ceiling glass wall (south) with a night-harbor view
+ const glass=new THREE.Mesh(new THREE.PlaneGeometry(15,4.2),new THREE.MeshBasicMaterial({map:homeWinTex}));
+ glass.position.set(ESTATEINT.X,iy+2.25,ESTATEINT.Z+5.98);glass.rotation.y=Math.PI;scene.add(glass);
+ // sectional couch + coffee table + big TV + bar
+ const couch=new THREE.Mesh(new THREE.BoxGeometry(5,0.9,1.6),new THREE.MeshLambertMaterial({color:0x14171b}));couch.position.set(ESTATEINT.X-1,iy+0.6,ESTATEINT.Z-1);couch.castShadow=true;scene.add(couch);
+ const tvpanel=new THREE.Mesh(new THREE.BoxGeometry(4,2.2,0.2),new THREE.MeshBasicMaterial({color:0x0a1016}));tvpanel.position.set(ESTATEINT.X-1,iy+2,ESTATEINT.Z-5.7);scene.add(tvpanel);
+ const tvglow=new THREE.Mesh(new THREE.PlaneGeometry(3.6,1.9),new THREE.MeshBasicMaterial({color:0x123246}));tvglow.position.set(ESTATEINT.X-1,iy+2,ESTATEINT.Z-5.58);scene.add(tvglow);
+ const bar=new THREE.Mesh(new THREE.BoxGeometry(4,1.1,1),new THREE.MeshLambertMaterial({color:0x3a2f22}));bar.position.set(ESTATEINT.X+5,iy+0.7,ESTATEINT.Z+4);bar.castShadow=true;scene.add(bar);
+ const chand=new THREE.PointLight(0xffe0a8,1.4,34);chand.position.set(ESTATEINT.X,iy+3.8,ESTATEINT.Z);scene.add(chand);
+ label('THE DON’S HILLSIDE — inside',ESTATEINT.X,iy+5.6,ESTATEINT.Z);}
+let inEstate=false,eOutX=0,eOutZ=0,eOutA=0,estIntHintT=0;
+function enterEstate(){eOutX=P.x;eOutZ=P.z;eOutA=P.a;
+  P.x=ESTATEINT.X;P.z=ESTATEINT.Z+4;P.a=Math.PI/2;P.v=0;inEstate=true;
+  toast('INSIDE THE HILLSIDE — press E by the door to leave');}
+function exitEstate(){P.x=eOutX;P.z=eOutZ;P.a=eOutA;P.v=0;inEstate=false;
+  toast('BACK OUTSIDE — The Don’s Hillside');}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='e')return;
+  if(!inEstate&&estateOwned&&veh===WALKER&&Math.hypot(P.x-ESTATE.X,P.z-ESTATE.Z)<8)enterEstate();
+  else if(inEstate&&Math.hypot(P.x-ESTATEINT.X,P.z-(ESTATEINT.Z+4))<3)exitEstate();});
 // ---------------- The Lotus Terraces: a Bali-inspired resort garden (original venue) ----------------
 // Bali-INSPIRED, not a copy: tiered garden temple, split gate, and a lotus pond, all
 // original stylized builds. Reimagined as an island resort, the way the whole map
@@ -6295,7 +6328,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),medicCert,steadyCert,wellDeckClip,quietOn,quietCP,quietDone,staticSU:smReading,inqOn,inqCP,inqDone,chuteOn:chute.on,chuteY:+chute.y.toFixed(1),chuteDone,spoutSeen,spoutVisible:spout.visible,cardsGot,wallDone,swarmT:+swarmT.toFixed(1),swarmCd:+swarmCd.toFixed(1),swarmUnlocked,estateOwned,baliSeen,sceneActive:SCENE.active,sceneProcT:+SCENE.procT.toFixed(1),golfSeen,jobWorked,shiftsDone,jobCd:+jobCd.toFixed(1),tixActive,tixServed,tixCount,tixOrder,domActive,domOpen,domPlayerN:domPlayer.length,domOppN:domOpp.length,domResult,droneActive,dronePhase,wrecksScouted,droneCd:+droneCd.toFixed(1),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},jackCar,VEH,CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},setMedicT:v=>{medicT=v;},STEADY,setSteadyT:v=>{steadyT=v;},CARRIER,wellDeckIn,setWellDeckClip:v=>{wellDeckClip=v;},ALEXP,QUIET_PTS,startQuiet,setQuietT:v=>{quietT=v;},setQuietCP:v=>{quietCP=v;},INQ_DESK,INQ_PTS,INQ_CRATE,startInquest,setInqT:v=>{inqT=v;},setInqCP:v=>{inqCP=v;if(v>=INQ_PTS.length)inqCrate.visible=true;},DROPRING,chute,bailOut,setChuteY:v=>{chute.y=v;},forceFly:()=>{FLIGHT.flying=true;FLIGHT.flown=0;walker.visible=false;},SPOUT,spout,setSpoutT:v=>{spoutT=v;},CARDWALL,CARD_PTS,cardMeshes,deploySwarm,swarmDrones,setSwarmCd:v=>{swarmCd=v;},ESTATE,ESTATE_COST,BALI,setBaliT:v=>{baliT=v;},SCENE,spawnScene,sceneGroup,setSceneProcT:v=>{SCENE.procT=v;},DUPPY,GOLF_TALK,setGolfT:v=>{golfT=v;},YARDBIRD,startShift,serveTix,setJobCd:v=>{jobCd=v;},nextTicket,drone,deployDrone,setDroneCd:v=>{droneCd=v;},startDom,playDomTile,passDom,domForce:(pl,op,open)=>{domActive=true;domResult='';domTurns=0;domPlayer=pl.slice();domOpp=op.slice();domOpen=open;renderDom();},
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),medicCert,steadyCert,wellDeckClip,quietOn,quietCP,quietDone,staticSU:smReading,inqOn,inqCP,inqDone,chuteOn:chute.on,chuteY:+chute.y.toFixed(1),chuteDone,spoutSeen,spoutVisible:spout.visible,cardsGot,wallDone,swarmT:+swarmT.toFixed(1),swarmCd:+swarmCd.toFixed(1),swarmUnlocked,estateOwned,inEstate,baliSeen,sceneActive:SCENE.active,sceneProcT:+SCENE.procT.toFixed(1),golfSeen,jobWorked,shiftsDone,jobCd:+jobCd.toFixed(1),tixActive,tixServed,tixCount,tixOrder,domActive,domOpen,domPlayerN:domPlayer.length,domOppN:domOpp.length,domResult,droneActive,dronePhase,wrecksScouted,droneCd:+droneCd.toFixed(1),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},jackCar,VEH,CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},setMedicT:v=>{medicT=v;},STEADY,setSteadyT:v=>{steadyT=v;},CARRIER,wellDeckIn,setWellDeckClip:v=>{wellDeckClip=v;},ALEXP,QUIET_PTS,startQuiet,setQuietT:v=>{quietT=v;},setQuietCP:v=>{quietCP=v;},INQ_DESK,INQ_PTS,INQ_CRATE,startInquest,setInqT:v=>{inqT=v;},setInqCP:v=>{inqCP=v;if(v>=INQ_PTS.length)inqCrate.visible=true;},DROPRING,chute,bailOut,setChuteY:v=>{chute.y=v;},forceFly:()=>{FLIGHT.flying=true;FLIGHT.flown=0;walker.visible=false;},SPOUT,spout,setSpoutT:v=>{spoutT=v;},CARDWALL,CARD_PTS,cardMeshes,deploySwarm,swarmDrones,setSwarmCd:v=>{swarmCd=v;},ESTATE,ESTATE_COST,ESTATEINT,enterEstate,exitEstate,BALI,setBaliT:v=>{baliT=v;},SCENE,spawnScene,sceneGroup,setSceneProcT:v=>{SCENE.procT=v;},DUPPY,GOLF_TALK,setGolfT:v=>{golfT=v;},YARDBIRD,startShift,serveTix,setJobCd:v=>{jobCd=v;},nextTicket,drone,deployDrone,setDroneCd:v=>{droneCd=v;},startDom,playDomTile,passDom,domForce:(pl,op,open)=>{domActive=true;domResult='';domTurns=0;domPlayer=pl.slice();domOpp=op.slice();domOpen=open;renderDom();},
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');

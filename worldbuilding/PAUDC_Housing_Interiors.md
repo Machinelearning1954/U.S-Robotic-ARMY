@@ -67,6 +67,13 @@ supercars in bright liveries (original low-poly builds, no real marque).
 - **Why it lands:** it's the visible answer to "what is all this clout *for*"
   — the same "day in the life at the big house" fantasy the open-world genre
   runs on, kept fictional and courtesy-first: you earn it, nobody's evicted.
+- **Walk inside (v0.63):** once it's yours, press **E** at the door to step
+  into a full **walk-in interior** — the same physically-separate-pocket
+  technique as Anchor Row (§1), scaled up to a luxury great room: sectional
+  couch, coffee table, a big glowing wall TV, a bar, a floor-to-ceiling glass
+  wall with the night-harbor view, and a warm chandelier. Press **E** by the
+  door to leave. It proves the interior system tiers cleanly from the starter
+  house to the top-of-ladder estate with no new tech — just a bigger room.
 
 ## 4. What's next (spec only, not yet built)
 
