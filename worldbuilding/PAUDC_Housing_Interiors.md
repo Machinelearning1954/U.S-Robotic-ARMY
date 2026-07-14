@@ -51,11 +51,28 @@ turf, wrecks); nothing ever asked the player to *spend* it. The Wardrobe is
 the prototype's proof that the economy doc's shop/vendor model
 (`PAUDC_Economy.md`) works as a real interaction, not just a spec.
 
+## 3b. The Don's Hillside Estate — live in the prototype (v0.55)
+
+The ownership ladder's top rung is now real: a high-clout **hillside estate**
+that the Don earns as his fame climbs — the power-fantasy payoff of the whole
+progression. It sits on a gentle rise well clear of the district ring, a dark
+wood-and-glass mansion with a **car-display forecourt** of four stylized
+supercars in bright liveries (original low-poly builds, no real marque).
+
+- **Claim it:** on foot at the estate with **150 clout** banked, it becomes
+  yours automatically — "keys are yours, from Anchor Row to the hills," +40
+  clout, one-time. Under the threshold, it tells you how much more you need.
+- **Persistent:** ownership saves to `localStorage` (like race-best and
+  clout), so the estate stays claimed across sessions.
+- **Why it lands:** it's the visible answer to "what is all this clout *for*"
+  — the same "day in the life at the big house" fantasy the open-world genre
+  runs on, kept fictional and courtesy-first: you earn it, nobody's evicted.
+
 ## 4. What's next (spec only, not yet built)
 
 - **More properties, more tiers:** a starter room → Anchor Row's house →
-  a Strip penthouse, each unlocked by clout/story progress, per the economy
-  doc's ownership ladder.
+  the Hillside Estate (live) → a Strip penthouse, each unlocked by
+  clout/story progress, per the economy doc's ownership ladder.
 - **More decoration:** furniture skins as a further clout sink, matching the
   Duppy Links ball-skin pattern (`PAUDC_Side_Activities.md` §4) and the
   Wardrobe's own unlock-once model above.

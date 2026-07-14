@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.54**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.55**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -324,6 +324,14 @@ the per-frame fill and VRAM; several HUD elements (vignette, whisper line,
 scan sweep, meter label) are now cached once instead of re-queried by
 `getElementById` every frame; and a dead lookup in the Dazzler path was
 removed. Verified: clean load, no errors, loop steady.
+v0.55 adds **The Don's Hillside Estate** — the top of the ownership ladder.
+A high-clout wood-and-glass mansion on a hillside with a car-display
+forecourt of four stylized supercars. Reach it on foot with 150 clout and
+it's yours ("from Anchor Row to the hills," +40, one-time, saved across
+sessions). The "day in the life at the big house" power-fantasy payoff,
+kept fictional and courtesy-first — you earn it, nobody's evicted. From a
+luxury-lifestyle reference video; no real property, person, or brand
+depicted. See `PAUDC_Housing_Interiors.md` §3b.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
