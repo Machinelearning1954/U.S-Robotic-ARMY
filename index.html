@@ -277,6 +277,7 @@
       <button id="tab-ig3" class="tab">Feed F · Rockstar Reel</button>
       <button id="tab-ig4" class="tab">Feed G · GTA6 News</button>
       <button id="tab-gpu" class="tab">Feed H · GPU Guide</button>
+      <button id="tab-live" class="tab">Feed I · Live Theater</button>
     </div>
     <p class="sub" id="briefing-sub"></p>
     <div class="video-wrap" id="video-wrap"></div>
@@ -363,6 +364,16 @@
       link: "https://youtu.be/kej44svYfc4?si=ZMdudmnJQEUcvsI4",
       linkText: "Open on YouTube ↗",
       portrait: false
+    },
+    live: {
+      sub: "Live theater feed — Higgsfield-animated view of the battlefield: " +
+           "moonlit ocean, drifting storm clouds, and sweeping searchlights.",
+      src: "https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260714_183606_1ec6955f-5e07-484a-8779-9929a9b8acba.mp4",
+      title: "Animated battlefield backdrop (Higgsfield)",
+      link: "https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260714_183606_1ec6955f-5e07-484a-8779-9929a9b8acba.mp4",
+      linkText: "Open clip ↗",
+      portrait: false,
+      video: true
     }
   };
   var currentFeed = "yt";
@@ -467,6 +478,32 @@
     link.href = f.link;
     link.textContent = f.linkText;
     videoWrap.classList.toggle("portrait", f.portrait);
+    if (f.video) {
+      // Higgsfield-generated clip: native <video>, autoplay+loop, muted so
+      // autoplay is allowed. Falls back to a note if the source can't load.
+      var vid = document.createElement("video");
+      vid.src = f.src;
+      vid.title = f.title;
+      vid.autoplay = true;
+      vid.loop = true;
+      vid.muted = true;
+      vid.playsInline = true;
+      vid.controls = true;
+      vid.style.width = "100%";
+      vid.style.height = "100%";
+      vid.style.objectFit = "contain";
+      vid.style.background = "#000";
+      vid.onerror = function () {
+        videoWrap.replaceChildren(
+          Object.assign(document.createElement("div"), {
+            textContent: "Live feed unavailable — open on the source link below.",
+            style: "color:#7d8fa1;display:flex;align-items:center;justify-content:center;height:100%;padding:20px;text-align:center;"
+          })
+        );
+      };
+      videoWrap.replaceChildren(vid);
+      return;
+    }
     var iframe = document.createElement("iframe");
     iframe.src = f.src;
     iframe.title = f.title;
