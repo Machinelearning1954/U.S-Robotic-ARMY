@@ -150,6 +150,7 @@
     <div><span class="k">Score</span> <span id="hudScore">0</span></div>
     <div><span class="k">Distance</span> <span id="hudDist">0</span>m</div>
     <div><span class="k">Hull</span> <span id="hudHull">100</span>%</div>
+    <div id="hudCloakWrap" class="hidden"><span class="k">Cloak</span> <span id="hudCloak">100</span>%</div>
     <div><span class="k">Plane</span> <span id="hudPlane">—</span></div>
   </div>
 
@@ -174,7 +175,7 @@
 
       <div class="controls">
         Fly with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or the <kbd>Arrow</kbd> keys &nbsp;•&nbsp;
-        <kbd>Space</kbd> boost &nbsp;•&nbsp; fly through <b>rings</b> for points, dodge <b>storms</b>.
+        <kbd>Space</kbd> boost &nbsp;•&nbsp; <kbd>Shift</kbd> cloak (CIA Phantom) &nbsp;•&nbsp; fly through <b>rings</b> for points, dodge <b>storms</b>.
       </div>
 
       <div class="btnRow">
@@ -210,6 +211,7 @@
     { id: "wraith",  name: "S-1 Wraith",   tag: "Nimble scout",          color: "#c79bff", accent: "#efe1ff", speed: 7, handling: 9, hull: 85  },
     { id: "vulcan",  name: "A-5 Vulcan",   tag: "All-rounder",           color: "#ffd24d", accent: "#fff2c2", speed: 6, handling: 6, hull: 110 },
     { id: "spectre", name: "R-0 Spectre",  tag: "Robotic ace",           color: "#4fd1ff", accent: "#d4f6ff", speed: 8, handling: 8, hull: 95  },
+    { id: "cia",     name: "CIA Phantom",  tag: "Covert stealth ops",    color: "#2b2f38", accent: "#6b7482", speed: 8, handling: 9, hull: 90, cloak: true },
   ];
 
   let selectedPlane = PLANES[0];
@@ -305,7 +307,8 @@
       statBar("SPD", p.speed, 9) + statBar("HDL", p.handling, 9) + statBar("HULL", p.hull, 150);
 
     const fly = document.createElement("div");
-    fly.className = "flyable"; fly.textContent = "✔ Flyable";
+    fly.className = "flyable";
+    fly.textContent = p.cloak ? "✔ Flyable · ⬢ Cloak (Shift)" : "✔ Flyable";
 
     card.append(cv, name, tag, stats, fly);
     card.addEventListener("click", () => {
@@ -340,6 +343,7 @@
 
   let state = "menu";
   let player, rings, storms, clouds, score, distance, hull, propPhase, spawnRing, spawnStorm, worldSpeed;
+  let cloakEnergy = 100, cloaked = false;
 
   function resetGame() {
     const p = selectedPlane;
@@ -352,7 +356,9 @@
     }
     score = 0; distance = 0; hull = p.hull; propPhase = 0;
     spawnRing = 0; spawnStorm = 90; worldSpeed = 2 + p.speed * 0.25;
+    cloakEnergy = 100; cloaked = false;
     document.getElementById("hudPlane").textContent = p.name;
+    document.getElementById("hudCloakWrap").classList.toggle("hidden", !p.cloak);
   }
 
   function start() {
@@ -399,6 +405,16 @@
     player.x = Math.max(60, Math.min(W - 120, player.x));
     player.y = Math.max(30, Math.min(H - 30, player.y));
 
+    // cloak (CIA Phantom only): hold Shift to phase through storms
+    if (p.cloak) {
+      const wantCloak = keys["shift"] && cloakEnergy > 0;
+      cloaked = wantCloak;
+      cloakEnergy += cloaked ? -0.8 : 0.35;
+      cloakEnergy = Math.max(0, Math.min(100, cloakEnergy));
+    } else {
+      cloaked = false;
+    }
+
     distance += worldSpeed * 0.15;
     worldSpeed += 0.0009;
     propPhase += 0.6;
@@ -431,7 +447,7 @@
 
     storms.forEach((s) => {
       s.x -= worldSpeed;
-      if (Math.hypot(s.x - player.x, s.y - player.y) < s.r + player.r - 6) {
+      if (!cloaked && Math.hypot(s.x - player.x, s.y - player.y) < s.r + player.r - 6) {
         hull -= 0.9;
         s.hit = true;
       }
@@ -444,6 +460,7 @@
     document.getElementById("hudScore").textContent = Math.floor(score);
     document.getElementById("hudDist").textContent = Math.floor(distance);
     document.getElementById("hudHull").textContent = Math.max(0, Math.floor(hull));
+    if (p.cloak) document.getElementById("hudCloak").textContent = Math.floor(cloakEnergy);
   }
 
   function draw() {
@@ -516,7 +533,17 @@
       ctx.save();
       ctx.translate(player.x, player.y);
       ctx.rotate(tilt);
+      if (cloaked) {
+        // stealth shimmer ring
+        ctx.globalAlpha = 0.35;
+        ctx.strokeStyle = "rgba(120,220,255,0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 30 + (propPhase % 2) * 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
       drawPlane(ctx, selectedPlane, 0, 0, 1.1, propPhase);
+      ctx.globalAlpha = 1;
       ctx.restore();
       // boost flame
       if (keys[" "]) {
