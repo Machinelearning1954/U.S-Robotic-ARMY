@@ -63,6 +63,19 @@ recon feeds:
   [post `DQ2S0n1D4Ns`](https://www.instagram.com/p/DQ2S0n1D4Ns/)
   (@gta6latest), via Instagram's official `/embed/` player in portrait format.
 
+## Generated brand art (Higgsfield)
+
+The main menu features two images generated with Higgsfield's `nano_banana_pro`
+model from an "Anonymous AI" naval brand concept (midnight-navy / luxury-gold /
+pearl-white palette):
+
+- **Anonymous AI — Naval Command crest**: a dual-A monogram title emblem.
+- **Fleet Captain portrait**: an original character commanding the Anonymous AI
+  mega-yacht.
+
+Both are referenced by their hosted URLs and fail gracefully (each image hides
+itself if the source is unavailable), so the game still runs without them.
+
 ## Navy SEAL fire-team support
 
 Press **S** during a mission to call in a two-operator Navy SEAL fire team.
