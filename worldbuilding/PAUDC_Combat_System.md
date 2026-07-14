@@ -96,6 +96,14 @@ keeping with the game's no-kill floor. Sixteen-second cooldown; first deploy
 unlocks it for +20 clout. No real drone, swarm doctrine, or hardware is depicted —
 it's stylized island tech, courtesy-first even when it comes in numbers.
 
+**The Dragonfin ROV — live in v0.62.** The other half of the Don's robotics kit: a
+little marine drone. On foot, press **`L`** and the Dragonfin auto-pilots out to the
+nearest un-logged shipwreck, **scouts it** (logs its coordinates, marks the gold
+glint, +15 clout), and returns to the case on an 8-second cooldown. It's the
+recon companion to the Wreck Dive loop (`PAUDC_Game_Systems.md` — salvage) —
+find wrecks the easy way with the ROV, then dive them yourself. Original
+fictional hardware; no real drone or ROV is depicted.
+
 ## 8. Hooks
 
 Tactical rescue (storm + flare), Weathermen takedown chains (campaign acts 2–3),

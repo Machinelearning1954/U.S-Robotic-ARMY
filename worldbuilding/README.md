@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.61**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.62**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -367,6 +367,10 @@ v0.61 upgrades the **Yaad Bird** job from a dwell bar to a timed
 the matching item (1–4) for each of five tickets before it expires. +8 per
 order served, +10 first-shift bonus, short cooldown. A real skill loop. See
 `PAUDC_Economy.md` §6a.
+v0.62 adds **the Dragonfin ROV**, the Don's marine drone: press `L` on foot
+and it auto-pilots to the nearest un-logged shipwreck, scouts it (+15, marks
+the glint), and returns on a cooldown. The recon companion to the wreck-dive
+loop, straight from his robotics-vet backstory. See `PAUDC_Combat_System.md` §7.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
