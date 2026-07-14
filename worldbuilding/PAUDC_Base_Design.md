@@ -115,6 +115,20 @@ trimaran assault carrier with a neon-lit well deck players can drive boats strai
   point precisely because no real fleet carrier looks like this.
 - **Vibe:** dockworker NPCs playing dominoes on ammo crates; sound of steel drums
   from a welding crew that moonlights as an actual steel band.
+- **The BII Maritime Desk — live in the prototype (v0.48):** a small
+  awning-topped kiosk on the harbor front where the Bureau of Island Integrity
+  keeps its ledgers on everything that floats. It runs **"The Manifest Case,"**
+  the game's first investigation mission: a crate has walked off the Maroon
+  Thunder's manifest, and the Desk wants it *found*, not avenged. Press **U** at
+  the kiosk to open the case, then interview three marked witnesses on foot —
+  a dockhand, a quay vendor, a hill lookout — each statement narrowing the
+  trail until the tarped crate appears in the mid-shore scrub. Recover it and
+  the case closes the only way BII cases close: **"MANIFEST BALANCED — crate
+  recovered, paperwork filed, nobody cuffed," +60 clout**, one-time.
+  Investigation-procedural flavor in the naval-crimes genre lane, but the unit,
+  the case, and the procedure are all invented — **no real investigative agency
+  is named or depicted**, and the BII's whole shtick stays paperwork-first,
+  courtesy-first, cuffs-never.
 
 ### Zone 5 — "The Strip": Errol Flynn Joint Airfield
 A coastal runway pointing straight out over the sea, so takeoffs blast players past

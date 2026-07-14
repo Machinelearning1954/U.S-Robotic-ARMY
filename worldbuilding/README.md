@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.47**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.48**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -281,6 +281,13 @@ in the dark, cool-teal near light. Automatic while a Static scene runs, gone
 when it lifts. An original gadget on a fictional phenomenon; no real
 detection device, agency, or family is depicted. See
 `PAUDC_Psych_Thriller.md` §8b.
+v0.48 opens the **BII Maritime Desk** on the harbor front and with it the
+game's first investigation mission, **The Manifest Case**: a crate walked off
+the Maroon Thunder's manifest; press `U` at the kiosk, interview three marked
+witnesses on foot, follow the statements to the tarped crate, and close it
+the BII way — "paperwork filed, nobody cuffed," +60 clout, one-time.
+Naval-procedural genre flavor with an entirely invented unit and case — no
+real investigative agency is depicted. See `PAUDC_Base_Design.md` Zone 4.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
