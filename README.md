@@ -52,6 +52,9 @@ recon feeds:
 - **Feed D** — YouTube:
   [video `DhomTNmvJ2c`](https://youtu.be/DhomTNmvJ2c?si=GneqX9j3gXw2jShx),
   shown as the auxiliary command feed.
+- **Feed E** — Instagram:
+  [reel `DaUSt0fo4ev`](https://www.instagram.com/reel/DaUSt0fo4ev/), a second
+  recon reel via Instagram's official `/embed/` player in portrait format.
 
 ## Navy SEAL fire-team support
 
