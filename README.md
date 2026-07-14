@@ -30,15 +30,22 @@ Note: real ray tracing is a renderer feature — it can't be imported from a
 YouTube URL. The link's `Zp9qozA2bzQ` part is just the video's ID and `si=` is
 a share-tracking token, so these effects are implemented natively in canvas.
 
-## Integrated video
+## Integrated media feeds
 
-The game integrates the YouTube video
-["GTA 5 Enhanced UPDATED Ray Tracing RTX 4090 4K Graphics Gameplay"](https://youtu.be/Zp9qozA2bzQ?si=psHQLoz6JmDDCwPN)
-as the in-game **Intel Briefing** screen:
+The in-game **Intel Briefing** screen embeds two external videos as switchable
+recon feeds:
 
-- Available from the main menu, the pause menu, and the game-over screen, or by
-  pressing **B** at any time (gameplay pauses while the briefing is open).
-- Embedded with the privacy-enhanced `youtube-nocookie.com` player; the iframe
-  is only created when the briefing is opened and removed when it closes, so
-  nothing loads from YouTube until the player asks for it.
-- A direct "Open on YouTube" link is provided alongside the embed.
+- **Feed A** — YouTube:
+  ["GTA 5 Enhanced UPDATED Ray Tracing RTX 4090 4K Graphics Gameplay"](https://youtu.be/Zp9qozA2bzQ?si=psHQLoz6JmDDCwPN),
+  via the privacy-enhanced `youtube-nocookie.com` player.
+- **Feed B** — Instagram:
+  [reel `DaxLfgoNQI2`](https://www.instagram.com/reel/DaxLfgoNQI2/), via
+  Instagram's official `/embed/` player in portrait format. (Instagram only
+  serves embeds for public posts; a private or deleted reel shows a login
+  prompt instead.)
+
+The briefing is available from the main menu, the pause menu, and the
+game-over screen, or by pressing **B** at any time (gameplay pauses while it
+is open). Iframes are created only when the briefing opens and are removed
+when it closes, so nothing loads from YouTube or Instagram until asked for.
+Direct "Open on YouTube / Instagram" links sit alongside the embeds.

@@ -129,6 +129,23 @@
     font-size: 0.82rem;
     margin-bottom: 12px;
   }
+  .feed-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .feed-tabs .tab {
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    border-color: var(--edge);
+    color: var(--muted);
+  }
+  .feed-tabs .tab.active {
+    border-color: var(--accent);
+    color: var(--text);
+    background: #1a2836;
+  }
   .video-wrap {
     position: relative;
     width: 100%;
@@ -136,6 +153,12 @@
     background: #000;
     border-radius: 6px;
     overflow: hidden;
+  }
+  .video-wrap.portrait {
+    aspect-ratio: 9 / 16;
+    height: min(68vh, 620px);
+    width: auto;
+    margin: 0 auto;
   }
   .video-wrap iframe {
     position: absolute;
@@ -197,14 +220,15 @@
 <!-- Intel briefing: embedded YouTube video (loaded only when opened) -->
 <div id="briefing" class="hidden" role="dialog" aria-modal="true" aria-label="Intel briefing video">
   <div class="briefing-panel">
-    <h3>Intel Briefing — Visual Recon Feed</h3>
-    <p class="sub">GTA 5 Enhanced — updated ray tracing, RTX 4090 4K graphics gameplay.
-       Reference footage for the simulation's target visual fidelity.</p>
+    <h3>Intel Briefing — Visual Recon Feeds</h3>
+    <div class="feed-tabs">
+      <button id="tab-yt" class="tab active">Feed A · Graphics Showcase</button>
+      <button id="tab-ig" class="tab">Feed B · Field Recon Reel</button>
+    </div>
+    <p class="sub" id="briefing-sub"></p>
     <div class="video-wrap" id="video-wrap"></div>
     <div class="briefing-actions">
-      <a href="https://youtu.be/Zp9qozA2bzQ?si=psHQLoz6JmDDCwPN" target="_blank" rel="noopener">
-        Open on YouTube ↗
-      </a>
+      <a id="briefing-link" href="#" target="_blank" rel="noopener"></a>
       <button id="btn-close-briefing">Close Briefing</button>
     </div>
   </div>
@@ -216,7 +240,28 @@
 (function () {
   "use strict";
 
-  var VIDEO_ID = "Zp9qozA2bzQ";
+  // Recon feeds shown in the Intel Briefing. Each embeds via the platform's
+  // official player; iframes are created on open and removed on close.
+  var FEEDS = {
+    yt: {
+      sub: "GTA 5 Enhanced — updated ray tracing, RTX 4090 4K graphics gameplay. " +
+           "Reference footage for the simulation's target visual fidelity.",
+      src: "https://www.youtube-nocookie.com/embed/Zp9qozA2bzQ?autoplay=1&rel=0",
+      title: "GTA 5 Enhanced Ray Tracing RTX 4090 4K Graphics Gameplay",
+      link: "https://youtu.be/Zp9qozA2bzQ?si=psHQLoz6JmDDCwPN",
+      linkText: "Open on YouTube ↗",
+      portrait: false
+    },
+    ig: {
+      sub: "Field recon reel — streamed through Instagram's official embed player.",
+      src: "https://www.instagram.com/reel/DaxLfgoNQI2/embed/",
+      title: "Field recon reel (Instagram)",
+      link: "https://www.instagram.com/reel/DaxLfgoNQI2/",
+      linkText: "Open on Instagram ↗",
+      portrait: true
+    }
+  };
+  var currentFeed = "yt";
 
   var canvas = document.getElementById("game");
   var ctx = canvas.getContext("2d");
@@ -289,7 +334,25 @@
     else show(next);
   }
 
-  // --- Briefing (integrated YouTube video) ---------------------------------
+  // --- Briefing (integrated media feeds) ------------------------------------
+  function loadFeed(key) {
+    currentFeed = key;
+    var f = FEEDS[key];
+    document.getElementById("tab-yt").classList.toggle("active", key === "yt");
+    document.getElementById("tab-ig").classList.toggle("active", key === "ig");
+    document.getElementById("briefing-sub").textContent = f.sub;
+    var link = document.getElementById("briefing-link");
+    link.href = f.link;
+    link.textContent = f.linkText;
+    videoWrap.classList.toggle("portrait", f.portrait);
+    var iframe = document.createElement("iframe");
+    iframe.src = f.src;
+    iframe.title = f.title;
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    iframe.allowFullscreen = true;
+    videoWrap.replaceChildren(iframe);
+  }
+
   function openBriefing() {
     if (state === "playing") {
       stateBeforeBriefing = "playing";
@@ -297,12 +360,7 @@
     } else {
       stateBeforeBriefing = state;
     }
-    var iframe = document.createElement("iframe");
-    iframe.src = "https://www.youtube-nocookie.com/embed/" + VIDEO_ID + "?autoplay=1&rel=0";
-    iframe.title = "GTA 5 Enhanced Ray Tracing RTX 4090 4K Graphics Gameplay";
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-    iframe.allowFullscreen = true;
-    videoWrap.replaceChildren(iframe);
+    loadFeed(currentFeed);
     briefing.classList.remove("hidden");
   }
 
@@ -623,6 +681,8 @@
     document.getElementById(id).addEventListener("click", openBriefing);
   });
   document.getElementById("btn-close-briefing").addEventListener("click", closeBriefing);
+  document.getElementById("tab-yt").addEventListener("click", function () { loadFeed("yt"); });
+  document.getElementById("tab-ig").addEventListener("click", function () { loadFeed("ig"); });
   briefing.addEventListener("click", function (ev) {
     if (ev.target === briefing) closeBriefing();
   });
