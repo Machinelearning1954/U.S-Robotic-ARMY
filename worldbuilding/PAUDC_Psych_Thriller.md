@@ -162,6 +162,25 @@ unharmed — the non-lethal rule, live. Toggle it off any time.
 
 ---
 
+## 8b. Auntie Blades' field gauge — live in the prototype (v0.47)
+
+A diegetic prop for the arc: a handheld analog-style gauge (drawn as a canvas HUD
+element, bottom-left corner) that appears only while a Static Hour scene is active.
+Its needle and digital readout track proximity to **The Presence** in the arc's own
+invented unit, "SU" (Static Units) — closer and darker reads hot and red
+("WARNING — CLOSE"), distant and lit reads cool and calm. It's Auntie Blades'
+answer to "how do I know it's getting closer without looking at it," and it
+reinforces the existing Paranoia meter (§4) with a second, more legible signal a
+player can glance at instead of staring down the treeline.
+
+**Content boundary:** this is an original in-world gadget belonging to a fictional
+character, reading a fictional in-story phenomenon (the Weathermen's conditioning
+broadcast, already established as fiction in §9b). It is not modeled on, and does
+not depict the use of, any real detection instrument, any real law-enforcement or
+government agency, or any real family, place, or person — those were the specific
+real-world elements in the reference material for this feature, and none of them
+appear in the shipped design.
+
 ## 9. Key art — "The Choir"
 
 The arc's poster motif (an original rendering, concept sourced from the wave of

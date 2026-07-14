@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.46**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.47**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -274,6 +274,13 @@ beat, courtesy-first: on foot, press `J` near a moving traffic car and it's
 yours, no violence depicted. The commuter's car joins your garage as a real
 ownable ride; the ambient traffic pool thins by one per flag-down. See
 `PAUDC_Driving_Physics.md` §6.
+v0.47 gives The Static Hour a diegetic prop: **Auntie Blades' field gauge**,
+a bottom-left analog meter that reads proximity to The Presence in the arc's
+own invented "SU" (Static Units) — needle and digits climb hot-red up close
+in the dark, cool-teal near light. Automatic while a Static scene runs, gone
+when it lifts. An original gadget on a fictional phenomenon; no real
+detection device, agency, or family is depicted. See
+`PAUDC_Psych_Thriller.md` §8b.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four

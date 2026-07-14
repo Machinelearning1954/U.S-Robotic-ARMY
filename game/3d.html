@@ -35,6 +35,8 @@
   #scan{position:fixed;inset:0;pointer-events:none;z-index:8;display:none;overflow:hidden;}
   #scan i{position:absolute;top:0;bottom:0;width:7%;left:-12%;background:linear-gradient(90deg,transparent,rgba(63,245,216,.8),transparent);filter:blur(1px);animation:scansweep 1.05s linear infinite;font-style:normal;}
   @keyframes scansweep{from{left:-12%}to{left:112%}}
+  #statMeter{position:fixed;left:16px;bottom:16px;width:180px;display:none;z-index:6;pointer-events:none;background:rgba(8,10,14,.74);border:1px solid #2a3540;border-radius:10px;padding:6px 8px 6px;box-shadow:0 0 18px rgba(0,0,0,.5);}
+  #statMeterLabel{text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#ffb84d;margin-top:2px;}
   @media (pointer:coarse){.tb{display:block}#keys{display:none}#mini{bottom:100px}}
   @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
@@ -42,9 +44,10 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>H</b> haul · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.30</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.47</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
+<div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
 <canvas id="mini" width="150" height="150"></canvas>
 <div id="mapwrap"><div id="maptitle">PORT ANTONIO UNIFIED DEFENSE COMPLEX</div><canvas id="mapbig" width="720" height="480"></canvas><div id="maphint">M or tap — close map</div></div>
 <button class="tb" id="tl">&#8634;</button><button class="tb" id="tr">&#8635;</button><button class="tb" id="tf">&#9650;</button><button class="tb" id="tb">&#9660;</button><button class="tb" id="gq">HD</button><button class="tb" id="fx">GRADE</button><button class="tb" id="mm">MAP</button><button class="tb" id="rn">RAIN</button><button class="tb" id="thr">THRLLR</button><button class="tb" id="ft">FOOT</button>
@@ -4252,7 +4255,32 @@ function setStatic(on){stat=on;presence.visible=on;
     paranoia=0;statT=0;if(vg)vg.style.opacity=0;if(wh)wh.style.opacity=0;
   }
   const tb=document.getElementById('thr');if(tb){tb.textContent=on?'STATIC':'THRLLR';tb.style.color=on?'#ff6b6b':'#3af5d8';}
-  toast(on?'THE STATIC HOUR — reach a lit district':'THE STATIC LIFTS');}
+  const sm=document.getElementById('statMeter');if(sm)sm.style.display=on?'block':'none';
+  if(!on)smReading=0;
+  toast(on?'THE STATIC HOUR — reach a lit district · Auntie Blades\' meter is live':'THE STATIC LIFTS');}
+// Auntie Blades' field gauge — a diegetic prop, not a real device: reads proximity to
+// The Presence in fictional "Static Units," the arc's own invented measurement.
+const smC=document.getElementById('statMeterC'),smX=smC?smC.getContext('2d'):null;
+let smReading=0,smJit=0;
+function drawStaticMeter(dp){
+  if(!smX)return;
+  const w=smC.width,h=smC.height;smX.clearRect(0,0,w,h);
+  const cx=w/2,cy=h*0.62,r=w*0.42;
+  smX.lineWidth=6;smX.strokeStyle='#2a3540';smX.beginPath();smX.arc(cx,cy,r,Math.PI,0);smX.stroke();
+  const frac=Math.max(0,Math.min(1,1-dp/48));
+  smJit=(smJit+(Math.random()-0.5)*0.09)*0.85;
+  const level=Math.max(0,Math.min(1,frac+smJit));
+  const col=level>0.66?'#ff5c5c':level>0.33?'#ffb84d':'#3af5d8';
+  smX.strokeStyle=col;smX.beginPath();smX.arc(cx,cy,r,Math.PI,Math.PI+level*Math.PI);smX.stroke();
+  const ang=Math.PI+level*Math.PI;
+  smX.strokeStyle='#ffb84d';smX.lineWidth=2;smX.beginPath();smX.moveTo(cx,cy);smX.lineTo(cx+Math.cos(ang)*r*0.86,cy+Math.sin(ang)*r*0.86);smX.stroke();
+  smX.fillStyle='#ffb84d';smX.beginPath();smX.arc(cx,cy,4,0,Math.PI*2);smX.fill();
+  smReading=Math.round(level*999);
+  smX.fillStyle='#ffb84d';smX.font='700 20px ui-monospace,Menlo,Consolas,monospace';smX.textAlign='center';
+  smX.fillText(String(smReading).padStart(3,'0')+' SU',cx,h-6);
+  const lbl=document.getElementById('statMeterLabel');
+  if(lbl){lbl.textContent=level>0.66?'WARNING — CLOSE':level>0.33?'ELEVATED':'CALM';lbl.style.color=col;}
+}
 function updateStatic(dt){if(!stat)return;
   // trail behind the player's heading; the slower you go, the closer it creeps
   const spd=Math.abs(P.v),trail=spd<6?13:40;
@@ -4263,6 +4291,7 @@ function updateStatic(dt){if(!stat)return;
   presence.position.y=Math.max(height(presence.position.x,presence.position.z),0)+0.05;
   presence.lookAt(P.x,presence.position.y+2,P.z);
   const dp=Math.hypot(P.x-presence.position.x,P.z-presence.position.z);
+  drawStaticMeter(dp);
   let lit=1e9;for(const b of beacons){const d=Math.hypot(P.x-b.X,P.z-b.Z);if(d<lit)lit=d;}
   const inLight=lit<42;
   paranoia+=((dp<26&&!inLight)?0.17:0)*dt-(inLight?0.30:0.05)*dt;
@@ -5718,7 +5747,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),medicCert,steadyCert,wellDeckClip,quietOn,quietCP,quietDone,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},jackCar,VEH,CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},setMedicT:v=>{medicT=v;},STEADY,setSteadyT:v=>{steadyT=v;},CARRIER,wellDeckIn,setWellDeckClip:v=>{wellDeckClip=v;},ALEXP,QUIET_PTS,startQuiet,setQuietT:v=>{quietT=v;},setQuietCP:v=>{quietCP=v;},
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),medicCert,steadyCert,wellDeckClip,quietOn,quietCP,quietDone,staticSU:smReading,rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},jackCar,VEH,CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},setMedicT:v=>{medicT=v;},STEADY,setSteadyT:v=>{steadyT=v;},CARRIER,wellDeckIn,setWellDeckClip:v=>{wellDeckClip=v;},ALEXP,QUIET_PTS,startQuiet,setQuietT:v=>{quietT=v;},setQuietCP:v=>{quietCP=v;},
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
