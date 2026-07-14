@@ -50,6 +50,15 @@ stands on schedule — the transit network is the NPC economy's circulatory syst
   (the game hides the rider model for this one rather than clipping it through
   the elevated floor — a rendering choice, not a design one), step off with `E`
   at any station.
+- **Harbor Drop (v0.49):** the Plantin Airways Island Hop gains an exit row.
+  Mid-flight, press **P** to bail out under an orange canopy — steer with
+  A/D on the descent and aim for **The Drop Ring**, a neon target laid out
+  by the airfield. Center it and the first bullseye pays +40 clout;
+  after that it's bragging rights and clean landings. Miss and the toast
+  tells you by how many metres. A pure spectacle-traversal beat in the
+  open-world skydiving tradition — invented airline, invented ring, and
+  the non-lethal floor holds: there is no fall damage, only paperwork-free
+  touchdowns.
 - Engine rung adds: schedules on the world clock, fares, bus lines, boat rental,
   and the airport hop.
 

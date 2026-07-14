@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.48**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.49**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -288,6 +288,11 @@ witnesses on foot, follow the statements to the tarped crate, and close it
 the BII way — "paperwork filed, nobody cuffed," +60 clout, one-time.
 Naval-procedural genre flavor with an entirely invented unit and case — no
 real investigative agency is depicted. See `PAUDC_Base_Design.md` Zone 4.
+v0.49 adds **Harbor Drop**: the Island Hop gets an exit row — press `P`
+mid-flight to bail out under an orange canopy, steer with A/D, and aim for
+**The Drop Ring** by the airfield. First bullseye pays +40 clout; misses
+just tell you how far off you came down. No fall damage — the non-lethal
+floor holds at terminal velocity too. See `PAUDC_Transit.md`.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
