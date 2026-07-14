@@ -86,6 +86,16 @@ Interceptor** mid-pursuit and it sits blinking for four seconds (lights on,
 wheels off) — the escape window. Dazzle the **Yard challenger** and his wind-up
 resets for three. Eight-second cooldown, 45 m range, non-lethal to its core.
 
+**The Dragonfly Swarm — live in v0.53.** The Don's own build, straight out of his
+robotics-vet backstory (`PAUDC_Character_Bible.md` §2.0): press **`K`** on foot to
+launch a swarm of fictional micro-drones that orbit him for six seconds. It's a
+hands-free **area** version of the Dazzler — while aloft it keeps a nearby
+Courtesy Interceptor or Yard challenger dazzled and scatters bystanders clear —
+and it is emphatically **non-lethal**: it dazzles and disperses, never harms, in
+keeping with the game's no-kill floor. Sixteen-second cooldown; first deploy
+unlocks it for +20 clout. No real drone, swarm doctrine, or hardware is depicted —
+it's stylized island tech, courtesy-first even when it comes in numbers.
+
 ## 8. Hooks
 
 Tactical rescue (storm + flare), Weathermen takedown chains (campaign acts 2–3),
