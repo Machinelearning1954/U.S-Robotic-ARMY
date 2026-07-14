@@ -43,6 +43,26 @@ applies: no real folklore claimed as literally true, no fear content beyond
 theme-park spookiness). Par-based scoring, a leaderboard per hole, cosmetic
 ball skins as a clout sink.
 
+### 4a. The domino table — "dominoes & deals" (live in the prototype, v0.58)
+
+Duppy Links now exists in the prototype as a green with flag pins and a
+**dominoes pavilion** — the country-club-satire beat where the island's
+business gets done over a slammed bone tile. Walk up on foot, stand at the
+table, and the old heads talk hustle: **LLCs, business grants, tax breaks**,
+all delivered as Patois table-banter. Hold the table a few seconds and you're
+"in the domino circle" — a one-time **+35 networking clout**; the banter lines
+keep rotating while you linger.
+
+- **It's comedy, not counsel.** Every line is a joke about island entrepreneurial
+  hustle ("register di LLC before yuh even have di idea"; "grant season come like
+  mango season"). **None of it is real financial, tax, or legal advice, and no
+  real program, agency, form, or firm is named** — it's character flavor in the
+  open-world-satire tradition, and it stays generic on purpose.
+- **Why the golf course:** the "deals happen on the back nine / at the club"
+  trope, reframed to the island's own domino-table culture (the same dominoes
+  the dockworkers play in `PAUDC_Base_Design.md`) instead of an imported
+  country-club aesthetic — courtesy-first, warm, and ours.
+
 ## 5. The Mud Run — live in the prototype (v0.32)
 
 The one activity built end-to-end this pass, chosen because it's the

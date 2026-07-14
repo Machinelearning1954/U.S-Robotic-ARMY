@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.57**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.58**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -345,6 +345,12 @@ evidence markers, two investigators photographing a dropped domino. Left
 alone it processes for ~12s and files ("ledger, not the morgue"); drive
 back through and the clock resets. +10 first time. No body, no blood; no
 real agency or procedure depicted. See `PAUDC_Wanted_System.md`.
+v0.58 builds **Duppy Links** — the golf green with a **dominoes pavilion**
+where island business gets done. Stand at the table on foot and the old
+heads talk hustle (LLCs, grants, tax breaks) as rotating Patois banter;
+hold a few seconds to join the "domino circle," +35 one-time. All comedy,
+not advice — no real program, agency, or firm named. See
+`PAUDC_Side_Activities.md` §4a.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
