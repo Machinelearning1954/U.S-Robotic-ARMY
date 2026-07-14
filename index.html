@@ -98,6 +98,7 @@
     text-shadow: 0 1px 2px #000;
   }
   .hud .lives { color: var(--warn); }
+  .hud .seals { color: #7ea8ff; }
   /* Intel briefing modal — integrated YouTube video */
   #briefing {
     position: fixed;
@@ -190,13 +191,15 @@
   <div class="hud" id="hud" style="display:none">
     <span id="hud-score">SCORE 0</span>
     <span id="hud-wave">WAVE 1</span>
+    <span class="seals" id="hud-seals">SEALS READY (S)</span>
     <span class="lives" id="hud-lives">ARMOR ❚❚❚</span>
   </div>
 
   <div class="overlay" id="menu">
     <h2>Frontline Defense</h2>
     <p>Hostile drones are inbound. Command your autonomous ground unit:
-       ← → or A / D to move, SPACE to fire. Press B any time for the intel briefing,
+       ← → or A / D to move, SPACE to fire, S to call in a Navy SEAL fire team
+       for covering fire. Press B any time for the intel briefing,
        G to toggle enhanced graphics (glow, reflections, starfield).</p>
     <button id="btn-start">Deploy Unit</button>
     <button id="btn-briefing" class="secondary">▶ Intel Briefing (video)</button>
@@ -224,6 +227,7 @@
     <div class="feed-tabs">
       <button id="tab-yt" class="tab active">Feed A · Graphics Showcase</button>
       <button id="tab-ig" class="tab">Feed B · Field Recon Reel</button>
+      <button id="tab-mw2" class="tab">Feed C · SEAL Ops</button>
     </div>
     <p class="sub" id="briefing-sub"></p>
     <div class="video-wrap" id="video-wrap"></div>
@@ -234,7 +238,7 @@
   </div>
 </div>
 
-<footer>Keyboard: ← → / A D move · SPACE fire · P pause · B briefing · G graphics FX</footer>
+<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · P pause · B briefing · G graphics FX</footer>
 
 <script>
 (function () {
@@ -259,6 +263,16 @@
       link: "https://www.instagram.com/reel/DaxLfgoNQI2/",
       linkText: "Open on Instagram ↗",
       portrait: true
+    },
+    mw2: {
+      sub: "U.S. Navy SEALs — Russian oil rig hostage rescue (Modern Warfare 2 " +
+           "Remastered, 8K). Tactics reference for the SEAL fire-team support unit: " +
+           "press S in the field to call them in.",
+      src: "https://www.youtube-nocookie.com/embed/4dBjwxVKDrY?autoplay=1&rel=0",
+      title: "U.S. Navy SEALs — Oil Rig Hostage Rescue (MW2 Remastered)",
+      link: "https://youtu.be/4dBjwxVKDrY?si=Bu9FoZasZ1LFRiho",
+      linkText: "Open on YouTube ↗",
+      portrait: false
     }
   };
   var currentFeed = "yt";
@@ -285,6 +299,8 @@
   var stateBeforeBriefing = null;
 
   var player, bullets, enemies, particles, score, lives, wave;
+  var seals, sealCooldown;
+  var SEAL_DURATION = 7, SEAL_COOLDOWN = 18;
   var spawnTimer, spawnInterval, fireCooldown, lastTime;
   var keys = {};
 
@@ -307,6 +323,8 @@
     bullets = [];
     enemies = [];
     particles = [];
+    seals = [];
+    sealCooldown = 0;
     score = 0;
     lives = 3;
     wave = 1;
@@ -338,8 +356,9 @@
   function loadFeed(key) {
     currentFeed = key;
     var f = FEEDS[key];
-    document.getElementById("tab-yt").classList.toggle("active", key === "yt");
-    document.getElementById("tab-ig").classList.toggle("active", key === "ig");
+    Object.keys(FEEDS).forEach(function (k) {
+      document.getElementById("tab-" + k).classList.toggle("active", k === key);
+    });
     document.getElementById("briefing-sub").textContent = f.sub;
     var link = document.getElementById("briefing-link");
     link.href = f.link;
@@ -389,6 +408,29 @@
     });
   }
 
+  // Navy SEAL fire team: two operators fast-rope in on the flanks and lay
+  // covering fire at the nearest drones for a few seconds, then exfil.
+  function deploySeals() {
+    if (state !== "playing" || sealCooldown > 0 || seals.length) return;
+    sealCooldown = SEAL_COOLDOWN;
+    [-110, 110].forEach(function (dx) {
+      var x = Math.max(20, Math.min(W - 20, player.x + dx));
+      seals.push({ x: x, y: GY - 2, life: SEAL_DURATION, fireTimer: 0.5 });
+    });
+  }
+
+  var hudSeals = document.getElementById("hud-seals");
+  var lastSealText = "";
+  function updateSealHud() {
+    var text = seals.length ? "SEALS ON STATION"
+      : sealCooldown > 0 ? "SEALS EXFIL " + Math.ceil(sealCooldown) + "s"
+      : "SEALS READY (S)";
+    if (text !== lastSealText) {
+      lastSealText = text;
+      hudSeals.textContent = text;
+    }
+  }
+
   function explode(x, y, color) {
     shake = Math.min(12, shake + 5);
     for (var i = 0; i < 14; i++) {
@@ -418,9 +460,36 @@
 
     // bullets
     for (var i = bullets.length - 1; i >= 0; i--) {
-      bullets[i].y += bullets[i].vy * dt;
-      if (bullets[i].y < -10) bullets.splice(i, 1);
+      var bl = bullets[i];
+      bl.x += (bl.vx || 0) * dt;
+      bl.y += bl.vy * dt;
+      if (bl.y < -10 || bl.y > H + 10 || bl.x < -10 || bl.x > W + 10) bullets.splice(i, 1);
     }
+
+    // SEAL fire team
+    if (sealCooldown > 0) sealCooldown -= dt;
+    for (var s = seals.length - 1; s >= 0; s--) {
+      var sl = seals[s];
+      sl.life -= dt;
+      if (sl.life <= 0) { seals.splice(s, 1); continue; }
+      sl.fireTimer -= dt;
+      if (sl.fireTimer <= 0 && enemies.length) {
+        var target = null, best = Infinity;
+        enemies.forEach(function (e) {
+          var d = (e.x - sl.x) * (e.x - sl.x) + (e.y - sl.y) * (e.y - sl.y);
+          if (d < best) { best = d; target = e; }
+        });
+        var tdx = target.x - sl.x, tdy = target.y - (sl.y - 14);
+        var tlen = Math.sqrt(tdx * tdx + tdy * tdy) || 1;
+        bullets.push({
+          x: sl.x, y: sl.y - 14,
+          vx: tdx / tlen * 480, vy: tdy / tlen * 480,
+          seal: true
+        });
+        sl.fireTimer = 0.35;
+      }
+    }
+    updateSealHud();
 
     // spawning / wave pacing
     spawnTimer += dt;
@@ -521,17 +590,53 @@
     }
     ctx.restore();
 
-    // bullets (tracer rounds)
+    // bullets (tracer rounds; SEAL rounds are blue and fly at an angle)
     bullets.forEach(function (b) {
       ctx.save();
+      var col = b.seal ? "#7ea8ff" : "#9be564";
       if (gfxEnhanced) {
-        ctx.shadowColor = "#9be564";
+        ctx.shadowColor = col;
         ctx.shadowBlur = 12;
-        ctx.fillStyle = "rgba(155,229,100,0.35)";
-        ctx.fillRect(b.x - 1.5, b.y, 3, 18); // trailing tracer
+        if (!b.seal) {
+          ctx.fillStyle = "rgba(155,229,100,0.35)";
+          ctx.fillRect(b.x - 1.5, b.y, 3, 18); // trailing tracer
+        }
       }
-      ctx.fillStyle = gfxEnhanced ? "#d6ff9e" : "#9be564";
-      ctx.fillRect(b.x - 2, b.y - 8, 4, 8);
+      if (b.seal) {
+        ctx.fillStyle = "#cfe0ff";
+        ctx.fillRect(b.x - 2, b.y - 2, 4, 4);
+      } else {
+        ctx.fillStyle = gfxEnhanced ? "#d6ff9e" : "#9be564";
+        ctx.fillRect(b.x - 2, b.y - 8, 4, 8);
+      }
+      ctx.restore();
+    });
+
+    // SEAL operators
+    seals.forEach(function (sl) {
+      ctx.save();
+      ctx.translate(sl.x, sl.y);
+      if (sl.life < 1.5) { // blink just before exfil
+        ctx.globalAlpha *= 0.4 + 0.6 * Math.abs(Math.sin(nowT * 8));
+      }
+      if (gfxEnhanced) { ctx.shadowColor = "#7ea8ff"; ctx.shadowBlur = 10; }
+      if (sl.life > SEAL_DURATION - 0.6) { // fast-rope on insertion
+        ctx.strokeStyle = "rgba(200,220,255,0.4)";
+        ctx.beginPath();
+        ctx.moveTo(0, -sl.y);
+        ctx.lineTo(0, -6);
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#31465f";
+      ctx.fillRect(-5, -12, 10, 12); // torso
+      ctx.beginPath();
+      ctx.arc(0, -15, 4, 0, Math.PI * 2); // helmet
+      ctx.fill();
+      ctx.strokeStyle = "#9fb6cc";
+      ctx.beginPath();
+      ctx.moveTo(0, -10);
+      ctx.lineTo(8, -18); // rifle
+      ctx.stroke();
       ctx.restore();
     });
 
@@ -650,6 +755,10 @@
       gfxEnhanced = !gfxEnhanced;
       return;
     }
+    if (ev.code === "KeyS") {
+      deploySeals();
+      return;
+    }
     if (ev.code === "KeyB") {
       if (briefing.classList.contains("hidden")) openBriefing();
       else closeBriefing();
@@ -681,8 +790,9 @@
     document.getElementById(id).addEventListener("click", openBriefing);
   });
   document.getElementById("btn-close-briefing").addEventListener("click", closeBriefing);
-  document.getElementById("tab-yt").addEventListener("click", function () { loadFeed("yt"); });
-  document.getElementById("tab-ig").addEventListener("click", function () { loadFeed("ig"); });
+  Object.keys(FEEDS).forEach(function (k) {
+    document.getElementById("tab-" + k).addEventListener("click", function () { loadFeed(k); });
+  });
   briefing.addEventListener("click", function (ev) {
     if (ev.target === briefing) closeBriefing();
   });

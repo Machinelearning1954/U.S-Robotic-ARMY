@@ -11,6 +11,7 @@ Open `index.html` in any modern browser — no build step or dependencies.
 | --- | --- |
 | ← → or A / D | Move unit |
 | SPACE | Fire |
+| S | Call in a Navy SEAL fire team |
 | P / ESC | Pause / resume |
 | B | Open or close the intel briefing video |
 | G | Toggle enhanced graphics mode |
@@ -43,6 +44,17 @@ recon feeds:
   Instagram's official `/embed/` player in portrait format. (Instagram only
   serves embeds for public posts; a private or deleted reel shows a login
   prompt instead.)
+- **Feed C** — YouTube:
+  ["U.S. Navy SEALs — The Russian Oil Rig Hostage Rescue Operation (Modern Warfare 2 Remastered, 8K)"](https://youtu.be/4dBjwxVKDrY?si=Bu9FoZasZ1LFRiho),
+  the tactics reference for the in-game SEAL fire-team support.
+
+## Navy SEAL fire-team support
+
+Press **S** during a mission to call in a two-operator Navy SEAL fire team.
+The operators fast-rope in on your flanks, automatically engage the nearest
+drones with aimed covering fire for about seven seconds (their rounds score
+like yours), then exfil. The HUD tracks their status: `SEALS READY (S)` →
+`SEALS ON STATION` → `SEALS EXFIL <n>s` while the 18-second cooldown runs.
 
 The briefing is available from the main menu, the pause menu, and the
 game-over screen, or by pressing **B** at any time (gameplay pauses while it
