@@ -22,6 +22,15 @@ Ranks and titles are game-flavored fiction, used loosely for character color onl
 
 ## 2. Character Sheets
 
+### 2.0 "The Don" — Malik Baptiste *(player-character / protagonist)*
+- **Role:** The player. A returning son of the island who enlists at the PAUDC Recruitment Pavilion in the opening cutscene and rises from raw recruit to the name the whole harbor knows — "the Don." Everything the player does, he does.
+- **Appearance:** Athletic, early 30s, warm dark skin, close fade and a short beard; carries himself easy but ready. Signature off-duty fit is the **black-green-and-gold flag colorway** — flag-print board shorts, tank or open linen shirt, gold rope chain, aviators pushed up. Player-customizable (the Wardrobe system, live in the prototype), but the flag look is his default poster silhouette. **Entirely an invented character — his face and name are original, not modeled on any real person.**
+- **Personality:** Calm confidence over a big heart; courtesy-first, the way the whole game is. Quick with a line, slow to anger, loyal to the people who raised him. The power fantasy is competence and charm, never cruelty.
+- **Voice/dialect:** Easy Portland Parish Patois, code-switches to Standard English with brass and officials; the player picks tone in a few key dialogue forks.
+- **Gameplay function:** The protagonist across the whole campaign — driving, YARDCLASH, the Numbers Station mystery, naval and air missions, Turf Standing, Harbor Drop, the works. His OnWatch clout is the game's progression currency.
+- **Secret/arc hook:** He came home for a reason he doesn't say out loud until Act 2 — and the Numbers Station seems to already know his name. (Ties into `PAUDC_Psych_Thriller.md`'s Static Hour.)
+- **Concept art:** original renders generated via the design pipeline (Higgsfield `soul_cast`), marina-noir and flag-colorway looks.
+
 ### 2.1 Command Sergeant Major Odessa "Auntie Blades" Deveraux
 - **Role:** Senior drill instructor, 1st Special Candidate School ("The Machete Course"), Zone 6.
 - **Appearance:** Late 50s, compact and iron-postured; silver locs pinned under a razor-creased campaign hat; ceremonial machete (blunted prop, in fiction) worn across the back like punctuation. Mirrored sunglasses she lowers exactly once per cutscene.
