@@ -55,6 +55,10 @@ recon feeds:
 - **Feed E** — Instagram:
   [reel `DaUSt0fo4ev`](https://www.instagram.com/reel/DaUSt0fo4ev/), a second
   recon reel via Instagram's official `/embed/` player in portrait format.
+- **Feed F** — Instagram:
+  [reel `DaDuh0HqbCR`](https://www.instagram.com/reel/DaDuh0HqbCR/)
+  (@rockstargamesfor), via Instagram's official `/embed/` player in portrait
+  format.
 
 ## Navy SEAL fire-team support
 
