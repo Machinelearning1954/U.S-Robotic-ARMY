@@ -44,7 +44,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.53</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.54</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -4008,7 +4008,9 @@ const TIER=(()=>{
     ||(devicePixelRatio>=3&&Math.min(screen.width,screen.height)>=390);
   return hi?1:0;
 })();
-const PXR_CAP=[1,1.5,1.75][TIER],BLOOM_ON=TIER>0,SHADOW_MAP=[512,1024,4096][TIER];
+// shadow map sized per tier; the moon's shadow camera only covers ~260u around the
+// player, so 2048 on PC is crisp for this blocky art at a quarter of 4096's fill/VRAM
+const PXR_CAP=[1,1.5,1.75][TIER],BLOOM_ON=TIER>0,SHADOW_MAP=[512,1024,2048][TIER];
 let pxr=Math.min(devicePixelRatio,PXR_CAP);renderer.setPixelRatio(pxr);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=2; // 2 = soft PCF
 const scene=new THREE.Scene();
@@ -4207,6 +4209,9 @@ function applySky(){if(rain||stat)return;
 }
 addEventListener('keydown',e=>{if(e.key.toLowerCase()==='n'){tod=(tod+0.125)%1;
   toast('TIME  '+String(Math.floor(tod*24)).padStart(2,'0')+':'+String(Math.floor(tod*24%1*60)).padStart(2,'0'));}});
+// cached HUD element refs — looked up once instead of every frame (perf)
+const EL_VIG=document.getElementById('vig'),EL_WHISPER=document.getElementById('whisper'),
+      EL_SCAN=document.getElementById('scan'),EL_STATLBL=document.getElementById('statMeterLabel');
 // ---------------- Storm mode (rain + wet neon) ----------------
 let rain=false;
 const RAINN=TIER?1600:700,RAINR=95,RAINH=70;
@@ -4273,7 +4278,7 @@ const presence=new THREE.Group();
  const eye2=eye.clone();eye2.position.x=-0.2;presence.add(eye2);}
 presence.visible=false;scene.add(presence);
 function setStatic(on){stat=on;presence.visible=on;
-  const vg=document.getElementById('vig'),wh=document.getElementById('whisper');
+  const vg=EL_VIG,wh=EL_WHISPER;
   if(on){
     scene.background.set(0x090b0e);scene.fog.color.set(0x090b0e);scene.fog.far=300;
     hemi.intensity=0.35;moon.intensity=0.5;if(bloom)bloom.strength=0.2;
@@ -4310,7 +4315,7 @@ function drawStaticMeter(dp){
   smReading=Math.round(level*999);
   smX.fillStyle='#ffb84d';smX.font='700 20px ui-monospace,Menlo,Consolas,monospace';smX.textAlign='center';
   smX.fillText(String(smReading).padStart(3,'0')+' SU',cx,h-6);
-  const lbl=document.getElementById('statMeterLabel');
+  const lbl=EL_STATLBL;
   if(lbl){lbl.textContent=level>0.66?'WARNING — CLOSE':level>0.33?'ELEVATED':'CALM';lbl.style.color=col;}
 }
 function updateStatic(dt){if(!stat)return;
@@ -4328,13 +4333,13 @@ function updateStatic(dt){if(!stat)return;
   const inLight=lit<42;
   paranoia+=((dp<26&&!inLight)?0.17:0)*dt-(inLight?0.30:0.05)*dt;
   paranoia=Math.max(0,Math.min(1,paranoia));
-  const vg=document.getElementById('vig');if(vg)vg.style.opacity=(0.34+paranoia*0.55).toFixed(2);
+  const vg=EL_VIG;if(vg)vg.style.opacity=(0.34+paranoia*0.55).toFixed(2);
   if(inLight&&lit<18){statT+=dt;if(statT>2.4){addClout(20);setStatic(false);toast('YOU REACHED THE LIGHT — THE STATIC LIFTS  +20');return;}}
   else statT=Math.max(0,statT-dt);
   if(paranoia>=1){paranoia=0;statT=0;
     P.x=PIER.X;P.z=PIER.Z;P.v=0;presence.position.set(P.x+60,0,P.z+60);
     toast('THE STATIC TOOK HOLD — you come to at the harbor');}
-  whT+=dt;if(whT>3.4){whT=0;whI=(whI+1)%WHISPERS.length;const wh=document.getElementById('whisper');if(wh)wh.textContent=WHISPERS[whI];}
+  whT+=dt;if(whT>3.4){whT=0;whI=(whI+1)%WHISPERS.length;if(EL_WHISPER)EL_WHISPER.textContent=WHISPERS[whI];}
 }
 addEventListener('keydown',e=>{if(e.key.toLowerCase()==='t')setStatic(!stat);});
 {const tb=document.getElementById('thr');if(tb)tb.addEventListener('pointerdown',e=>{e.preventDefault();setStatic(!stat);});}
@@ -4689,7 +4694,6 @@ function updateDazzler(dt){
     1.2+Math.sin(f*Math.PI)*6,
     puckFrom.z+(puckTo.z-puckFrom.z)*f);
   if(f>=1){puckT=-1;puck.visible=false;
-    const flash=document.getElementById('vig');
     if(puckTarget==='patrol'){patrolStun=4;toast('DAZZLER POP — interceptor blinking it off');}
     else{brawlStun=3;windup=0;toast('DAZZLER POP — challenger seeing fireworks');}}}
 addEventListener('keydown',e=>{if(e.key.toLowerCase()==='g')throwDazzler();});
@@ -5751,11 +5755,11 @@ function tick(t){
   if(wet&&!prevWet&&Math.abs(P.v)>18){const n=grade?10:5;addClout(n);rawClips++;toast('SPLASHDOWN CLIP  +'+n+' CLOUT'+(grade?' — GRADED':'')+'  ·  RAW CLIP BANKED');}
   // Chromelab Re-Render queue: bring raw clips to the Polytech's AI enhancer
   if(rawClips>0&&Math.hypot(P.x-CHROME.X,P.z-CHROME.Z)<12&&Math.abs(P.v)<4){rrT+=dt;
-    const sc=$('scan');if(sc)sc.style.display='block';
+    if(EL_SCAN)EL_SCAN.style.display='block';
     if(rrT>2){rrT=0;const pay=8*rawClips;addClout(pay);
       toast('CHROMELAB RE-RENDER — '+rawClips+' CLIP'+(rawClips>1?'S':'')+' ENHANCED  +'+pay+' CLOUT');rawClips=0;
-      if(sc)sc.style.display='none';}}
-  else{rrT=Math.max(0,rrT-dt);const sc=$('scan');if(sc&&rrT<=0)sc.style.display='none';}
+      if(EL_SCAN)EL_SCAN.style.display='none';}}
+  else{rrT=Math.max(0,rrT-dt);if(EL_SCAN&&rrT<=0)EL_SCAN.style.display='none';}
   prevWet=wet;
   const thr=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?0.6:0);
   const str=(keys.a||keys.arrowleft?1:0)-(keys.d||keys.arrowright?1:0);

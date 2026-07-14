@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.53**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.54**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -317,6 +317,13 @@ Dazzler that keeps a nearby interceptor or challenger dazzled and scatters
 bystanders, never harming anyone. 16s cooldown, +20 on first deploy.
 Stylized island tech — no real drone or hardware depicted. See
 `PAUDC_Combat_System.md` §7.
+v0.54 is a **graphics-performance pass** (all original code, no assets
+changed): the PC-tier shadow map drops from 4096² to 2048² — imperceptible
+on the blocky art at the moon's ~260-unit shadow camera, but a quarter of
+the per-frame fill and VRAM; several HUD elements (vignette, whisper line,
+scan sweep, meter label) are now cached once instead of re-queried by
+`getElementById` every frame; and a dead lookup in the Dazzler path was
+removed. Verified: clean load, no errors, loop steady.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
