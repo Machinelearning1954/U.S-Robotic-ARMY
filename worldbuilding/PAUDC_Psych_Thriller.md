@@ -276,6 +276,16 @@ ending. The horror was the *not-knowing*; the payoff is *knowing, and staying.*
 Reward: the **"Undertow"** permanent plate, and the Static Hour's free-roam toggle
 gains a calm "after" state — the island at peace.
 
+### 10c-live. Playable slice — The Card Wall (v0.52)
+The first beat's **memory-reconstruction mechanic** is live in the prototype. Near
+the Anchor Row home, four **memory cards** are scattered on foot-reachable ground
+— each one an original in-world clue ("a boarding pass with no departure city," "a
+photo of you shaking your own hand," "a tide chart dated tomorrow," "a consent
+form in your handwriting"). Collect all four, bring them to **The Card Wall**, and
+it assembles: *"the timeline was never yours to trust,"* +55 clout, one-time. A
+small honest taste of the capstone's central idea — you rebuild the story and the
+rebuild contradicts what you thought you knew. No film content is depicted.
+
 ### 10d. Content boundary note (capstone)
 - **Techniques merged, not works copied.** This campaign synthesizes the *general
   grammar* of the twist-thriller genre (unreliable narration, memory reconstruction,

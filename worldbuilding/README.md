@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.51**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.52**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -304,6 +304,12 @@ v0.51 adds **the Don's signature fit** to the Wardrobe: a fifth colorway,
 palette — the playable version of the protagonist's poster look now that
 the Don is canon in the Character Bible. Cycle to it at the Anchor Row
 wardrobe. See `PAUDC_Character_Bible.md` §2.0.
+v0.52 adds **The Card Wall** — a playable slice of the new twist-thriller
+capstone "The Undertow Hour." On foot near the Anchor Row home, gather four
+scattered **memory cards** (each an original clue), bring them to the wall,
+and it assembles: "the timeline was never yours to trust," +55 clout,
+one-time. The memory-reconstruction device merged from the twist-thriller
+canon — no film content depicted. See `PAUDC_Psych_Thriller.md` §10.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
