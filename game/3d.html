@@ -44,7 +44,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>H</b> haul · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.50</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.51</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -5370,11 +5370,11 @@ addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='e')return;
   if(!inHouse&&veh===WALKER&&Math.hypot(P.x-HOME.X,P.z-HOME.Z)<4)enterHouse();
   else if(inHouse&&Math.hypot(P.x-HOMEINT.X,P.z-(HOMEINT.Z+3.2))<3)exitHouse();});
 // ---------------- The Wardrobe — Anchor Row's clout sink (cosmetic outfit colors) ----------------
-const WARDROBE_COLORS=[0x3af5d8,0xffb84d,0xff5fd2,0x37d867];
-const WARDROBE_NAMES=['REEF TEAL','CUTLASS GOLD','TIDEWATER PINK','PALM GREEN'];
-const WARDROBE_COST=[0,25,40,60];
+const WARDROBE_COLORS=[0x3af5d8,0xffb84d,0xff5fd2,0x37d867,0x1a7a2e];
+const WARDROBE_NAMES=['REEF TEAL','CUTLASS GOLD','TIDEWATER PINK','PALM GREEN','THE DON — FLAG FIT'];
+const WARDROBE_COST=[0,25,40,60,80];
 let wardrobeIdx=0;
-const wardrobeUnlocked=[true,false,false,false];
+const wardrobeUnlocked=[true,false,false,false,false];
 function cycleWardrobe(){
   const next=(wardrobeIdx+1)%WARDROBE_COLORS.length;
   if(!wardrobeUnlocked[next]){
@@ -5384,6 +5384,11 @@ function cycleWardrobe(){
     toast('NEW FIT UNLOCKED — '+WARDROBE_NAMES[next]+'  ·  −'+cost+' CLOUT');
   }else toast('WEARING — '+WARDROBE_NAMES[next]);
   wardrobeIdx=next;wLimbs.torso.material.color.set(WARDROBE_COLORS[wardrobeIdx]);
+  // the Don's signature: black-green-and-gold, the protagonist's poster look
+  const donFit=next===WARDROBE_COLORS.length-1;
+  wLimbs.lL.material.color.set(donFit?0x111111:0x2b3742);
+  wLimbs.lR.material.color.set(donFit?0x111111:0x2b3742);
+  if(donFit)toast('DI DON FIT — black, green an’ gold. Now di whole harbor know yuh name.');
 }
 addEventListener('keydown',e=>{if(e.key.toLowerCase()==='e'&&inHouse&&Math.hypot(P.x-(HOMEINT.X-4),P.z-(HOMEINT.Z+3.4))<2.2)cycleWardrobe();});
 // ---------------- input ----------------

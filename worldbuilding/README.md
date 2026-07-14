@@ -34,7 +34,7 @@
 
 ## Playable prototypes
 
-[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.50**, a fully 3D
+[`../game/3d.html`](../game/3d.html) — **PAUDC 3D: Neon Harbor v0.51**, a fully 3D
 WebGL prototype (Three.js inlined, opens in any browser): vertex-colored island
 terrain generated from the same Port Antonio-traced coastline, drivable amphibious
 jeep with chase camera, water, stars, palm forests, glowing zone beacons, the Vault
@@ -299,6 +299,11 @@ water. Stand at the seawall on foot, look seaward, and hold to "film" it —
 the crowd gathers and OnWatch overpays for the clip, +35 clout, one-time.
 Pure spectacle, no danger to the player. Fictional weather VFX, no real
 footage or location. See `PAUDC_Game_Systems.md` §7.
+v0.51 adds **the Don's signature fit** to the Wardrobe: a fifth colorway,
+**"THE DON — FLAG FIT"** (80 clout), black-and-green in the island flag
+palette — the playable version of the protagonist's poster look now that
+the Don is canon in the Character Bible. Cycle to it at the Anchor Row
+wardrobe. See `PAUDC_Character_Bible.md` §2.0.
 v0.26 arms the Field Kit: press `G` to
 throw the **Dazzler puck** — the canon stun-dazzle tool — at whatever's
 threatening you: a dazzled **Courtesy Interceptor** sits blinking for four
