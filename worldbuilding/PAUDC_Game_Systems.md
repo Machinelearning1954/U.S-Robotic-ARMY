@@ -655,3 +655,20 @@ Unrecognized codes just report "no such code."
 - **Boundary:** the reference image was a real game's copyrighted cheat sheet
   (its logo, characters, codes, and car names). **None of that is reproduced** —
   every code word and every spawnable vehicle here is PAUDC's own invention.
+
+
+## 13. Field Conditioning Circuit — training across the map (live in the prototype, v0.73)
+
+PAUDC's own invented conditioning program, an extension of the canon **Crucible**
+(Section 2.3): five **training drill** stations scattered across the districts —
+SPRINT LADDER, AGILITY GATES, STEADY-HANDS BEAM, ENDURANCE HAUL, and the SUMMIT
+DRILL up at the hillside. Walk up to each on foot and hold the mark a few seconds
+to clear it (**+15** apiece); clear all five and the circuit certifies you for a
+**+60** bonus ("Conditioned").
+
+- **Boundary:** the reference was a real U.S. military human-augmentation
+  infographic (real branch/agency programs like TALOS, IVAS, N3, Safe Genes). **None
+  of that is used** — no real program, agency, branch, exo-suit, neurotech, or
+  gene-editing is depicted. These are generalized, invented *athletic* drills
+  (sprint/agility/steadiness/endurance), non-lethal and courtesy-first like the rest
+  of the game.
