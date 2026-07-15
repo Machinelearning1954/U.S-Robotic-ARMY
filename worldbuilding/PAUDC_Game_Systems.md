@@ -637,3 +637,21 @@ game's nod to basic first-aid literacy, not a simulation of medical training.
 
 > All systems above are fictional game mechanics. Tone rule stands: cinematic and
 > playful — power fantasy, not procedure manual.
+
+
+## 12. Cheat console — original codes (live in the prototype, v0.72)
+
+A classic cheat-code console, built **entirely original** — the game's own code
+words and its own vehicles, none of any real game's codes, car names, characters,
+or branding. Press **`** (backtick) to open the console, type a code, ENTER to
+run; while it's open a capture-phase key handler swallows input so the driving
+controls never fire mid-type.
+
+Codes: **MUDFISH / MARLIN / NIGHTHAWK / REEFRUN / FOOTIT** (spawn-and-board the
+matching original ride at your feet), **STORM / STATIC** (toggle the weather /
+the Static Hour), **MIDNIGHT / SUNUP** (jump the clock), **BUZZ** (+100 clout).
+Unrecognized codes just report "no such code."
+
+- **Boundary:** the reference image was a real game's copyrighted cheat sheet
+  (its logo, characters, codes, and car names). **None of that is reproduced** —
+  every code word and every spawnable vehicle here is PAUDC's own invention.
