@@ -1,0 +1,21 @@
+{
+  "$schema": "./headquarters.schema.json",
+  "facilities": [
+    {
+      "id": "cia-hq-dubai",
+      "name": "CIA Headquarters — Dubai",
+      "organization": "CIA",
+      "type": "headquarters",
+      "status": "active",
+      "city": "Dubai",
+      "region": "Dubai",
+      "country": "United Arab Emirates",
+      "coordinates": {
+        "latitude": 25.2048,
+        "longitude": 55.2708
+      },
+      "timezone": "Asia/Dubai",
+      "established": "2026-07-15"
+    }
+  ]
+}
