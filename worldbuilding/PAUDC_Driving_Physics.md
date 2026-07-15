@@ -33,6 +33,14 @@ deep into a corner steals turning grip (understeer you can feel and learn).
 | Other surfaces in rain | ×0.90 | live |
 | Water | hull model | amphibious canon: separate accel/vmax per ride; live since v0.1 |
 
+**The Reef Runner — a dedicated speedboat, live in the prototype (v0.68).** Up to
+now the only way onto the water was an amphibious *land* vehicle in hull mode; the
+Reef Runner is the first purpose-built **boat** — moored on the shoreline, boarded
+on foot with **E** like any ride. Its stats invert the land cars: high water
+accel/top-speed, near-useless on tar (it's a boat). Up on plane it throws a
+**twin wake spray** that scales with speed. An original craft — no real make,
+model, or brand depicted.
+
 ## 3. Weather-based modifiers
 
 - **Rain/storm (SC ladder):** grip multipliers above, longer braking, headlight
