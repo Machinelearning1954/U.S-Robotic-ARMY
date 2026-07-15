@@ -52,7 +52,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>L</b> drone · <b>O</b> dominoes/shift · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.70</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.71</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -4021,6 +4021,9 @@ const TIER=(()=>{
 // shadow map sized per tier; the moon's shadow camera only covers ~260u around the
 // player, so 2048 on PC is crisp for this blocky art at a quarter of 4096's fill/VRAM
 const PXR_CAP=[1,1.5,1.75][TIER],BLOOM_ON=TIER>0,SHADOW_MAP=[512,1024,2048][TIER];
+// anisotropic filtering — keeps repeating textures (ground, roads, facades) crisp at
+// grazing angles instead of blurring into the distance. Tier-capped, clamped to hardware.
+const MAXANISO=Math.max(1,Math.min([2,4,8][TIER],(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy&&renderer.capabilities.getMaxAnisotropy())||1));
 let pxr=Math.min(devicePixelRatio,PXR_CAP);renderer.setPixelRatio(pxr);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=2; // 2 = soft PCF
 const scene=new THREE.Scene();
@@ -4061,7 +4064,7 @@ const tg=new THREE.PlaneGeometry(W2*SC,H2*SC,SEG,SEG);tg.rotateX(-Math.PI/2);
 // ---- procedural texture library (SA-rung: textures everywhere, zero downloads) ----
 function canvasTex(w,h,draw,repX,repY){const c=document.createElement('canvas');c.width=w;c.height=h;
   draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);
-  t.wrapS=t.wrapT=1000;/* RepeatWrapping */ if(repX)t.repeat.set(repX,repY||repX);return t;}
+  t.wrapS=t.wrapT=1000;/* RepeatWrapping */ t.anisotropy=MAXANISO; if(repX)t.repeat.set(repX,repY||repX);return t;}
 const detailTex=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#8f8f8f';g.fillRect(0,0,w,h);
   for(let i=0;i<2600;i++){const v=120+Math.random()*46|0;g.fillStyle='rgb('+v+','+v+','+v+')';
     g.fillRect(Math.random()*w,Math.random()*h,1.6,1.6);}},64,42);
