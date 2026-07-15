@@ -209,6 +209,39 @@
     flex-wrap: wrap;
   }
   .briefing-actions a { color: var(--accent); font-size: 0.85rem; }
+  .hud .snd { color: var(--muted); }
+  .hiscore { color: #d4af37; font-size: 0.85rem; letter-spacing: 0.14em; text-transform: uppercase; }
+  /* On-screen touch controls — shown only on touch/coarse-pointer devices */
+  #touch {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: none;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 12px;
+    pointer-events: none;
+  }
+  #touch.on { display: flex; }
+  #touch .pad { display: flex; gap: 10px; }
+  #touch .tbtn {
+    pointer-events: auto;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    background: rgba(18, 26, 35, 0.72);
+    color: var(--text);
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  #touch .tbtn.fire { border-color: var(--accent-2); color: var(--accent-2); }
+  #touch .tbtn.seal { width: auto; padding: 0 16px; border-radius: 32px; border-color: #7ea8ff; color: #7ea8ff; font-size: 0.8rem; letter-spacing: 0.1em; }
+  #touch .tbtn:active { background: #1a2836; transform: translateY(1px); }
   footer { color: var(--muted); font-size: 0.75rem; padding-bottom: 20px; text-align: center; }
 </style>
 </head>
@@ -224,7 +257,20 @@
     <span id="hud-score">SCORE 0</span>
     <span id="hud-wave">WAVE 1</span>
     <span class="seals" id="hud-seals">SEALS READY (S)</span>
+    <span class="snd" id="hud-snd">♪ ON (M)</span>
     <span class="lives" id="hud-lives">ARMOR ❚❚❚</span>
+  </div>
+
+  <!-- On-screen controls for touch devices (auto-shown when touch is detected) -->
+  <div id="touch" aria-hidden="true">
+    <div class="pad">
+      <div class="tbtn" id="t-left" aria-label="Move left">◀</div>
+      <div class="tbtn" id="t-right" aria-label="Move right">▶</div>
+    </div>
+    <div class="pad">
+      <div class="tbtn seal" id="t-seal" aria-label="Call SEAL team">SEAL</div>
+      <div class="tbtn fire" id="t-fire" aria-label="Fire">●</div>
+    </div>
   </div>
 
   <div class="overlay" id="menu">
@@ -245,6 +291,7 @@
        ← → or A / D to move, SPACE to fire, S to call in a Navy SEAL fire team
        for covering fire. Press B any time for the intel briefing,
        G to toggle enhanced graphics (glow, reflections, starfield).</p>
+    <p class="hiscore" id="menu-hiscore"></p>
     <button id="btn-start">Deploy Unit</button>
     <button id="btn-briefing" class="secondary">▶ Intel Briefing (video)</button>
   </div>
@@ -288,7 +335,7 @@
   </div>
 </div>
 
-<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · P pause · B briefing · G graphics FX</footer>
+<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · P pause · B briefing · G graphics FX · M mute · On touch devices, use the on-screen controls</footer>
 
 <script>
 (function () {
@@ -404,6 +451,67 @@
   var SEAL_DURATION = 7, SEAL_COOLDOWN = 18;
   var spawnTimer, spawnInterval, fireCooldown, lastTime;
   var keys = {};
+
+  // --- Persistent high score ------------------------------------------------
+  // Stored in localStorage so a personal best survives page reloads. Wrapped
+  // in try/catch because storage can be disabled (private mode / sandboxed).
+  var HISCORE_KEY = "usra_highscore";
+  var highScore = 0;
+  try { highScore = parseInt(localStorage.getItem(HISCORE_KEY), 10) || 0; } catch (e) {}
+  function saveHighScore() {
+    if (score > highScore) {
+      highScore = score;
+      try { localStorage.setItem(HISCORE_KEY, String(highScore)); } catch (e) {}
+    }
+  }
+  var menuHiscore = document.getElementById("menu-hiscore");
+  function updateMenuHiscore() {
+    menuHiscore.textContent = highScore > 0 ? "Best score: " + highScore : "";
+  }
+
+  // --- Sound (Web Audio, synthesized — no external assets) ------------------
+  // The AudioContext is created lazily on the first user gesture so browsers
+  // that block autoplay audio don't warn. Mute state persists in localStorage.
+  var audioCtx = null;
+  var muted = false;
+  try { muted = localStorage.getItem("usra_muted") === "1"; } catch (e) {}
+  var hudSnd = document.getElementById("hud-snd");
+  function updateSndHud() { hudSnd.textContent = muted ? "♪ OFF (M)" : "♪ ON (M)"; }
+  function initAudio() {
+    if (audioCtx) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    } catch (e) { audioCtx = null; }
+  }
+  // A short tone with an exponential decay envelope. type/freq/duration shape
+  // the sound; freqEnd bends the pitch for zaps and explosions.
+  function tone(type, freq, freqEnd, dur, gain) {
+    if (muted || !audioCtx) return;
+    var t = audioCtx.currentTime;
+    var osc = audioCtx.createOscillator();
+    var g = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    if (freqEnd && freqEnd !== freq) osc.frequency.exponentialRampToValueAtTime(freqEnd, t + dur);
+    g.gain.setValueAtTime(gain, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g);
+    g.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + dur);
+  }
+  function sfxShoot() { tone("square", 720, 320, 0.09, 0.06); }
+  function sfxKill() { tone("triangle", 260, 60, 0.22, 0.12); }
+  function sfxHit() { tone("sawtooth", 180, 40, 0.28, 0.16); }
+  function sfxSeal() { tone("square", 440, 880, 0.16, 0.09); }
+  function sfxOver() { tone("sawtooth", 300, 40, 0.6, 0.18); }
+  function toggleMute() {
+    muted = !muted;
+    if (!muted) initAudio();
+    try { localStorage.setItem("usra_muted", muted ? "1" : "0"); } catch (e) {}
+    updateSndHud();
+  }
 
   var GY = H - 70; // the line we defend; below it is reflective "wet ground"
   var gfxEnhanced = true;
@@ -553,6 +661,7 @@
   function deploySeals() {
     if (state !== "playing" || sealCooldown > 0 || seals.length) return;
     sealCooldown = SEAL_COOLDOWN;
+    sfxSeal();
     [-110, 110].forEach(function (dx) {
       var x = Math.max(20, Math.min(W - 20, player.x + dx));
       seals.push({ x: x, y: GY - 2, life: SEAL_DURATION, fireTimer: 0.5 });
@@ -598,6 +707,7 @@
       bullets.push({ x: player.x, y: player.y - player.h / 2, vy: -520 });
       fireCooldown = 0.22;
       muzzle = 0.08;
+      sfxShoot();
     }
 
     // bullets
@@ -677,6 +787,7 @@
             enemies.splice(j, 1);
             score += 10;
             explode(e.x, e.y, "#9be564");
+            sfxKill();
             updateHud();
           }
           break;
@@ -696,10 +807,16 @@
 
   function loseLife() {
     lives -= 1;
+    sfxHit();
     updateHud();
     if (lives <= 0) {
-      document.getElementById("final-score").textContent =
-        "Final score: " + score + " — wave " + wave + " reached.";
+      saveHighScore();
+      sfxOver();
+      var msg = "Final score: " + score + " — wave " + wave + " reached.";
+      if (score >= highScore && score > 0) msg += " New best!";
+      else if (highScore > 0) msg += " Best: " + highScore + ".";
+      document.getElementById("final-score").textContent = msg;
+      updateMenuHiscore();
       setState("gameover");
     }
   }
@@ -926,10 +1043,15 @@
   // --- Input / buttons ---------------------------------------------------------
   document.addEventListener("keydown", function (ev) {
     if (ev.code === "Space" || ev.code.indexOf("Arrow") === 0) ev.preventDefault();
+    if (!muted) initAudio(); // first gesture unlocks the AudioContext
     keys[ev.code] = true;
 
     if (ev.code === "KeyG") {
       gfxEnhanced = !gfxEnhanced;
+      return;
+    }
+    if (ev.code === "KeyM") {
+      toggleMute();
       return;
     }
     if (ev.code === "KeyS") {
@@ -953,6 +1075,7 @@
   document.addEventListener("keyup", function (ev) { keys[ev.code] = false; });
 
   document.getElementById("btn-start").addEventListener("click", function () {
+    initAudio();
     reset();
     setState("playing");
   });
@@ -974,6 +1097,43 @@
     if (ev.target === briefing) closeBriefing();
   });
 
+  // --- Touch controls -------------------------------------------------------
+  // On touch / coarse-pointer devices the on-screen pad is shown and its
+  // buttons drive the same `keys` map the keyboard uses, so gameplay logic
+  // stays input-agnostic. Press-and-hold works for move and fire.
+  var touchPad = document.getElementById("touch");
+  var isTouch = ("ontouchstart" in window) ||
+    (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+  if (isTouch) touchPad.classList.add("on");
+
+  function holdButton(id, code) {
+    var el = document.getElementById(id);
+    function down(ev) { ev.preventDefault(); initAudio(); keys[code] = true; }
+    function up(ev) { ev.preventDefault(); keys[code] = false; }
+    el.addEventListener("touchstart", down, { passive: false });
+    el.addEventListener("touchend", up, { passive: false });
+    el.addEventListener("touchcancel", up, { passive: false });
+    el.addEventListener("mousedown", down);
+    el.addEventListener("mouseup", up);
+    el.addEventListener("mouseleave", up);
+  }
+  holdButton("t-left", "ArrowLeft");
+  holdButton("t-right", "ArrowRight");
+  holdButton("t-fire", "Space");
+  document.getElementById("t-seal").addEventListener("touchstart", function (ev) {
+    ev.preventDefault();
+    initAudio();
+    if (state === "menu" || state === "gameover") { reset(); setState("playing"); }
+    else deploySeals();
+  }, { passive: false });
+  document.getElementById("t-seal").addEventListener("click", function () {
+    initAudio();
+    if (state === "menu" || state === "gameover") { reset(); setState("playing"); }
+    else deploySeals();
+  });
+
+  updateSndHud();
+  updateMenuHiscore();
   reset();
   show("menu");
   requestAnimationFrame(frame);

@@ -15,6 +15,25 @@ Open `index.html` in any modern browser — no build step or dependencies.
 | P / ESC | Pause / resume |
 | B | Open or close the intel briefing video |
 | G | Toggle enhanced graphics mode |
+| M | Mute / unmute sound |
+
+On phones and tablets an on-screen control pad appears automatically (move,
+fire, and SEAL buttons), so the game is playable without a keyboard.
+
+## Sound
+
+The game synthesizes its own sound effects with the Web Audio API — no audio
+files or downloads. Firing, drone kills, taking a hit, the SEAL call-in, and
+game-over each have a distinct tone. Audio unlocks on your first interaction
+(browsers block autoplay sound until then). Toggle it with **M**; the choice is
+remembered across sessions.
+
+## High score
+
+Your best score is saved in the browser's `localStorage` and shown on the main
+menu and the game-over screen ("New best!" when you beat it). It persists across
+reloads and fails gracefully where storage is unavailable (private/sandboxed
+browsing).
 
 ## Enhanced graphics mode
 
