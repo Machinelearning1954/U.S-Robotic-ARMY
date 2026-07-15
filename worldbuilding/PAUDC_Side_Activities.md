@@ -124,7 +124,7 @@ involves real-money gambling — clout is the only stake, same as every other
 PAUDC economy loop.
 
 
-## 6. The Lido — pool club (live in the prototype, v0.70)
+## 8. The Lido — pool club (live in the prototype, v0.70)
 
 The "chill by the pool" hangout beat, built original: a poolside lounge deck
 with a swimming pool, striped umbrellas, loungers, a juice bar, and a couple of
