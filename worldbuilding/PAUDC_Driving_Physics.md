@@ -41,6 +41,13 @@ accel/top-speed, near-useless on tar (it's a boat). Up on plane it throws a
 **twin wake spray** that scales with speed. An original craft — no real make,
 model, or brand depicted.
 
+**The Blue Serenity — a moored superyacht, live in the prototype (v0.68/69).** A
+destination for the Reef Runner: cruise out to a big original superyacht anchored
+offshore — multi-deck hull, a sundeck **pool** and loungers, a **helipad** with a
+small chopper (rotor idling). Pull alongside on the water and hold a beat for a
+one-time **+50** "five-star life, island style." No real yacht, brand, or person
+depicted; it's an invented vessel and a reason to take the boat somewhere.
+
 ## 3. Weather-based modifiers
 
 - **Rain/storm (SC ladder):** grip multipliers above, longer braking, headlight
