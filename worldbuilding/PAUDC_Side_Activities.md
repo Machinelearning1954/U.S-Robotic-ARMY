@@ -122,3 +122,17 @@ All venues, activities, and names above are original PAUDC content. No real
 sports league, venue chain, or wagering system is depicted; nothing here
 involves real-money gambling — clout is the only stake, same as every other
 PAUDC economy loop.
+
+
+## 6. The Lido — pool club (live in the prototype, v0.70)
+
+The "chill by the pool" hangout beat, built original: a poolside lounge deck
+with a swimming pool, striped umbrellas, loungers, a juice bar, and a couple of
+relaxing NPCs. Walk in on foot and hold a beat to cool off for a one-time **+30**
+("cocktail in hand, island living"). A calm counterpoint to the Bassline
+dancefloor and the Mud Run — the game's leisure register.
+
+- **Boundary:** the reference was a GTA screenshot featuring a **Rockstar
+  character** (declined per Rule Zero — no copied characters or assets); only the
+  generic poolside-lounge *vibe* was kept and rebuilt from scratch. Every mesh,
+  NPC, and prop here is original. No real venue, brand, or person depicted.
