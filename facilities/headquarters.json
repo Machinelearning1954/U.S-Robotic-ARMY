@@ -5,11 +5,13 @@
       "id": "cia-hq-dubai",
       "name": "CIA Headquarters — Dubai",
       "organization": "CIA",
+      "nation": "United States of America",
       "type": "headquarters",
       "status": "active",
       "city": "Dubai",
       "region": "Dubai",
       "country": "United Arab Emirates",
+      "hostCountry": "United Arab Emirates",
       "coordinates": {
         "latitude": 25.2048,
         "longitude": 55.2708

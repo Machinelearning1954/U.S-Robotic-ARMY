@@ -9,7 +9,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "organization", "type", "status", "city", "country"],
+        "required": ["id", "name", "organization", "nation", "type", "status", "city", "country"],
         "properties": {
           "id": {
             "type": "string",
@@ -17,6 +17,10 @@
           },
           "name": { "type": "string" },
           "organization": { "type": "string" },
+          "nation": {
+            "type": "string",
+            "description": "The nation that operates the facility (e.g. \"United States of America\")."
+          },
           "type": {
             "type": "string",
             "enum": ["headquarters", "base", "outpost", "depot", "command-center"]
@@ -28,6 +32,10 @@
           "city": { "type": "string" },
           "region": { "type": "string" },
           "country": { "type": "string" },
+          "hostCountry": {
+            "type": "string",
+            "description": "The country where the facility is physically located, if different from the operating nation."
+          },
           "coordinates": {
             "type": "object",
             "required": ["latitude", "longitude"],

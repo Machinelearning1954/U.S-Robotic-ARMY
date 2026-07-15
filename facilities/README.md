@@ -7,9 +7,9 @@ validated against [`headquarters.schema.json`](./headquarters.schema.json).
 
 ## Facilities
 
-| ID | Name | Organization | Type | Status | Location |
-| --- | --- | --- | --- | --- | --- |
-| `cia-hq-dubai` | CIA Headquarters — Dubai | CIA | headquarters | active | Dubai, United Arab Emirates |
+| ID | Name | Organization | Nation | Type | Status | Location |
+| --- | --- | --- | --- | --- | --- | --- |
+| `cia-hq-dubai` | CIA Headquarters — Dubai | CIA | United States of America | headquarters | active | Dubai, United Arab Emirates |
 
 ## Adding a facility
 
