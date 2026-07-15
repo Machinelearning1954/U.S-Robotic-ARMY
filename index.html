@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRONEOLOGY — HUNT Flight School | Leonida</title>
+<meta name="description" content="Droneology: Leonida's premier fictional flight school for the HUNT drone navigation system. Fly where GPS fears to tread.">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --pink:#ff2d78; --teal:#00e5c7; --orange:#ff9f1c;
+  --pink-dim:rgba(255,45,120,.14); --teal-dim:rgba(0,229,199,.12); --orange-dim:rgba(255,159,28,.14);
+  --bg:#0d0a12; --bg2:#141020; --panel:#17121f; --line:rgba(255,45,120,.25);
+  --ink:#f4eef7; --ink-dim:#a99bb5;
+  --mono:'Courier New',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --disp:'Arial Black','Avenir Next Heavy',Impact,system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;overflow-x:hidden}
+img,svg,canvas{max-width:100%;display:block}
+a{color:var(--teal)}
+h1,h2,h3{font-family:var(--disp);letter-spacing:.02em;line-height:1.1}
+section{padding:5.5rem 1.5rem;position:relative}
+.wrap{max-width:1100px;margin:0 auto}
+/* content-visibility: below-the-fold sections skip render work until near viewport */
+.cv{content-visibility:auto;contain-intrinsic-size:auto 700px}
+
+/* ============ CRT OVERLAYS (pure CSS, zero JS cost) ============ */
+body::before{ /* scanlines */
+  content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.14) 2px 4px);
+  mix-blend-mode:multiply;
+}
+body::after{ /* noise via inline SVG turbulence — no image request, no JS */
+  content:"";position:fixed;inset:0;z-index:9997;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============ NAV ============ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+  padding:.8rem 1.5rem;background:rgba(13,10,18,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .logo{font-family:var(--disp);font-size:1.05rem;color:var(--pink);text-shadow:0 0 12px var(--pink-dim);text-decoration:none}
+nav .logo span{color:var(--teal)}
+nav ul{display:flex;gap:1.4rem;list-style:none}
+nav ul a{color:var(--ink-dim);text-decoration:none;font-size:.85rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;transition:color .2s}
+nav ul a:hover{color:var(--teal)}
+@media(max-width:640px){nav ul{display:none}}
+
+/* ============ HERO ============ */
+.hero{min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding-top:4rem;overflow:hidden}
+#net{position:absolute;inset:0;width:100%;height:100%}
+.hero .inner{position:relative;z-index:2;max-width:820px}
+.badge{display:inline-block;font-family:var(--mono);font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--orange);border:1px solid var(--orange);padding:.35rem .9rem;border-radius:2px;margin-bottom:1.4rem;
+  background:var(--orange-dim)}
+.glitch{font-size:clamp(2.6rem,9vw,5.6rem);color:var(--ink);position:relative;text-transform:uppercase}
+.glitch::before,.glitch::after{content:attr(data-t);position:absolute;inset:0;overflow:hidden}
+.glitch::before{color:var(--pink);animation:gl1 3.2s infinite steps(1);clip-path:inset(0 0 55% 0)}
+.glitch::after{color:var(--teal);animation:gl2 2.7s infinite steps(1);clip-path:inset(60% 0 0 0)}
+@keyframes gl1{0%,92%{transform:none;opacity:0}93%{transform:translate(-4px,2px);opacity:.9}96%{transform:translate(3px,-1px);opacity:.9}98%{transform:translate(-2px,0);opacity:.9}99%,100%{transform:none;opacity:0}}
+@keyframes gl2{0%,89%{transform:none;opacity:0}90%{transform:translate(4px,-2px);opacity:.9}94%{transform:translate(-3px,1px);opacity:.9}97%,100%{transform:none;opacity:0}}
+.hero p.tag{font-family:var(--mono);color:var(--teal);margin:.8rem 0 1.2rem;font-size:clamp(.9rem,2.4vw,1.15rem);letter-spacing:.05em}
+.hero p.sub{color:var(--ink-dim);max-width:560px;margin:0 auto 2.2rem}
+.cta-row{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:.9rem;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;
+  padding:.85rem 1.8rem;border-radius:2px;border:1px solid;text-decoration:none;display:inline-block;
+  transition:transform .15s,box-shadow .2s,background .2s}
+.btn:active{transform:translateY(1px)}
+.btn-pink{background:var(--pink);border-color:var(--pink);color:#fff;box-shadow:0 0 22px rgba(255,45,120,.45)}
+.btn-pink:hover{box-shadow:0 0 34px rgba(255,45,120,.7)}
+.btn-ghost{background:transparent;border-color:var(--teal);color:var(--teal)}
+.btn-ghost:hover{background:var(--teal-dim)}
+.drone-float{position:absolute;z-index:1;opacity:.5;animation:floaty 7s ease-in-out infinite;will-change:transform;pointer-events:none}
+.drone-float.d2{animation-duration:9s;animation-delay:-3s}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-26px) rotate(3deg)}}
+.scroll-hint{position:absolute;bottom:1.6rem;left:50%;transform:translateX(-50%);font-family:var(--mono);
+  font-size:.7rem;letter-spacing:.3em;color:var(--ink-dim);z-index:2;animation:floaty 2.4s ease-in-out infinite}
+
+/* ============ SECTION HEADS ============ */
+.kicker{font-family:var(--mono);color:var(--pink);letter-spacing:.3em;text-transform:uppercase;font-size:.75rem;margin-bottom:.6rem}
+h2{font-size:clamp(1.7rem,5vw,2.7rem);margin-bottom:.7rem;text-transform:uppercase}
+.lede{color:var(--ink-dim);max-width:620px;margin-bottom:2.6rem}
+
+/* ============ PROBLEM CARDS ============ */
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.4rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1.8rem;position:relative;overflow:hidden;
+  transition:transform .25s,border-color .25s}
+.card:hover{transform:translateY(-5px);border-color:var(--teal)}
+.card .icon{font-size:2rem;margin-bottom:.9rem}
+.card h3{color:var(--teal);font-size:1.1rem;margin-bottom:.6rem;text-transform:uppercase}
+.card p{color:var(--ink-dim);font-size:.92rem}
+.nosig{position:absolute;top:14px;right:-34px;transform:rotate(35deg);background:var(--pink);color:#fff;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;padding:.25rem 2.6rem;text-transform:uppercase;
+  box-shadow:0 0 14px rgba(255,45,120,.6)}
+
+/* ============ HOW / RADAR ============ */
+.how{background:var(--bg2)}
+.how-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+@media(max-width:820px){.how-grid{grid-template-columns:1fr}}
+.step{display:flex;gap:1.1rem;margin-bottom:1.6rem;align-items:flex-start}
+.step .num{font-family:var(--disp);font-size:1.5rem;color:var(--orange);min-width:2.6rem;height:2.6rem;
+  border:1px solid var(--orange);border-radius:2px;display:flex;align-items:center;justify-content:center;background:var(--orange-dim)}
+.step h3{font-size:1rem;color:var(--ink);text-transform:uppercase;margin-bottom:.25rem}
+.step p{color:var(--ink-dim);font-size:.9rem}
+.radar-box{aspect-ratio:1;max-width:440px;margin:0 auto;width:100%;border:1px solid var(--teal);border-radius:50%;
+  box-shadow:0 0 40px rgba(0,229,199,.18),inset 0 0 60px rgba(0,229,199,.06);overflow:hidden;position:relative}
+#radar{width:100%;height:100%}
+
+/* ============ COURSES ============ */
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.4rem}
+.course{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1.6rem;display:flex;flex-direction:column;
+  transition:transform .25s,box-shadow .25s}
+.course:hover{transform:translateY(-5px);box-shadow:0 8px 30px rgba(255,45,120,.15)}
+.course .code{font-family:var(--mono);color:var(--orange);font-size:.75rem;letter-spacing:.2em}
+.course h3{color:var(--ink);font-size:1.05rem;margin:.4rem 0 .6rem;text-transform:uppercase}
+.course p{color:var(--ink-dim);font-size:.88rem;flex:1;margin-bottom:1.1rem}
+.course .meta{font-family:var(--mono);font-size:.72rem;color:var(--teal);margin-bottom:1rem;letter-spacing:.06em}
+.enroll{font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;cursor:pointer;
+  padding:.7rem;border-radius:2px;border:1px solid var(--pink);background:transparent;color:var(--pink);transition:background .2s,color .2s}
+.enroll:hover{background:var(--pink);color:#fff}
+.enroll.done{border-color:var(--teal);color:var(--teal);cursor:default;background:var(--teal-dim)}
+
+/* ============ SIMULATOR ============ */
+.sim{background:var(--bg2)}
+.env-row{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.4rem}
+.env-btn{font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;cursor:pointer;
+  padding:.65rem 1.4rem;border-radius:2px;border:1px solid var(--ink-dim);background:transparent;color:var(--ink-dim);transition:all .2s}
+.env-btn.active{border-color:var(--teal);color:var(--teal);background:var(--teal-dim);box-shadow:0 0 16px rgba(0,229,199,.25)}
+.sim-shell{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#0a0810}
+#simc{width:100%;height:auto;aspect-ratio:16/9}
+.sim-hud{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:var(--mono);font-size:.75rem;
+  padding:.7rem 1rem;border-top:1px solid var(--line);color:var(--ink-dim);letter-spacing:.08em}
+.sim-hud b{color:var(--teal);font-weight:400}
+.conf-bar{flex:1;min-width:120px;max-width:220px;height:8px;align-self:center;background:#241c30;border-radius:4px;overflow:hidden}
+.conf-bar i{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--pink),var(--orange),var(--teal));transition:width .3s}
+.env-info{margin-top:1.4rem;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1.4rem 1.6rem}
+.env-info h3{color:var(--orange);text-transform:uppercase;font-size:1rem;margin-bottom:.4rem}
+.env-info p{color:var(--ink-dim);font-size:.9rem}
+
+/* ============ STATS / TESTIMONIALS ============ */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1.4rem;text-align:center;margin-bottom:3.5rem}
+.stat b{font-family:var(--disp);font-size:clamp(1.9rem,5vw,3rem);color:var(--pink);display:block;text-shadow:0 0 18px rgba(255,45,120,.4)}
+.stat span{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim)}
+.quote{background:var(--panel);border-left:3px solid var(--teal);border-radius:0 4px 4px 0;padding:1.3rem 1.5rem;margin-bottom:1.1rem}
+.quote p{color:var(--ink);font-size:.95rem;font-style:italic}
+.quote cite{display:block;margin-top:.6rem;font-family:var(--mono);font-size:.75rem;color:var(--orange);letter-spacing:.1em;font-style:normal}
+
+/* ============ FOOTER / TOAST / REVEAL ============ */
+footer{border-top:1px solid var(--line);padding:2.4rem 1.5rem;text-align:center;font-family:var(--mono);
+  font-size:.72rem;color:var(--ink-dim);letter-spacing:.1em}
+footer b{color:var(--pink);font-weight:400}
+#toasts{position:fixed;bottom:1.4rem;right:1.4rem;z-index:9999;display:flex;flex-direction:column;gap:.6rem;pointer-events:none}
+.toast{background:var(--panel);border:1px solid var(--teal);border-left:4px solid var(--teal);color:var(--ink);
+  font-family:var(--mono);font-size:.8rem;padding:.8rem 1.2rem;border-radius:2px;max-width:320px;
+  box-shadow:0 8px 30px rgba(0,0,0,.5);animation:toastin .3s ease-out}
+.toast.warn{border-color:var(--orange);border-left-color:var(--orange)}
+@keyframes toastin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.rv{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
+.rv.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+  .rv{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#top">DRONE<span>OLOGY</span></a>
+  <ul>
+    <li><a href="#problem">The Problem</a></li>
+    <li><a href="#how">How HUNT Works</a></li>
+    <li><a href="#courses">Courses</a></li>
+    <li><a href="#sim">Simulator</a></li>
+  </ul>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <canvas id="net" aria-hidden="true"></canvas>
+  <svg class="drone-float" style="top:18%;left:8%" width="90" height="60" viewBox="0 0 90 60" fill="none" stroke="#00e5c7" stroke-width="1.5" aria-hidden="true">
+    <rect x="35" y="24" width="20" height="12" rx="2"/><line x1="35" y1="26" x2="12" y2="12"/><line x1="55" y1="26" x2="78" y2="12"/>
+    <line x1="35" y1="34" x2="12" y2="48"/><line x1="55" y1="34" x2="78" y2="48"/>
+    <circle cx="12" cy="12" r="8"/><circle cx="78" cy="12" r="8"/><circle cx="12" cy="48" r="8"/><circle cx="78" cy="48" r="8"/>
+  </svg>
+  <svg class="drone-float d2" style="bottom:22%;right:9%" width="70" height="46" viewBox="0 0 90 60" fill="none" stroke="#ff2d78" stroke-width="1.5" aria-hidden="true">
+    <rect x="35" y="24" width="20" height="12" rx="2"/><line x1="35" y1="26" x2="12" y2="12"/><line x1="55" y1="26" x2="78" y2="12"/>
+    <line x1="35" y1="34" x2="12" y2="48"/><line x1="55" y1="34" x2="78" y2="48"/>
+    <circle cx="12" cy="12" r="8"/><circle cx="78" cy="12" r="8"/><circle cx="12" cy="48" r="8"/><circle cx="78" cy="48" r="8"/>
+  </svg>
+  <div class="inner">
+    <span class="badge">Leonida State Certified · Est. 2026</span>
+    <h1 class="glitch" data-t="DRONEOLOGY">DRONEOLOGY</h1>
+    <p class="tag">&gt; FLY WHERE GPS FEARS TO TREAD_</p>
+    <p class="sub">Vice City's only flight school for the HUNT navigation system. When the satellites go dark — under canopy, between towers, inside the storm — HUNT pilots keep flying.</p>
+    <div class="cta-row">
+      <a class="btn btn-pink" href="#courses">Enroll Now</a>
+      <a class="btn btn-ghost" href="#sim">Try the Simulator</a>
+    </div>
+  </div>
+  <span class="scroll-hint">▼ SCROLL</span>
+</header>
+
+<!-- ============ PROBLEM ============ -->
+<section id="problem" class="cv">
+  <div class="wrap">
+    <p class="kicker rv">// SIGNAL LOST</p>
+    <h2 class="rv">Where GPS Goes to Die</h2>
+    <p class="lede rv">Satellite navigation is a promise the sky can't always keep. Three places in Leonida where your fancy GPS drone becomes a very expensive brick.</p>
+    <div class="grid3">
+      <div class="card rv">
+        <span class="nosig">No Signal</span>
+        <div class="icon">🌴</div>
+        <h3>Dense Forest</h3>
+        <p>The Everglades canopy eats satellite signals for breakfast. Multipath scatter, attenuation, total blackout — under the mangroves, GPS accuracy degrades from meters to "somewhere in Florida."</p>
+      </div>
+      <div class="card rv">
+        <span class="nosig">No Signal</span>
+        <div class="icon">🏙️</div>
+        <h3>Urban Canyons</h3>
+        <p>Downtown Vice City's glass towers bounce signals like a pinball machine. Reflected multipath fixes put you two blocks over — right when you're threading a 3-meter alley at speed.</p>
+      </div>
+      <div class="card rv">
+        <span class="nosig">No Signal</span>
+        <div class="icon">🌀</div>
+        <h3>Disaster Zones</h3>
+        <p>Post-hurricane Leonida: jammed spectrum, downed infrastructure, dust and debris everywhere. The exact moment drones matter most is the exact moment GPS taps out.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW HUNT WORKS ============ -->
+<section id="how" class="how cv">
+  <div class="wrap">
+    <p class="kicker rv">// THE SYSTEM</p>
+    <h2 class="rv">How HUNT Works</h2>
+    <p class="lede rv">HUNT doesn't ask the sky where it is. It looks at the world and figures it out — visual-inertial navigation, no satellites required.</p>
+    <div class="how-grid">
+      <div>
+        <div class="step rv">
+          <span class="num">1</span>
+          <div><h3>See</h3><p>Onboard cameras stream the world in real time. Every tree, wall, and wreck becomes a landmark instead of an obstacle to your signal.</p></div>
+        </div>
+        <div class="step rv">
+          <span class="num">2</span>
+          <div><h3>Track</h3><p>Visual odometry tracks distinctive features frame-to-frame, fusing with the IMU to estimate motion — dead reckoning that actually stays alive.</p></div>
+        </div>
+        <div class="step rv">
+          <span class="num">3</span>
+          <div><h3>Map</h3><p>SLAM builds a live 3D map while localizing inside it. The drone knows where it is because it remembers where it's been.</p></div>
+        </div>
+        <div class="step rv">
+          <span class="num">4</span>
+          <div><h3>Hunt</h3><p>Path planning replans around obstacles in milliseconds, holding the mission line through canopy, canyon, or chaos. Waypoint acquired. Next.</p></div>
+        </div>
+      </div>
+      <div class="radar-box rv"><canvas id="radar" aria-label="Animated radar sweep visualization"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COURSES ============ -->
+<section id="courses" class="cv">
+  <div class="wrap">
+    <p class="kicker rv">// CURRICULUM</p>
+    <h2 class="rv">Course Catalog</h2>
+    <p class="lede rv">Four classes. Zero satellites. Bring sunscreen and a spare set of props.</p>
+    <div class="grid4">
+      <div class="course rv">
+        <span class="code">HUNT-101</span>
+        <h3>Ditch the Satellite</h3>
+        <p>Intro to GPS-denied flight. Learn why your nav solution drifts, how an IMU lies to you over time, and how camera-based odometry keeps you honest. Final exam: fly a figure-8 under the Ocean Drive awnings.</p>
+        <span class="meta">6 WEEKS · BEGINNER · SIM + FIELD</span>
+        <button class="enroll" data-course="HUNT-101 · Ditch the Satellite">Enroll</button>
+      </div>
+      <div class="course rv">
+        <span class="code">HUNT-201</span>
+        <h3>Feature Hunter</h3>
+        <p>Visual odometry deep dive. Track corners, edges, and textures at 60fps; learn what kills your features (glass, water, fog) and how sensor fusion saves the day. Field trip: the mirrored towers of the Financial District.</p>
+        <span class="meta">8 WEEKS · INTERMEDIATE · PREREQ 101</span>
+        <button class="enroll" data-course="HUNT-201 · Feature Hunter">Enroll</button>
+      </div>
+      <div class="course rv">
+        <span class="code">HUNT-301</span>
+        <h3>Map or Be Mapped</h3>
+        <p>SLAM in anger. Build live 3D maps of the Grassrivers swamp while localizing inside them, close loops before drift closes you, and replan paths around gators — uh, obstacles — in real time.</p>
+        <span class="meta">10 WEEKS · ADVANCED · PREREQ 201</span>
+        <button class="enroll" data-course="HUNT-301 · Map or Be Mapped">Enroll</button>
+      </div>
+      <div class="course rv">
+        <span class="code">HUNT-404</span>
+        <h3>Signal Not Found</h3>
+        <p>The capstone. Full mission in a simulated post-hurricane blackout zone: jammed spectrum, dust-choked air, collapsed landmarks. Navigate, map, deliver, return. Pass this and Leonida's worst days need you.</p>
+        <span class="meta">12 WEEKS · EXPERT · PREREQ 301</span>
+        <button class="enroll" data-course="HUNT-404 · Signal Not Found">Enroll</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SIMULATOR ============ -->
+<section id="sim" class="sim cv">
+  <div class="wrap">
+    <p class="kicker rv">// HANDS ON</p>
+    <h2 class="rv">Signal Simulator</h2>
+    <p class="lede rv">Watch a HUNT drone run waypoints with zero GPS. Switch environments and see how visual confidence — and flight stability — changes with what the cameras can see.</p>
+    <div class="env-row rv" role="tablist" aria-label="Environment selector">
+      <button class="env-btn active" data-env="forest" role="tab" aria-selected="true">🌴 Forest</button>
+      <button class="env-btn" data-env="city" role="tab" aria-selected="false">🏙️ City</button>
+      <button class="env-btn" data-env="disaster" role="tab" aria-selected="false">🌀 Disaster</button>
+    </div>
+    <div class="sim-shell rv">
+      <canvas id="simc" aria-label="Live drone navigation simulation"></canvas>
+      <div class="sim-hud">
+        <span>ENV: <b id="hud-env">FOREST</b></span>
+        <span>WAYPOINT: <b id="hud-wp">1/5</b></span>
+        <span style="display:flex;gap:.6rem;flex:1;justify-content:flex-end;align-items:center">
+          VISUAL CONFIDENCE <span class="conf-bar"><i id="hud-conf"></i></span> <b id="hud-pct">--%</b>
+        </span>
+      </div>
+    </div>
+    <div class="env-info rv">
+      <h3 id="info-title">Forest — Everglades Canopy</h3>
+      <p id="info-body">Rich texture everywhere: bark, leaves, shadow patterns. Feature tracking thrives, but the canopy blocks GPS entirely. HUNT confidence stays high — this is home turf.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section id="stats" class="cv">
+  <div class="wrap">
+    <p class="kicker rv">// RECEIPTS</p>
+    <h2 class="rv">The Numbers Don't Drift</h2>
+    <p class="lede rv">Unlike your IMU.</p>
+    <div class="stat-row">
+      <div class="stat rv"><b data-count="1337">0</b><span>Pilots Certified</span></div>
+      <div class="stat rv"><b data-count="98" data-suffix="%">0</b><span>Waypoint Accuracy</span></div>
+      <div class="stat rv"><b data-count="0">0</b><span>Satellites Needed</span></div>
+      <div class="stat rv"><b data-count="24601">0</b><span>Sim Hours Flown</span></div>
+    </div>
+    <div class="quote rv">
+      <p>"Flew my delivery drone straight through a Category 4 blackout zone. Package arrived. Five stars, would lose signal again."</p>
+      <cite>— T. MARLOWE, HUNT-404 GRADUATE, PORT GELLHORN</cite>
+    </div>
+    <div class="quote rv">
+      <p>"Before Droneology I thought SLAM was a wrestling move. Now I close loops in the Grassrivers fog like it's nothing."</p>
+      <cite>— K. OYELARAN, HUNT-301, VICE CITY</cite>
+    </div>
+    <div class="quote rv">
+      <p>"My instructor made me fly blindfolded. The drone, I mean. The drone was blindfolded. GPS-wise."</p>
+      <cite>— D. FUENTES, HUNT-101, LITTLE HAVANA HEIGHTS</cite>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><b>DRONEOLOGY</b> · A FICTIONAL IN-GAME SCHOOL · LEONIDA · NOT AFFILIATED WITH ANY REAL FLIGHT PROGRAM</p>
+  <p style="margin-top:.5rem;opacity:.7">HUNT: SEE · TRACK · MAP · HUNT — SATELLITES OPTIONAL, STYLE MANDATORY</p>
+</footer>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+(() => {
+const $  = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DPR = Math.min(devicePixelRatio || 1, 2); // cap DPR: 3x panels triple fill cost for no visible gain
+const TAU = Math.PI * 2;
+
+/* ---------- Shared render engine ----------
+   One rAF loop drives every canvas. Each renderer only draws while its
+   canvas is actually in the viewport (IntersectionObserver) and the tab
+   is visible; the loop suspends entirely when nothing needs drawing. */
+const renderers = [];
+let rafId = 0, lastT = 0;
+
+function tick(t) {
+  rafId = 0;
+  const dt = Math.min((t - lastT) / 1000, 0.05) || 0.016;
+  lastT = t;
+  let active = false;
+  for (const r of renderers) {
+    if (r.visible) { r.draw(dt, t / 1000); active = true; }
+  }
+  if (active && !document.hidden) rafId = requestAnimationFrame(tick);
+}
+function wake() {
+  if (!rafId && !document.hidden) { lastT = performance.now(); rafId = requestAnimationFrame(tick); }
+}
+document.addEventListener('visibilitychange', wake);
+
+const vis = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    const r = renderers.find(r => r.canvas === e.target);
+    if (r) { r.visible = e.isIntersecting; }
+  }
+  wake();
+}, { rootMargin: '50px' });
+
+function addRenderer(canvas, draw, resize) {
+  const r = { canvas, draw, resize, visible: false };
+  renderers.push(r);
+  vis.observe(canvas);
+  fit(r);
+  return r;
+}
+function fit(r) {
+  const { canvas } = r;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (!w || !h) return;
+  canvas.width = Math.round(w * DPR);
+  canvas.height = Math.round(h * DPR);
+  r.resize && r.resize(canvas.width, canvas.height);
+}
+let rsT;
+addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { renderers.forEach(fit); wake(); }, 150); }, { passive: true });
+
+/* ---------- Toasts ---------- */
+const toastBox = $('#toasts');
+function toast(msg, warn) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (warn ? ' warn' : '');
+  el.textContent = msg;
+  toastBox.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity .4s'; el.style.opacity = '0';
+    setTimeout(() => el.remove(), 400);
+  }, 3200);
+}
+
+/* ---------- Hero particle network ---------- */
+(() => {
+  const canvas = $('#net'), ctx = canvas.getContext('2d');
+  const mouse = { x: -9e3, y: -9e3 };
+  let pts = [], W = 0, H = 0;
+  const LINK = 130 * DPR, LINK2 = LINK * LINK;
+  const COLORS = ['255,45,120', '0,229,199', '255,159,28'];
+
+  function seed(w, h) {
+    W = w; H = h;
+    // density-scaled, hard-capped particle count keeps pair checks bounded
+    const n = Math.min(70, Math.round(w * h / (18000 * DPR * DPR)));
+    pts = Array.from({ length: n }, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - .5) * 24 * DPR, vy: (Math.random() - .5) * 24 * DPR,
+      r: (Math.random() * 1.6 + .8) * DPR, c: COLORS[Math.random() * 3 | 0]
+    }));
+  }
+  canvas.parentElement.addEventListener('pointermove', e => {
+    const b = canvas.getBoundingClientRect();
+    mouse.x = (e.clientX - b.left) * DPR; mouse.y = (e.clientY - b.top) * DPR;
+  }, { passive: true });
+  canvas.parentElement.addEventListener('pointerleave', () => { mouse.x = mouse.y = -9e3; }, { passive: true });
+
+  addRenderer(canvas, dt => {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      if (!REDUCED) {
+        // gentle repulsion from cursor
+        const dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
+        if (d2 < LINK2) { const f = 40 * DPR / (Math.sqrt(d2) + 1); p.vx += dx / 60 * f * dt * 60; p.vy += dy / 60 * f * dt * 60; }
+        p.vx *= .995; p.vy *= .995;
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        if (p.x < 0 || p.x > W) p.vx *= -1, p.x = Math.max(0, Math.min(W, p.x));
+        if (p.y < 0 || p.y > H) p.vy *= -1, p.y = Math.max(0, Math.min(H, p.y));
+      }
+      ctx.fillStyle = `rgba(${p.c},.85)`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
+    }
+    ctx.lineWidth = DPR * .6;
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i];
+      for (let j = i + 1; j < pts.length; j++) {
+        const b = pts[j], dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+        if (d2 < LINK2) {
+          ctx.strokeStyle = `rgba(${a.c},${(1 - d2 / LINK2) * .35})`;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+  }, seed);
+})();
+
+/* ---------- Radar ---------- */
+(() => {
+  const canvas = $('#radar'), ctx = canvas.getContext('2d');
+  let W = 0, H = 0, blips = [];
+  function seed(w, h) {
+    W = w; H = h;
+    blips = Array.from({ length: 7 }, (_, i) => ({
+      a: Math.random() * TAU, r: (.2 + Math.random() * .7), ph: Math.random() * TAU
+    }));
+  }
+  addRenderer(canvas, (dt, t) => {
+    const cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 4 * DPR;
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(0,229,199,.35)'; ctx.lineWidth = DPR;
+    for (let i = 1; i <= 3; i++) { ctx.beginPath(); ctx.arc(cx, cy, R * i / 3, 0, TAU); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+    const sweep = REDUCED ? 0.9 : (t * 1.1) % TAU;
+    const g = ctx.createConicGradient ? ctx.createConicGradient(sweep, cx, cy) : null;
+    if (g) {
+      g.addColorStop(0, 'rgba(0,229,199,.5)'); g.addColorStop(.12, 'rgba(0,229,199,0)'); g.addColorStop(1, 'rgba(0,229,199,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, 0, TAU); ctx.fill();
+    }
+    ctx.strokeStyle = 'rgba(0,229,199,.9)';
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(sweep) * R, cy + Math.sin(sweep) * R); ctx.stroke();
+    for (const b of blips) {
+      // blip glows brightest just after the beam passes it
+      let da = (sweep - b.a) % TAU; if (da < 0) da += TAU;
+      const glow = Math.max(0, 1 - da / 2.2);
+      const pulse = .75 + .25 * Math.sin(t * 3 + b.ph);
+      const x = cx + Math.cos(b.a) * b.r * R, y = cy + Math.sin(b.a) * b.r * R;
+      ctx.fillStyle = `rgba(255,45,120,${(.25 + glow * .75) * pulse})`;
+      ctx.beginPath(); ctx.arc(x, y, (2 + glow * 2.5) * DPR, 0, TAU); ctx.fill();
+    }
+  }, seed);
+})();
+
+/* ---------- Signal simulator ---------- */
+const ENVS = {
+  forest: {
+    label: 'FOREST', conf: [.78, .96], sky: '#0c1410', ground: '#0f1c12',
+    title: 'Forest — Everglades Canopy',
+    body: 'Rich texture everywhere: bark, leaves, shadow patterns. Feature tracking thrives, but the canopy blocks GPS entirely. HUNT confidence stays high — this is home turf.'
+  },
+  city: {
+    label: 'CITY', conf: [.55, .85], sky: '#120d18', ground: '#181222',
+    title: 'City — Downtown Vice Canyons',
+    body: 'Glass facades reflect and repeat — mirrored features can fool the tracker, so confidence dips near the towers. Sensor fusion with the IMU rides out the ambiguity between clean fixes.'
+  },
+  disaster: {
+    label: 'DISASTER', conf: [.35, .7], sky: '#171008', ground: '#1d1409',
+    title: 'Disaster — Post-Hurricane Blackout Zone',
+    body: 'Dust scatters light and erases texture; landmarks the map remembers may no longer exist. Confidence runs low and the flight path wobbles — this is why HUNT-404 exists.'
+  }
+};
+(() => {
+  const canvas = $('#simc'), ctx = canvas.getContext('2d');
+  const hudEnv = $('#hud-env'), hudWp = $('#hud-wp'), hudConf = $('#hud-conf'), hudPct = $('#hud-pct');
+  const infoT = $('#info-title'), infoB = $('#info-body');
+  let W = 0, H = 0, env = 'forest';
+  let wps = [], wpIdx = 0, drone = { x: 0, y: 0 }, trail = [], conf = .9, confTarget = .9, scen = [], dust = [];
+
+  function layout(w, h) {
+    W = w; H = h;
+    wps = Array.from({ length: 5 }, (_, i) => ({
+      x: (i + .8) / 5.6 * W,
+      y: H * (.3 + ((i * 2654435761 >>> 8) % 1000) / 1000 * .45)
+    }));
+    drone.x = wps[0].x; drone.y = wps[0].y; wpIdx = 1; trail = [];
+    scen = buildScenery(); dust = [];
+  }
+  function buildScenery() {
+    const out = [];
+    const n = 14;
+    for (let i = 0; i < n; i++) {
+      const x = (i + .5) / n * W + (Math.sin(i * 7.3) * W / n / 2);
+      if (env === 'forest') out.push({ x, y: H, r: (18 + (i * 37 % 26)) * DPR * (W / (900 * DPR)) });
+      else if (env === 'city') out.push({ x, w: W / n * .62, h: H * (.25 + (i * 53 % 40) / 100) });
+      else out.push({ x, y: H - (i * 29 % 40) * DPR, w: (22 + i * 31 % 30) * DPR, h: (10 + i * 17 % 18) * DPR });
+    }
+    return out;
+  }
+  function setEnv(name) {
+    env = name;
+    const e = ENVS[name];
+    hudEnv.textContent = e.label;
+    infoT.textContent = e.title; infoB.textContent = e.body;
+    scen = buildScenery(); dust = []; trail = [];
+    $$('.env-btn').forEach(b => {
+      const on = b.dataset.env === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on);
+    });
+    toast('ENV LOADED: ' + e.label + ' — GPS: UNAVAILABLE', true);
+    wake();
+  }
+  $$('.env-btn').forEach(b => b.addEventListener('click', () => setEnv(b.dataset.env)));
+
+  addRenderer(canvas, (dt, t) => {
+    const e = ENVS[env];
+    // background
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, e.sky); bg.addColorStop(1, e.ground);
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+    // scenery
+    if (env === 'forest') {
+      for (const s of scen) { // canopy trees
+        ctx.fillStyle = 'rgba(0,229,199,.18)';
+        ctx.beginPath(); ctx.arc(s.x, s.y * .98, s.r * 2.2, Math.PI, TAU); ctx.fill();
+        ctx.fillStyle = 'rgba(0,229,199,.30)';
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 1.5, Math.PI, TAU); ctx.fill();
+      }
+    } else if (env === 'city') {
+      for (const s of scen) { // towers + reflection shimmer
+        ctx.fillStyle = 'rgba(255,45,120,.20)';
+        ctx.fillRect(s.x - s.w / 2, H - s.h, s.w, s.h);
+        ctx.strokeStyle = `rgba(0,229,199,${.12 + .1 * Math.sin(t * 2 + s.x)})`;
+        ctx.lineWidth = DPR;
+        ctx.beginPath(); ctx.moveTo(s.x - s.w / 2 + 2 * DPR, H - s.h); ctx.lineTo(s.x - s.w / 2 + 2 * DPR, H); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(s.x + s.w / 2 - 2 * DPR, H - s.h); ctx.lineTo(s.x + s.w / 2 - 2 * DPR, H); ctx.stroke();
+      }
+    } else {
+      for (const s of scen) { // rubble
+        ctx.fillStyle = 'rgba(255,159,28,.26)';
+        ctx.fillRect(s.x - s.w / 2, s.y - s.h, s.w, s.h);
+      }
+      // dust: pooled, capped
+      if (dust.length < 60 && !REDUCED) dust.push({ x: Math.random() * W, y: H + 5, vy: -(12 + Math.random() * 30) * DPR, vx: (Math.random() - .3) * 18 * DPR, l: 1 });
+      ctx.fillStyle = 'rgba(255,159,28,.28)';
+      for (let i = dust.length - 1; i >= 0; i--) {
+        const d = dust[i];
+        d.x += d.vx * dt; d.y += d.vy * dt; d.l -= dt * .25;
+        if (d.l <= 0 || d.y < -10) { dust.splice(i, 1); continue; }
+        ctx.globalAlpha = d.l * .5;
+        ctx.fillRect(d.x, d.y, 2 * DPR, 2 * DPR);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // confidence drifts inside the env band
+    const [lo, hi] = e.conf;
+    if (Math.random() < .02) confTarget = lo + Math.random() * (hi - lo);
+    conf += (confTarget - conf) * Math.min(1, dt * 2);
+
+    // waypoints
+    for (let i = 0; i < wps.length; i++) {
+      const w = wps[i], done = i < wpIdx;
+      ctx.strokeStyle = done ? 'rgba(0,229,199,.9)' : 'rgba(255,159,28,.8)';
+      ctx.lineWidth = 1.5 * DPR;
+      ctx.beginPath(); ctx.arc(w.x, w.y, 7 * DPR, 0, TAU); ctx.stroke();
+      if (i === wpIdx) { // pulse the active target
+        ctx.strokeStyle = `rgba(255,159,28,${.5 + .4 * Math.sin(t * 5)})`;
+        ctx.beginPath(); ctx.arc(w.x, w.y, (11 + 3 * Math.sin(t * 5)) * DPR, 0, TAU); ctx.stroke();
+      }
+    }
+
+    // drone motion — wobble scales inversely with confidence
+    const tgt = wps[wpIdx];
+    const dx = tgt.x - drone.x, dy = tgt.y - drone.y, dist = Math.hypot(dx, dy);
+    const speed = (REDUCED ? 0 : 70 * DPR);
+    const wob = (1 - conf) * 14 * DPR;
+    drone.x += dx / (dist || 1) * speed * dt + Math.sin(t * 9) * wob * dt * 8;
+    drone.y += dy / (dist || 1) * speed * dt + Math.cos(t * 7) * wob * dt * 8;
+    if (dist < 9 * DPR) {
+      wpIdx = (wpIdx + 1) % wps.length;
+      if (wpIdx === 0) { trail.length = 0; wpIdx = 1; drone.x = wps[0].x; drone.y = wps[0].y; }
+      hudWp.textContent = (wpIdx) + '/5';
+    }
+    trail.push(drone.x, drone.y);
+    if (trail.length > 240) trail.splice(0, trail.length - 240);
+
+    // trail
+    ctx.strokeStyle = 'rgba(255,45,120,.5)'; ctx.lineWidth = 1.5 * DPR;
+    ctx.beginPath();
+    for (let i = 0; i < trail.length; i += 2) i ? ctx.lineTo(trail[i], trail[i + 1]) : ctx.moveTo(trail[0], trail[1]);
+    ctx.stroke();
+
+    // drone body
+    const heading = Math.atan2(dy, dx);
+    ctx.save();
+    ctx.translate(drone.x, drone.y); ctx.rotate(heading);
+    ctx.strokeStyle = '#00e5c7'; ctx.lineWidth = 1.6 * DPR;
+    const u = 5 * DPR;
+    ctx.strokeRect(-u * .8, -u * .5, u * 1.6, u);
+    ctx.beginPath();
+    ctx.moveTo(-u * .8, -u * .5); ctx.lineTo(-u * 1.8, -u * 1.4);
+    ctx.moveTo(u * .8, -u * .5); ctx.lineTo(u * 1.8, -u * 1.4);
+    ctx.moveTo(-u * .8, u * .5); ctx.lineTo(-u * 1.8, u * 1.4);
+    ctx.moveTo(u * .8, u * .5); ctx.lineTo(u * 1.8, u * 1.4);
+    ctx.stroke();
+    const rr = (2.4 + Math.sin(t * 40) * .8) * DPR;
+    for (const [rx, ry] of [[-1.8, -1.4], [1.8, -1.4], [-1.8, 1.4], [1.8, 1.4]]) {
+      ctx.beginPath(); ctx.arc(rx * u, ry * u, rr, 0, TAU); ctx.stroke();
+    }
+    ctx.restore();
+
+    // feature-tracking rays from drone to nearby scenery (SLAM flavor)
+    ctx.strokeStyle = `rgba(0,229,199,${conf * .3})`; ctx.lineWidth = DPR * .5;
+    for (let i = 0; i < scen.length; i += 3) {
+      const s = scen[i], sx = s.x, sy = env === 'city' ? H - s.h : (s.y || H) - (s.r || 0);
+      if (Math.abs(sx - drone.x) < W * .2) {
+        ctx.beginPath(); ctx.moveTo(drone.x, drone.y); ctx.lineTo(sx, sy); ctx.stroke();
+      }
+    }
+
+    // HUD (DOM writes are cheap here: text/width only, ~1 per frame)
+    const pct = Math.round(conf * 100);
+    hudPct.textContent = pct + '%';
+    hudConf.style.width = pct + '%';
+  }, layout);
+})();
+
+/* ---------- Enrollment ---------- */
+const roster = new Set();
+$$('.enroll').forEach(btn => btn.addEventListener('click', () => {
+  const c = btn.dataset.course;
+  if (roster.has(c)) { toast('ALREADY ENROLLED: ' + c.split(' · ')[0], true); return; }
+  roster.add(c);
+  btn.textContent = '✓ Enrolled';
+  btn.classList.add('done');
+  toast('ENROLLED: ' + c);
+}));
+
+/* ---------- Scroll reveal (one shared observer) ---------- */
+const reveal = new IntersectionObserver(entries => {
+  for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); reveal.unobserve(e.target); }
+}, { threshold: .12 });
+$$('.rv').forEach(el => reveal.observe(el));
+
+/* ---------- Animated counters (rAF-eased, run once on view) ---------- */
+const countIO = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    countIO.unobserve(e.target);
+    const el = e.target, end = +el.dataset.count, suf = el.dataset.suffix || '';
+    if (REDUCED || end === 0) { el.textContent = end.toLocaleString() + suf; continue; }
+    const t0 = performance.now(), DUR = 1400;
+    (function step(now) {
+      const p = Math.min((now - t0) / DUR, 1), ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(end * ease).toLocaleString() + suf;
+      if (p < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+}, { threshold: .5 });
+$$('[data-count]').forEach(el => countIO.observe(el));
+})();
+</script>
+</body>
+</html>
