@@ -121,3 +121,14 @@ Shared skeleton: `Idle ↔ Work ↔ Social` core loop, interrupted by
 
 > All fictional. Cultural texture is reference-based and respectful; factions,
 > police, and every named character are invented.
+
+
+## Ambient NPC weather reaction (live in the prototype, v0.75)
+
+A small "smarter, more realistic NPCs" beat: when a **storm** rolls in (press `R`),
+ambient pedestrians **pick up the pace and hurry for cover** (~1.9x their stroll
+speed), settling back to a relaxed walk once the skies clear. It layers on top of
+the existing reactive behaviors (scatter from a fast passing vehicle, the BII
+"unsolicited attention" report if the player tails someone too long) so street
+life reads as reacting to the world, not just looping a path. Fully original
+ambient behavior; no real person depicted.

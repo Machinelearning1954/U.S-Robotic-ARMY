@@ -55,7 +55,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>L</b> drone · <b>O</b> dominoes/shift · <b>`</b> cheats · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.74</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.75</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -4421,7 +4421,9 @@ function updatePeds(dt){
       p.followT+=dt;
       if(p.followT>6){p.followT=0;p.harassCd=20;p.scatter=2.2;harassInfraction('UNSOLICITED ATTENTION');}
     }else p.followT=Math.max(0,p.followT-dt*2);
-    const spd=p.scatter>0?p.baseSpd*3.2:p.baseSpd;
+    // smarter ambient life: when the storm rolls in, pedestrians hurry for cover
+    const weatherRush=rain?1.9:1;
+    const spd=(p.scatter>0?p.baseSpd*3.2:p.baseSpd)*weatherRush;
     p.f+=spd*dt/len;
     if(p.f>=1){p.f=0;p.seg=(p.seg+1)%ring.length;continue;}
     const x=a.X+dx*p.f+dz/len*4.5*p.side,z=a.Z+dz*p.f-dx/len*4.5*p.side;
