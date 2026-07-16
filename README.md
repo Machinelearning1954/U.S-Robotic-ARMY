@@ -12,6 +12,7 @@ Open `index.html` in any modern browser — no build step or dependencies.
 | ← → or A / D | Move unit |
 | SPACE | Fire |
 | S | Call in a Navy SEAL fire team |
+| U | Surface a strike submarine for a missile salvo |
 | P / ESC | Pause / resume |
 | B | Open or close the intel briefing video |
 | G | Toggle enhanced graphics mode |
@@ -133,6 +134,22 @@ The operators fast-rope in on your flanks, automatically engage the nearest
 drones with aimed covering fire for about seven seconds (their rounds score
 like yours), then exfil. The HUD tracks their status: `SEALS READY (S)` →
 `SEALS ON STATION` → `SEALS EXFIL <n>s` while the 18-second cooldown runs.
+
+## Submarine strike support
+
+Press **U** during a mission to call in a strike submarine. The boat surfaces
+offshore in the water strip below the defended line (near your unit's current
+position), ripple-fires a six-missile salvo — each missile aimed at the drone
+closest to the line, hitting hard enough to one-shot armored drones — then
+dives while its launchers cycle. The HUD tracks it: `SUB READY (U)` →
+`SUB ON STATION` → `SUB RELOAD <n>s` during the 24-second cooldown. A sonar
+ping announces its arrival and each launch gets its own whoosh and splash.
+On touch devices a `SUB` button sits next to the `SEAL` button.
+
+The submarine is a generic, fictional arcade unit: its silhouette, weapons,
+timings, and behavior are invented for this game and are not modeled on any
+real vessel — no real-world (let alone classified) characteristics are
+referenced.
 
 The briefing is available from the main menu, the pause menu, and the
 game-over screen, or by pressing **B** at any time (gameplay pauses while it

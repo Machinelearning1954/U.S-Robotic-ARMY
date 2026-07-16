@@ -131,6 +131,7 @@
   }
   .hud .lives { color: var(--warn); }
   .hud .seals { color: #7ea8ff; }
+  .hud .subhud { color: #6ee7c8; }
   /* Intel briefing modal — integrated YouTube video */
   #briefing {
     position: fixed;
@@ -243,6 +244,7 @@
   }
   #touch .tbtn.fire { border-color: var(--accent-2); color: var(--accent-2); }
   #touch .tbtn.seal { width: auto; padding: 0 16px; border-radius: 32px; border-color: #7ea8ff; color: #7ea8ff; font-size: 0.8rem; letter-spacing: 0.1em; }
+  #touch .tbtn.subq { width: auto; padding: 0 16px; border-radius: 32px; border-color: #6ee7c8; color: #6ee7c8; font-size: 0.8rem; letter-spacing: 0.1em; }
   #touch .tbtn:active { background: #1a2836; transform: translateY(1px); }
   footer { color: var(--muted); font-size: 0.75rem; padding-bottom: 20px; text-align: center; }
 </style>
@@ -259,6 +261,7 @@
     <span id="hud-score">SCORE 0</span>
     <span id="hud-wave">WAVE 1</span>
     <span class="seals" id="hud-seals">SEALS READY (S)</span>
+    <span class="subhud" id="hud-sub">SUB READY (U)</span>
     <span class="snd" id="hud-snd">♪ ON (M)</span>
     <span class="lives" id="hud-lives">ARMOR ❚❚❚</span>
   </div>
@@ -271,6 +274,7 @@
     </div>
     <div class="pad">
       <div class="tbtn seal" id="t-seal" aria-label="Call SEAL team">SEAL</div>
+      <div class="tbtn subq" id="t-sub" aria-label="Call submarine strike">SUB</div>
       <div class="tbtn fire" id="t-fire" aria-label="Fire">●</div>
     </div>
   </div>
@@ -291,7 +295,8 @@
     </div>
     <p>Hostile drones are inbound. Command your autonomous ground unit:
        ← → or A / D to move, SPACE to fire, S to call in a Navy SEAL fire team
-       for covering fire. Press B any time for the intel briefing,
+       for covering fire, U to surface a strike submarine offshore for a
+       missile salvo. Press B any time for the intel briefing,
        G to toggle enhanced graphics (glow, reflections, starfield).</p>
     <p class="hiscore" id="menu-hiscore"></p>
     <button id="btn-start">Deploy Unit</button>
@@ -342,7 +347,7 @@
   </div>
 </div>
 
-<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · P pause · B briefing · G graphics FX · M mute · On touch devices, use the on-screen controls</footer>
+<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · U sub strike · P pause · B briefing · G graphics FX · M mute · On touch devices, use the on-screen controls</footer>
 
 <script>
 (function () {
@@ -503,6 +508,8 @@
   var player, bullets, enemies, particles, score, lives, wave;
   var seals, sealCooldown;
   var SEAL_DURATION = 7, SEAL_COOLDOWN = 18;
+  var sub, subCooldown;
+  var SUB_COOLDOWN = 24, SUB_MISSILES = 6, SUB_TRANSIT = 1.1;
   var spawnTimer, spawnInterval, fireCooldown, lastTime;
   var keys = {};
 
@@ -559,6 +566,8 @@
   function sfxKill() { tone("triangle", 260, 60, 0.22, 0.12); }
   function sfxHit() { tone("sawtooth", 180, 40, 0.28, 0.16); }
   function sfxSeal() { tone("square", 440, 880, 0.16, 0.09); }
+  function sfxSonar() { tone("sine", 1250, 950, 0.45, 0.08); }
+  function sfxLaunch() { tone("sawtooth", 160, 640, 0.28, 0.08); }
   function sfxOver() { tone("sawtooth", 300, 40, 0.6, 0.18); }
   function toggleMute() {
     muted = !muted;
@@ -601,6 +610,8 @@
     particles = [];
     seals = [];
     sealCooldown = 0;
+    sub = null;
+    subCooldown = 0;
     score = 0;
     lives = 3;
     wave = 1;
@@ -744,6 +755,79 @@
     }
   }
 
+  // Submarine strike support: a strike submarine surfaces offshore (the water
+  // strip below the defended line), ripple-fires a missile salvo at the drone
+  // wave, then dives while its launchers cycle. The boat is a generic
+  // fictional arcade unit — silhouette and behavior are invented for the
+  // game, not based on any real vessel's characteristics.
+  function deploySub() {
+    if (state !== "playing" || subCooldown > 0 || sub) return;
+    subCooldown = SUB_COOLDOWN;
+    sfxSonar();
+    var x = Math.max(90, Math.min(W - 90, player.x));
+    sub = { x: x, phase: "surface", timer: SUB_TRANSIT, missiles: SUB_MISSILES, fireTimer: 0, claimed: [] };
+    for (var i = 0; i < 10; i++) { // surfacing foam
+      particles.push({
+        x: x - 50 + Math.random() * 100, y: GY + 10 + Math.random() * 14,
+        vx: (Math.random() - 0.5) * 50, vy: -20 - Math.random() * 40,
+        life: 0.4 + Math.random() * 0.3, color: "#cfe6ff"
+      });
+    }
+  }
+
+  // Each missile picks the unclaimed drone closest to the defended line, so a
+  // salvo spreads across the wave instead of piling onto one target, and leads
+  // the aim by the target's velocity over the missile's flight time.
+  function launchSubMissile() {
+    var sx = sub.x, sy = GY + 8;
+    function lowestEnemy(skipClaimed) {
+      var t = null, lowest = -Infinity;
+      enemies.forEach(function (e) {
+        if (skipClaimed && sub.claimed.indexOf(e) !== -1) return;
+        if (e.y > lowest) { lowest = e.y; t = e; }
+      });
+      return t;
+    }
+    var target = lowestEnemy(true) || lowestEnemy(false);
+    var tdx, tdy;
+    if (target) {
+      sub.claimed.push(target);
+      var flight = Math.sqrt((target.x - sx) * (target.x - sx) +
+                             (target.y - sy) * (target.y - sy)) / 560;
+      tdx = target.x + target.vx * flight - sx;
+      tdy = target.y + target.vy * flight - sy;
+    } else {
+      tdx = (Math.random() - 0.5) * 80;
+      tdy = -H;
+    }
+    var len = Math.sqrt(tdx * tdx + tdy * tdy) || 1;
+    bullets.push({
+      x: sx, y: sy,
+      vx: tdx / len * 560, vy: tdy / len * 560,
+      missile: true, dmg: 2
+    });
+    sfxLaunch();
+    for (var i = 0; i < 4; i++) { // launch splash
+      particles.push({
+        x: sx + (Math.random() - 0.5) * 10, y: sy + 4,
+        vx: (Math.random() - 0.5) * 90, vy: -30 - Math.random() * 60,
+        life: 0.3 + Math.random() * 0.25, color: "#ffd9a3"
+      });
+    }
+  }
+
+  var hudSub = document.getElementById("hud-sub");
+  var lastSubText = "";
+  function updateSubHud() {
+    var text = sub ? "SUB ON STATION"
+      : subCooldown > 0 ? "SUB RELOAD " + Math.ceil(subCooldown) + "s"
+      : "SUB READY (U)";
+    if (text !== lastSubText) {
+      lastSubText = text;
+      hudSub.textContent = text;
+    }
+  }
+
   function explode(x, y, color) {
     shake = Math.min(12, shake + 5);
     for (var i = 0; i < 14; i++) {
@@ -807,6 +891,31 @@
     }
     updateSealHud();
 
+    // submarine strike sequence: surface → ripple-fire salvo → dive
+    if (subCooldown > 0) subCooldown -= dt;
+    if (sub) {
+      if (sub.phase === "surface") {
+        sub.timer -= dt;
+        if (sub.timer <= 0) { sub.phase = "launch"; sub.fireTimer = 0.25; }
+      } else if (sub.phase === "launch") {
+        sub.fireTimer -= dt;
+        if (sub.fireTimer <= 0) {
+          if (sub.missiles > 0) {
+            launchSubMissile();
+            sub.missiles -= 1;
+            sub.fireTimer = 0.38;
+          } else {
+            sub.phase = "dive";
+            sub.timer = SUB_TRANSIT;
+          }
+        }
+      } else { // dive
+        sub.timer -= dt;
+        if (sub.timer <= 0) sub = null;
+      }
+    }
+    updateSubHud();
+
     // spawning / wave pacing
     spawnTimer += dt;
     if (spawnTimer >= spawnInterval) {
@@ -845,8 +954,9 @@
       for (var b = bullets.length - 1; b >= 0; b--) {
         if (Math.abs(bullets[b].x - e.x) < e.w / 2 + 3 &&
             Math.abs(bullets[b].y - e.y) < e.h / 2 + 6) {
+          var hitDmg = bullets[b].dmg || 1;
           bullets.splice(b, 1);
-          e.hp -= 1;
+          e.hp -= hitDmg;
           if (e.hp <= 0) {
             enemies.splice(j, 1);
             score += 10;
@@ -921,19 +1031,31 @@
     }
     ctx.restore();
 
-    // bullets (tracer rounds; SEAL rounds are blue and fly at an angle)
+    // bullets (tracer rounds; SEAL rounds are blue and fly at an angle;
+    // submarine missiles are finned darts with an exhaust flame)
     bullets.forEach(function (b) {
       ctx.save();
-      var col = b.seal ? "#7ea8ff" : "#9be564";
+      var col = b.missile ? "#ffd27d" : b.seal ? "#7ea8ff" : "#9be564";
       if (gfxEnhanced) {
         ctx.shadowColor = col;
         ctx.shadowBlur = 12;
-        if (!b.seal) {
+        if (!b.seal && !b.missile) {
           ctx.fillStyle = "rgba(155,229,100,0.35)";
           ctx.fillRect(b.x - 1.5, b.y, 3, 18); // trailing tracer
         }
       }
-      if (b.seal) {
+      if (b.missile) {
+        ctx.translate(b.x, b.y);
+        ctx.rotate(Math.atan2(b.vy, b.vx) + Math.PI / 2); // nose along velocity
+        ctx.fillStyle = "#e8eef4";
+        ctx.fillRect(-2, -9, 4, 12); // body
+        ctx.beginPath(); // nose cone
+        ctx.moveTo(-2, -9); ctx.lineTo(0, -14); ctx.lineTo(2, -9);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#ff8c5a"; // exhaust flame
+        ctx.fillRect(-2, 3, 4, 5 + Math.random() * 4);
+      } else if (b.seal) {
         ctx.fillStyle = "#cfe0ff";
         ctx.fillRect(b.x - 2, b.y - 2, 4, 4);
       } else {
@@ -1005,6 +1127,44 @@
     ctx.globalCompositeOperation = "source-over";
   }
 
+  // The submarine lives in the water strip below the defended line. It slides
+  // up while surfacing and back down while diving; a clip keeps the hull from
+  // ever poking above the waterline.
+  function drawSub() {
+    if (!sub) return;
+    var depth = 0;
+    if (sub.phase === "surface") depth = 40 * (sub.timer / SUB_TRANSIT);
+    else if (sub.phase === "dive") depth = 40 * (1 - sub.timer / SUB_TRANSIT);
+    var y = GY + 34 + depth;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, GY + 3, W, H - GY - 3);
+    ctx.clip();
+    ctx.translate(sub.x, y);
+    if (gfxEnhanced) { ctx.shadowColor = "#6ee7c8"; ctx.shadowBlur = 12; }
+    ctx.fillStyle = "#16222c"; // hull
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 62, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#1d2f3d"; // sail
+    ctx.fillRect(-13, -26, 26, 18);
+    ctx.strokeStyle = "#9fb6cc"; // periscope
+    ctx.beginPath();
+    ctx.moveTo(7, -26); ctx.lineTo(7, -33); ctx.lineTo(12, -33);
+    ctx.stroke();
+    if (sub.phase === "launch") { // hatch glow while the salvo cycles
+      ctx.fillStyle = "rgba(255,210,125," + (0.45 + 0.35 * Math.sin(nowT * 10)).toFixed(3) + ")";
+      ctx.fillRect(-40, -13, 14, 4);
+    }
+    ctx.fillStyle = "rgba(110,231,200," + (0.4 + 0.4 * Math.sin(nowT * 5)).toFixed(3) + ")";
+    ctx.fillRect(-2, -31, 4, 4); // beacon
+    ctx.strokeStyle = "rgba(207,230,255,0.3)"; // waterline wake
+    ctx.beginPath();
+    ctx.moveTo(-72, 3); ctx.lineTo(72, 3);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function draw() {
     // sky
     if (gfxEnhanced) {
@@ -1061,6 +1221,8 @@
       drawEntities(0.16);
       ctx.restore();
     }
+
+    drawSub();
 
     // defended ground line
     if (gfxEnhanced) {
@@ -1120,6 +1282,10 @@
     }
     if (ev.code === "KeyS") {
       deploySeals();
+      return;
+    }
+    if (ev.code === "KeyU") {
+      deploySub();
       return;
     }
     if (ev.code === "KeyB") {
@@ -1194,6 +1360,15 @@
     initAudio();
     if (state === "menu" || state === "gameover") { reset(); setState("playing"); }
     else deploySeals();
+  });
+  document.getElementById("t-sub").addEventListener("touchstart", function (ev) {
+    ev.preventDefault();
+    initAudio();
+    if (state === "playing") deploySub();
+  }, { passive: false });
+  document.getElementById("t-sub").addEventListener("click", function () {
+    initAudio();
+    if (state === "playing") deploySub();
   });
 
   updateSndHud();
