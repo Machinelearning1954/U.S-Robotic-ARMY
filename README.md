@@ -100,6 +100,9 @@ recon feeds:
 - **Feed L** — Instagram:
   [reel `DaR28IrG6CA`](https://www.instagram.com/reel/DaR28IrG6CA/), a fifth
   recon reel via Instagram's official `/embed/` player in portrait format.
+- **Feed M** — Instagram:
+  [reel `DYskJg1oV00`](https://www.instagram.com/reel/DYskJg1oV00/), a sixth
+  recon reel via Instagram's official `/embed/` player in portrait format.
 
 ## Generated brand art (Higgsfield)
 
