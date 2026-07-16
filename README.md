@@ -94,6 +94,9 @@ recon feeds:
 - **Feed J** — Instagram:
   [reel `DaMyhuKReep`](https://www.instagram.com/reel/DaMyhuKReep/), a third
   recon reel via Instagram's official `/embed/` player in portrait format.
+- **Feed K** — Instagram:
+  [reel `DaFTg7Uo4If`](https://www.instagram.com/reel/DaFTg7Uo4If/), a fourth
+  recon reel via Instagram's official `/embed/` player in portrait format.
 
 ## Generated brand art (Higgsfield)
 
