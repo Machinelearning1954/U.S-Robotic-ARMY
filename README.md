@@ -103,6 +103,15 @@ recon feeds:
 - **Feed M** — Instagram:
   [reel `DYskJg1oV00`](https://www.instagram.com/reel/DYskJg1oV00/), a sixth
   recon reel via Instagram's official `/embed/` player in portrait format.
+- **Feed N** — Social recon capture: a bundled screen recording (~3:18) of a
+  social feed scan featuring a Blue Angels low-altitude pass safety-review
+  post and an M67 vs F1 grenade comparison brief. Plays as a native `<video>`
+  (muted autoplay loop, portrait, controls to unmute) directly from the repo —
+  works fully offline, no embed script or external host required. Ships in two
+  encodings and the browser picks the one it can decode:
+  `media/social-recon-feed.webm` (VP9/Opus, ~5 MB) with
+  `media/social-recon-feed.mp4` (H.264/AAC original) as fallback for browsers
+  without VP9 support.
 
 ## Generated brand art (Higgsfield)
 

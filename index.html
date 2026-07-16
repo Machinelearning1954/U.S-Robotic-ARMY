@@ -145,6 +145,8 @@
   #briefing.hidden { display: none; }
   .briefing-panel {
     width: min(860px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
     background: var(--panel);
     border: 1px solid var(--edge);
     border-radius: 10px;
@@ -329,6 +331,7 @@
       <button id="tab-ig6" class="tab">Feed K · Recon Reel D</button>
       <button id="tab-ig7" class="tab">Feed L · Recon Reel E</button>
       <button id="tab-ig8" class="tab">Feed M · Recon Reel F</button>
+      <button id="tab-fb" class="tab">Feed N · Social Recon</button>
     </div>
     <p class="sub" id="briefing-sub"></p>
     <div class="video-wrap" id="video-wrap"></div>
@@ -457,6 +460,21 @@
       link: "https://www.instagram.com/reel/DYskJg1oV00/",
       linkText: "Open on Instagram ↗",
       portrait: true
+    },
+    fb: {
+      sub: "Social recon capture — an intercepted feed scan (Blue Angels " +
+           "low-altitude pass review, M67 vs F1 grenade brief). Bundled with " +
+           "the game, so it plays offline; use the controls to unmute.",
+      src: "media/social-recon-feed.mp4",
+      sources: [
+        { src: "media/social-recon-feed.webm", type: "video/webm" },
+        { src: "media/social-recon-feed.mp4", type: "video/mp4" }
+      ],
+      title: "Social recon capture (bundled recording)",
+      link: "media/social-recon-feed.mp4",
+      linkText: "Open clip ↗",
+      portrait: true,
+      video: true
     }
   };
   var currentFeed = "yt";
@@ -623,10 +641,10 @@
     link.textContent = f.linkText;
     videoWrap.classList.toggle("portrait", f.portrait);
     if (f.video) {
-      // Higgsfield-generated clip: native <video>, autoplay+loop, muted so
-      // autoplay is allowed. Falls back to a note if the source can't load.
+      // Native <video> clip: autoplay+loop, muted so autoplay is allowed.
+      // Multiple sources (f.sources) let the browser pick a codec it can
+      // decode; falls back to a note if none of the sources load.
       var vid = document.createElement("video");
-      vid.src = f.src;
       vid.title = f.title;
       vid.autoplay = true;
       vid.loop = true;
@@ -637,7 +655,7 @@
       vid.style.height = "100%";
       vid.style.objectFit = "contain";
       vid.style.background = "#000";
-      vid.onerror = function () {
+      var showFallback = function () {
         videoWrap.replaceChildren(
           Object.assign(document.createElement("div"), {
             textContent: "Live feed unavailable — open on the source link below.",
@@ -645,6 +663,16 @@
           })
         );
       };
+      vid.onerror = showFallback;
+      var sources = f.sources || [{ src: f.src }];
+      sources.forEach(function (s, i) {
+        var srcEl = document.createElement("source");
+        srcEl.src = s.src;
+        if (s.type) srcEl.type = s.type;
+        // The error event for exhausted candidates fires on the last <source>
+        if (i === sources.length - 1) srcEl.onerror = showFallback;
+        vid.appendChild(srcEl);
+      });
       videoWrap.replaceChildren(vid);
       return;
     }
