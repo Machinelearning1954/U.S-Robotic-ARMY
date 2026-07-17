@@ -1,0 +1,40 @@
+// Halcyon Bay districts. Each is a procedurally-flavored level with its own
+// palette, size, emitter count and sweeper count. All fictional.
+export const DISTRICTS = [
+  {
+    id: "driftmarket",
+    name: "DRIFT MARKET",
+    blurb: "Rain-slick stalls and dead neon. Meridian likes the crowds here.",
+    tile: 64,
+    cols: 28,
+    rows: 20,
+    emitters: 3,
+    sweepers: 2,
+    timeLimit: 150,
+    palette: { road: "#0b1220", block: "#111a2e", edge: "#1c2c4a", accent: "#33e2ff" },
+  },
+  {
+    id: "verge",
+    name: "THE VERGE",
+    blurb: "Half-built towers on the waterline. Signal bleeds off the steel.",
+    tile: 64,
+    cols: 34,
+    rows: 24,
+    emitters: 4,
+    sweepers: 3,
+    timeLimit: 165,
+    palette: { road: "#0a0f1e", block: "#12132a", edge: "#2a2350", accent: "#ff3b7f" },
+  },
+  {
+    id: "spindle",
+    name: "SPINDLE ROW",
+    blurb: "The contractor's home turf. Everything hums a little too much.",
+    tile: 64,
+    cols: 40,
+    rows: 28,
+    emitters: 5,
+    sweepers: 4,
+    timeLimit: 180,
+    palette: { road: "#090c16", block: "#0f1626", edge: "#243a2e", accent: "#46f4a0" },
+  },
+];

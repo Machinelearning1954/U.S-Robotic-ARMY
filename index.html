@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>REZONANCE — Halcyon Bay</title>
+  <meta name="description" content="REZONANCE: a neon-noir signals-investigation game set in the fictional city of Halcyon Bay." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2305070d'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%2333e2ff' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%2333e2ff' stroke-width='1.5' opacity='.5'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="src/css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Title screen -->
+    <section id="title" class="screen active">
+      <div class="title-glow"></div>
+      <div class="title-inner">
+        <h1 class="logo">REZONANCE</h1>
+        <p class="tagline">HALCYON BAY &middot; SIGNALS DIVISION</p>
+        <div class="brief">
+          <p>You are <strong>Vesper Kade</strong>, a burned signals-analyst working off the books.
+          The <strong>Meridian Group</strong> has salted the city with hidden harmonic emitters.
+          Sweep each district, triangulate the source by its resonance, and neutralize it before it locks.</p>
+        </div>
+        <button id="startBtn" class="btn primary">BEGIN SWEEP</button>
+        <button id="howBtn" class="btn ghost">HOW TO PLAY</button>
+        <p class="fineprint">A work of fiction. All characters, groups, and places are invented.</p>
+      </div>
+    </section>
+
+    <!-- How to play -->
+    <section id="how" class="screen">
+      <div class="panel">
+        <h2>FIELD MANUAL</h2>
+        <ul class="manual">
+          <li><span class="key">W A S D</span> / <span class="key">◄ ▲ ▼ ►</span> — move Vesper</li>
+          <li><span class="key">SHIFT</span> — sprint (drains stamina)</li>
+          <li><span class="key">SPACE</span> — pulse the resonance scanner</li>
+          <li><span class="key">E</span> — neutralize an emitter when in range</li>
+          <li>The <strong>resonance meter</strong> climbs as you near an emitter. The scanner tingle sharpens with proximity.</li>
+          <li>Avoid <strong>Meridian sweepers</strong> — their vision cones raise your exposure. Max exposure ends the run.</li>
+          <li>Neutralize all emitters in a district to advance.</li>
+        </ul>
+        <button class="btn primary backBtn">BACK</button>
+      </div>
+    </section>
+
+    <!-- Game -->
+    <section id="game" class="screen">
+      <canvas id="stage"></canvas>
+      <div id="hud">
+        <div class="hud-row top">
+          <div class="hud-box">
+            <div class="hud-label">DISTRICT</div>
+            <div id="districtName" class="hud-val">—</div>
+          </div>
+          <div class="hud-box">
+            <div class="hud-label">EMITTERS</div>
+            <div id="emitterCount" class="hud-val">0 / 0</div>
+          </div>
+          <div class="hud-box">
+            <div class="hud-label">TIME</div>
+            <div id="clock" class="hud-val">00:00</div>
+          </div>
+        </div>
+        <div class="hud-row bottom">
+          <div class="meter">
+            <div class="meter-label">RESONANCE</div>
+            <div class="meter-track"><div id="resonanceFill" class="meter-fill res"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-label">EXPOSURE</div>
+            <div class="meter-track"><div id="exposureFill" class="meter-fill exp"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-label">STAMINA</div>
+            <div class="meter-track"><div id="staminaFill" class="meter-fill sta"></div></div>
+          </div>
+        </div>
+        <div id="prompt" class="prompt"></div>
+      </div>
+      <div id="overlay" class="overlay">
+        <div class="overlay-card">
+          <h2 id="overTitle">—</h2>
+          <p id="overBody">—</p>
+          <button id="overBtn" class="btn primary">CONTINUE</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="src/js/main.js"></script>
+</body>
+</html>
