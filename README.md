@@ -167,6 +167,27 @@ timings, and behavior are invented for this game and are not modeled on any
 real vessel — no real-world (let alone classified) characteristics are
 referenced.
 
+## Adaptive chassis (body transformation)
+
+An original take on the classic "your body changes with how you play"
+transformation system from a shared concept image: instead of a human
+physique, it's the robot's **frame** that rebuilds itself.
+
+- Kills feed combat mass into the chassis (+5 per drone destroyed); idling
+  bleeds it off (−1.1/s). The HUD shows the current class as `FRAME LIGHT` /
+  `FRAME STD` / `FRAME HEAVY`.
+- **Light scout frame** (low mass): smallest hitbox, fastest movement,
+  thruster fins — but a slower single cannon.
+- **Standard frame** (mid mass): the baseline unit.
+- **Heavy siege frame** (high mass): twin cannons with a much faster fire
+  rate and bolted side armor plates, at the cost of slow movement and the
+  biggest hitbox.
+- Crossing a threshold physically rebuilds the unit on the spot with a spark
+  burst and a servo morph sound.
+
+All three frames are original sprite designs for this game — the concept
+image's characters, GTA/San Andreas branding, and art are not used.
+
 ## Operator credential verification
 
 Clicking **Deploy Unit** now runs a short boarding sequence before the mission

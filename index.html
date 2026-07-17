@@ -133,6 +133,7 @@
   .hud .seals { color: #7ea8ff; }
   .hud .subhud { color: #6ee7c8; }
   .hud .wing { color: #d7e3ee; }
+  .hud .frame { color: #c7b8f5; }
   /* Intel briefing modal — integrated YouTube video */
   #briefing {
     position: fixed;
@@ -395,6 +396,7 @@
     <span class="seals" id="hud-seals">SEALS READY (S)</span>
     <span class="subhud" id="hud-sub">SUB READY (U)</span>
     <span class="wing" id="hud-wing">WING READY (J)</span>
+    <span class="frame" id="hud-frame">FRAME STD</span>
     <span class="snd" id="hud-snd">♪ ON (M)</span>
     <span class="lives" id="hud-lives">ARMOR ❚❚❚</span>
   </div>
@@ -431,7 +433,9 @@
        ← → or A / D to move, SPACE to fire, S to call in a Navy SEAL fire team
        for covering fire, U to surface a strike submarine offshore for a
        missile salvo, J to scramble the NIGHTGLASS jet wing for a strafing
-       run. Press B any time for the intel briefing,
+       run. Your chassis adapts to how you fight: kills bulk it toward a
+       heavy siege frame (twin cannons, slower), idling slims it to a nimble
+       scout frame. Press B any time for the intel briefing,
        G to toggle enhanced graphics (glow, reflections, starfield).</p>
     <p class="hiscore" id="menu-hiscore"></p>
     <button id="btn-start">Deploy Unit</button>
@@ -731,6 +735,20 @@
   var SUB_COOLDOWN = 24, SUB_MISSILES = 6, SUB_TRANSIT = 1.1;
   var jets, jetCooldown;
   var JET_COOLDOWN = 30;
+
+  // Adaptive chassis ("body transformation"): sustained combat feeds mass
+  // into the unit's frame, idling bleeds it off, and the chassis physically
+  // rebuilds itself across three classes with real tradeoffs. An original
+  // take on the classic grow-with-how-you-play body system.
+  var build, chassisClass;
+  var CHASSIS = {
+    light:    { label: "FRAME LIGHT", w: 38, h: 22, speed: 385, fire: 0.24 },
+    standard: { label: "FRAME STD",   w: 46, h: 26, speed: 320, fire: 0.22 },
+    heavy:    { label: "FRAME HEAVY", w: 58, h: 30, speed: 255, fire: 0.15 }
+  };
+  function classForBuild(b) {
+    return b < 33 ? "light" : b < 67 ? "standard" : "heavy";
+  }
   var spawnTimer, spawnInterval, fireCooldown, lastTime;
   var keys = {};
 
@@ -791,6 +809,7 @@
   function sfxLaunch() { tone("sawtooth", 160, 640, 0.28, 0.08); }
   function sfxJet() { tone("sawtooth", 80, 340, 0.55, 0.12); }
   function sfxScan() { tone("sine", 320, 900, 0.5, 0.05); }
+  function sfxMorph() { tone("square", 140, 420, 0.3, 0.1); }
   function sfxCleared() {
     tone("sine", 660, 660, 0.1, 0.09);
     setTimeout(function () { tone("sine", 990, 990, 0.18, 0.09); }, 110);
@@ -830,6 +849,28 @@
     });
   }
 
+  var hudFrame = document.getElementById("hud-frame");
+  function applyChassis(cls, transformFx) {
+    chassisClass = cls;
+    var c = CHASSIS[cls];
+    player.w = c.w;
+    player.h = c.h;
+    player.speed = c.speed;
+    hudFrame.textContent = c.label;
+    if (transformFx) {
+      sfxMorph();
+      for (var i = 0; i < 16; i++) { // rebuild sparks
+        var a = Math.random() * Math.PI * 2;
+        var s = 30 + Math.random() * 90;
+        particles.push({
+          x: player.x, y: player.y,
+          vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+          life: 0.4 + Math.random() * 0.3, color: "#c7b8f5"
+        });
+      }
+    }
+  }
+
   function reset() {
     player = { x: W / 2, y: GY - 28, w: 46, h: 26, speed: 320 };
     bullets = [];
@@ -841,6 +882,8 @@
     subCooldown = 0;
     jets = [];
     jetCooldown = 0;
+    build = 45;
+    applyChassis("standard", false);
     score = 0;
     lives = 3;
     wave = 1;
@@ -1153,11 +1196,22 @@
     fireCooldown -= dt;
     if (muzzle > 0) muzzle -= dt;
     if (keys.Space && fireCooldown <= 0) {
-      bullets.push({ x: player.x, y: player.y - player.h / 2, vy: -520 });
-      fireCooldown = 0.22;
+      if (chassisClass === "heavy") { // twin cannons on the siege frame
+        bullets.push({ x: player.x - 9, y: player.y - player.h / 2, vy: -520 });
+        bullets.push({ x: player.x + 9, y: player.y - player.h / 2, vy: -520 });
+      } else {
+        bullets.push({ x: player.x, y: player.y - player.h / 2, vy: -520 });
+      }
+      fireCooldown = CHASSIS[chassisClass].fire;
       muzzle = 0.08;
       sfxShoot();
     }
+
+    // adaptive chassis: combat mass decays while idle; class shifts rebuild
+    // the frame with a spark burst
+    build = Math.max(0, build - dt * 1.1);
+    var cls = classForBuild(build);
+    if (cls !== chassisClass) applyChassis(cls, true);
 
     // bullets
     for (var i = bullets.length - 1; i >= 0; i--) {
@@ -1290,6 +1344,7 @@
           if (e.hp <= 0) {
             enemies.splice(j, 1);
             score += 10;
+            build = Math.min(100, build + 5); // kills feed the frame
             explode(e.x, e.y, "#9be564");
             sfxKill();
             updateHud();
@@ -1343,10 +1398,29 @@
     }
     ctx.fillRect(-player.w / 2, -player.h / 2, player.w, player.h);
     ctx.shadowBlur = 0;
+    if (chassisClass === "heavy") { // bolted side armor plates
+      ctx.fillStyle = "#31465f";
+      ctx.fillRect(-player.w / 2 - 5, -player.h / 2 + 4, 5, player.h - 8);
+      ctx.fillRect(player.w / 2, -player.h / 2 + 4, 5, player.h - 8);
+    }
     ctx.fillStyle = "#0b0f14";
     ctx.fillRect(-player.w / 2 + 6, -player.h / 2 + 6, player.w - 12, player.h - 12);
     ctx.fillStyle = "#5cc8ff";
-    ctx.fillRect(-3, -player.h / 2 - 10, 6, 10); // cannon
+    if (chassisClass === "heavy") { // twin cannons
+      ctx.fillRect(-12, -player.h / 2 - 10, 6, 10);
+      ctx.fillRect(6, -player.h / 2 - 10, 6, 10);
+    } else {
+      ctx.fillRect(-3, -player.h / 2 - 10, 6, 10); // cannon
+    }
+    if (chassisClass === "light") { // scout frame thruster fins
+      ctx.strokeStyle = "rgba(92,200,255,0.6)";
+      ctx.beginPath();
+      ctx.moveTo(-player.w / 2 - 6, player.h / 2);
+      ctx.lineTo(-player.w / 2 + 2, -player.h / 2 + 4);
+      ctx.moveTo(player.w / 2 + 6, player.h / 2);
+      ctx.lineTo(player.w / 2 - 2, -player.h / 2 + 4);
+      ctx.stroke();
+    }
     if (gfxEnhanced) { // pulsing power core
       ctx.fillStyle = "rgba(92,200,255," + (0.5 + 0.3 * Math.sin(nowT * 6)).toFixed(3) + ")";
       ctx.fillRect(-4, -4, 8, 8);
@@ -1761,6 +1835,14 @@
     initAudio();
     if (state === "playing") deployJets();
   });
+
+  // Tiny debug/tuning hook for the adaptive chassis (used by the smoke
+  // tests; also handy for balancing from the console).
+  window.__usraDebug = {
+    getBuild: function () { return build; },
+    setBuild: function (v) { build = Math.max(0, Math.min(100, v)); },
+    getChassis: function () { return chassisClass; }
+  };
 
   updateSndHud();
   updateMenuHiscore();
