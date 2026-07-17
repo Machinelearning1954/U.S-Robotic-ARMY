@@ -13,6 +13,7 @@ Open `index.html` in any modern browser — no build step or dependencies.
 | SPACE | Fire |
 | S | Call in a Navy SEAL fire team |
 | U | Surface a strike submarine for a missile salvo |
+| J | Scramble the NIGHTGLASS jet wing for a strafing run |
 | P / ESC | Pause / resume |
 | B | Open or close the intel briefing video |
 | G | Toggle enhanced graphics mode |
@@ -159,6 +160,19 @@ The submarine is a generic, fictional arcade unit: its silhouette, weapons,
 timings, and behavior are invented for this game and are not modeled on any
 real vessel — no real-world (let alone classified) characteristics are
 referenced.
+
+## NIGHTGLASS air wing
+
+Press **J** to scramble a flight of three chrome NIGHTGLASS jets — the
+aircraft from the Feed P clip, brought into gameplay. They sweep left-to-right
+across the sky at staggered altitudes and speeds (trailing jets render
+smaller, reading as further away), shredding every drone along their flight
+path for full score. Contrails stream behind them, afterburners flicker, and
+in enhanced graphics mode each jet occasionally throws the clip's signature
+sun glint — "a glint of light that shouldn't be there." HUD readout:
+`WING READY (J)` → `WING INBOUND` → `WING RTB <n>s` during the 30-second
+cooldown, and touch devices get a `JET` button. Like the submarine, the
+airframes are fictional arcade units, not modeled on any real aircraft.
 
 The briefing is available from the main menu, the pause menu, and the
 game-over screen, or by pressing **B** at any time (gameplay pauses while it

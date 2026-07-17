@@ -132,6 +132,7 @@
   .hud .lives { color: var(--warn); }
   .hud .seals { color: #7ea8ff; }
   .hud .subhud { color: #6ee7c8; }
+  .hud .wing { color: #d7e3ee; }
   /* Intel briefing modal — integrated YouTube video */
   #briefing {
     position: fixed;
@@ -245,6 +246,7 @@
   #touch .tbtn.fire { border-color: var(--accent-2); color: var(--accent-2); }
   #touch .tbtn.seal { width: auto; padding: 0 16px; border-radius: 32px; border-color: #7ea8ff; color: #7ea8ff; font-size: 0.8rem; letter-spacing: 0.1em; }
   #touch .tbtn.subq { width: auto; padding: 0 16px; border-radius: 32px; border-color: #6ee7c8; color: #6ee7c8; font-size: 0.8rem; letter-spacing: 0.1em; }
+  #touch .tbtn.wing { width: auto; padding: 0 16px; border-radius: 32px; border-color: #d7e3ee; color: #d7e3ee; font-size: 0.8rem; letter-spacing: 0.1em; }
   #touch .tbtn:active { background: #1a2836; transform: translateY(1px); }
   footer { color: var(--muted); font-size: 0.75rem; padding-bottom: 20px; text-align: center; }
 </style>
@@ -262,6 +264,7 @@
     <span id="hud-wave">WAVE 1</span>
     <span class="seals" id="hud-seals">SEALS READY (S)</span>
     <span class="subhud" id="hud-sub">SUB READY (U)</span>
+    <span class="wing" id="hud-wing">WING READY (J)</span>
     <span class="snd" id="hud-snd">♪ ON (M)</span>
     <span class="lives" id="hud-lives">ARMOR ❚❚❚</span>
   </div>
@@ -275,6 +278,7 @@
     <div class="pad">
       <div class="tbtn seal" id="t-seal" aria-label="Call SEAL team">SEAL</div>
       <div class="tbtn subq" id="t-sub" aria-label="Call submarine strike">SUB</div>
+      <div class="tbtn wing" id="t-wing" aria-label="Scramble jet wing">JET</div>
       <div class="tbtn fire" id="t-fire" aria-label="Fire">●</div>
     </div>
   </div>
@@ -296,7 +300,8 @@
     <p>Hostile drones are inbound. Command your autonomous ground unit:
        ← → or A / D to move, SPACE to fire, S to call in a Navy SEAL fire team
        for covering fire, U to surface a strike submarine offshore for a
-       missile salvo. Press B any time for the intel briefing,
+       missile salvo, J to scramble the NIGHTGLASS jet wing for a strafing
+       run. Press B any time for the intel briefing,
        G to toggle enhanced graphics (glow, reflections, starfield).</p>
     <p class="hiscore" id="menu-hiscore"></p>
     <button id="btn-start">Deploy Unit</button>
@@ -349,7 +354,7 @@
   </div>
 </div>
 
-<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · U sub strike · P pause · B briefing · G graphics FX · M mute · On touch devices, use the on-screen controls</footer>
+<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · U sub strike · J jet wing · P pause · B briefing · G graphics FX · M mute · On touch devices, use the on-screen controls</footer>
 
 <script>
 (function () {
@@ -534,6 +539,8 @@
   var SEAL_DURATION = 7, SEAL_COOLDOWN = 18;
   var sub, subCooldown;
   var SUB_COOLDOWN = 24, SUB_MISSILES = 6, SUB_TRANSIT = 1.1;
+  var jets, jetCooldown;
+  var JET_COOLDOWN = 30;
   var spawnTimer, spawnInterval, fireCooldown, lastTime;
   var keys = {};
 
@@ -592,6 +599,7 @@
   function sfxSeal() { tone("square", 440, 880, 0.16, 0.09); }
   function sfxSonar() { tone("sine", 1250, 950, 0.45, 0.08); }
   function sfxLaunch() { tone("sawtooth", 160, 640, 0.28, 0.08); }
+  function sfxJet() { tone("sawtooth", 80, 340, 0.55, 0.12); }
   function sfxOver() { tone("sawtooth", 300, 40, 0.6, 0.18); }
   function toggleMute() {
     muted = !muted;
@@ -636,6 +644,8 @@
     sealCooldown = 0;
     sub = null;
     subCooldown = 0;
+    jets = [];
+    jetCooldown = 0;
     score = 0;
     lives = 3;
     wave = 1;
@@ -840,6 +850,37 @@
     }
   }
 
+  // NIGHTGLASS air wing: a flight of three chrome jets — inspired by the
+  // Feed P clip — sweeps across the sky at staggered altitudes and shreds
+  // every drone along its path. Like the sub, a generic fictional arcade
+  // unit; the airframes are invented, not modeled on real aircraft.
+  function deployJets() {
+    if (state !== "playing" || jetCooldown > 0 || jets.length) return;
+    jetCooldown = JET_COOLDOWN;
+    sfxJet();
+    for (var i = 0; i < 3; i++) {
+      jets.push({
+        x: -70 - i * 150,
+        y: 100 + i * 85,
+        v: 660 + i * 40,
+        scale: 1 - i * 0.12, // trailing jets read as smaller / further away
+        trail: 0
+      });
+    }
+  }
+
+  var hudWing = document.getElementById("hud-wing");
+  var lastWingText = "";
+  function updateWingHud() {
+    var text = jets.length ? "WING INBOUND"
+      : jetCooldown > 0 ? "WING RTB " + Math.ceil(jetCooldown) + "s"
+      : "WING READY (J)";
+    if (text !== lastWingText) {
+      lastWingText = text;
+      hudWing.textContent = text;
+    }
+  }
+
   var hudSub = document.getElementById("hud-sub");
   var lastSubText = "";
   function updateSubHud() {
@@ -939,6 +980,35 @@
       }
     }
     updateSubHud();
+
+    // NIGHTGLASS wing strafing run
+    if (jetCooldown > 0) jetCooldown -= dt;
+    for (var w = jets.length - 1; w >= 0; w--) {
+      var jt = jets[w];
+      jt.x += jt.v * dt;
+      jt.trail -= dt;
+      if (jt.trail <= 0) { // contrail puffs
+        jt.trail = 0.04;
+        particles.push({
+          x: jt.x - 30 * jt.scale, y: jt.y + (Math.random() - 0.5) * 4,
+          vx: -30 - Math.random() * 30, vy: (Math.random() - 0.5) * 12,
+          life: 0.45 + Math.random() * 0.3, color: "#dfe9f2"
+        });
+      }
+      // shred every drone along the flight path
+      for (var q = enemies.length - 1; q >= 0; q--) {
+        var en = enemies[q];
+        if (Math.abs(en.x - jt.x) < 46 && Math.abs(en.y - jt.y) < 42) {
+          enemies.splice(q, 1);
+          score += 10;
+          explode(en.x, en.y, "#d7e3ee");
+          sfxKill();
+          updateHud();
+        }
+      }
+      if (jt.x - 80 > W) jets.splice(w, 1);
+    }
+    updateWingHud();
 
     // spawning / wave pacing
     spawnTimer += dt;
@@ -1114,6 +1184,52 @@
       ctx.moveTo(0, -10);
       ctx.lineTo(8, -18); // rifle
       ctx.stroke();
+      ctx.restore();
+    });
+
+    // NIGHTGLASS jets (chrome fuselage, delta wings, afterburner, sun glint)
+    jets.forEach(function (jt) {
+      ctx.save();
+      ctx.translate(jt.x, jt.y);
+      ctx.scale(jt.scale, jt.scale);
+      if (gfxEnhanced) { ctx.shadowColor = "#cfe0ff"; ctx.shadowBlur = 14; }
+      ctx.fillStyle = "#ffb36b"; // afterburner flame
+      ctx.fillRect(-36, -2, 7 + Math.random() * 6, 4);
+      var chrome = ctx.createLinearGradient(0, -10, 0, 10);
+      chrome.addColorStop(0, "#f2f7fc");
+      chrome.addColorStop(0.5, "#9fb2c4");
+      chrome.addColorStop(1, "#e3ecf4");
+      ctx.fillStyle = chrome;
+      ctx.beginPath(); // fuselage
+      ctx.moveTo(30, 0);
+      ctx.lineTo(-18, -6);
+      ctx.lineTo(-28, -2);
+      ctx.lineTo(-28, 2);
+      ctx.lineTo(-18, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath(); // delta wings
+      ctx.moveTo(6, -2);
+      ctx.lineTo(-20, -16);
+      ctx.lineTo(-12, -2);
+      ctx.moveTo(6, 2);
+      ctx.lineTo(-20, 16);
+      ctx.lineTo(-12, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#22303c"; // canopy
+      ctx.fillRect(8, -3, 10, 3);
+      if (gfxEnhanced) { // the glint of light that shouldn't be there
+        var g = Math.sin(nowT * 4 + jt.y);
+        if (g > 0.82) {
+          ctx.globalAlpha *= (g - 0.82) / 0.18;
+          ctx.strokeStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.moveTo(30 - 8, 0); ctx.lineTo(30 + 8, 0);
+          ctx.moveTo(30, -8); ctx.lineTo(30, 8);
+          ctx.stroke();
+        }
+      }
       ctx.restore();
     });
 
@@ -1312,6 +1428,10 @@
       deploySub();
       return;
     }
+    if (ev.code === "KeyJ") {
+      deployJets();
+      return;
+    }
     if (ev.code === "KeyB") {
       if (briefing.classList.contains("hidden")) openBriefing();
       else closeBriefing();
@@ -1393,6 +1513,15 @@
   document.getElementById("t-sub").addEventListener("click", function () {
     initAudio();
     if (state === "playing") deploySub();
+  });
+  document.getElementById("t-wing").addEventListener("touchstart", function (ev) {
+    ev.preventDefault();
+    initAudio();
+    if (state === "playing") deployJets();
+  }, { passive: false });
+  document.getElementById("t-wing").addEventListener("click", function () {
+    initAudio();
+    if (state === "playing") deployJets();
   });
 
   updateSndHud();
