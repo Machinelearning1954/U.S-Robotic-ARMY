@@ -64,3 +64,15 @@ stands on schedule — the transit network is the NPC economy's circulatory syst
 
 > All fictional. Operators, schedules, and vehicles are invented; the texture is
 > the island's real transit culture rendered with affection.
+
+
+## Green Cross Air Ambulance — VTOL medevac (live in the prototype, v0.76)
+
+A flying ambulance parked at the **Green Cross** medical bay: an original **VTOL
+medevac** in the island's black-green-and-gold flag livery (the gold-saltire motif),
+a green medical cross on the hull, twin tilt-rotor nacelles that idle on the pad.
+Walk up on foot for a one-time **+25** ("fueled and flight-ready, medevac on
+standby"). Purely **humanitarian and non-lethal** — no weapons, no armament; it's
+a rescue aircraft, consistent with the game's non-lethal floor. Original craft, no
+real aircraft or operator depicted; the flag motif is the same island colorway the
+Don wears.
