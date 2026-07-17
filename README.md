@@ -123,6 +123,9 @@ recon feeds:
   loop with controls to unmute; ships as `media/nightglass-1.webm` (VP9/Opus)
   with `media/nightglass-1.mp4` (H.264/AAC original) as fallback — plays
   offline like Feed N.
+- **Feed Q** — Instagram:
+  [reel `DaSZPXgsx3t`](https://www.instagram.com/reel/DaSZPXgsx3t/), a seventh
+  recon reel via Instagram's official `/embed/` player in portrait format.
 
 ## Generated brand art (Higgsfield)
 
