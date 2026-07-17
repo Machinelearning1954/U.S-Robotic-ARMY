@@ -113,6 +113,9 @@ recon feeds:
   `media/social-recon-feed.webm` (VP9/Opus, ~5 MB) with
   `media/social-recon-feed.mp4` (H.264/AAC original) as fallback for browsers
   without VP9 support.
+- **Feed O** — Instagram:
+  [post `Da1S5-wk8Or`](https://www.instagram.com/p/Da1S5-wk8Or/), a recon post
+  via Instagram's official `/embed/` player in portrait format.
 
 ## Generated brand art (Higgsfield)
 
