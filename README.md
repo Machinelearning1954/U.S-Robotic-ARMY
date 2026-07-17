@@ -126,6 +126,9 @@ recon feeds:
 - **Feed Q** — Instagram:
   [reel `DaSZPXgsx3t`](https://www.instagram.com/reel/DaSZPXgsx3t/), a seventh
   recon reel via Instagram's official `/embed/` player in portrait format.
+- **Feed R** — Instagram:
+  [reel `DZvNILJNCip`](https://www.instagram.com/reel/DZvNILJNCip/), an eighth
+  recon reel via Instagram's official `/embed/` player in portrait format.
 
 ## Generated brand art (Higgsfield)
 
