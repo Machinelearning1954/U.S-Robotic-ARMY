@@ -116,6 +116,12 @@ recon feeds:
 - **Feed O** — Instagram:
   [post `Da1S5-wk8Or`](https://www.instagram.com/p/Da1S5-wk8Or/), a recon post
   via Instagram's official `/embed/` player in portrait format.
+- **Feed P** — USF NIGHTGLASS-1: a bundled 16-second cinematic clip of a
+  fictional chrome jet at high altitude ("Sunrise. High altitude. A glint of
+  light that shouldn't be there."). Native `<video>`, portrait, muted autoplay
+  loop with controls to unmute; ships as `media/nightglass-1.webm` (VP9/Opus)
+  with `media/nightglass-1.mp4` (H.264/AAC original) as fallback — plays
+  offline like Feed N.
 
 ## Generated brand art (Higgsfield)
 
