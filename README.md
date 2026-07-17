@@ -167,6 +167,21 @@ timings, and behavior are invented for this game and are not modeled on any
 real vessel — no real-world (let alone classified) characteristics are
 referenced.
 
+## Operator credential verification
+
+Clicking **Deploy Unit** now runs a short boarding sequence before the mission
+starts: an operator credential slides under a glowing scan frame, a scanline
+sweeps it, a progress bar fills, and a green check clears the operator —
+"Verification ID — operator cleared" — with a two-tone confirmation chime.
+Click anywhere to skip; restarts after game over deploy instantly.
+
+The sequence was inspired by a shared ID-verification concept image, but
+everything here is original: the card is an invented in-universe simulation
+prop for the robot operator (SVG robot portrait, sci-fi issue data like
+`ISSUED: 2260 · SIM SECTOR 7`), it is labeled "Simulation credential —
+fictional, not an ID", and it deliberately avoids replicating any real
+identity document or third-party logo/branding.
+
 ## NIGHTGLASS air wing
 
 Press **J** to scramble a flight of three chrome NIGHTGLASS jets — the
