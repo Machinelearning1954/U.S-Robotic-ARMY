@@ -134,6 +134,7 @@
   .hud .subhud { color: #6ee7c8; }
   .hud .wing { color: #d7e3ee; }
   .hud .frame { color: #c7b8f5; }
+  .hud .radio { color: #ffd27d; }
   /* Intel briefing modal — integrated YouTube video */
   #briefing {
     position: fixed;
@@ -378,6 +379,7 @@
   #touch .tbtn.seal { width: auto; padding: 0 16px; border-radius: 32px; border-color: #7ea8ff; color: #7ea8ff; font-size: 0.8rem; letter-spacing: 0.1em; }
   #touch .tbtn.subq { width: auto; padding: 0 16px; border-radius: 32px; border-color: #6ee7c8; color: #6ee7c8; font-size: 0.8rem; letter-spacing: 0.1em; }
   #touch .tbtn.wing { width: auto; padding: 0 16px; border-radius: 32px; border-color: #d7e3ee; color: #d7e3ee; font-size: 0.8rem; letter-spacing: 0.1em; }
+  #touch .tbtn.radio { width: auto; padding: 0 16px; border-radius: 32px; border-color: #ffd27d; color: #ffd27d; font-size: 0.8rem; letter-spacing: 0.1em; }
   #touch .tbtn:active { background: #1a2836; transform: translateY(1px); }
   footer { color: var(--muted); font-size: 0.75rem; padding-bottom: 20px; text-align: center; }
 </style>
@@ -397,6 +399,7 @@
     <span class="subhud" id="hud-sub">SUB READY (U)</span>
     <span class="wing" id="hud-wing">WING READY (J)</span>
     <span class="frame" id="hud-frame">FRAME STD</span>
+    <span class="radio" id="hud-radio">RADIO OFF (R)</span>
     <span class="snd" id="hud-snd">♪ ON (M)</span>
     <span class="lives" id="hud-lives">ARMOR ❚❚❚</span>
   </div>
@@ -411,6 +414,7 @@
       <div class="tbtn seal" id="t-seal" aria-label="Call SEAL team">SEAL</div>
       <div class="tbtn subq" id="t-sub" aria-label="Call submarine strike">SUB</div>
       <div class="tbtn wing" id="t-wing" aria-label="Scramble jet wing">JET</div>
+      <div class="tbtn radio" id="t-radio" aria-label="Cycle radio station">FM</div>
       <div class="tbtn fire" id="t-fire" aria-label="Fire">●</div>
     </div>
   </div>
@@ -532,7 +536,7 @@
   </div>
 </div>
 
-<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · U sub strike · J jet wing · P pause · B briefing · G graphics FX · M mute · On touch devices, use the on-screen controls</footer>
+<footer>Keyboard: ← → / A D move · SPACE fire · S SEAL team · U sub strike · J jet wing · R radio · P pause · B briefing · G graphics FX · M mute · On touch devices, use the on-screen controls</footer>
 
 <script>
 (function () {
@@ -783,6 +787,8 @@
       var AC = window.AudioContext || window.webkitAudioContext;
       if (AC) audioCtx = new AC();
     } catch (e) { audioCtx = null; }
+    // resume a saved radio station on the first unlocking gesture
+    if (audioCtx && !muted && !RADIO_STATIONS[radioIdx].off) startRadio();
   }
   // A short tone with an exponential decay envelope. type/freq/duration shape
   // the sound; freqEnd bends the pitch for zaps and explosions.
@@ -820,6 +826,139 @@
     if (!muted) initAudio();
     try { localStorage.setItem("usra_muted", muted ? "1" : "0"); } catch (e) {}
     updateSndHud();
+    if (muted) stopRadio();
+    else if (RADIO_STATIONS[radioIdx] && !RADIO_STATIONS[radioIdx].off) startRadio();
+  }
+
+  // --- Frontline Radio -------------------------------------------------------
+  // An all-in-one in-game radio, inspired by an "every station in one app"
+  // ad concept — rebuilt as something fully original: every station below is
+  // an in-house composition synthesized live with the Web Audio API (same as
+  // the SFX). No real-world stations, streams, or branding; press R to surf.
+  var RADIO_STATIONS = [
+    { name: "RADIO OFF", off: true },
+    { name: "BAY ONE", desc: "island groove", step: 0.34 },
+    { name: "PULSE FM", desc: "night drive", step: 0.24 },
+    { name: "OPS BAND", desc: "CW + static", step: 0.1 }
+  ];
+  var radioIdx = 0;
+  try { radioIdx = parseInt(localStorage.getItem("usra_radio"), 10) || 0; } catch (e) {}
+  if (radioIdx < 0 || radioIdx >= RADIO_STATIONS.length) radioIdx = 0;
+  var radioTimer = null, radioStep = 0, radioNext = 0;
+  var staticSrc = null, staticGain = null, noiseBuf = null;
+
+  // Like tone(), but scheduled at an absolute AudioContext time.
+  function noteAt(type, freq, freqEnd, t, dur, gain) {
+    if (muted || !audioCtx) return;
+    var osc = audioCtx.createOscillator();
+    var g = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    if (freqEnd && freqEnd !== freq) osc.frequency.exponentialRampToValueAtTime(freqEnd, t + dur);
+    g.gain.setValueAtTime(gain, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g);
+    g.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + dur);
+  }
+
+  // Chord roots (A minor / F / C / G), one bar each, shared by both music
+  // stations; frequencies in Hz.
+  var RADIO_ROOTS = [110, 87.31, 130.81, 98];
+  function radioChord(root) { return [root * 2, root * 2.5, root * 3]; } // minor-ish stack
+
+  // OPS BAND beacon: "USRA" in continuous-wave code, precomputed as on/off
+  // units (dot = 1 unit, dash = 3, gaps between symbols/letters/words).
+  var MORSE_SEQ = (function () {
+    var code = { U: "..-", S: "...", R: ".-.", A: ".-" };
+    var seq = [];
+    "USRA".split("").forEach(function (ch) {
+      code[ch].split("").forEach(function (sym) {
+        for (var i = 0; i < (sym === "." ? 1 : 3); i++) seq.push(true);
+        seq.push(false);
+      });
+      seq.push(false, false); // letter gap
+    });
+    for (var i = 0; i < 6; i++) seq.push(false); // word gap before repeat
+    return seq;
+  })();
+
+  function radioScheduleStep(idx, step, t) {
+    var s8 = step % 8;
+    var root = RADIO_ROOTS[Math.floor(step / 8) % RADIO_ROOTS.length];
+    if (idx === 1) { // BAY ONE — laid-back offbeat skank + walking bass
+      if (s8 === 0) noteAt("triangle", root, 0, t, 0.32, 0.14);
+      if (s8 === 4) noteAt("triangle", root * 1.5, 0, t, 0.3, 0.11);
+      if (s8 === 6) noteAt("triangle", root * 1.25, 0, t, 0.22, 0.08);
+      if (s8 % 2 === 1) { // chord stab on every offbeat
+        radioChord(root).forEach(function (f) { noteAt("square", f, 0, t, 0.09, 0.028); });
+      }
+    } else if (idx === 2) { // PULSE FM — synth arpeggio over a four-on-the-floor kick
+      var mult = [2, 3, 4, 3, 2, 3, 4, 6][s8];
+      noteAt("sawtooth", root * mult, 0, t, 0.2, 0.045);
+      if (s8 % 2 === 0) noteAt("sine", 120, 45, t, 0.14, 0.2);
+    } else if (idx === 3) { // OPS BAND — CW beacon over the static bed
+      if (MORSE_SEQ[step % MORSE_SEQ.length]) noteAt("sine", 700, 0, t, 0.085, 0.05);
+    }
+  }
+
+  function radioTick() {
+    if (!audioCtx) return;
+    while (radioNext < audioCtx.currentTime + 0.25) {
+      radioScheduleStep(radioIdx, radioStep, radioNext);
+      radioNext += RADIO_STATIONS[radioIdx].step;
+      radioStep += 1;
+    }
+  }
+
+  function stopRadio() {
+    if (radioTimer) { clearInterval(radioTimer); radioTimer = null; }
+    if (staticSrc) {
+      try { staticSrc.stop(); } catch (e) {}
+      staticSrc = null;
+      staticGain = null;
+    }
+  }
+
+  function startRadio() {
+    stopRadio();
+    var st = RADIO_STATIONS[radioIdx];
+    if (st.off || muted) return;
+    initAudio();
+    if (!audioCtx) return;
+    if (radioIdx === 3) { // static bed under the beacon
+      if (!noiseBuf) {
+        noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
+        var data = noiseBuf.getChannelData(0);
+        for (var i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      }
+      staticSrc = audioCtx.createBufferSource();
+      staticSrc.buffer = noiseBuf;
+      staticSrc.loop = true;
+      staticGain = audioCtx.createGain();
+      staticGain.gain.value = 0.012;
+      staticSrc.connect(staticGain);
+      staticGain.connect(audioCtx.destination);
+      staticSrc.start();
+    }
+    radioStep = 0;
+    radioNext = audioCtx.currentTime + 0.05;
+    radioTimer = setInterval(radioTick, 60);
+  }
+
+  var hudRadio = document.getElementById("hud-radio");
+  function updateRadioHud() {
+    var st = RADIO_STATIONS[radioIdx];
+    hudRadio.textContent = st.off ? "RADIO OFF (R)" : "FM " + st.name + " (R)";
+  }
+
+  function cycleRadio() {
+    radioIdx = (radioIdx + 1) % RADIO_STATIONS.length;
+    try { localStorage.setItem("usra_radio", String(radioIdx)); } catch (e) {}
+    updateRadioHud();
+    startRadio();
+    if (RADIO_STATIONS[radioIdx].off) stopRadio();
   }
 
   var GY = H - 70; // the line we defend; below it is reflective "wet ground"
@@ -1742,6 +1881,10 @@
       deployJets();
       return;
     }
+    if (ev.code === "KeyR") {
+      cycleRadio();
+      return;
+    }
     if (ev.code === "KeyB") {
       if (briefing.classList.contains("hidden")) openBriefing();
       else closeBriefing();
@@ -1835,6 +1978,13 @@
     initAudio();
     if (state === "playing") deployJets();
   });
+  document.getElementById("t-radio").addEventListener("touchstart", function (ev) {
+    ev.preventDefault();
+    cycleRadio();
+  }, { passive: false });
+  document.getElementById("t-radio").addEventListener("click", function () {
+    cycleRadio();
+  });
 
   // Tiny debug/tuning hook for the adaptive chassis (used by the smoke
   // tests; also handy for balancing from the console).
@@ -1845,6 +1995,7 @@
   };
 
   updateSndHud();
+  updateRadioHud();
   updateMenuHiscore();
   reset();
   show("menu");

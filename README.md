@@ -14,6 +14,7 @@ Open `index.html` in any modern browser — no build step or dependencies.
 | S | Call in a Navy SEAL fire team |
 | U | Surface a strike submarine for a missile salvo |
 | J | Scramble the NIGHTGLASS jet wing for a strafing run |
+| R | Cycle Frontline Radio stations |
 | P / ESC | Pause / resume |
 | B | Open or close the intel briefing video |
 | G | Toggle enhanced graphics mode |
@@ -166,6 +167,26 @@ The submarine is a generic, fictional arcade unit: its silhouette, weapons,
 timings, and behavior are invented for this game and are not modeled on any
 real vessel — no real-world (let alone classified) characteristics are
 referenced.
+
+## Frontline Radio
+
+An in-game radio with every station in one place — an original take on an
+"all the radios in one app" ad concept. Press **R** (or the `FM` touch
+button) to surf: `RADIO OFF → BAY ONE → PULSE FM → OPS BAND → OFF`. The HUD
+shows the current station and the choice persists across sessions.
+
+- **BAY ONE — island groove**: laid-back offbeat chord skanks over a walking
+  triangle-wave bass.
+- **PULSE FM — night drive**: a sawtooth synth arpeggio over a four-on-the-
+  floor kick.
+- **OPS BAND — CW + static**: a morse beacon endlessly keying `USRA` through
+  a bed of radio static.
+
+Every station is an original in-house composition synthesized live with the
+Web Audio API (like the game's SFX) — no audio files, no real-world radio
+stations, streams, call signs, or branding. The radio keeps playing across
+menus and missions, respects the mute toggle (**M**), and resumes your saved
+station on the first interaction after a reload.
 
 ## Adaptive chassis (body transformation)
 
