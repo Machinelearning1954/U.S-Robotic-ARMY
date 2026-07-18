@@ -206,3 +206,17 @@ the lights run the seabed. *"The reef never minds good neighbours."*
   real places stay fictionalized in this world, and the request's "Bali" resolves
   to the island's own fictional Bali gardens, per the same rule that renamed
   every other real place. Civil infrastructure wonder only; nothing else kept.
+
+
+## The Vellum — sculptural harbourfront galleries (live, v0.93)
+
+On the strip between Gilded Bay and the Bali gardens: three pale sculptural
+**monoliths** on a bollard-lit promenade, each pierced by one huge **glowing
+aperture** — warm amber light breathing inside the cut stone, small dark figures
+silhouetted against it, brighter as the dusk comes down. The island's gallery
+quarter: art in the openings, sea at your back. Linger on the promenade for a
+one-time **+20**: *"three stones with light inside."*
+
+- **Origin:** an architecture concept render (sculptural waterfront pavilions
+  with cut-out apertures) — rebuilt as original invented buildings; no real
+  city, landmark, or architect's project depicted.
