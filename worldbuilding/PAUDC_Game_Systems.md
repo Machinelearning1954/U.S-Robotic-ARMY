@@ -776,3 +776,18 @@ happening: *"all quiet, bay breathing easy."*
   a field operator on a military laptop in a war camp. The missiles, targeting,
   and war frame are all **out**; ammo crates became plain island supply. Only the
   field-desk image was kept, and its scope was pointed at the weather.
+
+
+## The Island Flypast — festival formation (live, v0.89)
+
+Every so often three little **island sportplanes** — one black, one green, one
+gold — sweep the bay in a V, ribbon smoke breathing behind each in the flag
+colorway, wings waggling to the crowd below. Stand under the crossing for a
+one-time **+20**: *"black, green and gold writing across the sky — pride, not
+power."* Crossings recur on a loose festival timer.
+
+- **Boundary:** the source reel was a **real political figure** posed with a
+  **real strategic bomber** and armed ranks — a "show of strength." The person,
+  the bomber, the weapons, and the war-display are all **out** (no real people,
+  no real aircraft, no war-hype). Only the awe of aircraft overhead was kept,
+  rebuilt as a civil festival flypast in the island's own colors.
