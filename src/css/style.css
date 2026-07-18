@@ -41,6 +41,24 @@ html, body {
     radial-gradient(900px 600px at 15% 110%, rgba(255, 59, 127, 0.12), transparent 60%),
     linear-gradient(160deg, #060912, #04060c 70%);
 }
+.title-art {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  filter: saturate(1.08) brightness(0.9);
+}
+.title-art.loaded { opacity: 0.42; }
+/* Keep the copy readable over the art. */
+.title-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(5,7,13,0.25), rgba(5,7,13,0.85) 85%);
+}
+
 .title-glow {
   position: absolute;
   inset: 0;

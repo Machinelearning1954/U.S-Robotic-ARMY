@@ -8,6 +8,24 @@ const tryUnlock = () => audio.unlock();
 window.addEventListener("pointerdown", tryUnlock);
 window.addEventListener("keydown", tryUnlock);
 
+// Title key art: prefer a local copy in src/assets/, fall back to the
+// hosted original, and if both fail the CSS-only title stands on its own.
+const KEYART_SOURCES = [
+  "src/assets/keyart.png",
+  "https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260718_185334_4f64cefc-3ecc-4ae9-bf53-3f46a5873b2c.png",
+];
+(function loadKeyArt(i) {
+  if (i >= KEYART_SOURCES.length) return;
+  const img = new Image();
+  img.onload = () => {
+    const el = document.getElementById("titleArt");
+    el.style.backgroundImage = `url("${KEYART_SOURCES[i]}")`;
+    el.classList.add("loaded");
+  };
+  img.onerror = () => loadKeyArt(i + 1);
+  img.src = KEYART_SOURCES[i];
+})(0);
+
 const screens = {
   title: document.getElementById("title"),
   how: document.getElementById("how"),
