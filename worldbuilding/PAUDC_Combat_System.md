@@ -114,3 +114,20 @@ and BII training sims at the Crucible (combat tutorial diegetically).
 > All fictional; violence is gameplay with consequences, never glorified — the
 > package's tone rule (cinematic, playful, power fantasy with a conscience)
 > governs every line above.
+
+
+## The Dazzler Range — non-lethal target practice (live in the prototype, v0.78)
+
+The "shooting range" beat, kept firmly inside the non-lethal floor: a covered
+firing line downrange of **five pop-up target boards** (bullseyes, not people).
+Stand at the line on foot and press **G** to dazzle the nearest standing target;
+knock down all five to clear the round and score (**+6 clout per target hit**, a
+"best" is tracked; a perfect 5/5 is called out). Targets reset up for the next run.
+
+- **No guns, no enemies, no kills** — you're dazzling *boards* with the Field Kit's
+  existing less-lethal Dazzler, the same tool that stuns the Courtesy Interceptor.
+  It's reflex-scoring target practice, the arcade-range fun without the violence.
+- **Origin:** built from an AI-game-dev post whose demo clip was a first-person
+  *shooter*; PAUDC does not do firearms, so only the "target arena" idea was kept
+  and rebuilt non-lethal. No real weapon, and the 3D/physics/interaction
+  "capabilities" the post advertised are things the prototype already ships.
