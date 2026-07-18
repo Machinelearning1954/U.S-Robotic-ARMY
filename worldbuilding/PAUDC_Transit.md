@@ -110,3 +110,21 @@ your hold while a repair meter fills over a few seconds. Seal it and you bank cl
   aircraft, operator, weapon, or procedure is depicted; it's pure island spectacle.
 - It shares the Island Hop with the **Harbor Drop** (press **P** to bail out under a
   canopy instead) — two very different ways to leave, or work on, the same plane.
+
+
+## The Sea Puss — Reef School research submersible (live in the prototype, v0.84)
+
+The Reef School's own **unarmed research submersible**, moored at a green buoy in
+the southern bay: board it on foot with **E** like the ferry, and it runs a
+**periscope-depth dive tour** over the bay's wreck field — hull awash, conning
+tower and wooden observation deck above the chop, glowing viewports, a gentle
+porpoise bob. As it passes over each sunken site the **sonar calls the wreck
+shadow below** ("logged for the dive board" — the same wrecks you can free-dive).
+First ride pays **+25**; step off with **E** at any station ("mind the swim").
+
+- **Science boat, not a warship.** No weapons, no torpedoes, no combat systems —
+  a research vessel in Reef School green, consistent with the non-lethal floor.
+- **Boundary:** the source reel advertised "the world's deadliest submarine" with
+  military spec callouts. The deadly half is **not** depicted — no real submarine,
+  class, weapons system, or specification. Only the wonder of *riding a submarine*
+  was kept, rebuilt as the island's own little science sub.
