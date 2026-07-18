@@ -55,7 +55,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>L</b> drone · <b>O</b> dominoes/shift · <b>`</b> cheats · <b>Z</b> max-gfx · <b>I</b> cam-drone · <b>X</b> sky-rig · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.93</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.94</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -6049,30 +6049,34 @@ const tunnelCars=[];
 {
   const dx=TUNNELB.X-TUNNELA.X,dz=TUNNELB.Z-TUNNELA.Z,len=Math.hypot(dx,dz),yaw=Math.atan2(-dz,dx);
   const mx2=(TUNNELA.X+TUNNELB.X)/2,mz2=(TUNNELA.Z+TUNNELB.Z)/2;
-  // the glass tube
-  const tube=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,len,12,1,true).rotateZ(Math.PI/2),
-    new THREE.MeshPhongMaterial({color:0x9fd8e8,transparent:true,opacity:0.2,shininess:130,side:THREE.DoubleSide,depthWrite:false}));
-  tube.position.set(mx2,-3,mz2);tube.rotation.y=yaw;scene.add(tube);
-  // ring frames down its length
-  for(let i=0;i<=10;i++){
-    const f=i/10;
-    const ring=new THREE.Mesh(new THREE.CylinderGeometry(2.35,2.35,0.35,12,1,true).rotateZ(Math.PI/2),
-      new THREE.MeshLambertMaterial({color:0x2a3038,side:THREE.DoubleSide}));
-    ring.position.set(TUNNELA.X+dx*f,-3,TUNNELA.Z+dz*f);ring.rotation.y=yaw;scene.add(ring);
+  const pnx=-dz/len,pnz=dx/len; // perpendicular, for the twin bores
+  // twin glass bores, like the render: one line each way
+  for(const off of[-3.2,3.2]){
+    const tube=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,len,12,1,true).rotateZ(Math.PI/2),
+      new THREE.MeshPhongMaterial({color:0x9fd8e8,transparent:true,opacity:0.2,shininess:130,side:THREE.DoubleSide,depthWrite:false}));
+    tube.position.set(mx2+pnx*off,-3,mz2+pnz*off);tube.rotation.y=yaw;scene.add(tube);
+    for(let i=0;i<=10;i++){
+      const f=i/10;
+      const ring=new THREE.Mesh(new THREE.CylinderGeometry(2.35,2.35,0.35,12,1,true).rotateZ(Math.PI/2),
+        new THREE.MeshLambertMaterial({color:0x2a3038,side:THREE.DoubleSide}));
+      ring.position.set(TUNNELA.X+dx*f+pnx*off,-3,TUNNELA.Z+dz*f+pnz*off);ring.rotation.y=yaw;scene.add(ring);
+    }
   }
-  // portal towers where the line dives
+  // twin portal towers where each bore dives
   for(const P0 of[TUNNELA,TUNNELB]){
-    const tower=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.8,5,10),new THREE.MeshLambertMaterial({color:0xd8d2c4}));
-    tower.position.set(P0.X,1.2,P0.Z);tower.castShadow=true;scene.add(tower);
-    const cap=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,0.4,10),new THREE.MeshBasicMaterial({color:0x37d867}));
-    cap.position.set(P0.X,3.9,P0.Z);scene.add(cap);
+    for(const off of[-3.2,3.2]){
+      const tower=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.8,5,10),new THREE.MeshLambertMaterial({color:0xd8d2c4}));
+      tower.position.set(P0.X+pnx*off,1.2,P0.Z+pnz*off);tower.castShadow=true;scene.add(tower);
+      const cap=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,0.4,10),new THREE.MeshBasicMaterial({color:off>0?0x37d867:0xffd23f}));
+      cap.position.set(P0.X+pnx*off,3.9,P0.Z+pnz*off);scene.add(cap);
+    }
   }
   // the shuttles: glowing traffic inside the tube, both directions
   for(let i=0;i<8;i++){
     const car=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.5,0.7),
       new THREE.MeshBasicMaterial({color:[0xffd23f,0x3af5d8,0xff7f27,0xd4527a][i%4]}));
     scene.add(car);
-    tunnelCars.push({m:car,f:Math.random(),dir:i%2?1:-1,lane:i%2?0.8:-0.8,spd:26+Math.random()*10});
+    tunnelCars.push({m:car,f:Math.random(),dir:i%2?1:-1,lane:(i%2?1:-1)*3.2+(i<4?0.6:-0.6),spd:26+Math.random()*10}); // one direction per bore
   }
   // the viewing deck on the gardens' shore
   const gy=Math.max(height(TDECK.X,TDECK.Z),0.2);

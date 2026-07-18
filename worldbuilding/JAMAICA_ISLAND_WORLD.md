@@ -193,9 +193,10 @@ applied to a second real-world inspiration.
 ## The Coral Tunnel — undersea glass line off the Bali gardens (live, v0.91)
 
 From the shore of the island's **Bali garden estate** (the game's own invented
-garden district — no real Bali is depicted), a **glass undersea line** dives at a
-pale portal tower and runs four hundred metres across the bay floor to a twin
-tower on the far shallows: a transparent tube ringed in dark frames, resting
+garden district — no real Bali is depicted), a **twin-bore glass undersea line** dives at paired
+portal towers (gold cap one way, green the other) and runs four hundred metres
+across the bay floor: two transparent tubes ringed in dark frames, one direction
+of travel per bore (v0.94 matched the source render's twin tubes), resting
 among the coral, with **eight glowing shuttles** streaming through it in both
 directions like fireflies in a bottle. A wooden **viewing deck** with a brass
 scope overlooks the dive point — linger there for a one-time **+20** and watch
