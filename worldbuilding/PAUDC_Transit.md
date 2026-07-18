@@ -87,3 +87,26 @@ foot with **E** like any ride; mid-tier road stats, no water hull (it's a van).
 **Weaponless and humanitarian** — a rescue vehicle, consistent with the game's
 non-lethal floor. Original craft; no real ambulance, operator, or livery depicted
 beyond the island's own colorway.
+
+
+## Sky Rigger — seal a hull panel mid-flight (live in the prototype, v0.81)
+
+A daredevil stunt bolted onto the **Plantin Airways Island Hop** (the fictional
+flag-carrier, transit doc above). Board the Hop at the airfield, and once it's
+airborne press **X** to climb out onto the fuselage and **seal a loose hull panel
+against the slipstream** — the Don's robotics-vet party trick (`PAUDC_Character_Bible.md`
+§2.0). The wind constantly tries to peel your grip away; **tap X** to brace and keep
+your hold while a repair meter fills over a few seconds. Seal it and you bank clout
+(**+35 first time — SKY RIGGER unlocked**, +20 after, plus a Chromelab Grade bonus).
+
+- **Emphatically non-lethal — there is no fall damage.** If your grip runs out you're
+  simply **hauled back into the cabin, no harm done**, and can try the brace again;
+  the flight continues either way. It sits inside the same non-lethal floor as the
+  Harbor Drop (no death states, ever).
+- **Origin:** built from an AI-generated reel captioned *"is he really fixing a jet
+  mid-flight?"* The clip depicted a **real military aircraft**, which the game's rules
+  don't allow (no real aircraft, no weapons) — so only the *idea* was kept, the
+  wing-walk repair stunt, and rebuilt on PAUDC's **own fictional airliner**. No real
+  aircraft, operator, weapon, or procedure is depicted; it's pure island spectacle.
+- It shares the Island Hop with the **Harbor Drop** (press **P** to bail out under a
+  canopy instead) — two very different ways to leave, or work on, the same plane.
