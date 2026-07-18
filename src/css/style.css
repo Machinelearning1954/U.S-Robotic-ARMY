@@ -260,6 +260,25 @@ html, body {
 }
 .prompt.show { opacity: 1; }
 
+.radio {
+  position: absolute;
+  top: 96px;
+  left: 26px;
+  max-width: 360px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  line-height: 1.7;
+  color: #bfe9ff;
+  background: rgba(8, 14, 26, 0.78);
+  border-left: 2px solid var(--cyan);
+  padding: 9px 14px;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.radio.show { opacity: 1; }
+
 /* ---------- Overlay ---------- */
 .overlay {
   position: absolute;

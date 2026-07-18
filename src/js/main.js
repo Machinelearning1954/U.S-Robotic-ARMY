@@ -1,6 +1,12 @@
 // Boot + screen navigation for REZONANCE.
 import { Game } from "./game.js";
 import { Cutscene } from "./cutscene.js";
+import { audio } from "./audio.js";
+
+// Browsers only allow audio to start inside a user gesture.
+const tryUnlock = () => audio.unlock();
+window.addEventListener("pointerdown", tryUnlock);
+window.addEventListener("keydown", tryUnlock);
 
 const screens = {
   title: document.getElementById("title"),
@@ -22,6 +28,7 @@ const hud = {
   exposureFill: document.getElementById("exposureFill"),
   staminaFill: document.getElementById("staminaFill"),
   prompt: document.getElementById("prompt"),
+  radio: document.getElementById("radio"),
 };
 
 const overlay = document.getElementById("overlay");

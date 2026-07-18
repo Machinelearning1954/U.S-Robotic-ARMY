@@ -74,3 +74,23 @@ neon signage, and roof clutter (AC units, blinking antennas). On top of that:
   resonance "tingle" that rims the screen as you near an emitter
 - an adaptive quality governor that sheds grain → bloom → lighting refresh
   rate when the frame budget is tight, so it stays smooth on weak hardware
+
+Systemic layer (all fictional, all procedural):
+
+- **Weather cycle** — drizzle → rain → storm, with wind gusts that slant the
+  rain, lightning, and storm interference that makes scanner readings jump
+- **Compressed time-of-day** — each district runs dusk → deep night → pre-dawn
+  as its timer drains, shifting ambient light and sky tint
+- **Escalating detection** — sweepers go patrol → suspicious → alert → pursuit
+  of your last known position; suspicion decays if you break line of sight
+- **No hard fail at max exposure** — a 6-second lockdown opens instead: stay
+  unseen and the run continues at reduced heat
+- **Reactive world** — pedestrians bolt from sprinting players and loud
+  sweepers, traffic brakes for you and pulls away again, birds scatter from
+  sprints and scanner pings
+- **Contextual radio** — Vesper's handler comments on district entry, kills,
+  exposure spikes, storms, lockdowns, and the closing clock
+- **Procedural audio** (WebAudio, zero asset files) — rain/wind beds that
+  follow the weather, thunder after lightning, a resonance hum that tracks
+  the scanner, exposure-driven tension drone, pings, footsteps, alert
+  stingers, and radio squelch that ducks the ambience. `M` to mute.

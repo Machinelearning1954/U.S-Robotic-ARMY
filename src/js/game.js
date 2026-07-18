@@ -7,6 +7,7 @@
 // pedestrians, rain, bloom and film-grain post-processing.
 import { Input } from "./input.js";
 import { DISTRICTS } from "./world.js";
+import { audio } from "./audio.js";
 
 const TAU = Math.PI * 2;
 const EXTRUDE = 0.13; // max roof offset as a fraction of distance from screen center
@@ -257,6 +258,53 @@ export class Game {
     }));
     this.splashes = [];
 
+    // Dynamic weather: drizzle -> rain -> storm, rotating on a timer.
+    // Storms bring lightning and harder, wind-driven rain.
+    this.weather = { mode: "rain", t: 16 + rng() * 14 };
+    this.flash = 0;
+    this.wind = 0.1;
+    this.windTarget = 0.1;
+
+    // Drifting volumetric fog banks (world space, wrap around the viewport).
+    this.fog = Array.from({ length: 5 }, () => ({
+      x: rng() * this.worldW, y: rng() * this.worldH,
+      r: 260 + rng() * 320, vx: 6 + rng() * 10, a: 0.05 + rng() * 0.05,
+    }));
+
+    // Wildlife: birds resting on the streets; they scatter from sprinting
+    // players and scanner pings.
+    this.birds = Array.from({ length: 12 }, () => {
+      const p2 = this.findRoad(rng, 0, 0);
+      return { x: p2.x, y: p2.y, state: "rest", vx: 0, vy: 0, flap: rng() * TAU, t: 0 };
+    });
+
+    // Give puddles the color of their nearest light source — the cheap-2D
+    // stand-in for reflections of off-screen geometry.
+    for (const pu of this.puddles) {
+      let best = null, bd = Infinity;
+      for (const l of this.lamps) {
+        const dd = (l.x - pu.x) ** 2 + (l.y - pu.y) ** 2;
+        if (dd < bd) { bd = dd; best = "#ffb454"; }
+      }
+      for (let y = 0; y < d.rows; y++) {
+        for (let x = 0; x < d.cols; x++) {
+          const m2 = this.grid[y][x] && this.blockMeta[y][x];
+          if (!m2 || !m2.sign) continue;
+          const dd = ((x + 0.5) * d.tile - pu.x) ** 2 + ((y + 0.5) * d.tile - pu.y) ** 2;
+          if (dd < bd) { bd = dd; best = m2.sign.color; }
+        }
+      }
+      pu.tint = best || d.palette.accent;
+    }
+
+    // Escalation state: instead of a hard fail at max exposure, a lockdown
+    // window opens — survive it unseen and the run continues.
+    this.lockdown = null;
+
+    // Contextual radio chatter from Vesper's handler.
+    this.radioTimer = 0;
+    this.radioFlags = {};
+
     this.camera = { x: this.player.x, y: this.player.y };
     this.resonance = 0;
     this.exposure = 0;
@@ -267,6 +315,15 @@ export class Game {
     this.particles = [];
     this.hud.districtName.textContent = d.name;
     this.updateCounts();
+    this.radioMsg(`K — ${d.blurb.toUpperCase()}`);
+  }
+
+  radioMsg(text) {
+    if (!this.hud.radio) return;
+    this.hud.radio.textContent = text;
+    this.hud.radio.classList.add("show");
+    this.radioTimer = 4.5;
+    audio.radioSquelch();
   }
 
   findRoad(rng, minCol, minRow) {
@@ -345,13 +402,20 @@ export class Game {
       e.pulse += dt * 2;
     }
     const range = 520;
-    const target = nearest ? clamp(1 - nd / range, 0, 1) : 0;
+    let target = nearest ? clamp(1 - nd / range, 0, 1) : 0;
+    // Storm cells inject noise into the scanner — readings jump.
+    if (this.weather.mode === "storm" && target > 0.02) {
+      target = clamp(target + (Math.random() - 0.5) * 0.12, 0, 1);
+    }
     this.resonance = lerp(this.resonance, target, 1 - Math.pow(0.02, dt));
 
     // Scanner ping.
     if (this.input.justPressed(" ")) {
       this.pings.push({ x: p.x, y: p.y, r: 0, max: 420, life: 1 });
+      audio.ping();
     }
+    // Mute toggle.
+    if (this.input.justPressed("m")) audio.setMuted(!audio.muted);
     for (const ping of this.pings) {
       ping.r += 620 * dt;
       ping.life = clamp(1 - ping.r / ping.max, 0, 1);
@@ -363,61 +427,163 @@ export class Game {
       this.showPrompt("[E] NEUTRALIZE EMITTER");
       if (this.input.justPressed("e")) {
         nearest.neutralized = true;
+        audio.neutralize();
         this.spawnBurst(nearest.x, nearest.y, this.d.palette.accent);
         this.updateCounts();
         this.hidePrompt();
-        if (this.emitters.every((e) => e.neutralized)) this.winDistrict();
+        const left = this.emitters.filter((e) => !e.neutralized).length;
+        if (left === 0) this.winDistrict();
+        else if (left === 1) this.radioMsg("K — LAST EMITTER. FINISH IT AND GET OUT.");
+        else if (!this.radioFlags.first) {
+          this.radioFlags.first = true;
+          this.radioMsg("K — ONE DOWN. THE ARRAY'S THINNING.");
+        }
       }
     } else {
       this.hidePrompt();
     }
 
-    // Sweepers patrol + detection.
+    // Sweepers: patrol -> suspicious -> alert -> pursuit. Suspicion builds
+    // while you sit in a cone and decays when you break line of sight; only
+    // a confirmed sighting (sus past threshold) raises exposure and triggers
+    // a chase to your last known position.
+    let anyAlert = false;
+    let seenDuringLockdown = false;
     for (const s of this.sweepers) {
-      const tgtx = s.tx, tgty = s.ty;
+      const chasing = (s.chase || 0) > 0;
+      const tgtx = chasing ? s.cx : s.tx;
+      const tgty = chasing ? s.cy : s.ty;
       const ang = Math.atan2(tgty - s.y, tgtx - s.x);
       s.angle = ang;
-      this.moveCircle(s, Math.cos(ang) * s.speed * dt, Math.sin(ang) * s.speed * dt);
-      if (Math.hypot(tgtx - s.x, tgty - s.y) < 20) {
+      const spd2 = s.speed * (chasing ? 1.55 : 1);
+      this.moveCircle(s, Math.cos(ang) * spd2 * dt, Math.sin(ang) * spd2 * dt);
+      if (chasing) {
+        s.chase -= dt;
+        if (Math.hypot(s.cx - s.x, s.cy - s.y) < 24) s.chase = 0;
+      } else if (Math.hypot(tgtx - s.x, tgty - s.y) < 20) {
         const tmp = { x: s.tx, y: s.ty };
         s.tx = s.wpA.x === s.tx && s.wpA.y === s.ty ? s.wpB.x : s.wpA.x;
         s.ty = s.wpA.x === tmp.x && s.wpA.y === tmp.y ? s.wpB.y : s.wpA.y;
       }
+
       const toP = Math.atan2(p.y - s.y, p.x - s.x);
       const dd = dist(s, p);
-      let diff = Math.abs(normAngle(toP - s.angle));
+      const diff = Math.abs(normAngle(toP - s.angle));
       const seen = dd < s.view && diff < s.fov && this.lineOfSight(s, p);
-      s.alert = seen;
-      if (seen) this.exposure = clamp(this.exposure + 26 * dt, 0, 100);
+      s.sus = clamp((s.sus || 0) + (seen ? 1.4 : -0.5) * dt, 0, 1);
+      const wasAlert = s.alert;
+      s.alert = seen && s.sus >= 0.45;
+      if (s.alert && !wasAlert) audio.alert();
+      if (s.alert) {
+        anyAlert = true;
+        s.chase = 2.4;
+        s.cx = p.x; s.cy = p.y;
+        this.exposure = clamp(this.exposure + 26 * dt, 0, 100);
+      }
+      if (this.lockdown && seen) seenDuringLockdown = true;
     }
-    if (!this.sweepers.some((s) => s.alert)) {
+    if (!anyAlert && !this.lockdown) {
       this.exposure = clamp(this.exposure - 10 * dt, 0, 100);
     }
 
-    // Ambient traffic.
+    // Ambient traffic: cars brake for the player crossing ahead of them,
+    // then pull away again once the road is clear.
     for (const c of this.cars) {
-      c.pos += c.speed * c.dir * dt;
+      const x = c.vertical ? c.lane + 15 * c.dir : c.pos;
+      const y = c.vertical ? c.pos : c.lane + 15 * -c.dir;
+      const ahead = 44;
+      const fx = c.vertical ? x : x + ahead * c.dir;
+      const fy = c.vertical ? y + ahead * c.dir : y;
+      const blocked = Math.hypot(fx - p.x, fy - p.y) < 34;
+      if (c.v === undefined) c.v = c.speed;
+      c.v = blocked ? Math.max(0, c.v - 520 * dt) : Math.min(c.speed, c.v + 200 * dt);
+      c.pos += c.v * c.dir * dt;
       const max = c.vertical ? this.worldH : this.worldW;
       if (c.pos > max + 60) c.pos = -60;
       if (c.pos < -60) c.pos = max + 60;
     }
 
-    // Pedestrians drift between road points.
+    // Pedestrians drift between road points — and bolt from sprinting
+    // players or any sweeper that has gone loud.
     for (const ped of this.peds) {
-      const dx = ped.tx - ped.x, dy = ped.ty - ped.y;
-      const dd = Math.hypot(dx, dy);
-      if (dd < 8) {
-        const t2 = this.findRoad(this.rng, 0, 0);
-        ped.tx = t2.x; ped.ty = t2.y;
+      let threat = null;
+      if (sprinting && dist(ped, p) < 75) threat = p;
+      if (!threat) {
+        for (const s of this.sweepers) {
+          if (s.alert && dist(ped, s) < 170) { threat = s; break; }
+        }
+      }
+      if (threat) {
+        ped.panic = 1.4;
+        const a = Math.atan2(ped.y - threat.y, ped.x - threat.x);
+        ped.pvx = Math.cos(a); ped.pvy = Math.sin(a);
+      }
+      if (ped.panic > 0) {
+        ped.panic -= dt;
+        ped.x = clamp(ped.x + ped.pvx * 95 * dt, 8, this.worldW - 8);
+        ped.y = clamp(ped.y + ped.pvy * 95 * dt, 8, this.worldH - 8);
       } else {
-        ped.x += (dx / dd) * ped.speed * dt;
-        ped.y += (dy / dd) * ped.speed * dt;
+        const dx = ped.tx - ped.x, dy = ped.ty - ped.y;
+        const dd = Math.hypot(dx, dy);
+        if (dd < 8) {
+          const t2 = this.findRoad(this.rng, 0, 0);
+          ped.tx = t2.x; ped.ty = t2.y;
+        } else {
+          ped.x += (dx / dd) * ped.speed * dt;
+          ped.y += (dy / dd) * ped.speed * dt;
+        }
       }
     }
 
-    // Rain splashes on the pavement.
+    // Birds: startle on nearby sprint or a passing ping ring, fly off, and
+    // eventually settle somewhere new.
+    for (const b of this.birds) {
+      if (b.state === "rest") {
+        const startled =
+          (sprinting && dist(b, p) < 95) ||
+          this.pings.some((pg) => Math.abs(dist(pg, b) - pg.r) < 36 && pg.life > 0.1);
+        if (startled) {
+          const a = Math.atan2(b.y - p.y, b.x - p.x) + (Math.random() - 0.5) * 1.2;
+          const sp = 150 + Math.random() * 90;
+          b.state = "fly"; b.vx = Math.cos(a) * sp; b.vy = Math.sin(a) * sp; b.t = 2.6;
+        }
+      } else {
+        b.x += b.vx * dt; b.y += b.vy * dt;
+        b.flap += dt * 26;
+        b.t -= dt;
+        if (b.t <= 0) {
+          const spot = this.findRoad(this.rng, 0, 0);
+          b.x = spot.x; b.y = spot.y; b.state = "rest";
+        }
+      }
+    }
+
+    // Weather cycle + wind gusts + lightning during storms.
+    const wz = this.weather;
+    wz.t -= dt;
+    if (wz.t <= 0) {
+      const order = { drizzle: "rain", rain: "storm", storm: "drizzle" };
+      wz.mode = order[wz.mode];
+      wz.t = 16 + Math.random() * 16;
+      if (wz.mode === "storm") this.radioMsg("K — STORM CELL ON TOP OF YOU. EMITTER READINGS WILL JUMP.");
+    }
+    this.windTarget += (Math.random() - 0.5) * dt * 2;
+    this.windTarget = clamp(this.windTarget, 0.02, wz.mode === "storm" ? 0.55 : 0.25);
+    this.wind = lerp(this.wind, this.windTarget, 1 - Math.pow(0.1, dt));
+    if (wz.mode === "storm" && Math.random() < dt * 0.30) {
+      this.flash = 0.9;
+      audio.thunder();
+    }
+    this.flash *= Math.pow(0.02, dt);
+    for (const f of this.fog) {
+      f.x += f.vx * dt;
+      if (f.x - f.r > this.worldW) f.x = -f.r;
+    }
+
+    // Rain splashes on the pavement (rate follows the weather).
+    const splashRate = { drizzle: 1, rain: 3, storm: 5 }[this.weather.mode];
     if (this.splashes.length < 36) {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < splashRate; i++) {
         const wx = this.camera.x - this.w / 2 + Math.random() * this.w;
         const wy = this.camera.y - this.h / 2 + Math.random() * this.h;
         if (!this.solidAt(wx, wy)) this.splashes.push({ x: wx, y: wy, r: 1, life: 1 });
@@ -444,9 +610,54 @@ export class Game {
     const s2 = Math.max(0, Math.floor(this.timeLeft % 60));
     this.hud.clock.textContent = `${String(m).padStart(2, "0")}:${String(s2).padStart(2, "0")}`;
 
-    // Fail states.
-    if (this.exposure >= 100) this.loseDistrict("EXPOSED", "A sweeper flagged your position. The channel went cold and Meridian scrubbed the district.");
-    else if (this.timeLeft <= 0) this.loseDistrict("EMITTERS LOCKED", "The harmonic array finished locking before you cleared it. Halcyon Bay stays saturated.");
+    // Contextual radio warnings (each fires once per district).
+    if (this.exposure > 60 && !this.radioFlags.hot && !this.lockdown) {
+      this.radioFlags.hot = true;
+      this.radioMsg("K — YOU'RE HOT. BREAK LINE OF SIGHT, NOW.");
+    }
+    if (this.timeLeft < 30 && !this.radioFlags.thirty) {
+      this.radioFlags.thirty = true;
+      this.radioMsg("K — THIRTY SECONDS BEFORE THE ARRAY LOCKS.");
+    }
+    if (this.radioTimer > 0) {
+      this.radioTimer -= dt;
+      if (this.radioTimer <= 0 && this.hud.radio) this.hud.radio.classList.remove("show");
+    }
+
+    // No hard fail at max exposure: a lockdown window opens instead. Stay
+    // out of every cone until it ends and the run survives; get spotted
+    // once during it and Meridian closes the net.
+    if (this.lockdown) {
+      this.exposure = 100;
+      if (seenDuringLockdown) {
+        this.loseDistrict("EXPOSED", "A sweeper confirmed your position during the lockdown. The channel went cold and Meridian scrubbed the district.");
+        return;
+      }
+      this.lockdown.t -= dt;
+      this.showPrompt(`LOCKDOWN — STAY UNSEEN ${Math.ceil(this.lockdown.t)}s`);
+      if (this.lockdown.t <= 0) {
+        this.lockdown = null;
+        this.exposure = 55;
+        this.hidePrompt();
+        this.radioMsg("K — ...CLEAR. THEY LOST THE THREAD. BACK TO WORK.");
+      }
+    } else if (this.exposure >= 100) {
+      this.lockdown = { t: 6 };
+      for (const s of this.sweepers) { s.chase = 3.5; s.cx = p.x; s.cy = p.y; }
+      this.radioMsg("K — MAX EXPOSURE. GO DARK AND STAY DARK.");
+    }
+
+    if (this.timeLeft <= 0) this.loseDistrict("EMITTERS LOCKED", "The harmonic array finished locking before you cleared it. Halcyon Bay stays saturated.");
+
+    // Feed the continuous audio beds.
+    audio.update(dt, {
+      weatherMode: this.weather.mode,
+      wind: this.wind,
+      exposure: this.exposure,
+      resonance: this.resonance,
+      moving: !!(mv.x || mv.y),
+      sprinting,
+    });
   }
 
   lineOfSight(a, b) {
@@ -496,11 +707,17 @@ export class Game {
     this.drawPlayer(ctx, now);
     this.drawLamps(ctx, camX, camY, w, h);
     this.drawBuildings(ctx, camX, camY, w, h, cx, cy, now);
+    this.drawBirds(ctx, camX, camY, w, h);
+    this.drawFog(ctx, camX, camY, w, h);
     this.drawParticles(ctx);
 
     ctx.restore();
 
     this.compositeLighting(ctx, camX, camY, w, h, now);
+    if (this.flash > 0.02) {
+      ctx.fillStyle = `rgba(210,230,255,${this.flash * 0.38})`;
+      ctx.fillRect(0, 0, w, h);
+    }
     this.drawAccentGlows(ctx, camX, camY, w, h);
     this.drawRain(ctx, w, h);
     if (this.quality >= 1) this.compositeBloom(ctx, w, h);
@@ -533,6 +750,14 @@ export class Game {
     sheen.addColorStop(1, "rgba(30,60,110,0.10)");
     ctx.fillStyle = sheen;
     ctx.fillRect(camX, camY, w, h);
+    // Sky tint follows the compressed night: warm dusk -> deep blue night
+    // -> cold pre-dawn cyan as the clock runs down.
+    const phase = clamp(1 - this.timeLeft / this.d.timeLimit, 0, 1);
+    const tint = phase < 0.5
+      ? lerpColor("#ff8a50", "#0c1430", phase * 2)
+      : lerpColor("#0c1430", "#7fe7ff", (phase - 0.5) * 2);
+    ctx.fillStyle = withAlpha(tint, 0.05);
+    ctx.fillRect(camX, camY, w, h);
 
     for (let y = y0; y < y1; y++) {
       for (let x = x0; x < x1; x++) {
@@ -562,10 +787,11 @@ export class Game {
       ctx.ellipse(pu.x, pu.y, pu.rx, pu.ry, 0, 0, TAU);
       ctx.fillStyle = "rgba(4,10,22,0.85)";
       ctx.fill();
-      // Neon reflection smear — the wet-street money shot.
+      // Reflection smear tinted by the puddle's nearest light source — the
+      // cheap-2D stand-in for reflecting off-screen geometry.
       const g = ctx.createLinearGradient(pu.x, pu.y - pu.ry * 3, pu.x, pu.y + pu.ry);
       g.addColorStop(0, "transparent");
-      g.addColorStop(1, withAlpha(pal.accent, 0.16 + shimmer * 0.1));
+      g.addColorStop(1, withAlpha(pu.tint || pal.accent, 0.16 + shimmer * 0.1));
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.ellipse(pu.x, pu.y, pu.rx * 0.8, pu.ry * 0.8, 0, 0, TAU);
@@ -712,7 +938,8 @@ export class Game {
 
   drawSweepers(ctx) {
     for (const s of this.sweepers) {
-      const col = s.alert ? "#ff3b7f" : "#ffb454";
+      // patrol amber -> suspicious yellow -> alert magenta
+      const col = s.alert ? "#ff3b7f" : (s.sus || 0) > 0.12 ? "#ffd24f" : "#ffb454";
       ctx.beginPath();
       ctx.moveTo(s.x, s.y);
       ctx.arc(s.x, s.y, s.view, s.angle - s.fov, s.angle + s.fov);
@@ -869,6 +1096,9 @@ export class Game {
           this.drawGlow(ctx, sx, sy, 16, m.sign.color, 0.5 * flick);
           ctx.fillStyle = withAlpha(m.sign.color, 0.85 * flick);
           ctx.fillRect(sx - 8, sy - 2.5, 16, 5);
+          // Color bleed: the sign washes its light onto the street below
+          // (the 2D stand-in for bounce lighting).
+          this.drawGlow(ctx, (f.a[0] + f.b[0]) / 2, (f.a[1] + f.b[1]) / 2 + 10, 42, m.sign.color, 0.13 * flick);
         }
       }
 
@@ -909,6 +1139,42 @@ export class Game {
     }
   }
 
+  drawBirds(ctx, camX, camY, w, h) {
+    for (const b of this.birds) {
+      if (b.x < camX - 40 || b.x > camX + w + 40 || b.y < camY - 40 || b.y > camY + h + 40) continue;
+      if (b.state === "rest") {
+        ctx.beginPath();
+        ctx.ellipse(b.x, b.y, 3.4, 2.4, 0, 0, TAU);
+        ctx.fillStyle = "#1b2434";
+        ctx.fill();
+        ctx.fillStyle = "#2c3a52";
+        ctx.fillRect(b.x - 1, b.y - 2.6, 2, 2);
+      } else {
+        // In flight: a flapping "v" pointed along the velocity.
+        const a = Math.atan2(b.vy, b.vx);
+        const spread = 4 + Math.sin(b.flap) * 3;
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(a);
+        ctx.strokeStyle = "#2c3a52";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-3, -spread);
+        ctx.lineTo(1.5, 0);
+        ctx.lineTo(-3, spread);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+
+  drawFog(ctx, camX, camY, w, h) {
+    for (const f of this.fog) {
+      if (f.x + f.r < camX || f.x - f.r > camX + w || f.y + f.r < camY || f.y - f.r > camY + h) continue;
+      this.drawGlow(ctx, f.x, f.y, f.r, "#8fa8c8", f.a);
+    }
+  }
+
   drawParticles(ctx) {
     ctx.globalCompositeOperation = "lighter";
     for (const pt of this.particles) {
@@ -931,7 +1197,14 @@ export class Game {
     }
     lc.setTransform(1, 0, 0, 1, 0, 0);
     lc.globalCompositeOperation = "source-over";
-    lc.fillStyle = `rgba(3,7,18,${AMBIENT_DARK})`;
+    // Time of day: dusk when the district starts, deepest night mid-run,
+    // first hint of dawn as the timer runs out. Storms darken everything.
+    const phase = clamp(1 - this.timeLeft / this.d.timeLimit, 0, 1);
+    const ambient = clamp(
+      AMBIENT_DARK - 0.12 + 0.16 * Math.sin(Math.PI * phase) +
+      (this.weather.mode === "storm" ? 0.05 : 0),
+      0, 0.7);
+    lc.fillStyle = `rgba(3,7,18,${ambient})`;
     lc.fillRect(0, 0, w, h);
     lc.globalCompositeOperation = "destination-out";
 
@@ -986,16 +1259,22 @@ export class Game {
   }
 
   drawRain(ctx, w, h) {
-    ctx.strokeStyle = "rgba(150,195,255,0.20)";
+    const mode = this.weather.mode;
+    const count = mode === "drizzle" ? 55 : 110;
+    const alpha = mode === "drizzle" ? 0.13 : mode === "rain" ? 0.20 : 0.28;
+    const speedMul = mode === "storm" ? 1.35 : 1;
+    const windX = this.wind; // gusts slant the whole rain field
+    ctx.strokeStyle = `rgba(150,195,255,${alpha})`;
     ctx.lineWidth = 1;
     ctx.beginPath();
     const dt = 1 / 60;
-    for (const d of this.rainDrops) {
-      d.y += d.s * dt;
-      d.x -= d.s * 0.10 * dt;
+    for (let i = 0; i < count; i++) {
+      const d = this.rainDrops[i];
+      d.y += d.s * speedMul * dt;
+      d.x -= d.s * windX * dt;
       if (d.y > h) { d.y = -20; d.x = Math.random() * (w + 60); }
       ctx.moveTo(d.x, d.y);
-      ctx.lineTo(d.x - d.l * 0.10, d.y - d.l);
+      ctx.lineTo(d.x - d.l * windX, d.y - d.l);
     }
     ctx.stroke();
   }
@@ -1127,6 +1406,11 @@ function withAlpha(hex, a) {
 function shade(hex, f) {
   const c = hexToRgb(hex);
   return `rgb(${Math.min(255, Math.round(c.r * f))},${Math.min(255, Math.round(c.g * f))},${Math.min(255, Math.round(c.b * f))})`;
+}
+function lerpColor(a, b, t) {
+  const ca = hexToRgb(a), cb = hexToRgb(b);
+  return `#${[["r"], ["g"], ["b"]].map(([k]) =>
+    Math.round(ca[k] + (cb[k] - ca[k]) * t).toString(16).padStart(2, "0")).join("")}`;
 }
 function hexToRgb(hex) {
   const s = hex.replace("#", "");
