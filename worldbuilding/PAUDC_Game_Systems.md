@@ -809,3 +809,23 @@ were never sharks. A red lifeguard chair watches over the rim. One-time **+20**:
   the fins-around-a-board image was kept, rebuilt as opt-in lifeguard training
   with robots. "Alexandria Potomac" resolves to the game's own fictional
   Alexandria per the standing real-places rule.
+
+
+## TEST RUN — the Needle, Skyworks' hypersonic testbed (live, v0.96)
+
+On a teal-ringed pad up on the Palisade Skyworks plateau sits **the Needle**:
+a long black dart of an aircraft — chined nose, blended delta, twin canted
+fins, teal bubble canopy, gold island cheatlines. Stand on the pad a beat and
+you're strapped in for the **TEST RUN**: a ~26-second full-throttle proving
+flight that spirals out over the island and climbs while Mission Control calls
+the numbers — *MACH 2 through the shudder… MACH 5, the island a green coin
+below… MACH 8, leading edges glowing… MACH 9.9 — that's the number, bring her
+home.* The exhaust bloom swells with the speed. First completed run **+40**
+("Skyworks owes you a drink"), repeats +15. **The run always lands** — no fail
+state, no combat: the mission is speed, nerve, and bringing her home.
+
+- **Boundary:** built from a film clip of a hypersonic test flight. The film's
+  IP (title, characters, the fictional plane's name) and the **real aircraft
+  program** the request named are not used — Rule Zero and the no-real-military
+  rule. Only the *test-pilot mission shape* was kept: an original invented
+  testbed, an original control script, zero weapons.
