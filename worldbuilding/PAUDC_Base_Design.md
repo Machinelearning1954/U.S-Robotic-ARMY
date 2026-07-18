@@ -584,3 +584,22 @@ tech watches weather, not people.
   branding. None of that is depicted: no real country, no border enforcement, no
   armed guard, no flags. Only the visual idea of light-strung pylons was kept,
   inverted from "keep out" to "welcome home."
+
+
+## The Ground Ear — seismic garden on the Ear's hill (live, v0.88)
+
+Up the hill by Ear Terminus: a row of six brass line-markers where the base's
+buried **seismology line** surfaces, a dark **stomp pad** ringed in teal, and a
+**trace totem** — twelve live bars reading the island's pulse. The trace idles
+green with ground-hum, runs **amber** when rain or a waterspout shakes the bay,
+and jumps **gold** when you stand on the pad and give it your step — the exhibit
+reads *your* footfall because you offered it, science-museum style. First stomp
+pays **+20**.
+
+- **Boundary:** the source post was a real nation's **underground border-sensor
+  wall** — buried fibre-optics detecting footsteps, vehicles, and tunnels, with
+  thermal imagery of people. None of that is depicted: no real system, no border,
+  and **no detection of people** — the island's standing rule (its tech listens
+  to weather and ground, never to people) is stated in the feature's own toast.
+  Only the wonder of "ground that can feel" was kept, pointed at tremors, surf,
+  and an opt-in stomp.
