@@ -24,6 +24,7 @@
         <button id="startBtn" class="btn primary">BEGIN SWEEP</button>
         <button id="howBtn" class="btn ghost">HOW TO PLAY</button>
         <p class="fineprint">A work of fiction. All characters, groups, and places are invented.</p>
+        <a class="credit" href="https://www.instagram.com/reel/DRjgziwDPmg/" target="_blank" rel="noopener noreferrer">INSPIRED BY A REEL FROM @VKUOO &nearr;</a>
       </div>
     </section>
 
@@ -42,6 +43,15 @@
         </ul>
         <button class="btn primary backBtn">BACK</button>
       </div>
+    </section>
+
+    <!-- Intro cutscene: plays src/assets/intro.mp4 if present, else an
+         original animated briefing. Click or press any key to skip. -->
+    <section id="cutscene" class="screen">
+      <canvas id="cineStage"></canvas>
+      <video id="cineVideo" playsinline></video>
+      <div id="cineText" class="cine-text"></div>
+      <div class="cine-skip">CLICK OR PRESS ANY KEY TO SKIP</div>
     </section>
 
     <!-- Game -->

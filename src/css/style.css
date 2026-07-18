@@ -95,6 +95,61 @@ html, body {
   font-family: var(--mono);
 }
 
+.credit {
+  display: inline-block;
+  margin-top: 10px;
+  color: #5a6a8c;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-family: var(--mono);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(90, 106, 140, 0.35);
+  padding-bottom: 2px;
+  transition: color 0.18s, border-color 0.18s;
+}
+.credit:hover { color: var(--cyan); border-color: var(--cyan); }
+
+/* ---------- Cutscene ---------- */
+#cutscene { background: #000; cursor: pointer; }
+#cineStage { position: absolute; inset: 0; width: 100vw; height: 100vh; }
+#cineVideo {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  display: none;
+  background: #000;
+}
+.cine-text {
+  position: absolute;
+  left: 50%;
+  bottom: 16vh;
+  transform: translateX(-50%);
+  max-width: min(720px, 86vw);
+  font-family: var(--mono);
+  font-size: clamp(14px, 2.2vw, 19px);
+  letter-spacing: 0.14em;
+  line-height: 1.9;
+  color: #d9ecff;
+  text-align: center;
+  white-space: pre-line;
+  text-shadow: 0 0 18px rgba(51, 226, 255, 0.45);
+  pointer-events: none;
+}
+.cine-skip {
+  position: absolute;
+  right: 26px;
+  bottom: 26px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: rgba(125, 139, 168, 0.6);
+  animation: skipPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes skipPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.95; } }
+
 /* ---------- Buttons ---------- */
 .btn {
   font-family: var(--mono);

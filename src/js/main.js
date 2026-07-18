@@ -1,9 +1,11 @@
 // Boot + screen navigation for REZONANCE.
 import { Game } from "./game.js";
+import { Cutscene } from "./cutscene.js";
 
 const screens = {
   title: document.getElementById("title"),
   how: document.getElementById("how"),
+  cutscene: document.getElementById("cutscene"),
   game: document.getElementById("game"),
 };
 
@@ -66,7 +68,20 @@ function handleEnd(result) {
 
 overBtn.addEventListener("click", () => { if (pendingAction) pendingAction(); });
 
-document.getElementById("startBtn").addEventListener("click", () => launch(0));
+// Intro briefing plays before the first district only.
+async function beginSweep() {
+  for (const s of Object.values(screens)) s.classList.remove("active");
+  const cine = new Cutscene({
+    screen: screens.cutscene,
+    canvas: document.getElementById("cineStage"),
+    video: document.getElementById("cineVideo"),
+    text: document.getElementById("cineText"),
+  });
+  await cine.play();
+  launch(0);
+}
+
+document.getElementById("startBtn").addEventListener("click", beginSweep);
 document.getElementById("howBtn").addEventListener("click", () => show("how"));
 document.querySelectorAll(".backBtn").forEach((b) =>
   b.addEventListener("click", () => show("title"))
