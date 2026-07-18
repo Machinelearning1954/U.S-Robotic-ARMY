@@ -4276,7 +4276,7 @@ function updateRain(dt){if(!rain)return;const a=rainGeo.attributes.position.arra
 addEventListener('keydown',e=>{if(e.key.toLowerCase()==='r')setRain(!rain);});
 {const rb=document.getElementById('rn');if(rb)rb.addEventListener('pointerdown',e=>{e.preventDefault();setRain(!rain);});}
 // ---------------- Storm Watch: an offshore waterspout you gather to film ----------------
-// A GTA-style spectacle event: during a storm, a funnel forms out over the bay.
+// An open-world spectacle event: during a storm, a funnel forms out over the bay.
 // Stand at the seawall and watch it — the crowd films, OnWatch overpays for the clip.
 const SPOUT={X:-67,Z:-189};
 const spout=new THREE.Group();
@@ -6487,7 +6487,7 @@ VEH.push({g:amb,pose:ambP,name:'GREEN CROSS AMBULANCE — rescue van, no sirens 
 const AMB=VEH.length-1;
 label('GREEN CROSS AMBULANCE',ambP.x,Math.max(height(ambP.x,ambP.z),0)+4.5,ambP.z);
 // ---------------- Wave Dart + the Raft-Up: personal watercraft and the sunset boat party ----------------
-// From a GTA-6 fan clip (jet ski through a boat-party flotilla at sunset) — nothing of the
+// From an open-world fan clip (jet ski through a boat-party flotilla at sunset) — nothing of the
 // clip's game is copied ("make it original"): an original watercraft, an original raft-up,
 // the island's own skyline. E to board like any ride; fastest thing on the water, hopeless on tar.
 const jetski=new THREE.Group();
@@ -6678,7 +6678,7 @@ function updateCircuit(dt){
   }
 }
 // ---------------- The Lido: a poolside lounge club (chill-by-the-pool beat) ----------------
-// The GTA-style poolside-hangout vibe, built original: a pool, loungers, umbrellas, a
+// The open-world poolside-hangout vibe, built original: a pool, loungers, umbrellas, a
 // juice bar, a couple of relaxing NPCs. No copied character or asset; all invented.
 const LIDO={X:760,Z:-25};
 (()=>{
