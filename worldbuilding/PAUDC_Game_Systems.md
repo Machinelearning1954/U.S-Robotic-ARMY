@@ -849,3 +849,21 @@ neighbour before your neighbour your enemy… patience is a position; hold it.*
   everything idea, pointed at the game's own doctrine — the aphorisms are
   original and island-voiced, and the one answer the machine ever finds is the
   game's non-lethal floor stated as strategy.
+
+
+## The Evergreen Course — the bootcamp's longevity class (live, v0.99)
+
+Behind the middle Beach Bootcamp station on Palm Line sand: a dark board carrying
+the **two-roads chart** — a grey row of silhouettes that tilt and shrink decade
+by decade, and beneath it a **gold row standing upright all the way down the
+line**. A coach's bench and a rack of light hand-weights sit beside it. Stand at
+the chart to **enrol** (+20 one-time — *"two roads on the chart; the gold one is
+just showing up"*), with a **+15 honour bonus** if you've already earned the
+Field Conditioning Circuit cert (*"yuh already living it"*). Return visits get
+the coach's rotation of original longevity lines: *move a likkle every day…
+lift light, lift long… walk, swim, dance, stretch… rest is training too.*
+
+- Wellness-positive and deliberately general — movement, consistency, rest. No
+  medical claims, no products, no real people; the chart figures are stylized
+  silhouettes. From an "aging with vs without exercise" comparison post, rebuilt
+  original.
