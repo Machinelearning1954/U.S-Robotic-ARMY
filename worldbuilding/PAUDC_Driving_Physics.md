@@ -101,3 +101,20 @@ economy of scarcity as everything else the island tracks.
 
 > All fictional; tuned for fun first, plausibility second, in the open-world
 > arcade tradition.
+
+
+## Wave Dart + the Raft-Up (live in the prototype, v0.97)
+
+**The Wave Dart** — an original teal-and-gold personal watercraft moored by the
+Bali shallows: board with **E** like any ride. Fastest hull on the bay (out-runs
+the Reef Runner on water), and genuinely hopeless on land — beach it and walk.
+
+**The Raft-Up** — four boats anchored gunwale-to-gunwale off the shallows, party
+on every deck: crowds bouncing, festoon lights glowing, hulls bobbing out of
+phase. Idle nearby (Wave Dart recommended) for a one-time **+25** — *"mind di
+wake, captain."*
+
+- **Origin:** a GTA 6 fan clip (jet ski through a boat-party flotilla at sunset).
+  Per Rule Zero nothing of that game is depicted — original watercraft, original
+  raft-up, the island's own skyline; only the *activity* was kept, made original
+  as asked.
