@@ -744,3 +744,18 @@ Crossings recur on a loose timer; the sentry callout fires once per crossing.
   only the awe of a sky full of movement — rebuilt as birds, tracked by the island's
   own storm-and-wildlife watch. Nothing shoots anything; you look up, and the line
   takes a note.
+
+
+## The Glass Reef — coral-tank lounge (live, v0.85)
+
+An open-air lounge pavilion on the headland between the Kindred Court and the bay:
+warm pendant lights under a timber roof, two shell chairs, and the centerpiece — a
+long **glass coral tank** on a dark base, sand bed glowing, eleven coral heads in
+ember orange and gold, **nine little fish** drifting lazy circuits above them. On
+the rim sits the house cat — orange-and-white, tail keeping time, head tracking
+the fish. It has an arrangement with the glass; the fish are in no danger, and
+neither is anyone else. Sit with it a moment for a one-time **+20**.
+
+- **Origin:** an AI-generated luxury-interior render (aquarium table, coral, a cat
+  counting fish) — rebuilt as an original harborside lounge. Pure ambience; no
+  brand, place, or product depicted.
