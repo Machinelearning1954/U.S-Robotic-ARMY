@@ -219,6 +219,9 @@ html, body {
 /* ---------- Game ---------- */
 #game { background: #02030a; }
 #stage { display: block; width: 100vw; height: 100vh; image-rendering: auto; }
+#stage3d { position: absolute; inset: 0; width: 100vw; height: 100vh; display: none; }
+#game.mode3d #stage3d { display: block; }
+#game.mode3d #stage { display: none; }
 
 #hud {
   position: absolute;

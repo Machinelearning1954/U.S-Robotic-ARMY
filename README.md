@@ -44,6 +44,20 @@ python3 -m http.server 8099
 # then visit http://localhost:8099/index.html
 ```
 
+## 3D mode
+
+Press `V` in-game to switch to a true-3D WebGL camera (press again to return
+to the 2.5D view). The same running game state — grid, emitters, sweepers,
+traffic, pedestrians, weather — is mirrored into a Three.js scene: instanced
+tower blocks with emissive window facades, a moonlit street plane, roaming
+point lights that follow the player between street lamps, translucent sweeper
+vision cones, 3D rain, exponential fog, and ACES tone mapping (lightning
+briefly overdrives the exposure). Three.js r170 is vendored at
+`src/vendor/three.module.js` (MIT — see `src/vendor/THREE-LICENSE`), so the
+game remains fully self-contained. Generated GLB props (e.g. from Meshy or
+Higgsfield's image-to-3D) can be dropped into this scene later via GLTF
+loading.
+
 ## Project layout
 
 ```

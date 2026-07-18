@@ -39,6 +39,7 @@
           <li><span class="key">SPACE</span> — pulse the resonance scanner</li>
           <li><span class="key">E</span> — neutralize an emitter when in range</li>
           <li><span class="key">M</span> — mute / unmute audio</li>
+          <li><span class="key">V</span> — toggle the 3D camera (WebGL)</li>
           <li>The <strong>resonance meter</strong> climbs as you near an emitter. The scanner tingle sharpens with proximity.</li>
           <li>Avoid <strong>Meridian sweepers</strong> — linger in a cone and suspicion turns into a confirmed sighting, raising exposure. At max exposure a <strong>lockdown</strong> starts: stay unseen until it passes, or the run ends.</li>
           <li><strong>Weather shifts</strong> between drizzle, rain, and storms — storm cells make your scanner readings jump.</li>
@@ -60,6 +61,7 @@
     <!-- Game -->
     <section id="game" class="screen">
       <canvas id="stage"></canvas>
+      <canvas id="stage3d"></canvas>
       <div id="hud">
         <div class="hud-row top">
           <div class="hud-box">

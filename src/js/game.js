@@ -109,6 +109,7 @@ export class Game {
     this.canvas.width = this.w * dpr;
     this.canvas.height = this.h * dpr;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (this.r3d) this.r3d.resize();
     // Effect layers run at CSS resolution (lighting) and quarter res (bloom).
     this.lightCanvas.width = this.w;
     this.lightCanvas.height = this.h;
@@ -361,7 +362,10 @@ export class Game {
   // -------------------- main loop --------------------
   frame(t) {
     if (!this.running) return;
-    const dt = Math.min(0.05, (t - this.last) / 1000);
+    // Clamp both ends: rAF timestamps can occasionally run backwards
+    // (tab switches, headless timers), and a negative dt corrupts every
+    // integrator downstream.
+    const dt = clamp((t - this.last) / 1000, 0, 0.05);
     this.last = t;
     this.frameNo++;
     this.frameEma = this.frameEma * 0.95 + dt * 0.05;
@@ -416,6 +420,24 @@ export class Game {
     }
     // Mute toggle.
     if (this.input.justPressed("m")) audio.setMuted(!audio.muted);
+
+    // 3D camera toggle (lazy-loads the WebGL renderer on first use).
+    if (this.input.justPressed("v") && !this._loading3d) {
+      if (this.r3d) {
+        this.mode3d = !this.mode3d;
+        document.getElementById("game").classList.toggle("mode3d", this.mode3d);
+      } else {
+        this._loading3d = true;
+        import("./render3d.js")
+          .then(({ Renderer3D }) => {
+            this.r3d = new Renderer3D(document.getElementById("stage3d"));
+            this.mode3d = true;
+            document.getElementById("game").classList.add("mode3d");
+          })
+          .catch((err) => console.warn("3D mode unavailable:", err))
+          .finally(() => { this._loading3d = false; });
+      }
+    }
     for (const ping of this.pings) {
       ping.r += 620 * dt;
       ping.life = clamp(1 - ping.r / ping.max, 0, 1);
@@ -678,8 +700,12 @@ export class Game {
 
   // -------------------- rendering --------------------
   render() {
-    const ctx = this.ctx, w = this.w, h = this.h;
     const now = performance.now();
+    if (this.mode3d && this.r3d) {
+      this.r3d.render(this, now);
+      return;
+    }
+    const ctx = this.ctx, w = this.w, h = this.h;
     ctx.fillStyle = "#02030a";
     ctx.fillRect(0, 0, w, h);
 
@@ -809,7 +835,8 @@ export class Game {
     for (const sp of this.splashes) {
       ctx.globalAlpha = sp.life * 0.5;
       ctx.beginPath();
-      ctx.ellipse(sp.x, sp.y, sp.r, sp.r * 0.45, 0, 0, TAU);
+      const sr = Math.max(0.1, sp.r);
+      ctx.ellipse(sp.x, sp.y, sr, sr * 0.45, 0, 0, TAU);
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
