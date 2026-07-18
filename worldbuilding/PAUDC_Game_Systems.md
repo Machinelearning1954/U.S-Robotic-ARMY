@@ -688,3 +688,41 @@ clips). 14-second cooldown; rotors and nav LEDs animate while it films.
 - **Origin:** a real camera-drone brand's reel ("movement without losing sight of
   the frame"); the brand and hardware are **not** depicted — this is an original
   quadcopter, and only the "aerial cinematography drone" idea was kept.
+
+
+## The Future Island pack — four sights from the AR-city concepts (live, v0.82)
+
+Four features built from a batch of AI-generated "future city" concepts, each made
+original and folded into the island's non-lethal canon:
+
+**The Kindred Court** — a garden plaza beside the Bali estate gardens where the
+Don's old **care-companion units** (original fictional robots: white shells, teal
+eyes, no brand) tend the island's elders — one offers a glass of cool water at the
+bench, another walks a slow escort loop arm-in-arm around the court. Stand with
+them a moment for a one-time **+25** ("dem remember yuh, Don"). It's the gentle
+half of the Don's robotics-vet legacy made visible: care robotics, no weapons,
+nothing harmed.
+
+**The Glass Whale** — a translucent light-sculpture whale swimming a slow loop
+**above the Neon Strip**, an in-world AR art installation. It shimmers faint by
+day and glows after dark; stand under it as it passes for a one-time **+20**
+("big fish, no water").
+
+**The Star School** — a holo-orrery pedestal by the Wheaton Night School: walk up
+and it projects the island's **own invented four wanderer-stars**, slow-orbiting
+holograms taught in night class. One-time **+20**. No real agency, spacecraft, or
+program depicted — it's the island's fictional sky.
+
+**The Reef Sentry Line** — three stilt-mounted sensor masts in the shallows,
+blinking amber until you climb out and tune each by hand (**+8** apiece, **+15**
+when the line sings). They watch **storms and wildlife** — waterspout warnings and
+croc-drift pings for the harbor. *They watch weather, not people.*
+
+- **Boundary:** the sentry line's source post was about a **real national
+  border-surveillance system** (real name, real border, armed patrols) — none of
+  that is depicted. The real system, country, border, soldiers, and weapons were
+  all declined; only the generalized "line of sensor masts" idea was kept and
+  pointed at weather and wildlife. A second reel in the same batch — a real
+  political figure addressing massed troops with warship/missile/nuclear-war
+  imagery — was **declined entirely**: real people, real militaries, and war-hype
+  content stay out of the game, full stop.

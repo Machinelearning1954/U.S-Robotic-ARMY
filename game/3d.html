@@ -55,7 +55,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>L</b> drone · <b>O</b> dominoes/shift · <b>`</b> cheats · <b>Z</b> max-gfx · <b>I</b> cam-drone · <b>X</b> sky-rig · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.81</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v0.82</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -5405,6 +5405,202 @@ function updateMedevac(dt){
       toast('GREEN CROSS AIR AMBULANCE — fueled and flight-ready. Medevac on standby.  +25');}
   }else medevacT=Math.max(0,medevacT-dt*1.5);
 }
+// ---------------- The Kindred Court: care-companion robots tend the island's elders ----------------
+// A garden plaza where the Don's old CARE units (original fictional robots — white shells,
+// teal eyes, no brand) look after elderly islanders: one hands an elder a cool drink, one
+// escorts an elder on a slow garden walk. Pure care robotics — no weapons, nothing harmed;
+// it's the gentle half of the Don's robotics-vet legacy made visible in the world.
+const KINDRED={X:560,Z:-20};
+const kindredBots=[];let kindredEsc=null;
+function careBot(){
+  const b=new THREE.Group();
+  const torso=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.32,0.7,10),new THREE.MeshPhongMaterial({color:0xf2f5f7,shininess:60}));torso.position.y=1.05;b.add(torso);
+  const hip=new THREE.Mesh(new THREE.SphereGeometry(0.2,8,8),new THREE.MeshLambertMaterial({color:0x1c2126}));hip.position.y=0.68;b.add(hip);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.19,10,10),new THREE.MeshPhongMaterial({color:0xf2f5f7,shininess:80}));head.position.y=1.62;b.add(head);
+  const eye=new THREE.Mesh(new THREE.SphereGeometry(0.055,6,6),new THREE.MeshBasicMaterial({color:0x3af5d8}));eye.position.set(0.15,1.64,0);b.add(eye);
+  const chest=new THREE.Mesh(new THREE.SphereGeometry(0.06,6,6),new THREE.MeshBasicMaterial({color:0x37a8ff}));chest.position.set(0.24,1.2,0);b.add(chest);
+  for(const s of[-1,1]){
+    const leg=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.07,0.66,8),new THREE.MeshPhongMaterial({color:0xe8ecef,shininess:40}));leg.position.set(0,0.34,s*0.14);b.add(leg);
+    const arm=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.05,0.6,8),new THREE.MeshPhongMaterial({color:0xe8ecef,shininess:40}));
+    arm.position.set(0,1.15,s*0.36);arm.rotation.x=s*0.25;b.add(arm);b.userData['arm'+(s>0?'R':'L')]=arm;
+  }
+  b.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+  return b;
+}
+function elderNPC(shirt){
+  const e=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.62,0.3),new THREE.MeshLambertMaterial({color:shirt}));body.position.y=1.0;e.add(body);
+  const legs=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.6,0.26),new THREE.MeshLambertMaterial({color:0xd8d2c4}));legs.position.y=0.4;e.add(legs);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.17,8,8),new THREE.MeshLambertMaterial({color:0x8a5a3b}));head.position.y=1.5;e.add(head);
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(0.175,8,8,0,Math.PI*2,0,Math.PI*0.55),new THREE.MeshLambertMaterial({color:0xcfd2d6}));hair.position.y=1.53;e.add(hair);
+  e.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+  return e;
+}
+(()=>{
+  const gy=Math.max(height(KINDRED.X,KINDRED.Z),0.2);
+  // garden ring: planters + hedges around a paved court
+  const court=new THREE.Mesh(new THREE.CylinderGeometry(11,11,0.2,20),new THREE.MeshLambertMaterial({color:0xb8b0a0}));
+  court.position.set(KINDRED.X,gy+0.1,KINDRED.Z);court.receiveShadow=true;scene.add(court);
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;
+    const planter=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.8,1.1),new THREE.MeshLambertMaterial({color:0xa8552f}));
+    planter.position.set(KINDRED.X+Math.cos(a)*10.5,gy+0.4,KINDRED.Z+Math.sin(a)*10.5);planter.rotation.y=-a;planter.castShadow=true;scene.add(planter);
+    const bush=new THREE.Mesh(new THREE.SphereGeometry(0.7,7,6),new THREE.MeshLambertMaterial({color:i%3?0x2f7d3a:0xd4527a}));
+    bush.position.set(KINDRED.X+Math.cos(a)*10.5,gy+1.15,KINDRED.Z+Math.sin(a)*10.5);scene.add(bush);}
+  // two benches, each with a seated elder + attending bot
+  for(const[bx,bz,ba,shirt]of[[-3.5,2,0.6,0xf4f0e8],[4,-2.5,-2.1,0xcfe8f4]]){
+    const wx=KINDRED.X+bx,wz=KINDRED.Z+bz;
+    const seat=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.14,0.8),new THREE.MeshLambertMaterial({color:0x7a5a38}));seat.position.set(wx,gy+0.62,wz);seat.rotation.y=ba;seat.castShadow=true;scene.add(seat);
+    for(const s of[-0.9,0.9]){const legB=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.6,0.7),new THREE.MeshLambertMaterial({color:0x4a4038}));
+      legB.position.set(wx+Math.cos(ba)*s,gy+0.31,wz-Math.sin(ba)*s);legB.rotation.y=ba;scene.add(legB);}
+    const eld=elderNPC(shirt);eld.scale.y=0.78;eld.position.set(wx,gy+0.55,wz);eld.rotation.y=ba+Math.PI/2;scene.add(eld);
+    const bot=careBot();bot.position.set(wx+Math.sin(ba)*1.1,gy+0.2,wz+Math.cos(ba)*1.1);bot.rotation.y=ba-Math.PI/2;scene.add(bot);
+    // the offered glass of water, held out to the elder
+    const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.05,0.14,8),new THREE.MeshPhongMaterial({color:0xbfe6f0,shininess:120,transparent:true,opacity:0.85}));
+    cup.position.y=0.9;bot.add(cup);bot.userData.cup=cup;
+    kindredBots.push(bot);
+  }
+  // escort pair: a bot walking a slow loop with an elder on its arm
+  const esc=new THREE.Group();
+  const ebot=careBot();ebot.position.set(0,0,0.45);esc.add(ebot);
+  const eeld=elderNPC(0xe8d8b0);eeld.position.set(0,0,-0.45);esc.add(eeld);
+  esc.position.set(KINDRED.X+6,gy+0.2,KINDRED.Z);scene.add(esc);
+  kindredEsc=esc;kindredBots.push(ebot);
+  glowSprite(KINDRED.X,gy+6,KINDRED.Z,10,0x3af5d8);
+  label('THE KINDRED COURT',KINDRED.X,gy+8,KINDRED.Z);
+})();
+let kindredSeen=false,kindredT=0,kindredMsgT=0,kindredA=0;
+function updateKindred(dt){
+  // bench bots gently offer the cup; eyes and gesture on a soft loop
+  for(const b of kindredBots){
+    const armR=b.userData.armR;if(armR)armR.rotation.z=-0.9+Math.sin(perf*0.0012+b.position.x)*0.18;
+    if(b.userData.cup)b.userData.cup.position.set(0.32,1.02+Math.sin(perf*0.0012+b.position.x)*0.06,0.1);
+  }
+  // the escort pair strolls a slow circle around the court
+  if(kindredEsc){kindredA+=dt*0.12;
+    const gy=Math.max(height(KINDRED.X,KINDRED.Z),0.2);
+    kindredEsc.position.set(KINDRED.X+Math.cos(kindredA)*6,gy+0.2,KINDRED.Z+Math.sin(kindredA)*6);
+    kindredEsc.rotation.y=-kindredA;
+    // subtle walk bob for both walkers
+    kindredEsc.children.forEach((c,i)=>{c.position.y=Math.abs(Math.sin(perf*0.004+i))*0.04;});
+  }
+  if(veh!==WALKER)return;
+  const near=Math.hypot(P.x-KINDRED.X,P.z-KINDRED.Z)<9&&Math.abs(P.v)<2;
+  if(near){kindredT+=dt;
+    if(!kindredSeen&&kindredT>3){kindredSeen=true;addClout(25);
+      toast('THE KINDRED COURT — your old care units, still gentle, still running  +25  ·  "dem remember yuh, Don"');}
+    else if(kindredSeen&&perf>kindredMsgT){kindredMsgT=perf+16000;
+      toast('KINDRED COURT — cool water, steady arms, no rush. The good kind of robotics.');}
+  }else kindredT=Math.max(0,kindredT-dt*1.5);
+}
+// ---------------- The Glass Whale: a hologram whale swims above the Neon Strip ----------------
+// Pure AR-art spectacle (from a holographic-city concept): a translucent light-sculpture
+// whale on a slow loop above the strip. An art installation in-world — nothing real depicted.
+const WHALE={X:220,Z:-110,R:60,H:34};
+const whale=new THREE.Group();
+{
+  const mat=new THREE.MeshBasicMaterial({color:0x9fd8ff,transparent:true,opacity:0.32,depthWrite:false});
+  const body=new THREE.Mesh(new THREE.SphereGeometry(1.6,10,8),mat);body.scale.set(2.6,1,1);whale.add(body);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(1.1,8,8),mat);head.position.set(3.6,-0.1,0);head.scale.set(1.4,0.85,0.9);whale.add(head);
+  const tail=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.18,2.6),mat);tail.position.set(-4.6,0.3,0);whale.add(tail);whale.userData.tail=tail;
+  for(const s of[-1,1]){const fin=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.14,0.9),mat);fin.position.set(1.2,-0.7,s*1.4);fin.rotation.z=s*0.4;whale.add(fin);whale.userData['fin'+s]=fin;}
+  const eye=new THREE.Mesh(new THREE.SphereGeometry(0.12,6,6),new THREE.MeshBasicMaterial({color:0xe8fbff}));eye.position.set(4.3,0.15,0.75);whale.add(eye);
+  scene.add(whale);
+}
+let whaleSeen=false,whaleT=0,whaleA=0;
+function updateHoloWhale(dt){
+  whaleA+=dt*0.1;
+  const wy=WHALE.H+Math.sin(perf*0.0006)*3;
+  whale.position.set(WHALE.X+Math.cos(whaleA)*WHALE.R,wy,WHALE.Z+Math.sin(whaleA)*WHALE.R*0.6);
+  whale.rotation.y=-whaleA+Math.PI;whale.rotation.z=Math.sin(perf*0.001)*0.08;
+  if(whale.userData.tail)whale.userData.tail.rotation.x=Math.sin(perf*0.003)*0.5;
+  // hologram shimmer — brighter after dark, ghost-faint at noon
+  const glow=0.16+DARK*0.3+Math.sin(perf*0.008)*0.05;
+  whale.traverse(o=>{if(o.isMesh&&o.material.transparent)o.material.opacity=glow;});
+  if(whaleSeen)return;
+  const near=Math.hypot(P.x-whale.position.x,P.z-whale.position.z)<40;
+  if(near){whaleT+=dt;
+    if(whaleT>3){whaleSeen=true;addClout(20);
+      toast('THE GLASS WHALE — light-sculpture swimming over the strip  +20  ·  "big fish, no water"');}
+  }else whaleT=Math.max(0,whaleT-dt);
+}
+// ---------------- The Star School: holo-orrery at Wheaton Night School ----------------
+// From an AR-classroom concept: a pedestal that projects a slow-orbiting model of the
+// island's OWN invented night sky — four fictional wanderer-stars taught at night school.
+// Original hologram prop; no real agency, spacecraft, or program depicted.
+const ORRERY={X:SCHOOL.X+12,Z:SCHOOL.Z-8};
+const orreryPlanets=[];let orreryOn=false;
+{
+  const gy=Math.max(height(ORRERY.X,ORRERY.Z),0.2);
+  const ped=new THREE.Mesh(new THREE.CylinderGeometry(0.8,1.1,1.1,10),new THREE.MeshPhongMaterial({color:0x1c2126,shininess:60}));
+  ped.position.set(ORRERY.X,gy+0.55,ORRERY.Z);ped.castShadow=true;scene.add(ped);
+  const lensO=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,0.1,10),new THREE.MeshBasicMaterial({color:0x3af5d8}));
+  lensO.position.set(ORRERY.X,gy+1.15,ORRERY.Z);scene.add(lensO);
+  const cols=[0xffd23f,0x37d867,0xd4527a,0x9fd8ff],rads=[0.28,0.42,0.34,0.22];
+  for(let i=0;i<4;i++){
+    const p=new THREE.Mesh(new THREE.SphereGeometry(rads[i],9,8),new THREE.MeshBasicMaterial({color:cols[i],transparent:true,opacity:0.55,depthWrite:false}));
+    p.visible=false;scene.add(p);orreryPlanets.push({m:p,r:1.6+i*0.9,s:0.9-i*0.16,ph:i*1.7});
+  }
+  label('THE STAR SCHOOL',ORRERY.X,gy+5,ORRERY.Z);
+}
+let orrerySeen=false,orreryT=0;
+function updateOrrery(dt){
+  const gy=Math.max(height(ORRERY.X,ORRERY.Z),0.2);
+  const near=veh===WALKER&&Math.hypot(P.x-ORRERY.X,P.z-ORRERY.Z)<6;
+  orreryOn=near||orrerySeen&&Math.hypot(P.x-ORRERY.X,P.z-ORRERY.Z)<14;
+  for(const pl of orreryPlanets){
+    pl.m.visible=orreryOn;
+    if(orreryOn){const a=perf*0.0006*pl.s+pl.ph;
+      pl.m.position.set(ORRERY.X+Math.cos(a)*pl.r,gy+1.6+Math.sin(a*1.3)*0.25,ORRERY.Z+Math.sin(a)*pl.r);}
+  }
+  if(orrerySeen)return;
+  if(near){orreryT+=dt;
+    if(orreryT>3){orrerySeen=true;addClout(20);
+      toast('THE STAR SCHOOL — di island’s own four wanderers, spinning for the class  +20');}
+  }else orreryT=Math.max(0,orreryT-dt);
+}
+// ---------------- The Reef Sentry Line: storm-and-wildlife watch masts (fictional) ----------------
+// Built from a "smart fence" post about a real border-surveillance system — the real system,
+// border, and armed patrol are NOT depicted (game rule: no real military tech). Only the
+// generalized "sensor mast line" idea is kept, rebuilt as PAUDC's own fictional REEF SENTRY:
+// three stilt masts in the shallows that watch STORMS and WILDLIFE — waterspout warnings and
+// croc-drift pings for the harbor. They watch weather, not people. Tune each mast by hand.
+const SENTRY=[{X:40,Z:-190},{X:110,Z:-225},{X:180,Z:-260}];
+const sentryMasts=[];
+for(const s of SENTRY){
+  const gy=Math.max(height(s.X,s.Z),0.3);
+  const g=new THREE.Group();
+  for(const[dx,dz]of[[-0.5,-0.5],[0.5,-0.5],[0,0.55]]){
+    const stilt=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.16,3.2,6),new THREE.MeshLambertMaterial({color:0x6b6257}));
+    stilt.position.set(dx,1.6,dz);g.add(stilt);}
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.16,1.8),new THREE.MeshLambertMaterial({color:0x7a5a38}));deck.position.y=3.2;g.add(deck);
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.12,3.4,6),new THREE.MeshPhongMaterial({color:0xd8d2c4,shininess:40}));pole.position.y=4.9;g.add(pole);
+  const dish=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.08,10),new THREE.MeshPhongMaterial({color:0xe8ecef,shininess:80}));
+  dish.rotation.x=Math.PI/2.6;dish.position.set(0,6.2,0.2);g.add(dish);
+  for(const sd of[-1,1]){const cam=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.22,0.22),new THREE.MeshLambertMaterial({color:0x39434d}));
+    cam.position.set(sd*0.35,5.6,0);cam.rotation.y=sd*0.7;g.add(cam);}
+  const led=new THREE.Mesh(new THREE.SphereGeometry(0.14,6,6),new THREE.MeshBasicMaterial({color:0xff7f27}));
+  led.position.y=6.75;g.add(led);
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+  g.position.set(s.X,gy,s.Z);scene.add(g);
+  sentryMasts.push({g,led,tuned:false,t:0});
+}
+label('REEF SENTRY LINE',SENTRY[1].X,Math.max(height(SENTRY[1].X,SENTRY[1].Z),0.3)+9,SENTRY[1].Z);
+let sentryDone=false;
+function updateSentry(dt){
+  let tuned=0;
+  for(const m of sentryMasts){
+    if(m.tuned){tuned++;m.led.material.color.set(0x37d867);continue;}
+    m.led.material.color.set(perf%900<450?0xff7f27:0x8a4a1a); // untuned masts blink amber
+    if(veh!==WALKER)continue;
+    const near=Math.hypot(P.x-m.g.position.x,P.z-m.g.position.z)<5&&Math.abs(P.v)<2;
+    if(near){m.t+=dt;
+      if(m.t>2){m.tuned=true;addClout(8);
+        toast('SENTRY MAST TUNED — storm eyes and croc pings back online  +8');}
+    }else m.t=Math.max(0,m.t-dt);
+  }
+  if(!sentryDone&&tuned===SENTRY.length){sentryDone=true;addClout(15);
+    toast('REEF SENTRY LINE SINGING — weather watch full strength. It watches storms, not people.  +15');}
+}
 // ---------------- Likkle Oracle's sky-writer (banner plane) ----------------
 const planeG=new THREE.Group();
 {const fus=new THREE.Mesh(new THREE.BoxGeometry(5,1,1),new THREE.MeshLambertMaterial({color:0xd8dde2}));planeG.add(fus);
@@ -6844,7 +7040,7 @@ function tick(t){
    banner.position.set(Math.cos(pa-0.14)*R,127,Math.sin(pa-0.14)*R);
    const mi=((t/28000)|0)%SKY_MSGS.length;if(mi!==msgI)setBanner(mi);}
   tod=(tod+dt/CYCLE)%1;applySky();
-  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);updateTurf(dt);updateWrecks(dt);updateTrain(dt);updateMedic(dt);updateSteady(dt);updateCarrier(dt);updateQuiet(dt);updateInquest(dt);updateChute(dt);updateSpout(dt);updateCards(dt);updateSwarm(dt);updateEstate(dt);updateBali(dt);updateScene(dt);updateGolf(dt);updateJob(dt);updateDrone(dt);updateGilded(dt);updateClub(dt);updateSkyworks(dt);updateMissionCtrl(dt);updateBoat(dt);updateYacht(dt);updateLido(dt);updateCircuit(dt);updateMedevac(dt);updateCamDrone(dt);updateSkyRig(dt);
+  waveWater(t);updateRain(dt);updateStatic(dt);updateTraffic(dt);updateFight(dt);updateArcade(dt);updatePursuit(dt);updateBirds(dt);updateFerry(dt);updateTaxi(dt);updateDazzler(dt);updateSchool(dt);updateFlight(dt);updateVaultDrag(dt);updateIguanas(dt);updateMarine(dt);updateFathom(dt);updateObie(dt);updateRace(dt);updateHouse(dt);updatePeds(dt);updateTurf(dt);updateWrecks(dt);updateTrain(dt);updateMedic(dt);updateSteady(dt);updateCarrier(dt);updateQuiet(dt);updateInquest(dt);updateChute(dt);updateSpout(dt);updateCards(dt);updateSwarm(dt);updateEstate(dt);updateBali(dt);updateScene(dt);updateGolf(dt);updateJob(dt);updateDrone(dt);updateGilded(dt);updateClub(dt);updateSkyworks(dt);updateMissionCtrl(dt);updateBoat(dt);updateYacht(dt);updateLido(dt);updateCircuit(dt);updateMedevac(dt);updateCamDrone(dt);updateSkyRig(dt);updateKindred(dt);updateHoloWhale(dt);updateOrrery(dt);updateSentry(dt);
   moon.position.set(P.x-140,60+SUN_ELEV*260,P.z-98);moon.target.position.set(P.x,0,P.z);
   geoCore.intensity=1.9+0.7*Math.sin(t*0.003);
   let got=0;
@@ -6963,7 +7159,7 @@ function fit(){renderer.setSize(innerWidth,innerHeight,false);composer.setSize(i
 addEventListener('resize',fit);fit();
 // headless-test / debug handle (no gameplay effect)
 window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
-  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),medicCert,steadyCert,wellDeckClip,quietOn,quietCP,quietDone,staticSU:smReading,inqOn,inqCP,inqDone,chuteOn:chute.on,chuteY:+chute.y.toFixed(1),chuteDone,spoutSeen,spoutVisible:spout.visible,cardsGot,wallDone,swarmT:+swarmT.toFixed(1),swarmCd:+swarmCd.toFixed(1),swarmUnlocked,estateOwned,inEstate,baliSeen,gildedSeen,clubSeen,skyworksSeen,mcSeen,onBoat:veh===BOAT,yachtSeen,lidoSeen,cheatOpen,drillsDone,circuitCert,medevacSeen,rangeHits,rangeBest,maxFidelity,pxr:+pxr.toFixed(2),camDroneClips,camDroneUp:camDroneT>0,skyRigOn:rig.on,rigProg:+rig.prog.toFixed(2),rigGrip:+rig.grip.toFixed(2),rigFixes:rig.fixes,protagonist:"The Don (Malik Baptiste)",clubHype:+clubHype.toFixed(1),sceneActive:SCENE.active,sceneProcT:+SCENE.procT.toFixed(1),golfSeen,jobWorked,shiftsDone,jobCd:+jobCd.toFixed(1),tixActive,tixServed,tixCount,tixOrder,domActive,domOpen,domPlayerN:domPlayer.length,domOppN:domOpp.length,domResult,droneActive,dronePhase,wrecksScouted,droneCd:+droneCd.toFixed(1),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},jackCar,VEH,CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},setMedicT:v=>{medicT=v;},STEADY,setSteadyT:v=>{steadyT=v;},CARRIER,wellDeckIn,setWellDeckClip:v=>{wellDeckClip=v;},ALEXP,QUIET_PTS,startQuiet,setQuietT:v=>{quietT=v;},setQuietCP:v=>{quietCP=v;},INQ_DESK,INQ_PTS,INQ_CRATE,startInquest,setInqT:v=>{inqT=v;},setInqCP:v=>{inqCP=v;if(v>=INQ_PTS.length)inqCrate.visible=true;},DROPRING,chute,bailOut,setChuteY:v=>{chute.y=v;},forceFly:()=>{FLIGHT.flying=true;FLIGHT.flown=0;walker.visible=false;},SPOUT,spout,setSpoutT:v=>{spoutT=v;},CARDWALL,CARD_PTS,cardMeshes,deploySwarm,swarmDrones,setSwarmCd:v=>{swarmCd=v;},ESTATE,ESTATE_COST,ESTATEINT,enterEstate,exitEstate,BALI,setBaliT:v=>{baliT=v;},GILDED,gildedJets,setGildedT:v=>{gildedT=v;},CLUB,clubTiles,clubLasers,setClubHype:v=>{clubHype=v;},setClubCd:v=>{clubCd=v;},SKYWORKS,orbStation,setSkyworksT:v=>{skyworksT=v;},MCTRL,mcScreens,setMcT:v=>{mcT=v;},BOAT,boat,boatP,boatWake,AMB,amb,ambP,YACHT,setYachtT:v=>{yachtT=v;},LIDO,setLidoT:v=>{lidoT=v;},DRILLS,drillPosts,setDrillT:(i,v)=>{drillPosts[i].t=v;},MEDEVAC,medevacRotors,setMedevacT:v=>{medevacT=v;},RANGE,rangeTargets,rangeDazzle,setMaxFidelity,camDrone,deployCamDrone,setCamDroneT:v=>{camDroneT=v;},rig,rigFig,startSkyRig,setRigProg:v=>{rig.prog=v;},setRigGrip:v=>{rig.grip=v;},rigTap:()=>{if(rig.on)rig.grip=Math.min(1,rig.grip+0.22);},runCheat,CHEATS,SCENE,spawnScene,sceneGroup,setSceneProcT:v=>{SCENE.procT=v;},DUPPY,GOLF_TALK,setGolfT:v=>{golfT=v;},YARDBIRD,startShift,serveTix,setJobCd:v=>{jobCd=v;},nextTicket,drone,deployDrone,setDroneCd:v=>{droneCd=v;},startDom,playDomTile,passDom,domForce:(pl,op,open)=>{domActive=true;domResult='';domTurns=0;domPlayer=pl.slice();domOpp=op.slice();domOpen=open;renderDom();},
+  st:()=>({phase,relocated,carrying:carryCroc?carryCroc.name:null,hasPot,wellFed,clout,grade,tier:TIER,watch,fish,instructor,veh,sets,coach,pov,rain,irie,stat,paranoia:+paranoia.toFixed(3),cine:!!grainTimer,onFoot:veh===WALKER,trafN:traffic.length,fightOn,fightWon,hp,ehp,hype,beast,rawClips,roadChunks,tod:+tod.toFixed(3),dark:+DARK.toFixed(2),pursuit,patrolDist:pursuit?Math.round(Math.hypot(P.x-patrol.position.x,P.z-patrol.position.z)):null,surface:surf,grip:+grip.toFixed(2),birdsUp:birds.filter(b=>b.g.visible).length,aboard:ferry.aboard,ferryDocked:ferry.docked,patrolStun:+patrolStun.toFixed(1),brawlStun:+brawlStun.toFixed(1),dazzCd:+dazzCd.toFixed(1),schooled,flying:FLIGHT.flying,flown:+FLIGHT.flown.toFixed(2),hauling,haulCd:+haulCd.toFixed(1),iguanasUp:iguanas.filter(i=>i.g.visible).length,marineUp:marine.filter(m=>m.g.visible).length,fathomState,obieSeen,raceOn,raceCP,raceBest:raceBest===null?null:+raceBest.toFixed(1),inHouse,pedsScattering:peds.filter(p=>p.scatter>0).length,harassCount,turfHeld:beacons.filter(b=>b.crew===CREWS.length).length,wrecksFound,trainAboard:train.aboard,trainDocked:train.docked,wardrobeIdx,wardrobeUnlocked:wardrobeUnlocked.slice(),medicCert,steadyCert,wellDeckClip,quietOn,quietCP,quietDone,staticSU:smReading,inqOn,inqCP,inqDone,chuteOn:chute.on,chuteY:+chute.y.toFixed(1),chuteDone,spoutSeen,spoutVisible:spout.visible,cardsGot,wallDone,swarmT:+swarmT.toFixed(1),swarmCd:+swarmCd.toFixed(1),swarmUnlocked,estateOwned,inEstate,baliSeen,gildedSeen,clubSeen,skyworksSeen,mcSeen,onBoat:veh===BOAT,yachtSeen,lidoSeen,cheatOpen,drillsDone,circuitCert,medevacSeen,rangeHits,rangeBest,maxFidelity,pxr:+pxr.toFixed(2),camDroneClips,camDroneUp:camDroneT>0,skyRigOn:rig.on,rigProg:+rig.prog.toFixed(2),rigGrip:+rig.grip.toFixed(2),rigFixes:rig.fixes,kindredSeen,kindredT:+kindredT.toFixed(2),whaleSeen,orrerySeen,orreryOn,sentryTuned:sentryMasts.filter(m=>m.tuned).length,sentryDone,protagonist:"The Don (Malik Baptiste)",clubHype:+clubHype.toFixed(1),sceneActive:SCENE.active,sceneProcT:+SCENE.procT.toFixed(1),golfSeen,jobWorked,shiftsDone,jobCd:+jobCd.toFixed(1),tixActive,tixServed,tixCount,tixOrder,domActive,domOpen,domPlayerN:domPlayer.length,domOppN:domOpp.length,domResult,droneActive,dronePhase,wrecksScouted,droneCd:+droneCd.toFixed(1),rawClips}),setRain,setStatic,presence,traffic,walker,wLimbs,YARD,brawler,CHROME,ARC,scene,hemi,patrol,ROADPTS,height,ferry,TAXI,SCHOOL,FLIGHT,GATE,jet,VAULTP,DROP,crate,bustVaultDrag,hookVaultDrag,setHaulCd:v=>{haulCd=v;},iguanas,marine,fathom,FATHOMP,setFathomT:v=>{fathomT=v;},forceFathom:()=>{fathomState=1;fathom.visible=true;fathom.position.y=-9;},forceFathomUp:()=>{fathomState=2;fathom.visible=true;fathom.position.y=1;fathomClipT=4.5;fathom.userData.clipped=false;},setFathomState:v=>{fathomState=v;},bii:n=>{watch=n;watchT=perf+60000;},endPursuit,FISH_SPOTS,PIER,gxP,bikeP,FIT,DISP,setGrade,OBIEP,obieBoard,setObieSeenT:v=>{obieSeenT=v;},TRAIL,startRace,setRaceCP:v=>{raceCP=v;},BIKE,HOME,HOMEINT,enterHouse,exitHouse,sleepHouse,peds,setPedFollowT:(i,v)=>{peds[i].followT=v;},jackCar,VEH,CREWS,PLAYER_CREW,setTurfT:(i,v)=>{beacons[i].turfT=v;},WRECKS,wreckMeshes,setWreckDiveT:(i,v)=>{wreckMeshes[i].diveT=v;},train,cycleWardrobe,setClout:v=>{addClout(v-clout);},setMedicT:v=>{medicT=v;},STEADY,setSteadyT:v=>{steadyT=v;},CARRIER,wellDeckIn,setWellDeckClip:v=>{wellDeckClip=v;},ALEXP,QUIET_PTS,startQuiet,setQuietT:v=>{quietT=v;},setQuietCP:v=>{quietCP=v;},INQ_DESK,INQ_PTS,INQ_CRATE,startInquest,setInqT:v=>{inqT=v;},setInqCP:v=>{inqCP=v;if(v>=INQ_PTS.length)inqCrate.visible=true;},DROPRING,chute,bailOut,setChuteY:v=>{chute.y=v;},forceFly:()=>{FLIGHT.flying=true;FLIGHT.flown=0;walker.visible=false;},SPOUT,spout,setSpoutT:v=>{spoutT=v;},CARDWALL,CARD_PTS,cardMeshes,deploySwarm,swarmDrones,setSwarmCd:v=>{swarmCd=v;},ESTATE,ESTATE_COST,ESTATEINT,enterEstate,exitEstate,BALI,setBaliT:v=>{baliT=v;},GILDED,gildedJets,setGildedT:v=>{gildedT=v;},CLUB,clubTiles,clubLasers,setClubHype:v=>{clubHype=v;},setClubCd:v=>{clubCd=v;},SKYWORKS,orbStation,setSkyworksT:v=>{skyworksT=v;},MCTRL,mcScreens,setMcT:v=>{mcT=v;},BOAT,boat,boatP,boatWake,AMB,amb,ambP,YACHT,setYachtT:v=>{yachtT=v;},LIDO,setLidoT:v=>{lidoT=v;},DRILLS,drillPosts,setDrillT:(i,v)=>{drillPosts[i].t=v;},MEDEVAC,medevacRotors,setMedevacT:v=>{medevacT=v;},RANGE,rangeTargets,rangeDazzle,setMaxFidelity,camDrone,deployCamDrone,setCamDroneT:v=>{camDroneT=v;},rig,rigFig,startSkyRig,setRigProg:v=>{rig.prog=v;},setRigGrip:v=>{rig.grip=v;},rigTap:()=>{if(rig.on)rig.grip=Math.min(1,rig.grip+0.22);},KINDRED,kindredBots,kindredEsc,setKindredT:v=>{kindredT=v;},WHALE,whale,setWhaleT:v=>{whaleT=v;},ORRERY,orreryPlanets,setOrreryT:v=>{orreryT=v;},SENTRY,sentryMasts,setSentryT:(i,v)=>{sentryMasts[i].t=v;},runCheat,CHEATS,SCENE,spawnScene,sceneGroup,setSceneProcT:v=>{SCENE.procT=v;},DUPPY,GOLF_TALK,setGolfT:v=>{golfT=v;},YARDBIRD,startShift,serveTix,setJobCd:v=>{jobCd=v;},nextTicket,drone,deployDrone,setDroneCd:v=>{droneCd=v;},startDom,playDomTile,passDom,domForce:(pl,op,open)=>{domActive=true;domResult='';domTurns=0;domPlayer=pl.slice();domOpp=op.slice();domOpen=open;renderDom();},
   skipTour:()=>{for(const b of beacons){b.got=true;b.pil.material.color.set(0xffb84d);}}};
 {const f=document.getElementById('fine');if(f)f.textContent+=' \u00b7 '+['BASE','HIGH','ULTRA'][TIER]+' TIER';}
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
