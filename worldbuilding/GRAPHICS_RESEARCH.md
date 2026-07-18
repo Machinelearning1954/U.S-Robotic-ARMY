@@ -117,3 +117,17 @@ category) are legitimate **production tools** for this project:
 In-world, this whole tool category is satirized as the **Chromelab Re-Render
 Queue** (systems doc §4.4) — the island's AI enhancement studio that pays bonus
 clout for enhanced clips and flags over-glazed ones "NUH REAL!".
+
+## Shipped from this doc (v0.95)
+
+- **Haze banding (candidate #4):** a horizon haze ring — an unlit vertical-gradient
+  band just inside the far plane, immune to fog, riding with the player. Tinted
+  toward the sun color at low sun (dawn/dusk warmth), thicker in rain, faint at
+  night. The "cheap GI/atmosphere imitation" the doc called the top payoff.
+- **Desktop MSAA:** hardware antialiasing now always on for desktop UAs including
+  high-DPR/retina (previously only DPR<1.5); mobile keeps the DPR rule to save
+  fill. Chosen over an FXAA pass because the inlined three.js build exposes no
+  ShaderPass/ShaderMaterial to hang a custom AA shader on (candidate #2's spirit,
+  different mechanism).
+- Still open from the list: SMAA/FXAA proper (needs a build that exports
+  ShaderPass), tunnel strobe lighting, more instanced props.
