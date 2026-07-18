@@ -566,3 +566,21 @@ project must never do).
 - Real places (Port Antonio, Blue Mountains) are used the way open-world games use
   real cities: as an artistic backdrop, remixed and fictionalized.
 - Tone stays cinematic and playful — power fantasy, not procedure manual.
+
+
+## The PAUDC Light Ring — courtesy perimeter & welcome gate (live, v0.86)
+
+A short arc of seven pale pylons on the headland, strung with **twenty-four soft
+teal light-strands** that breathe brighter after dark, gold caps glowing, and at
+the center a green-and-gold **welcome arch**. It is the base's perimeter rendered
+the PAUDC way: **the gate keeps nobody out — it signs you in.** Walk through the
+arch and the first pass logs you (+20, *"Welcome back, Don"*); later passes hum
+you through (*"Walk good, Don"*). No cameras pointed at people, no patrol, no
+weapons — a perimeter as public art, consistent with the island rule that its
+tech watches weather, not people.
+
+- **Boundary:** the source reel was a **real nation's border-security wall** —
+  national flags, laser fencing, an armed patrol officer, real border-force
+  branding. None of that is depicted: no real country, no border enforcement, no
+  armed guard, no flags. Only the visual idea of light-strung pylons was kept,
+  inverted from "keep out" to "welcome home."
