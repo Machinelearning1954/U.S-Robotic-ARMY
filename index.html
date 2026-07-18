@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Cloud Runner — GTA 6 Free Cloud Gaming Edition</title>
+<style>
+  :root {
+    --bg: #0b0e17;
+    --panel: #131828;
+    --panel-2: #1b2138;
+    --line: #2a3352;
+    --text: #e8ecf8;
+    --muted: #8f9bb8;
+    --accent: #64d2ff;
+    --accent-2: #ff7ad9;
+    --good: #6ee7a0;
+    --warn: #ffd166;
+    --bad: #ff6b81;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(1200px 700px at 50% -10%, #182040 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100%;
+  }
+  header { text-align: center; padding: 18px 12px 8px; }
+  header h1 {
+    font-size: clamp(20px, 4vw, 34px);
+    letter-spacing: 2px; text-transform: uppercase;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  #wrap { position: relative; width: min(960px, 96vw); }
+  canvas {
+    display: block; width: 100%; height: auto;
+    background: #0a0d18; border: 1px solid var(--line); border-radius: 12px;
+  }
+  #hud {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; padding: 8px 2px; font-size: 14px; color: var(--muted);
+    flex-wrap: wrap; gap: 6px;
+  }
+  #hud b { color: var(--text); }
+  .btn {
+    cursor: pointer; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--panel-2); color: var(--text);
+    padding: 8px 14px; font-size: 14px; font-weight: 600;
+    transition: background .15s, transform .05s;
+  }
+  .btn:hover { background: #232b4a; }
+  .btn:active { transform: scale(.97); }
+  .btn.primary { background: linear-gradient(90deg, #1e5fa8, #7a2f86); border-color: #3b6fb5; }
+  .overlay {
+    position: absolute; inset: 0; border-radius: 12px;
+    background: rgba(8, 11, 22, .92); backdrop-filter: blur(4px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 20px; z-index: 5;
+  }
+  .overlay.scroll { justify-content: flex-start; overflow-y: auto; text-align: left; }
+  .overlay h2 { font-size: clamp(18px, 3.4vw, 28px); margin-bottom: 10px; letter-spacing: 1px; }
+  .overlay p.lead { color: var(--muted); max-width: 560px; margin-bottom: 16px; font-size: 14px; line-height: 1.5; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+  .hidden { display: none !important; }
+  #toast {
+    position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+    max-width: 92%; background: var(--panel); border: 1px solid var(--line);
+    border-left: 4px solid var(--accent); border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; line-height: 1.45; color: var(--text);
+    opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 4;
+  }
+  #toast b { color: var(--accent); }
+  /* Guide styles */
+  .guide { width: 100%; max-width: 860px; margin: 0 auto; padding-bottom: 24px; }
+  .guide h2 { text-align: center; margin: 6px 0 2px; }
+  .guide .sub { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 12px;
+  }
+  .card h3 { font-size: 16px; margin-bottom: 8px; }
+  .card h3 .tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+    border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: 2px;
+  }
+  .tag.free { background: rgba(110,231,160,.15); color: var(--good); }
+  .tag.sub  { background: rgba(255,209,102,.15); color: var(--warn); }
+  .card ul { margin: 6px 0 0 18px; color: var(--muted); font-size: 13.5px; line-height: 1.6; }
+  .card ul b { color: var(--text); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 560px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel-2); }
+  td { color: var(--muted); }
+  td:first-child { color: var(--text); font-weight: 600; }
+  .takeaway { border-left: 4px solid var(--accent-2); }
+  .refs { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  footer { color: #5b6685; font-size: 12px; padding: 14px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cloud Runner</h1>
+  <p>GTA 6 Free Cloud Gaming Edition &mdash; U.S Robotic ARMY arcade</p>
+</header>
+
+<div id="wrap">
+  <canvas id="game" width="960" height="540"></canvas>
+
+  <!-- Start screen -->
+  <div id="menu" class="overlay">
+    <h2>CLOUD RUNNER</h2>
+    <p class="lead">
+      GTA 6 lands November 19, 2026 on PS5 and Xbox Series X|S &mdash; but can you play it
+      in the cloud for free? Pilot your streaming rig, collect cloud gaming services,
+      and dodge paywalls and queue blocks. Each pickup teaches you a real fact from the
+      2026 free cloud gaming guide.
+    </p>
+    <p class="lead" style="font-size:12.5px">
+      Controls: Arrow keys / WASD to move &middot; P to pause &middot; touch drag on mobile
+    </p>
+    <div class="row">
+      <button class="btn primary" id="playBtn">&#9654; Play</button>
+      <button class="btn" id="guideBtn">&#9776; Cloud Gaming Guide</button>
+    </div>
+  </div>
+
+  <!-- Game over screen -->
+  <div id="gameover" class="overlay hidden">
+    <h2>SESSION EXPIRED</h2>
+    <p class="lead" id="goStats"></p>
+    <p class="lead" id="goVerdict"></p>
+    <div class="row">
+      <button class="btn primary" id="retryBtn">&#8635; Play Again</button>
+      <button class="btn" id="guideBtn2">&#9776; Cloud Gaming Guide</button>
+    </div>
+  </div>
+
+  <!-- Integrated guide -->
+  <div id="guide" class="overlay scroll hidden">
+    <div class="guide">
+      <h2>Free Cloud Gaming Solutions for GTA 6</h2>
+      <p class="sub">Overview &mdash; July 2026</p>
+
+      <div class="card">
+        <p style="color:var(--muted);font-size:13.5px;line-height:1.6">
+          As of July 2026, GTA 6 is scheduled to release on <b style="color:var(--text)">November 19, 2026</b>,
+          for PlayStation 5 and Xbox Series X|S. While a native PC version has not been announced,
+          cloud gaming offers a potential way to play the game on PC or other devices without owning
+          high-end hardware. Below are the primary &ldquo;free&rdquo; or low-cost cloud-based solutions
+          available in 2026.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>1. NVIDIA GeForce NOW <span class="tag free">Free tier</span></h3>
+        <ul>
+          <li><b>Cost:</b> $0.00 &mdash; the most prominent truly free cloud gaming service.</li>
+          <li><b>Session length:</b> typically limited to 1 hour per session.</li>
+          <li><b>Wait times:</b> free tier users often face long queues, especially at peak hours or major launches.</li>
+          <li><b>Hardware:</b> basic rigs (likely not the RTX 5080 / Ultimate tier).</li>
+          <li><b>Availability:</b> GTA 6 must be officially supported. Historically, Rockstar titles (GTA V, RDR2) have had a complicated relationship with GeForce NOW and are often unavailable.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>2. Xbox Cloud Gaming <span class="tag sub">Game Pass Ultimate</span></h3>
+        <ul>
+          <li><b>Free options:</b> not strictly free, but 14-day or $1 one-month trials are common for new subscribers.</li>
+          <li><b>GTA 6 potential:</b> since GTA 6 launches on Xbox Series X|S, there is a strong possibility it arrives on Xbox Cloud Gaming, potentially at or near launch.</li>
+          <li><b>Device support:</b> PC (browser or app), mobile devices, and some smart TVs.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>3. Amazon Luna <span class="tag sub">Free with Prime</span></h3>
+        <ul>
+          <li><b>Cost:</b> a rotating selection of games is included with an Amazon Prime membership.</li>
+          <li><b>GTA 6 potential:</b> unlikely to be free at launch, but may be available for purchase and play via the Luna+ subscription or through integration with Ubisoft+ or GOG.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>4. Remote Play <span class="tag free">Host your own cloud</span></h3>
+        <ul>
+          <li><b>PS Remote Play / Xbox Remote Play:</b> official apps that stream your console's screen to PC or mobile for free over the internet &mdash; if you (or a friend) own a PS5 or Series X|S.</li>
+          <li><b>Moonlight / Sunshine:</b> high-performance, open-source alternatives for streaming from a host PC (if a PC version eventually releases).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Comparison of Free / Low-Cost Cloud Options (2026)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Service</th><th>Cost</th><th>GTA 6 Availability (Est.)</th><th>Pros</th><th>Cons</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>GeForce NOW (Free)</td><td>$0</td><td>Low (depends on Rockstar)</td>
+                <td>Truly free; no hardware needed.</td><td>1-hour sessions; long queues.</td>
+              </tr>
+              <tr>
+                <td>Xbox Cloud Gaming</td><td>~$20/mo (or $1 trial)</td><td>High (likely after launch)</td>
+                <td>High-quality console hardware.</td><td>Requires subscription; not truly free.</td>
+              </tr>
+              <tr>
+                <td>Amazon Luna</td><td>Prime sub</td><td>Low</td>
+                <td>Free for Prime members.</td><td>Limited library; regional availability.</td>
+              </tr>
+              <tr>
+                <td>Remote Play</td><td>$0</td><td>High (at launch)</td>
+                <td>Truly free; full console features.</td><td>Requires owning a console (or a friend's).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card takeaway">
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li><b>No truly free launch-day access:</b> no service currently lets you play GTA 6 for free on day one without a console or a paid subscription.</li>
+          <li><b>Wait for the PC release:</b> the best free experience (via GeForce NOW) will likely only be possible after the official PC version launches, expected in 2027 or 2028.</li>
+          <li><b>Trials are your best bet:</b> look for $1 Xbox Game Pass Ultimate trials around November 2026 to play the console version via the cloud.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>References</h3>
+        <p class="refs">
+          [1] Reddit (2026, April 2). <i>2020 Free vs 2026 Performance Hardware Comparison.</i><br>
+          [2] Xbox (2026). <i>Grand Theft Auto VI: Coming November 19, 2026 to Xbox Series X|S.</i><br>
+          [3] AS.com (2026, July 2). <i>Amazon reveals July 2026 lineup for Luna cloud gaming.</i><br>
+          [4] Reddit (2024, December 31). <i>Any free cloud gaming services?</i>
+        </p>
+      </div>
+
+      <div class="row">
+        <button class="btn primary" id="closeGuideBtn">&#8592; Back</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<div id="hud">
+  <span>Score: <b id="score">0</b></span>
+  <span>Session time: <b id="time">60.0</b>s</span>
+  <span>Services found: <b id="services">0</b>/4</span>
+  <span><button class="btn" id="pauseBtn" style="padding:4px 10px;font-size:12px">Pause (P)</button></span>
+</div>
+
+<footer>All graphics rendered locally on canvas &mdash; no external assets. Guide content: July 2026.</footer>
+
+<script>
+(() => {
+  "use strict";
+
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+
+  const ui = {
+    menu: document.getElementById("menu"),
+    gameover: document.getElementById("gameover"),
+    guide: document.getElementById("guide"),
+    toast: document.getElementById("toast"),
+    score: document.getElementById("score"),
+    time: document.getElementById("time"),
+    services: document.getElementById("services"),
+    goStats: document.getElementById("goStats"),
+    goVerdict: document.getElementById("goVerdict"),
+  };
+
+  // The four cloud services from the guide, integrated as in-game pickups.
+  const SERVICES = [
+    {
+      id: "gfn", name: "GeForce NOW", short: "GFN", color: "#76b900", points: 100,
+      fact: "<b>GeForce NOW (free tier):</b> $0.00 — but sessions are capped at ~1 hour and free users face long queues. GTA 6 availability is LOW: Rockstar titles are often missing from the platform."
+    },
+    {
+      id: "xcloud", name: "Xbox Cloud Gaming", short: "XBX", color: "#107c10", points: 150,
+      fact: "<b>Xbox Cloud Gaming:</b> included with Game Pass Ultimate (~$20/mo, $1 trials common). Since GTA 6 launches on Series X|S, cloud availability at or near launch is HIGH."
+    },
+    {
+      id: "luna", name: "Amazon Luna", short: "LUNA", color: "#9146ff", points: 100,
+      fact: "<b>Amazon Luna:</b> a rotating game selection is free with Prime. GTA 6 free at launch is unlikely — watch Luna+, Ubisoft+ or GOG integration instead."
+    },
+    {
+      id: "remote", name: "Remote Play", short: "RP", color: "#00b2ff", points: 150,
+      fact: "<b>Remote Play:</b> PS/Xbox Remote Play streams a console you (or a friend) own to PC or mobile for $0. Moonlight/Sunshine cover PC hosts. HIGH availability at launch."
+    },
+  ];
+
+  // Hazards from the guide's "cons" column.
+  const HAZARDS = [
+    { name: "PAYWALL", color: "#ff6b81", fact: "<b>Paywall!</b> No service offers truly free GTA 6 on day one without a console or paid subscription." },
+    { name: "QUEUE", color: "#ffd166", fact: "<b>Queue block!</b> Free-tier queues get long at peak hours — especially during major game launches." },
+    { name: "1-HR CAP", color: "#ff9f43", fact: "<b>Session cap!</b> Free tiers typically limit you to 1 hour per session." },
+  ];
+
+  const SESSION_SECONDS = 60; // one free-tier "session"
+
+  const state = {
+    running: false, paused: false, over: false,
+    score: 0, time: SESSION_SECONDS,
+    collected: new Set(),
+    player: { x: W / 2, y: H - 70, r: 18, vx: 0, vy: 0, speed: 320 },
+    items: [], particles: [], stars: [],
+    spawnTimer: 0, hazardTimer: 0, elapsed: 0,
+  };
+
+  for (let i = 0; i < 90; i++) {
+    state.stars.push({ x: Math.random() * W, y: Math.random() * H, s: Math.random() * 1.6 + .4, v: Math.random() * 18 + 6 });
+  }
+
+  const keys = {};
+  addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
+    if (["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase())) e.preventDefault();
+    if (e.key.toLowerCase() === "p") togglePause();
+  });
+  addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+  // Touch: drag to move
+  let touch = null;
+  canvas.addEventListener("touchstart", e => { touch = pt(e); e.preventDefault(); }, { passive: false });
+  canvas.addEventListener("touchmove", e => { touch = pt(e); e.preventDefault(); }, { passive: false });
+  canvas.addEventListener("touchend", () => touch = null);
+  function pt(e) {
+    const r = canvas.getBoundingClientRect(), t = e.touches[0];
+    return { x: (t.clientX - r.left) * (W / r.width), y: (t.clientY - r.top) * (H / r.height) };
+  }
+
+  function reset() {
+    state.score = 0; state.time = SESSION_SECONDS; state.elapsed = 0;
+    state.collected.clear();
+    state.items.length = 0; state.particles.length = 0;
+    state.player.x = W / 2; state.player.y = H - 70;
+    state.spawnTimer = 0; state.hazardTimer = 2;
+    state.over = false; state.paused = false;
+    updateHud();
+  }
+
+  function start() {
+    reset();
+    state.running = true;
+    ui.menu.classList.add("hidden");
+    ui.gameover.classList.add("hidden");
+    toast("Collect all 4 cloud services before your free session expires!");
+  }
+
+  function endGame(reason) {
+    state.running = false; state.over = true;
+    ui.goStats.textContent = `Score: ${state.score} — Services found: ${state.collected.size}/4 — ${reason}`;
+    ui.goVerdict.textContent = state.collected.size === 4
+      ? "You found every option. Real-world verdict: trials are your best bet — look for $1 Game Pass Ultimate trials around November 2026."
+      : "Guide tip: there is no truly free launch-day access to GTA 6. Open the Cloud Gaming Guide to see all four options.";
+    ui.gameover.classList.remove("hidden");
+  }
+
+  function togglePause() {
+    if (!state.running) return;
+    state.paused = !state.paused;
+    toast(state.paused ? "Paused — press P to resume." : "Resumed.");
+  }
+
+  function spawnService() {
+    const remaining = SERVICES.filter(s => !state.collected.has(s.id));
+    const pool = remaining.length ? remaining : SERVICES;
+    const s = pool[Math.floor(Math.random() * pool.length)];
+    state.items.push({
+      kind: "service", def: s,
+      x: 40 + Math.random() * (W - 80), y: -30,
+      r: 20, vy: 70 + Math.random() * 50, wob: Math.random() * Math.PI * 2,
+    });
+  }
+
+  function spawnHazard() {
+    const h = HAZARDS[Math.floor(Math.random() * HAZARDS.length)];
+    state.items.push({
+      kind: "hazard", def: h,
+      x: 40 + Math.random() * (W - 80), y: -30,
+      r: 18, vy: 110 + Math.random() * 90 + state.elapsed * 1.5, wob: Math.random() * Math.PI * 2,
+    });
+  }
+
+  function burst(x, y, color, n) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 40 + Math.random() * 160;
+      state.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: .6 + Math.random() * .4, color });
+    }
+  }
+
+  let toastTimer = null;
+  function toast(html) {
+    ui.toast.innerHTML = html;
+    ui.toast.style.opacity = 1;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => ui.toast.style.opacity = 0, 4200);
+  }
+
+  function updateHud() {
+    ui.score.textContent = state.score;
+    ui.time.textContent = Math.max(0, state.time).toFixed(1);
+    ui.services.textContent = state.collected.size;
+  }
+
+  function update(dt) {
+    state.elapsed += dt;
+    state.time -= dt;
+    if (state.time <= 0) { updateHud(); endGame("Free session time expired (1-hour cap... arcade-scaled to 60s)."); return; }
+
+    const p = state.player;
+    let dx = 0, dy = 0;
+    if (keys["arrowleft"] || keys["a"]) dx -= 1;
+    if (keys["arrowright"] || keys["d"]) dx += 1;
+    if (keys["arrowup"] || keys["w"]) dy -= 1;
+    if (keys["arrowdown"] || keys["s"]) dy += 1;
+    if (touch) { dx = Math.sign(touch.x - p.x) * Math.min(1, Math.abs(touch.x - p.x) / 20); dy = Math.sign(touch.y - p.y) * Math.min(1, Math.abs(touch.y - p.y) / 20); }
+    const len = Math.hypot(dx, dy) || 1;
+    p.x += dx / len * p.speed * dt;
+    p.y += dy / len * p.speed * dt;
+    p.x = Math.max(p.r, Math.min(W - p.r, p.x));
+    p.y = Math.max(p.r, Math.min(H - p.r, p.y));
+
+    state.spawnTimer -= dt;
+    if (state.spawnTimer <= 0) { spawnService(); state.spawnTimer = 1.4 + Math.random(); }
+    state.hazardTimer -= dt;
+    if (state.hazardTimer <= 0) { spawnHazard(); state.hazardTimer = Math.max(.5, 1.6 - state.elapsed * .02) + Math.random() * .8; }
+
+    for (let i = state.items.length - 1; i >= 0; i--) {
+      const it = state.items[i];
+      it.y += it.vy * dt;
+      it.wob += dt * 3;
+      it.x += Math.sin(it.wob) * 20 * dt;
+      if (it.y > H + 40) { state.items.splice(i, 1); continue; }
+      const d = Math.hypot(it.x - p.x, it.y - p.y);
+      if (d < it.r + p.r) {
+        state.items.splice(i, 1);
+        if (it.kind === "service") {
+          state.score += it.def.points;
+          const first = !state.collected.has(it.def.id);
+          state.collected.add(it.def.id);
+          burst(it.x, it.y, it.def.color, 22);
+          if (first) toast(it.def.fact);
+          if (state.collected.size === 4 && first) {
+            state.score += 500;
+            toast("<b>All 4 services collected! +500</b> — Key takeaway: trials are your best bet for GTA 6 cloud play in Nov 2026.");
+          }
+        } else {
+          state.score = Math.max(0, state.score - 75);
+          state.time = Math.max(0, state.time - 5);
+          burst(it.x, it.y, it.def.color, 16);
+          toast(it.def.fact + " <b>(-75 pts, -5s)</b>");
+        }
+      }
+    }
+
+    for (let i = state.particles.length - 1; i >= 0; i--) {
+      const q = state.particles[i];
+      q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 220 * dt;
+      if (q.life <= 0) state.particles.splice(i, 1);
+    }
+
+    for (const s of state.stars) { s.y += s.v * dt; if (s.y > H) { s.y = -2; s.x = Math.random() * W; } }
+    updateHud();
+  }
+
+  function drawPlayer(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    // thruster glow
+    const g = ctx.createRadialGradient(0, 16, 2, 0, 16, 22);
+    g.addColorStop(0, "rgba(100,210,255,.8)"); g.addColorStop(1, "rgba(100,210,255,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 16, 22, 0, Math.PI * 2); ctx.fill();
+    // robot rig body
+    ctx.fillStyle = "#dfe7ff";
+    ctx.strokeStyle = "#64d2ff"; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, -18); ctx.lineTo(14, 6); ctx.lineTo(8, 16); ctx.lineTo(-8, 16); ctx.lineTo(-14, 6);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // visor
+    ctx.fillStyle = "#0b0e17";
+    ctx.fillRect(-7, -8, 14, 6);
+    ctx.fillStyle = "#64d2ff";
+    ctx.fillRect(-5, -6.5, 4, 3); ctx.fillRect(1, -6.5, 4, 3);
+    ctx.restore();
+  }
+
+  function drawItem(it) {
+    ctx.save();
+    ctx.translate(it.x, it.y);
+    if (it.kind === "service") {
+      // cloud puff
+      ctx.fillStyle = it.def.color + "33";
+      ctx.beginPath(); ctx.arc(0, 0, it.r + 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#0e1322";
+      ctx.strokeStyle = it.def.color; ctx.lineWidth = 2;
+      cloudPath(it.r); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = it.def.color;
+      ctx.font = "bold 9px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(it.def.short, 0, 1);
+    } else {
+      ctx.rotate(it.wob * .4);
+      ctx.fillStyle = "#1a0f16";
+      ctx.strokeStyle = it.def.color; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const a = i / 8 * Math.PI * 2;
+        const r = i % 2 ? it.r * .55 : it.r;
+        ctx[i ? "lineTo" : "moveTo"](Math.cos(a) * r, Math.sin(a) * r);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.rotate(-it.wob * .4);
+      ctx.fillStyle = it.def.color;
+      ctx.font = "bold 7px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(it.def.name, 0, 1);
+    }
+    ctx.restore();
+  }
+
+  function cloudPath(r) {
+    ctx.beginPath();
+    ctx.arc(-r * .5, 2, r * .55, 0, Math.PI * 2);
+    ctx.arc(0, -r * .35, r * .6, 0, Math.PI * 2);
+    ctx.arc(r * .5, 2, r * .55, 0, Math.PI * 2);
+    ctx.rect(-r * .8, 2, r * 1.6, r * .5);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // starfield
+    ctx.fillStyle = "#3a4670";
+    for (const s of state.stars) ctx.fillRect(s.x, s.y, s.s, s.s);
+    // skyline hint
+    ctx.fillStyle = "rgba(30,40,80,.5)";
+    for (let i = 0; i < 12; i++) {
+      const bw = 60, bx = i * 84 - 20, bh = 40 + ((i * 37) % 70);
+      ctx.fillRect(bx, H - bh, bw, bh);
+    }
+    for (const it of state.items) drawItem(it);
+    for (const q of state.particles) {
+      ctx.globalAlpha = Math.max(0, q.life);
+      ctx.fillStyle = q.color;
+      ctx.fillRect(q.x - 2, q.y - 2, 4, 4);
+      ctx.globalAlpha = 1;
+    }
+    drawPlayer(state.player);
+
+    // collected-services tray
+    ctx.font = "bold 10px 'Segoe UI', sans-serif";
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    SERVICES.forEach((s, i) => {
+      const x = 14, y = 20 + i * 22;
+      ctx.globalAlpha = state.collected.has(s.id) ? 1 : .28;
+      ctx.fillStyle = s.color;
+      ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#cdd6f2";
+      ctx.fillText(s.name, x + 12, y);
+      ctx.globalAlpha = 1;
+    });
+
+    if (state.paused && state.running) {
+      ctx.fillStyle = "rgba(8,11,22,.6)";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#e8ecf8";
+      ctx.font = "bold 28px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("PAUSED", W / 2, H / 2);
+    }
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(.05, (now - last) / 1000);
+    last = now;
+    if (state.running && !state.paused) update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // UI wiring
+  document.getElementById("playBtn").onclick = start;
+  document.getElementById("retryBtn").onclick = start;
+  document.getElementById("pauseBtn").onclick = togglePause;
+  const openGuide = () => { ui.guide.classList.remove("hidden"); if (state.running) state.paused = true; };
+  document.getElementById("guideBtn").onclick = openGuide;
+  document.getElementById("guideBtn2").onclick = openGuide;
+  document.getElementById("closeGuideBtn").onclick = () => {
+    ui.guide.classList.add("hidden");
+    if (state.over) ui.gameover.classList.remove("hidden");
+    else if (!state.running) ui.menu.classList.remove("hidden");
+  };
+
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
