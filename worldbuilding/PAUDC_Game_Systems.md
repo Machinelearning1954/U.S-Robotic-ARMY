@@ -726,3 +726,21 @@ croc-drift pings for the harbor. *They watch weather, not people.*
   political figure addressing massed troops with warship/missile/nuclear-war
   imagery — was **declined entirely**: real people, real militaries, and war-hype
   content stay out of the game, full stop.
+
+
+## The Grand Flock — a migration swarm over the bay (live, v0.83)
+
+Every so often the harbor sky fills with wings: a great seasonal **bird migration**
+sweeps east-to-west over the bay in a loose V-echelon, forty-plus birds strong on
+high tiers, wingbeats staggered, the whole sky moving. Stand under the crossing and
+take it in for a one-time **+20 — or +30 if the Reef Sentry Line is tuned**, because
+the wildlife watch logs the flock as it passes ("SENTRY PING — grand flock logged").
+Crossings recur on a loose timer; the sentry callout fires once per crossing.
+
+- **Boundary:** the source reel was a war clip — a sky black with attack aircraft
+  under a missile-defense targeting HUD, with a **real counter-swarm weapons system**
+  named in the caption. The weapons, the targeting, the real system, and the war
+  frame are all **out** (non-lethal floor; no real military tech). What was kept is
+  only the awe of a sky full of movement — rebuilt as birds, tracked by the island's
+  own storm-and-wildlife watch. Nothing shoots anything; you look up, and the line
+  takes a note.
