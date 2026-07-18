@@ -76,3 +76,14 @@ standby"). Purely **humanitarian and non-lethal** — no weapons, no armament; i
 a rescue aircraft, consistent with the game's non-lethal floor. Original craft, no
 real aircraft or operator depicted; the flag motif is the same island colorway the
 Don wears.
+
+
+## Green Cross Ground Ambulance — drivable rescue van (live in the prototype, v0.77)
+
+The road counterpart to the air medevac: a **boardable ground ambulance** parked at
+the Green Cross bay. Original van in the island flag colorway (green band, gold
+stripe), green medical crosses on both flanks, a red/blue light bar. Board it on
+foot with **E** like any ride; mid-tier road stats, no water hull (it's a van).
+**Weaponless and humanitarian** — a rescue vehicle, consistent with the game's
+non-lethal floor. Original craft; no real ambulance, operator, or livery depicted
+beyond the island's own colorway.
