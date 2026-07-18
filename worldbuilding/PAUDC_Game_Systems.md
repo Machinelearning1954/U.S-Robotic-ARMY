@@ -759,3 +759,20 @@ neither is anyone else. Sit with it a moment for a one-time **+20**.
 - **Origin:** an AI-generated luxury-interior render (aquarium table, coral, a cat
   counting fish) — rebuilt as an original harborside lounge. Pure ambience; no
   brand, place, or product depicted.
+
+
+## The Storm Desk — field weather station (live, v0.87)
+
+A canvas field tent on the headland behind the Light Ring: two poles, sloped
+canvas, plain supply crates, a folding table, and a **rugged field laptop** whose
+green scope never stops sweeping. It is the island's weather desk — first check
+pays **+20** ("squalls and wildlife only, nothing else on this scope"), and every
+later check reads out a **live field report from the actual world state**: an
+active waterspout, the grand flock mid-crossing, a rain cell overhead, the camera
+drone aloft, and where the Sea Puss is on the wreck line right now. If nothing's
+happening: *"all quiet, bay breathing easy."*
+
+- **Boundary:** the source reel was "AI Warfare: Precision Missile Deployment" —
+  a field operator on a military laptop in a war camp. The missiles, targeting,
+  and war frame are all **out**; ammo crates became plain island supply. Only the
+  field-desk image was kept, and its scope was pointed at the weather.
