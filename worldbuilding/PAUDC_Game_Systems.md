@@ -791,3 +791,21 @@ power."* Crossings recur on a loose festival timer.
   the bomber, the weapons, and the war-display are all **out** (no real people,
   no real aircraft, no war-hype). Only the awe of aircraft overhead was kept,
   rebuilt as a civil festival flypast in the island's own colors.
+
+
+## The Surf Rescue Drill — robo-fin training pool at the Alexandria (live, v0.92)
+
+Beside the Alexandria on the hilltop: a round **lifeguard training pool** ringed
+in orange-and-white buoys, a **rescue dummy** riding a board dead centre, and four
+of the Don's **robotic drill fins** carving slow circles around it — dark blades
+with bright **grab handles** and green nav LEDs, because the rig makes no secret
+of being a rig. Trainees practice the paddle-out against moving "sharks" that
+were never sharks. A red lifeguard chair watches over the rim. One-time **+20**:
+*"nobody in these waters but machines."*
+
+- **Boundary:** the source clip was an AI shark-thriller (two people stranded on
+  a surfboard, sharks circling). The peril is **not** depicted — this game never
+  does animal attacks; its wildlife is protected and rescued, not menacing. Only
+  the fins-around-a-board image was kept, rebuilt as opt-in lifeguard training
+  with robots. "Alexandria Potomac" resolves to the game's own fictional
+  Alexandria per the standing real-places rule.
