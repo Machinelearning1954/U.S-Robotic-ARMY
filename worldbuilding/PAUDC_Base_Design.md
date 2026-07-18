@@ -603,3 +603,22 @@ pays **+20**.
   to weather and ground, never to people) is stated in the feature's own toast.
   Only the wonder of "ground that can feel" was kept, pointed at tremors, surf,
   and an opt-in stomp.
+
+
+## The Storm Walkers — heavy rescue frames on barrier drill (live, v0.90)
+
+On the yard beside the fort, four **heavy humanoid rescue frames** run the
+barrier drill: olive-green plating, amber hazard stripes, teal visors, each
+carrying a striped **storm barrier** between the stacks at either end of the
+lane — heavy step-bob, about-face at the ends, endless patient reps. They are
+PAUDC's disaster-response muscle: **no weapons, no arms on these arms** — their
+enemy is weather, their cargo is sandbags. Watch the drill a moment for a
+one-time **+25**.
+
+- **Boundary:** the source post was "robot soldiers enter battlefield" — armed
+  humanoid combat robots fielded by real nations in a real, ongoing war (and the
+  request asked to re-flag them for two other real nations). All of it is out:
+  no real war, no real nations' forces, and **no armed robots ever** — in canon
+  the Don's machines have never carried a weapon. Only the image of humanoid
+  frames deployed in ranks was kept, re-pointed at the island's real adversary:
+  the storm.
