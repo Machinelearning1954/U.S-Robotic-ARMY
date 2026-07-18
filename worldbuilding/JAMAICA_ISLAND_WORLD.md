@@ -188,3 +188,21 @@ applied to a second real-world inspiration.
 > Fictional game world. Real-place names are geographic reference in the tradition of
 > open-world games set in real regions; everything operational, commercial, military,
 > or personal is invented.
+
+
+## The Coral Tunnel — undersea glass line off the Bali gardens (live, v0.91)
+
+From the shore of the island's **Bali garden estate** (the game's own invented
+garden district — no real Bali is depicted), a **glass undersea line** dives at a
+pale portal tower and runs four hundred metres across the bay floor to a twin
+tower on the far shallows: a transparent tube ringed in dark frames, resting
+among the coral, with **eight glowing shuttles** streaming through it in both
+directions like fireflies in a bottle. A wooden **viewing deck** with a brass
+scope overlooks the dive point — linger there for a one-time **+20** and watch
+the lights run the seabed. *"The reef never minds good neighbours."*
+
+- **Boundary:** the source post was a real city's undersea road-tunnel project,
+  national flag flying. The real city, project, and flag are **not** depicted —
+  real places stay fictionalized in this world, and the request's "Bali" resolves
+  to the island's own fictional Bali gardens, per the same rule that renamed
+  every other real place. Civil infrastructure wonder only; nothing else kept.
