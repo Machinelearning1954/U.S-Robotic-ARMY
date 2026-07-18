@@ -829,3 +829,23 @@ state, no combat: the mission is speed, nerve, and bringing her home.
   program** the request named are not used — Rule Zero and the no-real-military
   rule. Only the *test-pilot mission shape* was kept: an original invented
   testbed, an original control script, zero weapons.
+
+
+## The Long Game — the million-run strategy table (live, v0.98)
+
+At Alexandria Mission Control: a dark round table under a soft **column of
+light**, ringed by twelve run-counter lamps that ripple teal when someone steps
+up to read the board. The table has **run the storm season a million times**,
+and the count on the board never changes: *the island wins 1,000,000 of
+1,000,000 — and every winning line starts the same way: nobody throws the first
+punch.* First reading pays **+25**; step up again and the board re-runs, dealing
+original island aphorisms — *win first, then walk in… make your enemy your
+neighbour before your neighbour your enemy… patience is a position; hold it.*
+
+- **Boundary:** the request bundled a real author's strategy books, a film
+  character's "saw every future" trick, and a real-nation war to win. The
+  author's copyrighted work is not reproduced, the film IP is not used, and the
+  war is declined (standing rules). Kept only the strategist-who-simulates-
+  everything idea, pointed at the game's own doctrine — the aphorisms are
+  original and island-voiced, and the one answer the machine ever finds is the
+  game's non-lethal floor stated as strategy.
