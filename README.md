@@ -59,7 +59,18 @@ src/js/
 ## Tech
 
 Plain HTML + CSS + vanilla JS with the Canvas 2D API. Districts are generated
-deterministically from a seeded PRNG, so each one has a stable layout. Rendering
-does camera-follow with world-bounds clamping, faux-height building shading,
-radial-gradient glow for emitters and the player, sweeper vision cones, a
-particle system for neutralize bursts, and a live minimap.
+deterministically from a seeded PRNG, so each one has a stable layout.
+
+The renderer is a GTA2-style 2.5D pipeline: buildings extrude away from the
+screen center (a scale-about-center projection, so roofs stay axis-aligned),
+with visible wall faces shaded per orientation, lit windows climbing the walls,
+neon signage, and roof clutter (AC units, blinking antennas). On top of that:
+
+- a dynamic night-lighting layer (street lamps, headlights, emitters and the
+  player punch holes in the darkness)
+- wet streets: puddles with neon reflection smears, rain, ground splashes
+- ambient life: traffic with headlight cones and pedestrians under umbrellas
+- post-processing: quarter-res bloom, film grain, vignette, and the
+  resonance "tingle" that rims the screen as you near an emitter
+- an adaptive quality governor that sheds grain → bloom → lighting refresh
+  rate when the frame budget is tight, so it stays smooth on weak hardware
