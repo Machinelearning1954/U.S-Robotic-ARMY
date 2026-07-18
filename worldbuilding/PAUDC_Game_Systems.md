@@ -672,3 +672,19 @@ to clear it (**+15** apiece); clear all five and the circuit certifies you for a
   gene-editing is depicted. These are generalized, invented *athletic* drills
   (sprint/agility/steadiness/endurance), non-lethal and courtesy-first like the rest
   of the game.
+
+
+## Camera Drone — aerial clips for OnWatch (live in the prototype, v0.80)
+
+A cinematography drone in the Don's robotics kit: press **I** on foot and an
+original filming quadcopter lifts off, orbits overhead for a few seconds getting
+the aerial shot, then banks an **OnWatch clip** — **+18 clout, or +30 when
+Chromelab Grade is on** (the graded footage overperforms, same as splashdown
+clips). 14-second cooldown; rotors and nav LEDs animate while it films.
+
+- **It's a camera, not a weapon** — a gimbal drone that captures footage, nothing
+  else, consistent with the non-lethal floor. It feeds the existing OnWatch/clout
+  economy (the game's "film the stunt" loop) with a new *aerial* angle.
+- **Origin:** a real camera-drone brand's reel ("movement without losing sight of
+  the frame"); the brand and hardware are **not** depicted — this is an original
+  quadcopter, and only the "aerial cinematography drone" idea was kept.
