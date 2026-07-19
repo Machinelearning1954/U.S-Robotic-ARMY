@@ -221,3 +221,18 @@ one-time **+20**: *"three stones with light inside."*
 - **Origin:** an architecture concept render (sculptural waterfront pavilions
   with cut-out apertures) — rebuilt as original invented buildings; no real
   city, landmark, or architect's project depicted.
+
+
+## The Trine — the triangle observation wheel (live, v1.06)
+
+The waterfront's new signature landmark, original by geometry: not a wheel — a
+**giant equilateral triangle**, turning slow as a Sunday on an A-frame above the
+strip. Each of its three edges is lit in its own neon (teal, gold, pink), gold
+hubs at the corners, and **six white-and-green gondolas ride the rim of the
+triangle itself**, counter-rotating so they hang level through every corner.
+Stand beneath it a moment for a one-time **+25**: *"the only three-cornered
+wheel on any coast."*
+
+- Invented landmark — no real attraction depicted. Born from a "make it a
+  triangle instead of a circle" brief, which is exactly the kind of twist that
+  makes a skyline ownable for marketing.
