@@ -639,3 +639,25 @@ to leave.
   non-lethal **Vault Drag** outside (outrun the BII, cones not carnage). The
   enterable interior is the long-promised payoff for the concept art generated
   earlier; original strong-room, no real bank, brand, or bullion depicted.
+
+
+## Roam the Carrier — walkable flight deck + the Mess Hall (live, v1.03)
+
+The fictional **JSV Maroon Thunder** is now boardable and roamable. Swim to the
+**stern ramp** and press **E** to climb aboard, then **walk the entire flight
+deck** — teal-and-gold deck markings, a landing circle, catwalk railings along
+both edges, the island superstructure, and two **parked unarmed original utility
+craft** (no weapons). A rail keeps you on deck; step off aft (**E**) to drop back
+into the water and swim. First boarding **+35**.
+
+Amidships a lit **hatch** drops you into the **Mess Hall** — the crew's chill
+hall: long tables and benches, a galley counter with coffee urns, a glowing wall
+screen, warm light. First visit **+20**; **E** by the ladder to go back up. The
+mess is a **dominoes station** — sit at the felt-mat centre table and press **O**
+to start a full game of dominoes (the same playable set as Duppy Links).
+
+- **Classified/real content kept out, by request and by rule:** no real ship
+  (the source named a real carrier), no real aircraft, no weapons, no flags, and
+  **no reactor/propulsion internals** (the source's cutaway is exactly what's
+  excluded). Everything is invented deck dressing on the game's own fictional
+  ship — non-lethal, unclassified, original.
