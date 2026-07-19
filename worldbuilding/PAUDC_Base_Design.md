@@ -622,3 +622,20 @@ one-time **+25**.
   the Don's machines have never carried a weapon. Only the image of humanoid
   frames deployed in ranks was kept, re-pointed at the island's real adversary:
   the storm.
+
+
+## The Vault — enterable island strong-room (live, v1.02)
+
+The Vault Drag crate site now has a **real vault you can walk into**. Outside: a
+concrete face set with a **round steel door** — bolt ring, cutlass-gold spin
+wheels — at the crate site. Press **E** at the door to step inside a full
+strong-room: steel walls, **grids of gold deposit boxes** on three walls, and a
+central plinth stacked with the island's **cutlass-gold reserve**, everything
+shimmering warm under a single lamp. First entry pays **+30**; **E** by the door
+to leave.
+
+- **Look, don't lift.** It's the island's public rainy-day reserve, not a target
+  — no guards, no weapons, nothing to steal-on-foot; the caper stays the
+  non-lethal **Vault Drag** outside (outrun the BII, cones not carnage). The
+  enterable interior is the long-promised payoff for the concept art generated
+  earlier; original strong-room, no real bank, brand, or bullion depicted.
