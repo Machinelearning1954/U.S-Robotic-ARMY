@@ -118,3 +118,18 @@ wake, captain."*
   Per Rule Zero nothing of that game is depicted — original watercraft, original
   raft-up, the island's own skyline; only the *activity* was kept, made original
   as asked.
+
+
+## Osprey LMX — endurance prototype (live in the prototype, v1.05)
+
+Parked on the Vellum promenade where the yachts can admire it: an **original
+endurance-prototype hypercar** — low white tub, wraparound dark canopy, shark
+fin, twin-pylon rear wing, teal chevron over a gold pinstripe (the island
+colorway, no works livery). Board with **E** like any ride. **The fastest thing
+on tar in the game** (tops the Marlin GX), and proudly allergic to water — beach
+it and you're swimming home.
+
+- **Origin:** an AI reel of a real marque's Le Mans hypercar posed on a marina
+  dock. The brand, grille signature, and works livery are **not** depicted (no
+  real makes, per the rules); only the endurance-prototype silhouette-as-idea
+  was kept, rebuilt original in island colors.
