@@ -884,3 +884,21 @@ surface even if you keep holding dive. First swim unlocks the verb (+10); your
 first deep dive pays +15 ("down where the wrecks and the tunnel run"). It ties
 together every water feature already in the game — the Lido, the Raft-Up, the
 reef, the tunnel, the wrecks — into one continuous swimmable bay.
+
+
+## Persistence — auto-save & restore (live, v1.04)
+
+The oldest lesson in game design, now installed: **the island remembers you.**
+Progress auto-saves to the browser every few seconds and on tab-hide — clout,
+position, time of day, wardrobe, certs (night school, medic, steady-hands,
+conditioning circuit), every one-time sight unlocked across the whole map, the
+sentry line's tuned masts, and your bests (race, range, beam gate) plus ride
+tallies (Sea Puss trips, Needle runs, sky-rig fixes, camera-drone clips). Boot
+the game again and you're back where you stood: *"WELCOME BACK, DON — progress
+restored."*
+
+- `?fresh=1` on the URL boots a clean island without touching the save;
+  `wipeSave()` (debug/cheat surface) clears everything including the older
+  per-feature keys (clout/estate/race-best) that predated this system.
+- Everything saved is the player's own progress, stored locally in the
+  browser — no telemetry, nothing leaves the machine.
