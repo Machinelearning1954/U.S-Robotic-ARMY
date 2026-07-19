@@ -867,3 +867,20 @@ lift light, lift long… walk, swim, dance, stretch… rest is training too.*
   medical claims, no products, no real people; the chart figures are stylized
   silhouettes. From an "aging with vs without exercise" comparison post, rebuilt
   original.
+
+
+## Swimming — the water verb (live, v1.01)
+
+The core mechanic the bay had been waiting for. On foot in water you now truly
+**swim**: the Don goes prone into a **front-crawl stroke with a flutter kick**,
+**W** to swim, **SHIFT** for a strong sprint stroke. Hold **SPACE to dive
+under** — down to where the **Coral Tunnel** shuttles run, over the **wreck
+field**, beneath the **Sea Puss** on its dive tour. A **breath** gauge shows in
+the HUD while submerged (`DIVING ●●●●`); surface to refill it.
+
+**Non-lethal by design, like everything else:** run the breath out and you don't
+drown — you simply **come up for air** ("no harm, just breathe"), rising to the
+surface even if you keep holding dive. First swim unlocks the verb (+10); your
+first deep dive pays +15 ("down where the wrecks and the tunnel run"). It ties
+together every water feature already in the game — the Lido, the Raft-Up, the
+reef, the tunnel, the wrecks — into one continuous swimmable bay.
