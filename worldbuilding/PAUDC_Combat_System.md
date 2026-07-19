@@ -131,3 +131,22 @@ knock down all five to clear the round and score (**+6 clout per target hit**, a
   *shooter*; PAUDC does not do firearms, so only the "target arena" idea was kept
   and rebuilt non-lethal. No real weapon, and the 3D/physics/interaction
   "capabilities" the post advertised are things the prototype already ships.
+
+
+## The Beam Gate — non-lethal light-beam agility drill (live, v1.00)
+
+An agility course on the compound flats: a rubber lane between two posts, a green
+start pad and a gold finish pad, and **eight light-beams** strung across it. Arm
+it at the green pad (**E**) and thread the grid — each armed beam **blinks dark
+for half a second** of every cycle; press **E** in that dark window to phase it
+(the beam turns green), mistime it and you **trip**. A trip just **resets the
+grid — no harm, no alarm, no scratch**; wait for the dark and go again. Clear all
+eight for **+25 (+35 graded)**; your best run is tracked.
+
+- **Boundary:** built from a border-infiltration image — a real national border
+  fence with its flag, laser tripwires, and a masked intruder mid-break-in. The
+  real border, the flag, the intruder, and the whole break-in framing are **out**
+  (no real places, no real security systems, no crime-against-a-real-site).
+  Only the thread-the-laser-grid *game beat* — the heist-room classic — was kept,
+  rebuilt as courtesy-first reflex sport with a no-penalty trip, fully inside the
+  non-lethal floor.
