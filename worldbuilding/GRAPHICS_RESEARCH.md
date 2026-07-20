@@ -131,3 +131,17 @@ clout for enhanced clips and flags over-glazed ones "NUH REAL!".
   different mechanism).
 - Still open from the list: SMAA/FXAA proper (needs a build that exports
   ShaderPass), tunnel strobe lighting, more instanced props.
+
+## Shipped from this doc (v1.15) — CPU-side optimization pass
+
+- **Distance-gated decoration:** ten decorative animation loops (Kindred bots,
+  Glass Reef fish, drill fins, Storm Walkers, the Trine, Light Ring strands,
+  Ground Ear bars, Coral Tunnel shuttles, completed Sentry LEDs, Vellum glow)
+  now sleep entirely when the player is beyond their sight radius (260–420u),
+  waking instantly on approach. Frame cost of the decorated districts is now
+  near-zero from across the island.
+- **Zero per-frame allocations in the sky path:** the two `new THREE.Color`
+  allocations per frame in `applySky`/haze replaced with a preallocated scratch
+  color (GC pressure eliminated from the hottest loop).
+- **Whale material cache:** the Glass Whale's per-frame `traverse` replaced
+  with a one-time material cache.

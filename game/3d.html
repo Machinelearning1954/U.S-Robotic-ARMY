@@ -4205,7 +4205,7 @@ const SKY=[
  {t:0.78,bg:0x0a1826,hemi:1.00,sunC:0xbfe8ff,sunI:1.00,elev:0.40,dark:1},
  {t:1.00,bg:0x05131c,hemi:0.95,sunC:0xbfe8ff,sunI:1.00,elev:0.55,dark:1},
 ];
-const _c1=new THREE.Color(),_c2=new THREE.Color(),_warm=new THREE.Color(0xffe2bd);
+const _c1=new THREE.Color(),_c2=new THREE.Color(),_c3=new THREE.Color(),_warm=new THREE.Color(0xffe2bd);
 function applySky(){if(rain||stat)return;
   let a=SKY[0],b=SKY[1];
   for(let i=0;i<SKY.length-1;i++)if(tod>=SKY[i].t&&tod<=SKY[i+1].t){a=SKY[i];b=SKY[i+1];break;}
@@ -4217,7 +4217,7 @@ function applySky(){if(rain||stat)return;
   scene.background.copy(_c1);scene.fog.color.copy(_c1);
   scene.fog.far=(grade?880:720)+(1-DARK)*300;
   hemi.intensity=hem*(grade?1.2:1);
-  _c2.set(a.sunC).lerp(new THREE.Color(b.sunC),f);
+  _c2.set(a.sunC).lerp(_c3.set(b.sunC),f);
   moon.color.copy(grade&&DARK>0.7?_warm:_c2);
   moon.intensity=sunI*(grade?1.25:1);
   if(dome)dome.material.opacity=DARK;
@@ -4227,7 +4227,7 @@ function applySky(){if(rain||stat)return;
   // horizon haze band (graphics-research doc: "stronger height fog + haze banding" —
   // the cheap GI/atmosphere imitation): tinted toward the sun at low sun, faint at night
   if(haze){
-    _c2.set(a.sunC).lerp(new THREE.Color(b.sunC),f);
+    _c2.set(a.sunC).lerp(_c3.set(b.sunC),f);
     haze.material.color.copy(_c1).lerp(_c2,(1-DARK)*0.55);
     haze.material.opacity=0.42*(1-DARK*0.55)+(rain?0.2:0);
     haze.position.set(P.x,34,P.z); // ride with the player — you're always inside the band
@@ -5576,6 +5576,7 @@ function elderNPC(shirt){
 })();
 let kindredSeen=false,kindredT=0,kindredMsgT=0,kindredA=0;
 function updateKindred(dt){
+  if(Math.hypot(P.x-KINDRED.X,P.z-KINDRED.Z)>260){kindredT=0;return;} // decorative zone asleep when far
   // bench bots gently offer the cup; eyes and gesture on a soft loop
   for(const b of kindredBots){
     const armR=b.userData.armR;if(armR)armR.rotation.z=-0.9+Math.sin(perf*0.0012+b.position.x)*0.18;
@@ -5621,7 +5622,8 @@ function updateHoloWhale(dt){
   if(whale.userData.tail)whale.userData.tail.rotation.x=Math.sin(perf*0.003)*0.5;
   // hologram shimmer — brighter after dark, ghost-faint at noon
   const glow=0.16+DARK*0.3+Math.sin(perf*0.008)*0.05;
-  whale.traverse(o=>{if(o.isMesh&&o.material.transparent)o.material.opacity=glow;});
+  if(!whale.userData.mats){whale.userData.mats=[];whale.traverse(o=>{if(o.isMesh&&o.material.transparent)whale.userData.mats.push(o.material);});}
+  for(const m of whale.userData.mats)m.opacity=glow; // cached — no per-frame traverse
   if(whaleSeen)return;
   const near=Math.hypot(P.x-whale.position.x,P.z-whale.position.z)<40;
   if(near){whaleT+=dt;
@@ -5693,6 +5695,7 @@ for(const s of SENTRY){
 label('REEF SENTRY LINE',SENTRY[1].X,Math.max(height(SENTRY[1].X,SENTRY[1].Z),0.3)+9,SENTRY[1].Z);
 let sentryDone=false;
 function updateSentry(dt){
+  if(sentryDone&&Math.hypot(P.x-SENTRY[1].X,P.z-SENTRY[1].Z)>320)return; // finished line idles quietly when far
   let tuned=0;
   for(const m of sentryMasts){
     if(m.tuned){tuned++;m.led.material.color.set(0x37d867);continue;}
@@ -5890,6 +5893,7 @@ const reefFish=[];let reefCatTail=null,reefCatHead=null;
 }
 let reefSeen=false,reefT=0,reefMsgT=0;
 function updateGlassReef(dt){
+  if(Math.hypot(P.x-REEFL.X,P.z-REEFL.Z)>260){reefT=0;return;} // tank sleeps when nobody's looking
   const gy=Math.max(height(REEFL.X,REEFL.Z),0.2);
   for(const f of reefFish){
     const a=perf*0.0011*f.s+f.ph;
@@ -5947,6 +5951,7 @@ const ringStrands=[];
 }
 let ringSigned=false,ringT=0,ringMsgT=0;
 function updateLightRing(dt){
+  if(Math.hypot(P.x-LIGHTRING.X,P.z-LIGHTRING.Z)>300){ringT=0;return;}
   for(const s of ringStrands)s.m.material.opacity=0.35+0.3*Math.sin(perf*0.003+s.ph)+DARK*0.15;
   if(veh!==WALKER)return;
   const near=Math.hypot(P.x-(LIGHTRING.X+16),P.z-LIGHTRING.Z)<4;
@@ -6047,6 +6052,7 @@ const earBars=[];
 }
 let earSeen=false,earT=0,earMsgT=0;
 function updateGroundEar(dt){
+  if(Math.hypot(P.x-GROUNDEAR.X,P.z-GROUNDEAR.Z)>260){earT=0;return;}
   const onPad=veh===WALKER&&Math.hypot(P.x-GROUNDEAR.X,P.z-GROUNDEAR.Z)<2.2;
   // live trace: island noise + rain shake + your own stomp (opt-in, standing on the pad)
   for(let i=0;i<earBars.length;i++){
@@ -6148,6 +6154,7 @@ const stormWalkers=[];
 }
 let walkersSeen=false,walkersT=0;
 function updateWalkers(dt){
+  if(Math.hypot(P.x-WALKYARD.X,P.z-WALKYARD.Z)>260){walkersT=0;return;}
   for(const w of stormWalkers){
     const t=perf*0.0005+w.ph;
     const lane=Math.asin(Math.sin(t))/(Math.PI/2); // -1..1 triangle sweep
@@ -6214,6 +6221,7 @@ const tunnelCars=[];
 }
 let tunnelSeen=false,tunnelT=0,tunnelMsgT=0;
 function updateCoralTunnel(dt){
+  if(Math.hypot(P.x-(TUNNELA.X+TUNNELB.X)/2,P.z-(TUNNELA.Z+TUNNELB.Z)/2)>420){tunnelT=0;return;}
   const dx=TUNNELB.X-TUNNELA.X,dz=TUNNELB.Z-TUNNELA.Z,len=Math.hypot(dx,dz);
   const nx=-dz/len,nz=dx/len;
   for(const c of tunnelCars){
@@ -6277,6 +6285,7 @@ const drillFins=[];
 }
 let surfSeen=false,surfT=0;
 function updateSurfDrill(dt){
+  if(Math.hypot(P.x-SURFDRILL.X,P.z-SURFDRILL.Z)>260){surfT=0;return;}
   const gy=Math.max(height(SURFDRILL.X,SURFDRILL.Z),0.2);
   for(const f of drillFins){
     const a=perf*0.0008+f.ph;
@@ -6324,6 +6333,7 @@ const vellumGlows=[];
 }
 let vellumSeen=false,vellumT=0,vellumMsgT=0;
 function updateVellum(dt){
+  if(Math.hypot(P.x-VELLUM.X,P.z-VELLUM.Z)>300){vellumT=0;return;}
   const breathe=0.85+0.15*Math.sin(perf*0.0012)+DARK*0.1;
   for(const g of vellumGlows)g.material.color.setRGB(1*breathe,0.69*breathe,0.38*breathe);
   if(veh!==WALKER)return;
@@ -6685,6 +6695,7 @@ function trinePoint(f){
 }
 let trineSeen=false,trineT=0,trineRot=0;
 function updateTrine(dt){
+  if(Math.hypot(P.x-TRINE.X,P.z-TRINE.Z)>420){trineT=0;return;} // still stands, just rests its motor out of view
   trineRot+=dt*0.06; // the whole triangle turns, slow as a Sunday
   trineG.rotation.z=trineRot;
   for(const c of trineCabs){
