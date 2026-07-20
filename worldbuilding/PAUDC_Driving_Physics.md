@@ -152,3 +152,22 @@ step out; the unlock is saved.
   was already fully original — so the request's second half became the feature:
   capabilities that roster doesn't have. Invented tech, no real or third-party
   brands, non-lethal as ever.
+
+
+## The Flying Fish — hydrofoil hypercar (live in the prototype, v1.20)
+
+The island's answer to "what if the bay were a road": an original **hydrofoil
+hypercar** parked on the Harbor Watch waterfront. Low wedge shell with a gold
+spine stripe, vertical light blades at the nose, ember bars aft — and under the
+tub, twin carbon struts carrying reef-green **foil blades**. Board it with E
+like any ride. On tar it's a proper hypercar; drive it straight off the
+seawall and it **rides the foils** — near-full speed on open water (wacc 34 /
+wmax 36 where ordinary cars crawl at 2), twin spray jets fanning off the
+foils that scale with your speed. Skim 60 metres and the island pays **+25 —
+"the bay turned highway"** (saved, with your lifetime skim distance).
+
+- **Boundary:** the source reel showed a real manufacturer's concept car
+  skimming a marina. The make, badge, and design language are **not** depicted
+  (Rule Zero — no real brands); the Flying Fish is an original shape named for
+  the island fish that actually flies. It also plays nice with the existing
+  splashdown-clip bonus — hit the water fast and OnWatch buys the clip.
