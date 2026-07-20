@@ -145,3 +145,27 @@ clout for enhanced clips and flags over-glazed ones "NUH REAL!".
   color (GC pressure eliminated from the hottest loop).
 - **Whale material cache:** the Glass Whale's per-frame `traverse` replaced
   with a one-time material cache.
+
+
+## Shipped v1.21 — OVERKILL tier (Z now cycles Adaptive → Max → OVERKILL)
+
+Request was "RTX 5090 32GB, 4K OVERKILL, DLSS ON". The honest engineering
+answer: **vendor upscalers (DLSS/FSR/XeSS) are driver+hardware technology and
+cannot exist inside browser WebGL** — no game file can turn them on. What a
+monster GPU *can* do in a browser is the brute-force equivalent, so the Z key
+now cycles three tiers:
+
+| Tier | Pixel ratio | Shadows | Fog / camera far | Bloom |
+|---|---|---|---|---|
+| ADAPTIVE (default) | native, auto-downscaling | base | base | base |
+| MAX FIDELITY | up to 2.5× device | 4096² | 1100 / 1400 | +0.22 |
+| **OVERKILL** | **1.6× native, cap 3.5 — true supersampling (SSAA)** | **8192²** | **1400 / 1900** | +0.30 |
+
+Supersampling renders *above* native resolution and downscales — crisper than
+any AI upscaler, at honest GPU cost, which is exactly what "overkill" hardware
+is for. The adaptive downscaler still guards weak machines: sustained slow
+frames step resolution back down, so the tier can never trap a slow GPU.
+
+Headless-verified: Z cycles 0→1→2→0 with pxr 1 → 1 → 1.6 → 1 (headless dpr=1),
+maxFidelity flag tracks, legacy `setMaxFidelity(true)` maps to tier 1, zero
+page errors.
