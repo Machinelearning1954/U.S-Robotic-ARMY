@@ -925,3 +925,20 @@ stations; state persists in the auto-save.
   every keepable idea from that series had already been built fiction-safe in
   v0.82–v1.00; this quest is the ribbon on the completed set, and its completion
   line states the design rule outright.
+
+
+## The Cliff Kite — hang-glider soar (live, v1.09)
+
+On the Ear's high hill, above the Ground Ear: a timber **launch ramp** and a
+parked blue-and-white wing. Stand on the ramp a beat and you're **airborne** —
+a swept two-panel kite with a prone pilot pod, steering with **A/D**, **W to
+tuck** for speed at the cost of sink. Soar south off the hill and out over the
+bay; the chase camera rides behind the wing. **There are no crashes on this
+island — only landings**: touch down anywhere feather-soft, get the distance
+flown called out, and walk the wing back up. First soar pays **+30**; saved
+with everything else.
+
+- **Origin:** a coastal hang-gliding reel — pure traversal joy, rebuilt
+  original (invented wing, the island's own cliffs; no resort, brand, or place
+  depicted). It completes the flight set: parachute down (Harbor Drop), Mach
+  9.9 up (the Needle), and now the slow soar between.
