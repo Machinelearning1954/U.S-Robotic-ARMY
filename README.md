@@ -23,6 +23,7 @@ staying out of the sightlines of Meridian's roaming **sweepers**.
 | `Shift` | Sprint (drains stamina) |
 | `Space` | Pulse the resonance scanner |
 | `E` | Neutralize an emitter when in range |
+| `R` | OVERWATCH recon pass (once per district) — a Mach-3 bird flashes all live emitters onto the minimap |
 
 - The **RESONANCE** meter climbs as you close on the nearest live emitter, and
   the screen-edge "tingle" sharpens with proximity — that's your detection cue.

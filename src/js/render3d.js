@@ -139,6 +139,7 @@ export class Renderer3D {
     this.signs = [];
     this.antennas = [];
     this.strikeFx = null;
+    this.reconFx = null;
 
     const accent = new THREE.Color(g.d.palette.accent);
 
@@ -854,6 +855,7 @@ export class Renderer3D {
     });
 
     this.syncStrike(g);
+    this.syncRecon(g);
 
     // Neon sign flicker.
     for (const s of this.signs) {
@@ -1003,6 +1005,48 @@ export class Renderer3D {
       fx.dust.material.opacity = 0.34 * (1 - q);
       fx.light.intensity = 12000 * Math.max(0, 1 - (t - 3.0) * 1.4);
     }
+  }
+
+  // OVERWATCH recon pass in 3D: a Mach-3 dart streaking over the district,
+  // airframe rimmed in skin-friction heat, twin afterburner glows trailing.
+  syncRecon(g) {
+    const rc = g.recon;
+    if (!rc) {
+      if (this.reconFx) {
+        this.scene.remove(this.reconFx.grp);
+        this.reconFx = null;
+      }
+      return;
+    }
+    if (!this.reconFx) {
+      const grp = new THREE.Group();
+      const fuselage = new THREE.Mesh(
+        new THREE.ConeGeometry(7, 110, 6),
+        new THREE.MeshStandardMaterial({
+          color: 0x11151d, roughness: 0.3, metalness: 0.8,
+          emissive: 0xff8c46, emissiveIntensity: 0.35,
+        })
+      );
+      fuselage.rotation.z = -Math.PI / 2;
+      fuselage.scale.set(0.5, 1, 1);
+      const burnGeo = new THREE.ConeGeometry(4, 30, 8, 1, true);
+      const burnMat = new THREE.MeshBasicMaterial({
+        color: 0xffa050, transparent: true, opacity: 0.7,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      [-10, 10].forEach((dz) => {
+        const burn = new THREE.Mesh(burnGeo, burnMat);
+        burn.rotation.z = Math.PI / 2;
+        burn.position.set(-58, 0, dz);
+        grp.add(burn);
+      });
+      grp.add(fuselage);
+      this.scene.add(grp);
+      this.reconFx = { grp };
+    }
+    const p = rc.t / 2.6;
+    this.reconFx.grp.position.set(
+      g.player.x - 1100 + 2200 * p, 470, g.player.y - 120);
   }
 
   dispose() {

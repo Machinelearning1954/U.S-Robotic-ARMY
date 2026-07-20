@@ -182,6 +182,13 @@ class AudioEngine {
     this.blip({ type: "noise", freq: 1400, freqEnd: 200, dur: 0.5, gain: 0.08, delay: 0.12 });
   }
 
+  sonicBoom() {
+    // The SR-71 signature: a double thump, then the drawn-out heat-wash roar.
+    this.blip({ type: "noise", freq: 110, freqEnd: 40, q: 0.7, dur: 0.5, gain: 0.24 });
+    this.blip({ type: "noise", freq: 110, freqEnd: 40, q: 0.7, dur: 0.5, gain: 0.2, delay: 0.14 });
+    this.blip({ type: "noise", freq: 400, freqEnd: 70, q: 0.8, dur: 1.8, gain: 0.1, delay: 0.3 });
+  }
+
   thunder() {
     // Rolls in slightly after the flash, like real distance.
     const delay = 0.25 + Math.random() * 1.1;

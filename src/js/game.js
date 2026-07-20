@@ -308,6 +308,11 @@ export class Game {
     this.radioTimer = 0;
     this.radioFlags = {};
 
+    // OVERWATCH recon pass (R): one Mach-3 flyover per district.
+    this.recon = null;
+    this.reconUsed = false;
+    this.reconReveal = 0;
+
     this.camera = { x: this.player.x, y: this.player.y };
     this.resonance = 0;
     this.exposure = 0;
@@ -387,6 +392,7 @@ export class Game {
     const p = this.player;
 
     this.updateStrike(dt);
+    this.updateRecon(dt);
 
     // Movement + stamina.
     const mv = this.input.moveVector();
@@ -422,6 +428,8 @@ export class Game {
       this.pings.push({ x: p.x, y: p.y, r: 0, max: 420, life: 1 });
       audio.ping();
     }
+    // OVERWATCH recon pass.
+    if (this.input.justPressed("r")) this.beginRecon();
     // Mute toggle.
     if (this.input.justPressed("m")) audio.setMuted(!audio.muted);
 
@@ -752,6 +760,7 @@ export class Game {
     }
     this.drawAccentGlows(ctx, camX, camY, w, h);
     this.drawStrike(ctx, w, h);
+    this.drawRecon(ctx, w, h);
     this.drawRain(ctx, w, h);
     if (this.quality >= 1) this.compositeBloom(ctx, w, h);
     if (this.quality >= 2) this.drawGrain(ctx, w, h);
@@ -1373,9 +1382,17 @@ export class Game {
     ctx.strokeRect(mx, my, size, size);
     for (const e of this.emitters) {
       if (e.neutralized) continue;
-      if (dist(e, this.player) > 320) continue;
+      const revealed = this.reconReveal > 0;
+      if (!revealed && dist(e, this.player) > 320) continue;
       ctx.fillStyle = this.d.palette.accent;
-      ctx.fillRect(mx + e.x * sx - 1.5, my + e.y * sy - 1.5, 3, 3);
+      if (revealed) {
+        // recon-flashed contacts blink until the sensor picture fades
+        ctx.globalAlpha = 0.55 + 0.45 * Math.sin(this.reconReveal * 9);
+        ctx.fillRect(mx + e.x * sx - 2.5, my + e.y * sy - 2.5, 5, 5);
+        ctx.globalAlpha = 0.9;
+      } else {
+        ctx.fillRect(mx + e.x * sx - 1.5, my + e.y * sy - 1.5, 3, 3);
+      }
     }
     for (const s of this.sweepers) {
       ctx.fillStyle = s.alert ? "#ff3b7f" : "#ffb454";
@@ -1392,6 +1409,70 @@ export class Game {
     this.hud.prompt.classList.add("show");
   }
   hidePrompt() { this.hud.prompt.classList.remove("show"); }
+
+  // ---------- OVERWATCH recon pass ----------
+  // Once per district, K sends a Mach-3 recon bird over the grid. The
+  // airframe glows with skin-friction heat, the sonic boom arrives late,
+  // and its sensor pass flashes every live emitter onto the minimap.
+  beginRecon() {
+    if (this.reconUsed || this.strike || this.recon) return;
+    this.reconUsed = true;
+    this.recon = { t: 0, sensed: false };
+    this.radioMsg("K — OVERWATCH BIRD ROLLING IN AT MACH 3. WATCH YOUR MAP.");
+    audio.flyby();
+  }
+
+  updateRecon(dt) {
+    if (this.reconReveal > 0) this.reconReveal -= dt;
+    const rc = this.recon;
+    if (!rc) return;
+    rc.t += dt;
+    // Mid-pass: sensor sweep fires and the boom catches up to the airframe.
+    if (rc.t >= 1.1 && !rc.sensed) {
+      rc.sensed = true;
+      this.reconReveal = 8;
+      audio.sonicBoom();
+      for (const e of this.emitters) {
+        if (!e.neutralized) this.pings.push({ x: e.x, y: e.y, r: 0, max: 300, life: 1 });
+      }
+    }
+    if (rc.t >= 2.6) this.recon = null;
+  }
+
+  drawRecon(ctx, w, h) {
+    const rc = this.recon;
+    if (!rc) return;
+    const p = rc.t / 2.6;
+    const jx = -220 + (w + 440) * p; // much faster than the strike wing
+    const jy = 56 + Math.sin(p * 4) * 3;
+    ctx.save();
+    // heat trail: skin-friction orange smearing behind the airframe
+    const trail = ctx.createLinearGradient(jx - 320, jy, jx, jy);
+    trail.addColorStop(0, "rgba(255,140,60,0)");
+    trail.addColorStop(0.7, "rgba(255,150,70,0.16)");
+    trail.addColorStop(1, "rgba(255,190,120,0.45)");
+    ctx.fillStyle = trail;
+    ctx.fillRect(jx - 320, jy - 3, 320, 6);
+    // long dart fuselage with twin nacelles
+    ctx.fillStyle = "#141a22";
+    ctx.strokeStyle = "rgba(255,170,110,0.7)";
+    ctx.beginPath();
+    ctx.moveTo(jx + 44, jy);
+    ctx.lineTo(jx - 30, jy - 6);
+    ctx.lineTo(jx - 40, jy);
+    ctx.lineTo(jx - 30, jy + 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#1a2230";
+    ctx.fillRect(jx - 22, jy - 10, 20, 5);
+    ctx.fillRect(jx - 22, jy + 5, 20, 5);
+    // afterburner cones
+    ctx.fillStyle = "rgba(255,170,80,0.85)";
+    ctx.beginPath(); ctx.ellipse(jx - 24, jy - 7.5, 7, 2, 0, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(jx - 24, jy + 7.5, 7, 2, 0, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
 
   // ---------- VAULTBREAKER strike: the district finale ----------
   // With the last emitter dark, command sends a stealth wing at high
