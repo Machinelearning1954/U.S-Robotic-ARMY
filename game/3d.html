@@ -55,7 +55,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>L</b> drone · <b>O</b> dominoes/shift · <b>`</b> cheats · <b>Z</b> max-gfx · <b>I</b> cam-drone · <b>X</b> sky-rig · <b>SPACE</b> dive · <b>M</b> map · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v1.11 · auto-saves</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v1.12 · auto-saves</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -6525,7 +6525,15 @@ const walker=new THREE.Group(),wLimbs={};
  for(const[k,zz]of[['aL',0.42],['aR',-0.42]]){ // arms pivot at the shoulder
    const arm=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.68,0.18).translate(0,-0.34,0),skin);
    arm.position.set(0,1.52,zz);walker.add(arm);wLimbs[k]=arm;}
- const head=new THREE.Mesh(new THREE.SphereGeometry(0.24,10,8),skin);head.position.y=1.82;walker.add(head);}
+ const head=new THREE.Mesh(new THREE.SphereGeometry(0.24,10,8),skin);head.position.y=1.82;walker.add(head);
+ // v1.12 — the Founder's look, by the creator's own request: short black hair, goatee,
+ // stud earrings. The Don wears the face of the one who dreamed the harbor.
+ const hair=new THREE.Mesh(new THREE.SphereGeometry(0.25,10,8,0,Math.PI*2,0,Math.PI*0.48),new THREE.MeshLambertMaterial({color:0x14100c}));
+ hair.position.y=1.86;walker.add(hair);
+ const goatee=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.09,0.15),new THREE.MeshLambertMaterial({color:0x14100c}));
+ goatee.position.set(0.18,1.70,0);walker.add(goatee);
+ for(const s of[-1,1]){const stud=new THREE.Mesh(new THREE.SphereGeometry(0.032,6,6),new THREE.MeshPhongMaterial({color:0xffd88a,shininess:160}));
+   stud.position.set(0,1.80,s*0.245);walker.add(stud);}}
 walker.traverse(o=>{if(o.isMesh)o.castShadow=true;});walker.visible=false;scene.add(walker);
 const walkP={x:mx(700),z:mz(860),a:0};
 const VEH=[
@@ -7333,11 +7341,11 @@ addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='e')return;
   if(!inVault&&veh===WALKER&&Math.hypot(P.x-VAULTP.X,P.z-(VAULTP.Z-6))<4)enterVault();
   else if(inVault&&Math.hypot(P.x-VAULTINT.X,P.z-(VAULTINT.Z+4.5))<3.2)exitVault();});
 // ---------------- The Wardrobe — Anchor Row's clout sink (cosmetic outfit colors) ----------------
-const WARDROBE_COLORS=[0x3af5d8,0xffb84d,0xff5fd2,0x37d867,0x1a7a2e];
-const WARDROBE_NAMES=['REEF TEAL','CUTLASS GOLD','TIDEWATER PINK','PALM GREEN','THE DON — FLAG FIT'];
-const WARDROBE_COST=[0,25,40,60,80];
+const WARDROBE_COLORS=[0x3af5d8,0xffb84d,0xff5fd2,0x37d867,0x1a7a2e,0xd2b48c];
+const WARDROBE_NAMES=['REEF TEAL','CUTLASS GOLD','TIDEWATER PINK','PALM GREEN','THE DON — FLAG FIT','FOUNDER TAN — di creator\'s fit'];
+const WARDROBE_COST=[0,25,40,60,80,0]; // the Founder's own tee is free — it was his first
 let wardrobeIdx=0;
-const wardrobeUnlocked=[true,false,false,false,false];
+const wardrobeUnlocked=[true,false,false,false,false,true];
 function cycleWardrobe(){
   const next=(wardrobeIdx+1)%WARDROBE_COLORS.length;
   if(!wardrobeUnlocked[next]){
@@ -8571,6 +8579,7 @@ window.__paudc={P,beacons,crocs,SANCT,FORTP,EARP,
 toast('PORT ANTONIO UNIFIED DEFENSE COMPLEX');
 // name the protagonist on boot — you play as The Don (Malik Baptiste), canon lead
 setTimeout(()=>toast('YOU ARE THE DON — Malik Baptiste. Make the whole harbor know your name.'),3400);
+setTimeout(()=>toast('DI DON WEARS THE FOUNDER\'S FACE — big up di one who dreamed the harbor.'),7200);
 requestAnimationFrame(tick);
 </script>
 </body></html>

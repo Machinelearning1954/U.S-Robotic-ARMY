@@ -269,3 +269,17 @@ replace, or promote any of them. All are original inventions.
 *All content above is fictional entertainment writing for a video game. See the
 disclaimer at the top of this document and the Content Boundaries section of
 `PAUDC_Base_Design.md`.*
+
+
+## §2.0 addendum — the Founder's face (v1.12)
+
+By the creator's own request, the Don wears **the Founder's look**: short black
+hair, the goatee, gold stud earrings in both ears — rendered at the game's
+stylized fidelity — and a free wardrobe fit, **FOUNDER TAN** (*"di creator's
+fit"*), the tan tee from the portrait that started it. The boot sequence now
+tips its hat: *"DI DON WEARS THE FOUNDER'S FACE — big up di one who dreamed the
+harbor."*
+
+Malik Baptiste remains a fictional character in a fictional world; the likeness
+is the creator's own, added with his consent to his own game — the oldest indie
+tradition there is.
