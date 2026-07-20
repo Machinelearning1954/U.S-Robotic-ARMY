@@ -169,3 +169,27 @@ frames step resolution back down, so the tier can never trap a slow GPU.
 Headless-verified: Z cycles 0→1→2→0 with pxr 1 → 1 → 1.6 → 1 (headless dpr=1),
 maxFidelity flag tracks, legacy `setMaxFidelity(true)` maps to tier 1, zero
 page errors.
+
+
+## Shipped v1.22 — RT-style wet streets + micro-optimization pass
+
+**Mirror puddles ("RTX ON" wet streets, honestly).** True ray tracing does not
+exist in WebGL2 — what does is a planar Reflector: a genuine second render of
+the scene mirrored about a plane (not a screen-space trick). v1.22 lazily
+builds a 56×56 Reflector sheet that rides under the player on **wet asphalt**
+— rain + asphalt + Max/OVERKILL tier — so the neon strip doubles into the
+road exactly like the classic wet-streets showcase. It costs a second scene
+render, so the adaptive tier never pays: no rain, no asphalt, or no high tier
+→ the sheet is invisible and skips its render entirely.
+
+**Micro-optimizations (same discipline as v1.15):**
+- Bassline night-crowd dancers cache their ground height at build (they never
+  move horizontally) — 8 fewer `height()` field lookups per frame at night.
+- The Drone Loft caches its site height in a constant — one fewer `height()`
+  per frame inside its 260u gate.
+- `updateFlyFish` early-outs when you're not in the Flying Fish — no
+  `isWater()` probe per frame for a parked car.
+
+Headless-verified: puddle stays OFF in rain at adaptive tier (cost gate), ON
+at Max tier on wet asphalt, OFF again when skies clear; night crowd and loft
+hologram still animate off their cached heights; zero page errors.
