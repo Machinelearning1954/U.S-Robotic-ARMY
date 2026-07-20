@@ -281,28 +281,16 @@ export class Renderer3D {
       return sp;
     });
 
-    // Player: coat-dark figure + a cyan lamp that follows them.
+    // Player: Vesper — an hourglass figure in a dark coat + a cyan lamp
+    // that follows her.
     this.dyn.player = new THREE.Group();
-    const body = new THREE.Mesh(
-      new THREE.CapsuleGeometry(6.5, 12, 4, 12),
-      new THREE.MeshStandardMaterial({ color: 0x161f36, roughness: 0.55 })
-    );
-    body.position.y = 13;
-    body.castShadow = true;
-    const shoulders = new THREE.Mesh(
-      new THREE.CapsuleGeometry(4.5, 8, 4, 10),
-      new THREE.MeshStandardMaterial({ color: 0x1b2540, roughness: 0.5 })
-    );
-    shoulders.rotation.z = Math.PI / 2;
-    shoulders.position.y = 20;
-    const head = new THREE.Mesh(
-      new THREE.SphereGeometry(4.2, 14, 14),
-      new THREE.MeshStandardMaterial({ color: 0xdfe9f2, emissive: 0x33e2ff, emissiveIntensity: 0.22, roughness: 0.4 })
-    );
-    head.position.y = 27;
-    head.castShadow = true;
-    this.dyn.playerBody = body;
-    this.dyn.player.add(body, shoulders, head);
+    const figure = this.makeFigure({
+      height: 1.15, hipW: 1.55, shoulderW: 1.0,
+      outfit: 0x161f36, skin: 0xdfe9f2,
+      headGlow: 0x33e2ff,
+    });
+    this.dyn.playerBody = figure;
+    this.dyn.player.add(figure);
     this.dyn.playerLight = new THREE.PointLight(accent, 4800, 360, 1.8);
     this.dyn.playerLight.position.y = 40;
     this.dyn.player.add(this.dyn.playerLight);
@@ -387,21 +375,25 @@ export class Renderer3D {
       return { grp, mir };
     });
 
-    // Pedestrians: little capsules with umbrella discs.
-    this.dyn.peds = g.peds.map((ped) => {
+    // Pedestrians: small figures under umbrellas. Body shapes vary from a
+    // deterministic per-ped seed — many of the women carry a full hourglass
+    // build (wide hips, narrow waist, strong thighs).
+    this.dyn.peds = g.peds.map((ped, i) => {
       const grp = new THREE.Group();
-      const b = new THREE.Mesh(
-        new THREE.CapsuleGeometry(3, 7, 3, 8),
-        new THREE.MeshStandardMaterial({ color: 0x0d1420, roughness: 0.7 })
-      );
-      b.position.y = 8;
-      b.castShadow = true;
+      const seed = (i * 2654435761) % 1000 / 1000;
+      const curvy = seed < 0.55; // just over half the crowd
+      const fig = this.makeFigure({
+        height: 0.52 + (seed * 7 % 1) * 0.1,
+        hipW: curvy ? 1.5 + (seed * 13 % 1) * 0.45 : 1.0 + (seed * 13 % 1) * 0.2,
+        shoulderW: curvy ? 0.85 : 1.0 + (seed * 17 % 1) * 0.25,
+        outfit: 0x0d1420, skin: 0x9a8474,
+      });
       const um = new THREE.Mesh(
         new THREE.ConeGeometry(8, 4, 10),
         new THREE.MeshStandardMaterial({ color: new THREE.Color(ped.tint).multiplyScalar(0.4), roughness: 0.5 })
       );
-      um.position.y = 17;
-      grp.add(b, um);
+      um.position.y = 19;
+      grp.add(fig, um);
       this.scene.add(grp);
       return grp;
     });
@@ -409,6 +401,60 @@ export class Renderer3D {
     this.buildRain(g);
 
     this.camPos = new THREE.Vector3(g.player.x, 560, g.player.y + 240);
+  }
+
+  // A stylized human figure with controllable proportions. hipW widens the
+  // hips/glutes/thighs and narrows the waist toward an hourglass build;
+  // shoulderW broadens the upper body. height scales the whole figure.
+  makeFigure({ height = 1, hipW = 1, shoulderW = 1, outfit = 0x161f36, skin = 0x9a8474, headGlow = null }) {
+    const grp = new THREE.Group();
+    const outfitMat = new THREE.MeshStandardMaterial({ color: outfit, roughness: 0.6 });
+    const skinMat = headGlow
+      ? new THREE.MeshStandardMaterial({ color: skin, emissive: headGlow, emissiveIntensity: 0.22, roughness: 0.4 })
+      : new THREE.MeshStandardMaterial({ color: skin, roughness: 0.5 });
+
+    // thighs: fuller and spread with hip width
+    const thighR = 2.6 + hipW * 0.9;
+    [-1, 1].forEach((side) => {
+      const leg = new THREE.Mesh(new THREE.CapsuleGeometry(thighR * 0.62, 8.5, 4, 8), outfitMat);
+      leg.position.set(side * hipW * 2.4, 6, 0);
+      leg.castShadow = true;
+      grp.add(leg);
+    });
+    // hips/glutes: a wide ellipsoid, the center of mass of the silhouette
+    const hips = new THREE.Mesh(new THREE.SphereGeometry(5.6, 14, 12), outfitMat);
+    hips.scale.set(hipW * 1.02, 0.82, 0.9 + hipW * 0.22);
+    hips.position.y = 11.8;
+    hips.castShadow = true;
+    grp.add(hips);
+    // waist: pinched relative to the hips
+    const waist = new THREE.Mesh(new THREE.CapsuleGeometry(3.1, 3.5, 4, 10), outfitMat);
+    waist.position.y = 16.5;
+    grp.add(waist);
+    // chest + shoulders
+    const chest = new THREE.Mesh(new THREE.SphereGeometry(4.1, 12, 10), outfitMat);
+    chest.scale.set(shoulderW * 1.15, 0.95, 0.9);
+    chest.position.y = 20.5;
+    chest.castShadow = true;
+    grp.add(chest);
+    const shoulders = new THREE.Mesh(new THREE.CapsuleGeometry(2.6, 7 * shoulderW, 4, 8), outfitMat);
+    shoulders.rotation.z = Math.PI / 2;
+    shoulders.position.y = 22.5;
+    grp.add(shoulders);
+    // head + hair cap
+    const head = new THREE.Mesh(new THREE.SphereGeometry(3.9, 14, 14), skinMat);
+    head.position.y = 27.5;
+    head.castShadow = true;
+    grp.add(head);
+    const hair = new THREE.Mesh(
+      new THREE.SphereGeometry(4.15, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.55),
+      new THREE.MeshStandardMaterial({ color: 0x181c26, roughness: 0.7 })
+    );
+    hair.position.y = 28.1;
+    grp.add(hair);
+
+    grp.scale.setScalar(height);
+    return grp;
   }
 
   makeCar(c, mirrored) {
@@ -719,9 +765,10 @@ export class Renderer3D {
 
     d.player.position.set(g.player.x, 0, g.player.y);
     d.player.rotation.y = -g.player.angle;
-    // walking bob + a slight lean into motion
+    // walking bob (a hint of hip sway) + a slight lean into motion
     const moving = Math.hypot(g.player.vx || 0, g.player.vy || 0) > 4;
-    d.playerBody.position.y = 13 + (moving ? Math.sin(now * 0.014) * 0.9 : 0);
+    d.playerBody.position.y = moving ? Math.abs(Math.sin(now * 0.011)) * 1.1 : 0;
+    d.playerBody.rotation.z = moving ? Math.sin(now * 0.0055) * 0.05 : 0;
     d.player.rotation.x = moving ? 0.06 : 0;
 
     // moon + shadow frustum track the player so shadows stay crisp

@@ -58,6 +58,9 @@ full night-city realism pipeline, all procedural:
   a storefront band; separate emissive map so only glass glows
 - procedural sky dome (stars, moon halo, drifting cloud murk), exponential fog
 - pooled dynamic lights: nearest street lamps + car headlight spotlights
+- proportion-driven character figures: Vesper and the female pedestrians
+  carry an hourglass build (wide hips, narrow waist, full thighs) from a
+  shared procedural figure builder with per-pedestrian body variety
 - neon signage with flicker, blinking rooftop beacons, emitter sky-beams,
   drone scan cones, wind-slanted rain streaks
 - post chain: threshold bloom, chromatic aberration, film grain, vignette,
