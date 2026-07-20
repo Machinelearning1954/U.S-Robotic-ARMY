@@ -170,6 +170,18 @@ class AudioEngine {
     this.blip({ type: "osc", shape: "square", freq: 660, dur: 0.09, gain: 0.055, delay: 0.14 });
   }
 
+  flyby() {
+    // High-altitude turbine wash swelling in and trailing off.
+    this.blip({ type: "noise", freq: 240, freqEnd: 90, q: 0.8, dur: 2.6, gain: 0.12 });
+  }
+
+  airstrike() {
+    // Ground-shaking penetrator impact: sub thump, long low rumble, debris hiss.
+    this.blip({ type: "noise", freq: 90, freqEnd: 30, q: 0.6, dur: 2.2, gain: 0.3 });
+    this.blip({ type: "osc", shape: "sine", freq: 54, freqEnd: 24, dur: 1.6, gain: 0.2, delay: 0.05 });
+    this.blip({ type: "noise", freq: 1400, freqEnd: 200, dur: 0.5, gain: 0.08, delay: 0.12 });
+  }
+
   thunder() {
     // Rolls in slightly after the flash, like real distance.
     const delay = 0.25 + Math.random() * 1.1;

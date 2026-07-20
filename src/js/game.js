@@ -386,6 +386,8 @@ export class Game {
   update(dt) {
     const p = this.player;
 
+    this.updateStrike(dt);
+
     // Movement + stamina.
     const mv = this.input.moveVector();
     const sprinting = this.input.isDown("shift") && this.stamina > 1 && (mv.x || mv.y);
@@ -456,7 +458,7 @@ export class Game {
         this.updateCounts();
         this.hidePrompt();
         const left = this.emitters.filter((e) => !e.neutralized).length;
-        if (left === 0) this.winDistrict();
+        if (left === 0) this.beginStrike(nearest);
         else if (left === 1) this.radioMsg("K — LAST EMITTER. FINISH IT AND GET OUT.");
         else if (!this.radioFlags.first) {
           this.radioFlags.first = true;
@@ -749,6 +751,7 @@ export class Game {
       ctx.fillRect(0, 0, w, h);
     }
     this.drawAccentGlows(ctx, camX, camY, w, h);
+    this.drawStrike(ctx, w, h);
     this.drawRain(ctx, w, h);
     if (this.quality >= 1) this.compositeBloom(ctx, w, h);
     if (this.quality >= 2) this.drawGrain(ctx, w, h);
@@ -1389,6 +1392,132 @@ export class Game {
     this.hud.prompt.classList.add("show");
   }
   hidePrompt() { this.hud.prompt.classList.remove("show"); }
+
+  // ---------- VAULTBREAKER strike: the district finale ----------
+  // With the last emitter dark, command sends a stealth wing at high
+  // altitude to put a kinetic penetrator through the buried array vault —
+  // flyover, drop, impact, and an underground cutaway readout on the HUD.
+  beginStrike(e) {
+    this.strike = { t: 0, x: e.x, y: e.y, boomed: false };
+    this.radioMsg("K — ARRAY DARK. VAULTBREAKER WING INBOUND FROM ANGELS 50 — CLEAR THE IMPACT POINT.");
+    audio.flyby();
+  }
+
+  updateStrike(dt) {
+    const s = this.strike;
+    if (!s) return;
+    s.t += dt;
+    if (s.t >= 3.0 && !s.boomed) {
+      s.boomed = true;
+      this.flash = Math.max(this.flash, 1.1);
+      this.spawnBurst(s.x, s.y, "#ffcf6a");
+      this.spawnBurst(s.x, s.y, "#c8b49a");
+      audio.airstrike();
+    }
+    if (s.t >= 5.6) {
+      this.strike = null;
+      this.winDistrict();
+    }
+  }
+
+  drawStrike(ctx, w, h) {
+    const s = this.strike;
+    if (!s) return;
+    const sx = s.x - this.viewCamX, sy = s.y - this.viewCamY;
+    // flyover: a stealth flying wing crossing high over the district
+    if (s.t < 3.0) {
+      const p = s.t / 3.0;
+      const wx = -160 + (w + 320) * p;
+      const wy = 74 + Math.sin(p * 6) * 4;
+      ctx.save();
+      const trail = ctx.createLinearGradient(wx - 230, wy, wx, wy);
+      trail.addColorStop(0, "rgba(200,220,240,0)");
+      trail.addColorStop(1, "rgba(200,220,240,0.28)");
+      ctx.fillStyle = trail;
+      ctx.fillRect(wx - 230, wy - 2, 230, 4);
+      ctx.fillStyle = "#0c1118";
+      ctx.strokeStyle = "rgba(140,170,200,0.55)";
+      ctx.beginPath();
+      ctx.moveTo(wx + 34, wy);
+      ctx.lineTo(wx - 26, wy - 13);
+      ctx.lineTo(wx - 14, wy - 2);
+      ctx.lineTo(wx - 26, wy + 13);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+    // the penetrator falls from the flight line to the vault point
+    if (s.t >= 2.2 && s.t < 3.0) {
+      const q = (s.t - 2.2) / 0.8;
+      const px = sx + (1 - q) * 30;
+      const py = 90 + (sy - 90) * q * q;
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,220,120,0.5)";
+      ctx.beginPath(); ctx.moveTo(px + 6, py - 26); ctx.lineTo(px, py); ctx.stroke();
+      ctx.fillStyle = "#e8c85a";
+      ctx.beginPath(); ctx.ellipse(px, py, 3, 8, 0.1, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+    // impact: shockwave ring + rolling dust, then the cutaway readout
+    if (s.t >= 3.0) {
+      const q = Math.min(1, (s.t - 3.0) / 2.4);
+      ctx.save();
+      ctx.strokeStyle = `rgba(255,214,140,${0.55 * (1 - q)})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(sx, sy, 20 + q * 240, 0, TAU); ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = `rgba(150,128,102,${0.3 * (1 - q)})`;
+      for (let i = 0; i < 10; i++) {
+        const a = (i / 10) * TAU + q;
+        const r = 14 + q * 90 + (i % 3) * 8;
+        ctx.beginPath();
+        ctx.arc(sx + Math.cos(a) * r * 0.8, sy + Math.sin(a) * r * 0.45 - q * 30, 10 + q * 26, 0, TAU);
+        ctx.fill();
+      }
+      ctx.restore();
+      this.drawStrikeCutaway(ctx, w, h, q);
+    }
+  }
+
+  // HUD cutaway inspired by strike-visualization reels: surface, bore line,
+  // depth marker, and the buried vault chamber going dark.
+  drawStrikeCutaway(ctx, w, h, q) {
+    const cw = 250, chh = 132;
+    const px = w - cw - 22, py = h - chh - 180; // clear of minimap + meters
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, q * 3);
+    ctx.fillStyle = "rgba(6,12,22,0.88)";
+    ctx.fillRect(px, py, cw, chh);
+    ctx.strokeStyle = "rgba(51,226,255,0.5)";
+    ctx.strokeRect(px + 0.5, py + 0.5, cw - 1, chh - 1);
+    ctx.fillStyle = "#0d1a30";
+    ctx.fillRect(px + 1, py + 15, cw - 2, 25);
+    ctx.fillStyle = "#2a2118";
+    ctx.fillRect(px + 1, py + 40, cw - 2, chh - 41);
+    ctx.strokeStyle = "rgba(255,214,140,0.8)";
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(px + cw * 0.5, py + 40);
+    ctx.lineTo(px + cw * 0.5, py + chh - 34);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const vy = py + chh - 34;
+    ctx.fillStyle = "#101724";
+    ctx.fillRect(px + cw * 0.5 - 34, vy, 68, 24);
+    ctx.strokeStyle = "rgba(255,120,120,0.8)";
+    ctx.strokeRect(px + cw * 0.5 - 34, vy, 68, 24);
+    const flick = Math.sin(q * 40) > 0 && q < 0.5 ? 0.9 : 0.25;
+    ctx.fillStyle = `rgba(255,90,90,${flick})`;
+    ctx.fillRect(px + cw * 0.5 - 4, vy + 6, 8, 12);
+    ctx.fillStyle = "#bfe9ff";
+    ctx.font = "9px monospace";
+    ctx.fillText("VAULTBREAKER // KINETIC PENETRATOR", px + 8, py + 11);
+    ctx.fillText("-200 FT", px + cw * 0.5 + 10, py + 76);
+    ctx.fillStyle = "#ffb0a0";
+    ctx.fillText(q < 0.5 ? "ARRAY VAULT: BREACHED" : "ARRAY VAULT: COLLAPSED", px + 8, py + chh - 8);
+    ctx.restore();
+  }
 
   winDistrict() {
     this.pausedForOverlay = true;

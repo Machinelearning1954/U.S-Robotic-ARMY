@@ -138,6 +138,7 @@ export class Renderer3D {
     this.dyn = {};
     this.signs = [];
     this.antennas = [];
+    this.strikeFx = null;
 
     const accent = new THREE.Color(g.d.palette.accent);
 
@@ -852,6 +853,8 @@ export class Renderer3D {
       sp.target.position.set(n.x + fx * 190, 0, n.y + fz * 190);
     });
 
+    this.syncStrike(g);
+
     // Neon sign flicker.
     for (const s of this.signs) {
       if (!s.meta.flicker) continue;
@@ -933,6 +936,72 @@ export class Renderer3D {
       this.renderer.setPixelRatio(1);
       this.renderer.shadowMap.enabled = false;
       this.resize();
+    }
+  }
+
+  // VAULTBREAKER finale mirrored into 3D: a stealth flying wing crosses at
+  // altitude, the penetrator drops, and the impact throws light, a ground
+  // shockwave ring, and a rolling dust dome.
+  syncStrike(g) {
+    const s = g.strike;
+    if (!s) {
+      if (this.strikeFx) {
+        this.scene.remove(this.strikeFx.grp);
+        this.strikeFx = null;
+      }
+      return;
+    }
+    if (!this.strikeFx) {
+      const grp = new THREE.Group();
+      const wing = new THREE.Mesh(
+        new THREE.ConeGeometry(34, 96, 3),
+        new THREE.MeshStandardMaterial({ color: 0x0a0e15, roughness: 0.35, metalness: 0.7 })
+      );
+      wing.scale.set(0.16, 1, 1); // flatten into a stealth wing profile
+      wing.rotation.z = -Math.PI / 2; // nose along +x
+      const pen = new THREE.Mesh(
+        new THREE.CylinderGeometry(2.4, 1.2, 26, 8),
+        new THREE.MeshBasicMaterial({ color: 0xe8c85a })
+      );
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(0.86, 1, 44),
+        new THREE.MeshBasicMaterial({
+          color: 0xffd68c, transparent: true, opacity: 0,
+          blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+        })
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(s.x, 1.4, s.y);
+      const dust = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 14, 10),
+        new THREE.MeshBasicMaterial({ color: 0x8a7458, transparent: true, opacity: 0, depthWrite: false })
+      );
+      dust.position.set(s.x, 0, s.y);
+      const light = new THREE.PointLight(0xffd08a, 0, 900, 1.6);
+      light.position.set(s.x, 40, s.y);
+      grp.add(wing, pen, ring, dust, light);
+      this.scene.add(grp);
+      this.strikeFx = { grp, wing, pen, ring, dust, light };
+    }
+    const fx = this.strikeFx;
+    const t = s.t;
+    fx.wing.visible = t < 3.0;
+    if (fx.wing.visible) {
+      const p = t / 3.0;
+      fx.wing.position.set(s.x - 950 + 1900 * p, 440, s.y + 70);
+    }
+    fx.pen.visible = t >= 2.2 && t < 3.0;
+    if (fx.pen.visible) {
+      const q = (t - 2.2) / 0.8;
+      fx.pen.position.set(s.x, 430 * (1 - q * q) + 8, s.y);
+    }
+    if (t >= 3.0) {
+      const q = Math.min(1, (t - 3.0) / 2.4);
+      fx.ring.scale.setScalar(8 + q * 280);
+      fx.ring.material.opacity = 0.5 * (1 - q);
+      fx.dust.scale.setScalar(12 + q * 130);
+      fx.dust.material.opacity = 0.34 * (1 - q);
+      fx.light.intensity = 12000 * Math.max(0, 1 - (t - 3.0) * 1.4);
     }
   }
 
