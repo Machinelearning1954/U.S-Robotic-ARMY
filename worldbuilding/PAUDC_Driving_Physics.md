@@ -133,3 +133,22 @@ it and you're swimming home.
   dock. The brand, grille signature, and works livery are **not** depicted (no
   real makes, per the rules); only the endurance-prototype silhouette-as-idea
   was kept, rebuilt original in island colors.
+
+
+## Skyline Mode — hover kits & holo windshields (live, v1.13)
+
+The fleet's leapfrog feature: the Don's workshop has retrofitted the island's
+cars with **hover kits**. Press **B** in any car (not the bike, boat, or jet
+ski — they have their own souls) and the ride **lifts off**: four teal hover
+pads glowing underneath, cruising at altitude over terrain and **straight
+across open water, bone dry**, wheels down anywhere with another tap of B.
+While airborne a **holographic windshield** floats ahead of the glass — a
+translucent teal readout panel with ticker lines, the hover kit's HUD. First
+lift-off pays **+30**: *"the road was a suggestion."* Kit state ends when you
+step out; the unlock is saved.
+
+- **Origin:** a GTA 6 sports-car roster infographic. Per Rule Zero none of
+  Rockstar's fictional brands, names, or designs are used — the island's fleet
+  was already fully original — so the request's second half became the feature:
+  capabilities that roster doesn't have. Invented tech, no real or third-party
+  brands, non-lethal as ever.
