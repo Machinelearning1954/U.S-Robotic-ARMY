@@ -1063,3 +1063,30 @@ tempo 1.6 with all 8 out, NIGHT sends 4 home and raises the 8-dancer club
 crowd; all four director events spawn (meteors/dolphins/trio forced, dolphins
 auto-picked by the scheduler), first-sighting pays +10 atomically; zero page
 errors.
+
+
+## The Five Cores — right core, right work (live in the prototype, v1.18)
+
+A Chromelab garden of five **invented** processor totems arranged in a ring —
+each a pedestal with a slow-spinning, glowing chip hovering above it. Walk up
+to each on foot and dwell a moment to "read" it (its LED goes teal when
+logged):
+
+| Totem | Epithet | What it teaches |
+|---|---|---|
+| **CORE-G** | The Generalist | runs everything, rushes nothing — the harbor books on it |
+| **CORE-P** | The Thousand Hands | massive parallel math — dreams the big models |
+| **CORE-M** | The Pocket | sips power, lives in your hand — on-device smarts |
+| **CORE-T** | The Tide | tensor currents at scale — the cloud math engine |
+| **CORE-D** | The Mover | ships the data so the thinkers can think |
+
+Read all five for **+25 — GRID LITERATE** ("the island computes with
+intention"). Completion persists in the save, and restored saves re-light the
+LEDs.
+
+- **Boundary:** built from an AI-chip explainer infographic (CPU/GPU/NPU/TPU/
+  DPU). Only the *taxonomy idea* — "the right chip for the right workload" —
+  was kept, as island education. **No real chip brands, vendors, product names,
+  or the explainer's design/art are used**; the totems, names, and epithets are
+  original. Educational and civilian — nothing military, consistent with the
+  island's tech doctrine.

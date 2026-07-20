@@ -134,3 +134,21 @@ watch is hers.
   military spec callouts. The deadly half is **not** depicted — no real submarine,
   class, weapons system, or specification. Only the wonder of *riding a submarine*
   was kept, rebuilt as the island's own little science sub.
+
+
+## Harbor Departures Board — one island, every line connected (live in the prototype, v1.18)
+
+A live departures board raised beside the Plantin Airways gate kiosk: six rows,
+one per transit line, each status read **live from the actual simulation** —
+the Island Hop (BOARDING / IN THE AIR), the Harbour Hopper (DOCKED / EN ROUTE),
+the Coastal Line (AT PLATFORM / EN ROUTE), the Sea Puss (MOORED / DIVING), the
+Needle (PAD READY / TEST RUN), and Island One (SCHEDULED / OVERHEAD). When the
+storm rolls in, the air and sea rows flip to **STORM HOLD** in red — the canon
+storm-condition ladder, written onto the board in real time. The board never
+lies, because it has no script: it *is* the world state. Stand and read it on
+foot for a one-time **+20** ("one island, every line connected").
+
+- **Boundary:** the reference was a fan post of another game's airport board
+  listing that game's city names — those are someone else's IP and are **not**
+  used. Only the separable idea was kept (the world reads as one connected
+  network), rebuilt entirely on PAUDC's own invented lines and places.
