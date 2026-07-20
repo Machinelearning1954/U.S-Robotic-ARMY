@@ -974,3 +974,48 @@ wherever she's currently sailing.
   this island); the visor half was kept and pointed at exploration. The dive kit
   is now complete: swim (v1.01), power (v1.10), and sight (v1.11) — nothing to
   shoot, everything to find.
+
+
+## The Soundring — procedural audio engine (live in the prototype, v1.16)
+
+The island gets its voice: a **fully procedural WebAudio engine** — every sound
+synthesized at runtime from oscillators and filtered noise. **No audio files, no
+samples, no licensed music** — the single-file and all-original guarantees hold
+(the IP provenance table's "Audio: none shipped" becomes "Audio: all synthesized").
+Toggle with **0** (zero); off by default (browsers require a user gesture anyway).
+
+**What's in the ring:**
+
+- **Bus architecture** — ambience / vehicle / foley / music gain buses into a
+  master compressor, the standard mix topology (checklist §6).
+- **Dialogue ducking** — while a toast "speaks", the ambience and music buses
+  step back automatically (checklist §4), driven by the game's own toast timer.
+- **HRTF spatial audio** — the Bassline club is a positional 3D emitter: its
+  bass **bleeds through the walls** as you walk past, panned binaurally around
+  your head, with exponential distance rolloff (checklist §1 + §5 exterior
+  music bleed). The listener rides the player every frame.
+- **Interior acoustics** — a master lowpass occludes the outside world to a
+  muffle the moment you step inside the house, vault, mess, or estate
+  (checklist §1 occlusion / §2 interior reverb zones, rendered as filtering).
+- **Engine synthesis, not loops** — sawtooth + sub-sine whose pitch and filter
+  brightness ride your actual speed (checklist §3's granular RPM idea, done
+  with synthesis); hover mode adds a +70 Hz lift to the tone.
+- **Dynamic weather audio** — an always-breathing ocean bed (bandpass noise),
+  a wind layer that swells in storms, and a rain hiss layer keyed live to the
+  storm state (checklist §2).
+- **Material footstep system** — steps are scheduled by distance travelled and
+  filtered per surface: asphalt (bright), sand (soft low), grass (mid), plus
+  stroke splashes while swimming (checklist §2).
+
+**Honest coverage note (the boundary):** the checklist's remaining items are
+engine-rung work, deferred deliberately — Dolby Atmos / platform spatial APIs,
+ray-traced propagation, licensed radio stations, recorded VO with lip-sync, and
+controller haptics don't exist in a single-file browser prototype. **There is no
+weapon audio because there are no weapons** — the non-lethal floor holds in the
+mix too. Everything shipped is original synthesis; nothing recorded, sampled,
+or licensed.
+
+Headless-verified: context starts on the 0-key gesture; engine gain 0 on foot
+and rising while driving; occlusion filter drops 18000→480 Hz inside the vault
+and reopens outside; rain layer follows the storm state; HRTF panner sits at the
+club's coordinates; footstep scheduler accumulates and fires on grass.

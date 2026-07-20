@@ -19,7 +19,7 @@ vehicle, aircraft, vessel, robot, business, and system in the game is invented.
 | **Engine** | three.js (inlined build) | MIT license — commercial use permitted; the bundled license notice inside `game/3d.html` **must be kept** |
 | **3D assets** | Every model is built in code from engine primitives | Original — no imported models, no marketplace assets |
 | **Textures** | All generated procedurally at runtime via canvas | Original — no image files, no photo textures |
-| **Audio** | None shipped | — |
+| **Audio** | All synthesized at runtime via WebAudio (oscillators + filtered noise) — no audio files, samples, or recorded music | Original — nothing recorded, sampled, or licensed |
 | **Fonts** | System font stack | No embedded fonts |
 | **Names & text** | All in-game names (PAUDC, BII, Plantin Airways, Sea Puss, Wave Dart, YARDCLASH, the Don/Malik Baptiste, etc.), all toasts, labels, and dialogue | Original, invented for this project |
 | **Folklore** | Rolling Calf, duppy — Jamaican folklore | Public domain cultural material, rendered with original designs |
