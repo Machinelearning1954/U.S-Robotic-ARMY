@@ -942,3 +942,18 @@ with everything else.
   original (invented wing, the island's own cliffs; no resort, brand, or place
   depicted). It completes the flight set: parachute down (Harbor Drop), Mach
   9.9 up (the Needle), and now the slow soar between.
+
+
+## The Current Suit — powered swim suit (live, v1.10)
+
+On the Vellum promenade, a dark mannequin on a plinth wears it: **the Current
+Suit**, Reef School assistive swim-tech out of the Don's workshop — *"anyone can
+swim."* Stand at the display a moment and it's fitted, permanently (saved):
+**stronger stroke** (+45% swim speed and acceleration, stacking with the sprint
+stroke) and **double the breath** underwater. While you swim, thin **blue
+propulsion lines glow** along the Don's sides — the suit working.
+
+- **Origin:** an AI concept ad for a propulsion swimsuit. Rebuilt original — no
+  brand, no product; framed as what this island always builds: tech that helps a
+  body do more, never a weapon. Pairs with v1.01 swimming and the island's
+  accessibility streak (Kindred care units, Evergreen Course).
