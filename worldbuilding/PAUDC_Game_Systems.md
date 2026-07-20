@@ -902,3 +902,26 @@ restored."*
   per-feature keys (clout/estate/race-best) that predated this system.
 - Everything saved is the player's own progress, stored locally in the
   browser — no telemetry, nothing leaves the machine.
+
+
+## The Watchkeeper's Walk — the watch-tech tour quest (live, v1.07)
+
+A meta-quest crowning the island's five courtesy-tech stations — each one built
+fiction-safe from border-surveillance source material and pointed at weather,
+wildlife, welcome, or sport, never at people:
+
+1. **Tune the Reef Sentry Line** (storms & wildlife)
+2. **Read the Storm Desk** (live field reports)
+3. **Stomp the Ground Ear** (seismology, opt-in)
+4. **Sign in at the Light Ring** (the gate that welcomes)
+5. **Thread the Beam Gate** (reflex sport)
+
+Finish all five and the island names you **Watchkeeper**: **+50** — *"the island
+watches WITH you, never AT you."* Progress notes surface gently as you collect
+stations; state persists in the auto-save.
+
+- **Origin:** an eight-image batch of a real nation's border-force "laser wall"
+  series (flags, armed soldiers, detection of people). Nothing new was taken —
+  every keepable idea from that series had already been built fiction-safe in
+  v0.82–v1.00; this quest is the ribbon on the completed set, and its completion
+  line states the design rule outright.
