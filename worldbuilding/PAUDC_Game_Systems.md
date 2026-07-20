@@ -957,3 +957,20 @@ propulsion lines glow** along the Don's sides — the suit working.
   brand, no product; framed as what this island always builds: tech that helps a
   body do more, never a weapon. Pairs with v1.01 swimming and the island's
   accessibility streak (Kindred care units, Evergreen Course).
+
+
+## The Reef Visor — sonar for divers (live, v1.11)
+
+Next to the Current Suit stand on the promenade: a dark half-dome visor on a
+pedestal, teal band glowing. Fit it (one-time **+25**, saved) and the bay starts
+talking: **while you're genuinely under** (diving, not just wading), the visor
+pings the nearest sleeping thing every few seconds — *"VISOR SONAR — wreck 2,
+64m west… the coral tunnel, 28m south… the Sea Puss, 90m east"* — live
+distances and bearings to the wreck field, the tunnel line, and the submersible
+wherever she's currently sailing.
+
+- **Origin:** an "abyssal combat diver" concept — a supercavitating underwater
+  **gun** paired with a sonar visor. The gun is **out** (no firearms, ever, on
+  this island); the visor half was kept and pointed at exploration. The dive kit
+  is now complete: swim (v1.01), power (v1.10), and sight (v1.11) — nothing to
+  shoot, everything to find.
