@@ -54,7 +54,7 @@ const BLUR_FRAG = /* glsl */ `
 `;
 
 const COMPOSITE_FRAG = /* glsl */ `
-  uniform sampler2D tScene; uniform sampler2D tBloom;
+  uniform sampler2D tScene; uniform sampler2D tBloom; uniform sampler2D tBloomWide;
   uniform float time; uniform float bloomAmt; uniform float grainAmt;
   varying vec2 vUv;
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -67,7 +67,13 @@ const COMPOSITE_FRAG = /* glsl */ `
     c.r = texture2D(tScene, vUv - ca).r;
     c.g = texture2D(tScene, vUv).g;
     c.b = texture2D(tScene, vUv + ca).b;
-    c += texture2D(tBloom, vUv).rgb * bloomAmt;
+    // two bloom octaves: tight neon glow + wide atmospheric halo
+    c += texture2D(tBloom, vUv).rgb * bloomAmt * 0.75;
+    c += texture2D(tBloomWide, vUv).rgb * bloomAmt * 0.65;
+    // teal-orange grade: cool shadows, warm highlights, gentle saturation lift
+    float l = dot(c, vec3(0.299, 0.587, 0.114));
+    c *= mix(vec3(0.92, 1.03, 1.12), vec3(1.07, 1.01, 0.94), smoothstep(0.08, 0.75, l));
+    c = mix(vec3(l), c, 1.12);
     c *= 1.0 - r2 * 0.85;                       // vignette
     c += (hash(vUv * 917.0 + time) - 0.5) * grainAmt; // film grain
     c = max(c, 0.0);
@@ -109,8 +115,8 @@ export class Renderer3D {
     this.matComposite = new THREE.ShaderMaterial({
       vertexShader: QUAD_VERT, fragmentShader: COMPOSITE_FRAG, depthTest: false,
       uniforms: {
-        tScene: { value: null }, tBloom: { value: null },
-        time: { value: 0 }, bloomAmt: { value: 0.9 }, grainAmt: { value: 0.028 },
+        tScene: { value: null }, tBloom: { value: null }, tBloomWide: { value: null },
+        time: { value: 0 }, bloomAmt: { value: 0.95 }, grainAmt: { value: 0.028 },
       },
     });
     this.resize();
@@ -123,11 +129,18 @@ export class Renderer3D {
     this.camera.updateProjectionMatrix();
     const pw = Math.max(2, Math.floor(w * this.ratio));
     const ph = Math.max(2, Math.floor(h * this.ratio));
-    if (this.rtScene) { this.rtScene.dispose(); this.rtBloomA.dispose(); this.rtBloomB.dispose(); }
+    if (this.rtScene) {
+      this.rtScene.dispose(); this.rtBloomA.dispose(); this.rtBloomB.dispose();
+      this.rtBloomC.dispose(); this.rtBloomD.dispose();
+    }
     this.rtScene = new THREE.WebGLRenderTarget(pw, ph, { samples: 4 });
     this.rtBloomA = new THREE.WebGLRenderTarget(pw >> 2, ph >> 2);
     this.rtBloomB = new THREE.WebGLRenderTarget(pw >> 2, ph >> 2);
-    this.rtBloomA.texture.minFilter = this.rtBloomB.texture.minFilter = THREE.LinearFilter;
+    this.rtBloomC = new THREE.WebGLRenderTarget(pw >> 3, ph >> 3);
+    this.rtBloomD = new THREE.WebGLRenderTarget(pw >> 3, ph >> 3);
+    for (const rt of [this.rtBloomA, this.rtBloomB, this.rtBloomC, this.rtBloomD]) {
+      rt.texture.minFilter = THREE.LinearFilter;
+    }
   }
 
   // ---------- static city, rebuilt when the district changes ----------
@@ -176,56 +189,101 @@ export class Renderer3D {
         if (g.grid[y][x]) tiles.push({ x, y, m: g.blockMeta[y][x] });
       }
     }
-    const { map: facadeMap, emissive: facadeEm } = this.makeFacadeTextures();
     const boxGeo = new THREE.BoxGeometry(1, 1, 1);
     boxGeo.translate(0, 0.5, 0); // grow upward from the ground
-    const sideMat = new THREE.MeshStandardMaterial({
-      map: facadeMap, roughness: 0.82, metalness: 0.08,
-      emissive: 0xffffff, emissiveMap: facadeEm, emissiveIntensity: 1.35,
-    });
     const roofMat = new THREE.MeshStandardMaterial({ color: 0x0e1424, roughness: 0.92 });
-    // Box face order: +x, -x, +y (roof), -y, +z, -z — windows on walls only.
-    const mats = [sideMat, sideMat, roofMat, roofMat, sideMat, sideMat];
-    const inst = new THREE.InstancedMesh(boxGeo, mats, tiles.length);
-    inst.castShadow = true;
-    inst.receiveShadow = true;
-    const mirrorMats = mats.map((m) => {
-      const c = m.clone();
-      c.side = THREE.BackSide; // y-flip reverses winding
-      c.emissiveIntensity = (m.emissiveIntensity || 0) * 0.55;
-      c.color = new THREE.Color(0x0a0e1a);
-      return c;
-    });
-    const instM = new THREE.InstancedMesh(boxGeo, mirrorMats, tiles.length);
+    // Two facade variants so adjacent blocks don't share one identical skin.
+    const variants = [this.makeFacadeTextures(1), this.makeFacadeTextures(2)];
+    const varGroups = [[], []];
+    for (const t2 of tiles) varGroups[(t2.x * 3 + t2.y) % 2].push(t2);
     const mtx = new THREE.Matrix4();
     const col = new THREE.Color();
-    tiles.forEach((t2, i) => {
-      const h = t2.m.h * UP_SCALE;
-      const s = g.tile - 6;
-      const cx = (t2.x + 0.5) * g.tile, cz = (t2.y + 0.5) * g.tile;
-      mtx.makeScale(s, h, s);
-      mtx.setPosition(cx, 0, cz);
-      inst.setMatrixAt(i, mtx);
-      mtx.makeScale(s, -h, s);
-      mtx.setPosition(cx, 0, cz);
-      instM.setMatrixAt(i, mtx);
-      col.setHSL(0.6, 0.2, 0.16 + t2.m.h * 0.09);
-      inst.setColorAt(i, col);
-      instM.setColorAt(i, col);
+    const setbacks = [];
+    let sideMat0 = null;
+    varGroups.forEach((list, vi) => {
+      const v = variants[vi];
+      const sideMat = new THREE.MeshStandardMaterial({
+        map: v.map, normalMap: v.normal, normalScale: new THREE.Vector2(0.7, 0.7),
+        roughness: 0.82, metalness: 0.08,
+        emissive: 0xffffff, emissiveMap: v.emissive, emissiveIntensity: 1.35,
+      });
+      if (!sideMat0) sideMat0 = sideMat;
+      // Box face order: +x, -x, +y (roof), -y, +z, -z — windows on walls only.
+      const mats = [sideMat, sideMat, roofMat, roofMat, sideMat, sideMat];
+      const inst = new THREE.InstancedMesh(boxGeo, mats, list.length);
+      inst.castShadow = true;
+      inst.receiveShadow = true;
+      const mirrorMats = mats.map((m) => {
+        const c = m.clone();
+        c.side = THREE.BackSide; // y-flip reverses winding
+        c.emissiveIntensity = (m.emissiveIntensity || 0) * 0.55;
+        c.color = new THREE.Color(0x0a0e1a);
+        return c;
+      });
+      const instM = new THREE.InstancedMesh(boxGeo, mirrorMats, list.length);
+      list.forEach((t2, i) => {
+        const h = t2.m.h * UP_SCALE;
+        const s = g.tile - 6;
+        const cx = (t2.x + 0.5) * g.tile, cz = (t2.y + 0.5) * g.tile;
+        mtx.makeScale(s, h, s);
+        mtx.setPosition(cx, 0, cz);
+        inst.setMatrixAt(i, mtx);
+        mtx.makeScale(s, -h, s);
+        mtx.setPosition(cx, 0, cz);
+        instM.setMatrixAt(i, mtx);
+        col.setHSL(0.6, 0.2, 0.16 + t2.m.h * 0.09);
+        inst.setColorAt(i, col);
+        instM.setColorAt(i, col);
+        if (t2.m.h > 0.78) setbacks.push({ cx, cz, h, s });
+      });
+      this.scene.add(inst);
+      this.mirror.add(instM);
     });
-    this.scene.add(inst);
-    this.mirror.add(instM);
+
+    // Tower setbacks: the tallest blocks get a stepped upper tier, breaking
+    // the flat-roof skyline the way real high-rises do.
+    if (setbacks.length) {
+      const mats2 = [sideMat0, sideMat0, roofMat, roofMat, sideMat0, sideMat0];
+      const instS = new THREE.InstancedMesh(boxGeo, mats2, setbacks.length);
+      instS.castShadow = true;
+      setbacks.forEach((sb, i) => {
+        mtx.makeScale(sb.s * 0.58, sb.h * 0.42, sb.s * 0.58);
+        mtx.setPosition(sb.cx, sb.h, sb.cz);
+        instS.setMatrixAt(i, mtx);
+      });
+      this.scene.add(instS);
+    }
+
+    // Roof clutter: AC units scattered on the roofs that have them.
+    const acTiles = tiles.filter((t2) => t2.m.ac).slice(0, 220);
+    if (acTiles.length) {
+      const acMat = new THREE.MeshStandardMaterial({ color: 0x1c2536, roughness: 0.7, metalness: 0.4 });
+      const instAC = new THREE.InstancedMesh(boxGeo, acMat, acTiles.length);
+      acTiles.forEach((t2, i) => {
+        const h = t2.m.h * UP_SCALE;
+        const s = g.tile - 6;
+        const ox = ((t2.x * 13 + t2.y * 7) % 10 - 5) * (s / 24);
+        const oz = ((t2.x * 5 + t2.y * 17) % 10 - 5) * (s / 24);
+        const w2 = 6 + ((t2.x + t2.y) % 3) * 2.5;
+        mtx.makeScale(w2, 4.5, w2 * 0.8);
+        mtx.setPosition((t2.x + 0.5) * g.tile + ox, h, (t2.y + 0.5) * g.tile + oz);
+        instAC.setMatrixAt(i, mtx);
+      });
+      this.scene.add(instAC);
+    }
 
     this.buildSigns(g, tiles);
     this.buildAntennas(g, tiles);
 
     // Ground goes in AFTER the mirror world: it is transparent, so three
     // renders it last and the mirrored city shows through the asphalt.
-    const groundTex = this.makeGroundTexture(g);
+    const gt = this.makeGroundTexture(g);
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(g.worldW, g.worldH),
       new THREE.MeshStandardMaterial({
-        map: groundTex, roughness: 0.42, metalness: 0.18,
+        map: gt.map, normalMap: gt.normalMap, roughnessMap: gt.roughnessMap,
+        normalScale: new THREE.Vector2(0.9, 0.9),
+        roughness: 1, metalness: 0.18,
         transparent: true, opacity: 0.86, depthWrite: false,
       })
     );
@@ -255,6 +313,10 @@ export class Renderer3D {
     const bulbMirrorMat = new THREE.MeshBasicMaterial({ color: 0x8a6f47 });
     const poleMat = new THREE.MeshStandardMaterial({ color: 0x151d2e, roughness: 0.6, metalness: 0.5 });
     const poleGeo = new THREE.CylinderGeometry(0.9, 1.2, 26, 6);
+    const glowMat = new THREE.SpriteMaterial({
+      map: this.makeGlowTexture(), color: 0xffb46e,
+      blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.5,
+    });
     this.lampBulbs = g.lamps.map((l) => {
       const b = new THREE.Mesh(bulbGeo, bulbMat);
       b.position.set(l.x, 26, l.y);
@@ -263,7 +325,11 @@ export class Renderer3D {
       const pole = new THREE.Mesh(poleGeo, poleMat);
       pole.position.set(l.x, 13, l.y);
       pole.castShadow = true;
-      this.scene.add(b, pole);
+      // additive halo: the rain-fog aura every real streetlight carries
+      const halo = new THREE.Sprite(glowMat);
+      halo.scale.setScalar(46);
+      halo.position.set(l.x, 27, l.y);
+      this.scene.add(b, pole, halo);
       this.mirror.add(bm);
       return b;
     });
@@ -325,9 +391,14 @@ export class Renderer3D {
       beam.position.y = 175;
       const light = new THREE.PointLight(accent, 0, 300, 1.8);
       light.position.y = 30;
-      grp.add(core, beam, light);
+      const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: this.makeGlowTexture(), color: accent,
+        blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0,
+      }));
+      halo.position.y = 12;
+      grp.add(core, beam, light, halo);
       this.scene.add(grp);
-      return { grp, core, beam, light };
+      return { grp, core, beam, light, halo };
     });
 
     // Sweepers: drone bodies with rotor rings + volumetric-style scan cones.
@@ -637,6 +708,63 @@ export class Renderer3D {
     );
     this.dyn.rain.frustumCulled = false;
     this.scene.add(this.dyn.rain);
+
+    // Splash rings where drops hit the street around the player.
+    const splashGeo = new THREE.RingGeometry(0.8, 1, 14);
+    this.splashes = Array.from({ length: 26 }, () => {
+      const m = new THREE.Mesh(
+        splashGeo,
+        new THREE.MeshBasicMaterial({
+          color: 0x9cc4ea, transparent: true, opacity: 0,
+          blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+        })
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.position.y = 0.6;
+      this.scene.add(m);
+      return { m, t: Math.random() * 0.5, dur: 0.32 + Math.random() * 0.22 };
+    });
+  }
+
+  // Sobel a grayscale height canvas into a tangent-space normal map.
+  makeNormalMap(hc, strength = 2.2) {
+    const w = hc.width, h = hc.height;
+    const src = hc.getContext("2d").getImageData(0, 0, w, h).data;
+    const out = document.createElement("canvas");
+    out.width = w; out.height = h;
+    const octx = out.getContext("2d");
+    const img = octx.createImageData(w, h);
+    const H = (x, y) => src[(((y + h) % h) * w + ((x + w) % w)) * 4] / 255;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const dx = (H(x - 1, y) - H(x + 1, y)) * strength;
+        const dy = (H(x, y - 1) - H(x, y + 1)) * strength;
+        const inv = 1 / Math.hypot(dx, dy, 1);
+        const o = (y * w + x) * 4;
+        img.data[o] = (dx * inv * 0.5 + 0.5) * 255;
+        img.data[o + 1] = (dy * inv * 0.5 + 0.5) * 255;
+        img.data[o + 2] = (inv * 0.5 + 0.5) * 255;
+        img.data[o + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    return new THREE.CanvasTexture(out);
+  }
+
+  // Soft radial glow used as an additive halo sprite on light sources.
+  makeGlowTexture() {
+    if (this.glowTex) return this.glowTex;
+    const c = document.createElement("canvas");
+    c.width = c.height = 128;
+    const x = c.getContext("2d");
+    const gr = x.createRadialGradient(64, 64, 2, 64, 64, 62);
+    gr.addColorStop(0, "rgba(255,255,255,0.9)");
+    gr.addColorStop(0.35, "rgba(255,255,255,0.28)");
+    gr.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = gr;
+    x.fillRect(0, 0, 128, 128);
+    this.glowTex = new THREE.CanvasTexture(c);
+    return this.glowTex;
   }
 
   makeGroundTexture(g) {
@@ -644,12 +772,39 @@ export class Renderer3D {
     const c = document.createElement("canvas");
     c.width = g.cols * px; c.height = g.rows * px;
     const x = c.getContext("2d");
+    // parallel height + roughness canvases for normal/roughness maps
+    const hgt = document.createElement("canvas");
+    hgt.width = c.width; hgt.height = c.height;
+    const xh = hgt.getContext("2d");
+    const rgh = document.createElement("canvas");
+    rgh.width = c.width; rgh.height = c.height;
+    const xr = rgh.getContext("2d");
     x.fillStyle = "#1b2438";
     x.fillRect(0, 0, c.width, c.height);
-    // asphalt grain
+    xh.fillStyle = "#808080";
+    xh.fillRect(0, 0, c.width, c.height);
+    xr.fillStyle = "#6f6f6f"; // damp asphalt: mid roughness
+    xr.fillRect(0, 0, c.width, c.height);
+    // asphalt grain (albedo + height speckle + roughness variance)
     for (let i = 0; i < c.width * c.height / 28; i++) {
-      x.fillStyle = `rgba(${Math.random() < 0.5 ? "255,255,255" : "0,0,0"},${0.02 + Math.random() * 0.05})`;
-      x.fillRect(Math.random() * c.width, Math.random() * c.height, 1.5, 1.5);
+      const gx = Math.random() * c.width, gy = Math.random() * c.height;
+      const lite = Math.random() < 0.5;
+      x.fillStyle = `rgba(${lite ? "255,255,255" : "0,0,0"},${0.02 + Math.random() * 0.05})`;
+      x.fillRect(gx, gy, 1.5, 1.5);
+      xh.fillStyle = `rgba(${lite ? "255,255,255" : "0,0,0"},0.25)`;
+      xh.fillRect(gx, gy, 1.5, 1.5);
+    }
+    // slick patches: locally low roughness so lamp light smears like water
+    for (let i = 0; i < (c.width * c.height) / 22000; i++) {
+      const gr2 = xr.createRadialGradient(0, 0, 2, 0, 0, 26);
+      gr2.addColorStop(0, "rgba(18,18,18,0.85)");
+      gr2.addColorStop(1, "rgba(18,18,18,0)");
+      xr.save();
+      xr.translate(Math.random() * c.width, Math.random() * c.height);
+      xr.scale(1.6, 0.8);
+      xr.fillStyle = gr2;
+      xr.fillRect(-26, -26, 52, 52);
+      xr.restore();
     }
     for (let ty = 0; ty < g.rows; ty++) {
       for (let tx = 0; tx < g.cols; tx++) {
@@ -657,67 +812,97 @@ export class Renderer3D {
         if (isB) {
           x.fillStyle = "#0d1322";
           x.fillRect(tx * px, ty * px, px, px);
+          xr.fillStyle = "#e0e0e0"; // building footprints: rough, no sheen
+          xr.fillRect(tx * px, ty * px, px, px);
           continue;
         }
-        // sidewalk edging beside buildings
+        // sidewalk edging beside buildings (raised curb in the height map)
         const edge = (dx2, dy2) => {
           const nx = tx + dx2, ny = ty + dy2;
           return ny >= 0 && ny < g.rows && nx >= 0 && nx < g.cols && g.grid[ny][nx];
         };
         x.fillStyle = "#1d2740";
-        if (edge(-1, 0)) x.fillRect(tx * px, ty * px, 4, px);
-        if (edge(1, 0)) x.fillRect(tx * px + px - 4, ty * px, 4, px);
-        if (edge(0, -1)) x.fillRect(tx * px, ty * px, px, 4);
-        if (edge(0, 1)) x.fillRect(tx * px, ty * px + px - 4, px, 4);
-        // lane dashes
+        xh.fillStyle = "#b8b8b8";
+        if (edge(-1, 0)) { x.fillRect(tx * px, ty * px, 4, px); xh.fillRect(tx * px, ty * px, 4, px); }
+        if (edge(1, 0)) { x.fillRect(tx * px + px - 4, ty * px, 4, px); xh.fillRect(tx * px + px - 4, ty * px, 4, px); }
+        if (edge(0, -1)) { x.fillRect(tx * px, ty * px, px, 4); xh.fillRect(tx * px, ty * px, px, 4); }
+        if (edge(0, 1)) { x.fillRect(tx * px, ty * px + px - 4, px, 4); xh.fillRect(tx * px, ty * px + px - 4, px, 4); }
+        // lane dashes (slightly proud of the asphalt, like thermoplastic paint)
         x.fillStyle = "rgba(215,225,195,0.4)";
-        if (tx % 4 === 0 && ty % 4 !== 0) x.fillRect(tx * px + px / 2 - 1, ty * px + 4, 2, px - 8);
-        if (ty % 4 === 0 && tx % 4 !== 0) x.fillRect(tx * px + 4, ty * px + px / 2 - 1, px - 8, 2);
+        xh.fillStyle = "rgba(255,255,255,0.35)";
+        if (tx % 4 === 0 && ty % 4 !== 0) {
+          x.fillRect(tx * px + px / 2 - 1, ty * px + 4, 2, px - 8);
+          xh.fillRect(tx * px + px / 2 - 1, ty * px + 4, 2, px - 8);
+        }
+        if (ty % 4 === 0 && tx % 4 !== 0) {
+          x.fillRect(tx * px + 4, ty * px + px / 2 - 1, px - 8, 2);
+          xh.fillRect(tx * px + 4, ty * px + px / 2 - 1, px - 8, 2);
+        }
         // crosswalk zebra at intersections
         if (tx % 4 === 0 && ty % 4 === 0) {
           x.fillStyle = "rgba(220,228,240,0.28)";
-          for (let k = 3; k < px - 3; k += 5) x.fillRect(tx * px + k, ty * px + 5, 3, px - 10);
+          xh.fillStyle = "rgba(255,255,255,0.3)";
+          for (let k = 3; k < px - 3; k += 5) {
+            x.fillRect(tx * px + k, ty * px + 5, 3, px - 10);
+            xh.fillRect(tx * px + k, ty * px + 5, 3, px - 10);
+          }
         }
       }
     }
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = 8;
-    return tex;
+    const normalMap = this.makeNormalMap(hgt, 1.8);
+    normalMap.anisotropy = 4;
+    const roughnessMap = new THREE.CanvasTexture(rgh);
+    return { map: tex, normalMap, roughnessMap };
   }
 
-  makeFacadeTextures() {
+  makeFacadeTextures(variant = 1) {
     // 512px facade: varied window warmth per unit, dark floors, mullions,
     // floor ledges, and a bright storefront band at street level. The
-    // emissive canvas holds only the glass, so walls don't glow.
+    // emissive canvas holds only the glass, so walls don't glow, and a
+    // parallel height canvas turns into a normal map (inset windows,
+    // proud ledges) so the moonlight actually grips the wall.
     const c = document.createElement("canvas");
     const e = document.createElement("canvas");
-    c.width = c.height = e.width = e.height = 512;
+    const hgt = document.createElement("canvas");
+    c.width = c.height = e.width = e.height = hgt.width = hgt.height = 512;
     const x = c.getContext("2d");
     const xe = e.getContext("2d");
+    const xh = hgt.getContext("2d");
     x.fillStyle = "#0a0e1a";
     x.fillRect(0, 0, 512, 512);
     xe.fillStyle = "#000";
     xe.fillRect(0, 0, 512, 512);
+    xh.fillStyle = "#808080";
+    xh.fillRect(0, 0, 512, 512);
     // concrete tone noise
     for (let i = 0; i < 2600; i++) {
       x.fillStyle = `rgba(${Math.random() < 0.5 ? "255,255,255" : "0,0,0"},${0.015 + Math.random() * 0.03})`;
       x.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
     }
-    const floorH = 44;
+    const floorH = variant === 1 ? 44 : 38;
+    const winStep = variant === 1 ? 30 : 24;
+    const litP = variant === 1 ? 0.3 : 0.24;
     for (let fy = 512 - floorH; fy > 30; fy -= floorH) {
-      // ledge line between floors
+      // ledge line between floors (proud in the height map)
       x.fillStyle = "rgba(255,255,255,0.05)";
       x.fillRect(0, fy, 512, 2);
+      xh.fillStyle = "#c8c8c8";
+      xh.fillRect(0, fy, 512, 3);
       const groundFloor = fy >= 512 - floorH;
       const floorDark = !groundFloor && Math.random() < 0.22; // whole floor unlit
-      for (let wx = 10; wx < 500; wx += 30) {
-        const w = 18, h = groundFloor ? 34 : 26;
+      for (let wx = 10; wx < 500; wx += winStep) {
+        const w = winStep * 0.6, h = groundFloor ? 34 : floorH * 0.6;
         const wy = fy + (groundFloor ? 6 : 9);
         // frame
         x.fillStyle = "#131a2e";
         x.fillRect(wx - 2, wy - 2, w + 4, h + 4);
-        let lit = groundFloor ? Math.random() < 0.55 : !floorDark && Math.random() < 0.3;
+        // window glass sits inset from the wall plane
+        xh.fillStyle = "#4a4a4a";
+        xh.fillRect(wx, wy, w, h);
+        let lit = groundFloor ? Math.random() < 0.55 : !floorDark && Math.random() < litP;
         if (lit) {
           // window color temperature varies: warm homes, cool offices, tv glow
           const r = Math.random();
@@ -756,7 +941,9 @@ export class Renderer3D {
     map.anisotropy = 8;
     const emissive = new THREE.CanvasTexture(e);
     emissive.colorSpace = THREE.SRGBColorSpace;
-    return { map, emissive };
+    const normal = this.makeNormalMap(hgt, 2.4);
+    normal.anisotropy = 4;
+    return { map, emissive, normal };
   }
 
   // ---------- per-frame sync ----------
@@ -792,6 +979,8 @@ export class Renderer3D {
       m.core.scale.setScalar(1 + pulse * 0.5);
       m.beam.material.opacity = 0.04 + vis * 0.3 * pulse;
       m.light.intensity = vis * 2600 * pulse;
+      m.halo.material.opacity = 0.12 + vis * 0.5 * pulse;
+      m.halo.scale.setScalar(34 + pulse * 26);
     });
 
     g.sweepers.forEach((s, i) => {
@@ -887,6 +1076,22 @@ export class Renderer3D {
     rainPos.needsUpdate = true;
     d.rain.material.opacity = g.weather.mode === "storm" ? 0.5 : g.weather.mode === "rain" ? 0.34 : 0.18;
 
+    // Ground splash rings cycle around the player, denser in heavier rain.
+    const splashGain = g.weather.mode === "storm" ? 0.45 : g.weather.mode === "rain" ? 0.3 : 0.16;
+    for (const sp of this.splashes) {
+      sp.t += 0.016;
+      if (sp.t >= sp.dur) {
+        sp.t = 0;
+        sp.dur = 0.32 + Math.random() * 0.22;
+        sp.m.position.set(
+          g.player.x + (Math.random() - 0.5) * 620, 0.6,
+          g.player.y + (Math.random() - 0.5) * 620);
+      }
+      const q = sp.t / sp.dur;
+      sp.m.scale.setScalar(1.5 + q * 7);
+      sp.m.material.opacity = splashGain * (1 - q);
+    }
+
     // Lightning bumps the exposure for a frame.
     this.renderer.toneMappingExposure = 1.25 + (g.flash || 0) * 1.7;
 
@@ -917,10 +1122,20 @@ export class Renderer3D {
       this.matBlur.uniforms.dir.value.set(0, 1 / this.rtBloomA.height);
       this.renderer.setRenderTarget(this.rtBloomA);
       this.renderer.render(this.postScene, this.postCam);
+      // second bloom octave: blur down again at 1/8 res for a wide halo
+      this.matBlur.uniforms.tex.value = this.rtBloomA.texture;
+      this.matBlur.uniforms.dir.value.set(1.5 / this.rtBloomC.width, 0);
+      this.renderer.setRenderTarget(this.rtBloomC);
+      this.renderer.render(this.postScene, this.postCam);
+      this.matBlur.uniforms.tex.value = this.rtBloomC.texture;
+      this.matBlur.uniforms.dir.value.set(0, 1.5 / this.rtBloomC.height);
+      this.renderer.setRenderTarget(this.rtBloomD);
+      this.renderer.render(this.postScene, this.postCam);
       // composite to screen
       this.postQuad.material = this.matComposite;
       this.matComposite.uniforms.tScene.value = this.rtScene.texture;
       this.matComposite.uniforms.tBloom.value = this.rtBloomA.texture;
+      this.matComposite.uniforms.tBloomWide.value = this.rtBloomD.texture;
       this.matComposite.uniforms.time.value = now * 0.001;
       this.renderer.setRenderTarget(null);
       this.renderer.render(this.postScene, this.postCam);

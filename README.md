@@ -64,9 +64,16 @@ full night-city realism pipeline, all procedural:
   shared procedural figure builder with per-pedestrian body variety
 - neon signage with flicker, blinking rooftop beacons, emitter sky-beams,
   drone scan cones, wind-slanted rain streaks
-- post chain: threshold bloom, chromatic aberration, film grain, vignette,
-  ACES tone mapping (lightning overdrives the exposure), MSAA — with an auto
-  quality governor that sheds post/shadows on weak GPUs
+- procedural PBR detail: Sobel-derived normal maps on facades (inset glass,
+  proud ledges) and streets (curbs, paint, grain), plus a roughness map with
+  slick patches so lamp light smears like standing water
+- skyline variety: two facade texture variants, stepped setback tiers on the
+  tallest towers, and AC-unit roof clutter
+- light halos on street lamps and emitters, rain splash rings on the asphalt
+- post chain: two-octave threshold bloom (tight neon + wide halo), teal-orange
+  color grade, chromatic aberration, film grain, vignette, ACES tone mapping
+  (lightning overdrives the exposure), MSAA — with an auto quality governor
+  that sheds post/shadows on weak GPUs
 
 Three.js r170 is vendored at `src/vendor/three.module.js` (MIT — see
 `src/vendor/THREE-LICENSE`), so the game remains fully self-contained. The
