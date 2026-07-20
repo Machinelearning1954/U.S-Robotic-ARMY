@@ -1019,3 +1019,47 @@ Headless-verified: context starts on the 0-key gesture; engine gain 0 on foot
 and rising while driving; occlusion filter drops 18000→480 Hz inside the vault
 and reopens outside; rain layer follows the storm state; HRTF panner sits at the
 club's coordinates; footstep scheduler accumulates and fires on grass.
+
+
+## The Generation Leap — Photo Mode, Daily Routines, the Spectacle Director (live in the prototype, v1.17)
+
+The systemic-depth pass: the kind of polish work that separates one open-world
+generation from the next. **Boundary note:** the request framed this as "do what
+the GTA 6 developers did" — no other studio's tech, code, assets, or design
+documents exist to copy, and none were. These are the island's own from-scratch
+takes on three open-world *traditions* (photo modes, NPC schedules, ambient
+events), which are genre conventions, not anyone's protected expression.
+
+**Photo Mode (key 9).** A free orbit camera around the Don while the world keeps
+living — WASD orbits and tilts, Q/E zooms, F cycles six original color lenses
+(Clean, Golden Hour, Harbor Noir, Neon Punch, VHS Dub, Dream Wash — CSS filter
+grades, no shader work), SPACE fires the shutter with a white-flash beat, 9
+exits. The HUD hides itself for the frame; photo mode owns the keyboard while
+active (a capture-phase listener, so no accidental carjacking mid-shot). First
+frame pays **+15 — THE REEL OPENS**; the shot counter persists in the save.
+
+**Daily Routines.** The island keeps hours now. The day is sliced into
+MORNING / DAY / EVENING / NIGHT; each slice retunes the pedestrians' walking
+tempo (morning joggers move at 1.6×, the evening lime slows to 0.85×), sends
+half the foot traffic home after dark, and staffs the **Bassline night shift**
+— an eight-strong dance crowd that appears outside the club only at night,
+bobbing to the bass the Soundring is already bleeding through the wall. Slice
+changes are announced in patois-inflected toasts.
+
+**The Spectacle Director.** The world stages its own ambient events on a
+random cooldown, filtered by what fits the moment: **a dolphin pod** arcs
+across the bay (needs water, no storm), **a full rainbow** hangs over the
+harbor (daylight, clear skies — a canvas-gradient arc, no new geometry types),
+**a meteor watch** streaks the night sky, and **a steel trio** sets up on a
+street corner and actually *plays* — sine-pluck pentatonic notes through the
+Soundring's foley bus when you're close and the audio is on. First sighting of
+each kind pays **+10**. Events tear down after their run and the director rests
+90–160 s before the next one, so no two sessions look alike.
+
+Headless-verified: photo mode toggles on 9 with the HUD hidden, orbit/zoom/lens
+keys consumed (F cycles the lens instead of exiting to foot), shutter pays +15
+and increments the saved counter, CSS grade clears on exit; MORNING sets ped
+tempo 1.6 with all 8 out, NIGHT sends 4 home and raises the 8-dancer club
+crowd; all four director events spawn (meteors/dolphins/trio forced, dolphins
+auto-picked by the scheduler), first-sighting pays +10 atomically; zero page
+errors.
