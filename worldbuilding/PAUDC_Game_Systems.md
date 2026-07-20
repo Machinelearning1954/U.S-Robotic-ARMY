@@ -1090,3 +1090,22 @@ LEDs.
   or the explainer's design/art are used**; the totems, names, and epithets are
   original. Educational and civilian — nothing military, consistent with the
   island's tech doctrine.
+
+
+## The Palaver Table — one question, five voices (live in the prototype, v1.23)
+
+The island's oldest institution gets a table: a round palaver board at a
+probed-clear site where **five invented elders** sit — the Practitioner (straw
+brim, lives it daily), the Sceptic (thinks the consensus is wrong), the
+Economist (follows the money), the Historian (has seen the pattern), and the
+Academic (read the studies, book in lap). Walk up on foot and the table takes
+your question; the five answer **in turn, each in their own voice** — three
+rotating questions ship (building taller, the reef's recovery, what makes a
+town rich), so three visits hear the full bank. First completed palaver pays
+**+25 — "you heard the whole island think."**
+
+- **Boundary:** built from a reel demonstrating an AI-prompting technique
+  (answer as five distinct experts) shown in a real AI product's interface.
+  The product's UI and branding are **not** depicted — only the separable
+  five-voices idea, rebuilt as island oral tradition with original characters
+  and original dialogue.
