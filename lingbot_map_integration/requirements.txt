@@ -1,0 +1,11 @@
+# Map exporter (PLY conversion mode)
+numpy>=1.24
+
+# Optional: --video frame extraction
+opencv-python>=4.8
+
+# Optional: direct inference mode additionally needs LingBot-Map and CUDA PyTorch —
+# see https://github.com/robbyant/lingbot-map for the exact versions:
+#   pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu128
+#   git clone https://github.com/robbyant/lingbot-map && pip install -e lingbot-map
+#   pip install flashinfer-python   # recommended
