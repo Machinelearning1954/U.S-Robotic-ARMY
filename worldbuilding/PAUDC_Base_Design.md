@@ -661,3 +661,36 @@ to start a full game of dominoes (the same playable set as Duppy Links).
   **no reactor/propulsion internals** (the source's cutaway is exactly what's
   excluded). Everything is invented deck dressing on the game's own fictional
   ship — non-lethal, unclassified, original.
+
+
+## The Harbor Watch, the Drone Loft & the Twin Harbors Accord (live in the prototype, v1.19)
+
+Three builds from one batch of real-nation defense reels — a naval radar ops
+room, a defense-lab drone table under DRDO branding, and a border wall running
+facial recognition on travelers. **Boundary first:** no real defense
+organization, flag, or program is depicted, and the face-scanning wall is
+refused outright — island doctrine bans any tech that detects or identifies
+people. What ships is the non-lethal inversion of all three:
+
+- **The Harbor Watch** — a glass-fronted search-and-rescue radar room on the
+  waterfront: three crewed scopes whose sweeps and blips are drawn live from
+  the **actual positions of the sim's vessels** (the ferry, the Sea Puss, the
+  bay boat, the Wave Dart). When the storm rolls in, every scope flips to
+  amber **STORM WATCH**. Dwell inside for **+20** — "every scope tracks boats
+  in trouble, never people."
+- **The Drone Loft** — engineers around a holo table reviewing a **civil
+  airframe**: a four-rotor hologram with a medkit winch slung under it. Stand
+  in the review and the callouts walk the design: lift test, medkit winch,
+  reef sensor pod, storm probe. Complete the review for **+25** — "nothing
+  that harms leaves this room."
+- **The Twin Harbors Accord** — the request was "make it America working with
+  Jamaica"; real nations don't act in this world, so the partnership is
+  rendered in the game's own vocabulary: **Port Antonio ✕ Alexandria** (the
+  game's invented sister harbor), stripes of both harbors' colorways meeting
+  at a handshake mark on the Watch's east gable. The accord text is explicit:
+  storms tracked together, rescue data shared, **no face scans, nobody
+  watched**. Reading it pays **+15**.
+
+All three persist in the save. Headless-verified: scopes plot the four real
+vessel positions, storm mode redraws clean, all three dwell rewards pay, the
+hologram animates, zero page errors.
