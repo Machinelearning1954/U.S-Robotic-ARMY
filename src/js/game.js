@@ -8,6 +8,7 @@
 import { Input } from "./input.js";
 import { DISTRICTS } from "./world.js";
 import { audio } from "./audio.js";
+import { HandlerHologram } from "./hologram.js";
 
 const TAU = Math.PI * 2;
 const EXTRUDE = 0.13; // max roof offset as a fraction of distance from screen center
@@ -34,6 +35,7 @@ export class Game {
     this.ctx = canvas.getContext("2d");
     this.hud = hud;
     this.onEnd = onEnd;
+    this.holo = hud.holo ? new HandlerHologram(hud.holo) : null;
     this.input = new Input();
     this.running = false;
     this.districtIndex = 0;
@@ -321,7 +323,7 @@ export class Game {
 
   radioMsg(text) {
     if (!this.hud.radio) return;
-    this.hud.radio.textContent = text;
+    (this.hud.radioText || this.hud.radio).textContent = text;
     this.hud.radio.classList.add("show");
     this.radioTimer = 4.5;
     audio.radioSquelch();
@@ -701,6 +703,8 @@ export class Game {
   // -------------------- rendering --------------------
   render() {
     const now = performance.now();
+    // Handler hologram animates alongside the radio text in both view modes.
+    if (this.radioTimer > 0 && this.holo) this.holo.draw(now);
     if (this.mode3d && this.r3d) {
       this.r3d.render(this, now);
       return;

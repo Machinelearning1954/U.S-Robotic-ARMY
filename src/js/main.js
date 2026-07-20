@@ -47,6 +47,8 @@ const hud = {
   staminaFill: document.getElementById("staminaFill"),
   prompt: document.getElementById("prompt"),
   radio: document.getElementById("radio"),
+  radioText: document.getElementById("radioText"),
+  holo: document.getElementById("holo"),
 };
 
 const overlay = document.getElementById("overlay");

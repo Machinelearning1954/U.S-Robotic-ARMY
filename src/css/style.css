@@ -285,7 +285,10 @@ html, body {
   position: absolute;
   top: 96px;
   left: 26px;
-  max-width: 360px;
+  max-width: 430px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
   font-family: var(--mono);
   font-size: 12px;
   letter-spacing: 0.12em;
@@ -299,6 +302,15 @@ html, body {
   pointer-events: none;
 }
 .radio.show { opacity: 1; }
+.radio #holo {
+  flex: none;
+  width: 80px;
+  height: 100px;
+  border: 1px solid rgba(51, 226, 255, 0.35);
+  background: #030910;
+  box-shadow: 0 0 16px rgba(51, 226, 255, 0.22);
+}
+.radio-text { min-width: 0; }
 
 /* ---------- Overlay ---------- */
 .overlay {

@@ -116,6 +116,12 @@ Systemic layer (all fictional, all procedural):
   sprints and scanner pings
 - **Contextual radio** — Vesper's handler comments on district entry, kills,
   exposure spikes, storms, lockdowns, and the closing clock
+- **Handler uplink hologram** — every radio message opens an animated
+  holographic portrait of K, the handler: an original, fully procedural
+  canvas drawing (signals analyst with headset, code rain, orange wireframe
+  globe, hex reticle, glitch slices, LIVE indicator) inspired by a
+  command-center reel by @nilu__kumari_mishra_2 (credited on the title
+  screen); visible in both the 2.5D and 3D view modes
 - **Procedural audio** (WebAudio, zero asset files) — rain/wind beds that
   follow the weather, thunder after lightning, a resonance hum that tracks
   the scanner, exposure-driven tension drone, pings, footsteps, alert
