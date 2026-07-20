@@ -236,3 +236,23 @@ wheel on any coast."*
 - Invented landmark — no real attraction depicted. Born from a "make it a
   triangle instead of a circle" brief, which is exactly the kind of twist that
   makes a skyline ownable for marketing.
+
+
+## Island One — the state flagship and her wing (live, v1.14)
+
+Every so often the whole sky stands up straight: **Island One**, the island's
+invented state flagship — cream hull, green band, black tail crossed with the
+**gold saltire** — crosses high and stately, westbound, with **four festival
+sportplanes riding a rigid diamond** around her, wingtip-true. The escorts are
+built into the same formation frame, so their sync is perfect *by construction*;
+the whole procession banks and breathes as one.
+
+**Untouchable, twice over.** By canon the procession is ceremonial; by
+construction nothing in the game can affect it — no system targets aircraft
+here, because nothing on this island attacks anything. Stand under the crossing
+for a one-time **+25**: *"the flagship and her wing, untouchable and exact."*
+
+- **Origin:** an image of a real head-of-state aircraft under real fighter and
+  bomber escort. The real aircraft, national livery, fighters, and bombers are
+  **not** depicted — only the majesty of a flagship in formation was kept, and
+  every plane in it is invented and unarmed.
