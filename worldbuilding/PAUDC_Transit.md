@@ -122,6 +122,12 @@ porpoise bob. As it passes over each sunken site the **sonar calls the wreck
 shadow below** ("logged for the dive board" — the same wrecks you can free-dive).
 First ride pays **+25**; step off with **E** at any station ("mind the swim").
 
+**The crew (v1.08):** the Sea Puss is run by **Cap'n Ida and her all-women
+science watch** — five Reef School crewwomen, invented characters in field kit,
+stationed on the tower deck and afterdeck. They ride every dive tour with the
+boat, and the first-boarding call-out names them. Science, not war — and the
+watch is hers.
+
 - **Science boat, not a warship.** No weapons, no torpedoes, no combat systems —
   a research vessel in Reef School green, consistent with the non-lethal floor.
 - **Boundary:** the source reel advertised "the world's deadliest submarine" with
