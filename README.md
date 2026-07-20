@@ -48,15 +48,27 @@ python3 -m http.server 8099
 
 Press `V` in-game to switch to a true-3D WebGL camera (press again to return
 to the 2.5D view). The same running game state — grid, emitters, sweepers,
-traffic, pedestrians, weather — is mirrored into a Three.js scene: instanced
-tower blocks with emissive window facades, a moonlit street plane, roaming
-point lights that follow the player between street lamps, translucent sweeper
-vision cones, 3D rain, exponential fog, and ACES tone mapping (lightning
-briefly overdrives the exposure). Three.js r170 is vendored at
-`src/vendor/three.module.js` (MIT — see `src/vendor/THREE-LICENSE`), so the
-game remains fully self-contained. Generated GLB props (e.g. from Meshy or
-Higgsfield's image-to-3D) can be dropped into this scene later via GLTF
-loading.
+traffic, pedestrians, weather — is mirrored into a Three.js scene running a
+full night-city realism pipeline, all procedural:
+
+- PCF soft shadows from a moon key light that follows the player
+- wet-street planar reflections (the lit city mirrored under translucent
+  asphalt, with sharper puddle patches)
+- 512px facades with per-window color temperature, blinds, dark floors, and
+  a storefront band; separate emissive map so only glass glows
+- procedural sky dome (stars, moon halo, drifting cloud murk), exponential fog
+- pooled dynamic lights: nearest street lamps + car headlight spotlights
+- neon signage with flicker, blinking rooftop beacons, emitter sky-beams,
+  drone scan cones, wind-slanted rain streaks
+- post chain: threshold bloom, chromatic aberration, film grain, vignette,
+  ACES tone mapping (lightning overdrives the exposure), MSAA — with an auto
+  quality governor that sheds post/shadows on weak GPUs
+
+Three.js r170 is vendored at `src/vendor/three.module.js` (MIT — see
+`src/vendor/THREE-LICENSE`), so the game remains fully self-contained. The
+step-by-step plan for pushing further toward AAA ("GTA 6-level") fidelity —
+GLTF PBR assets, SSAO/TAA, WebGPU, and the honest pixel-streaming ceiling —
+lives in `docs/REALISM.md`.
 
 ## Project layout
 
