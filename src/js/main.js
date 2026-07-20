@@ -12,6 +12,9 @@ window.addEventListener("keydown", tryUnlock);
 // hosted original, and if both fail the CSS-only title stands on its own.
 const KEYART_SOURCES = [
   "src/assets/keyart.png",
+  // Vesper key art — Higgsfield soul_2: rear three-quarter, hourglass build,
+  // rain-slick neon street, logo negative space on the left.
+  "https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260720_111440_8794d366-f40c-4ec7-ae7b-c1284ea7d1e2.png",
   "https://d8j0ntlcm91z4.cloudfront.net/user_3DecqKTontO540o5h6oTceJuUaD/hf_20260718_185334_4f64cefc-3ecc-4ae9-bf53-3f46a5873b2c.png",
 ];
 (function loadKeyArt(i) {
