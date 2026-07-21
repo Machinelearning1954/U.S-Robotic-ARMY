@@ -224,6 +224,23 @@ export class Game {
       });
     }
 
+    // Ambient luxury hovercars cruising a skylane above the district —
+    // sleek supercars floating at altitude with glowing underglow, thruster
+    // flare, and hover-mist (inspired by the flying-car reels).
+    this.skyCars = Array.from({ length: 2 }, (_, i) => {
+      const vertical = i % 2 === 0;
+      return {
+        vertical,
+        lane: (0.28 + 0.44 * rng()) * (vertical ? this.worldW : this.worldH),
+        dir: rng() < 0.5 ? 1 : -1,
+        pos: rng() * (vertical ? this.worldH : this.worldW),
+        speed: 150 + rng() * 90,
+        alt: 128 + rng() * 66,
+        tint: ["#2f6bff", "#00d4ff", "#7a5cff"][i % 3],
+        phase: rng() * TAU,
+      };
+    });
+
     // Player spawns on a road tile near a corner.
     const spawn = this.findRoad(rng, 2, 2);
     this.player = {
@@ -592,6 +609,15 @@ export class Game {
       }
     }
 
+    // Sky hovercars drift along their lane and wrap around the district.
+    for (const s of this.skyCars) {
+      s.pos += s.speed * s.dir * dt;
+      const max = s.vertical ? this.worldH : this.worldW;
+      if (s.pos > max + 240) s.pos = -240;
+      else if (s.pos < -240) s.pos = max + 240;
+      s.phase += dt;
+    }
+
     // Weather cycle + wind gusts + lightning during storms.
     const wz = this.weather;
     wz.t -= dt;
@@ -748,6 +774,7 @@ export class Game {
     this.drawLamps(ctx, camX, camY, w, h);
     this.drawBuildings(ctx, camX, camY, w, h, cx, cy, now);
     this.drawBirds(ctx, camX, camY, w, h);
+    this.drawSkyCars(ctx, camX, camY, w, h, now);
     this.drawFog(ctx, camX, camY, w, h);
     this.drawParticles(ctx);
 
@@ -1179,6 +1206,92 @@ export class Game {
           ctx.fillRect(rx + rw / 2 - 1.5, ry + rw / 2 - 12, 3, 3);
         }
       }
+    }
+  }
+
+  // Luxury hovercars gliding over the district at altitude. Drawn in screen
+  // space: a soft ground shadow under the true world position, then the car
+  // body lifted by its altitude, with cyan underglow, a headlight bar, twin
+  // thruster flares and a puff of hover-mist.
+  drawSkyCars(ctx, camX, camY, w, h, now) {
+    for (const s of this.skyCars) {
+      const wx = s.vertical ? s.lane : s.pos;
+      const wy = s.vertical ? s.pos : s.lane;
+      const sx = wx - camX, gy = wy - camY;
+      if (sx < -160 || sx > w + 160 || gy < -160 || gy > h + 260) continue;
+      const bob = Math.sin(s.phase * 1.6) * 4;
+      const cy = gy - s.alt + bob;         // elevated body position
+      const face = s.dir * (s.vertical ? 1 : 1);
+      const ang = s.vertical ? (s.dir > 0 ? Math.PI / 2 : -Math.PI / 2) : (s.dir > 0 ? 0 : Math.PI);
+
+      // ground shadow (soft, offset, shrinks with altitude)
+      ctx.save();
+      ctx.globalAlpha = 0.28;
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.ellipse(sx, gy, 26, 9, 0, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+
+      // hover-mist drifting down from the thrusters toward the shadow
+      ctx.save();
+      const mist = ctx.createLinearGradient(sx, cy + 8, sx, gy);
+      mist.addColorStop(0, "rgba(150,210,255,0.16)");
+      mist.addColorStop(1, "rgba(150,210,255,0)");
+      ctx.fillStyle = mist;
+      ctx.beginPath();
+      ctx.moveTo(sx - 16, cy + 10);
+      ctx.lineTo(sx + 16, cy + 10);
+      ctx.lineTo(sx + 26, gy);
+      ctx.lineTo(sx - 26, gy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(sx, cy);
+      ctx.rotate(ang);
+
+      // underglow bloom
+      const glow = ctx.createRadialGradient(0, 6, 2, 0, 6, 34);
+      glow.addColorStop(0, s.tint);
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalAlpha = 0.5 + 0.2 * Math.sin(now * 0.006 + s.phase);
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.ellipse(0, 7, 34, 12, 0, 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // sleek supercar body: low wedge with a canopy
+      ctx.fillStyle = "#0e1622";
+      ctx.strokeStyle = s.tint;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-30, 3);
+      ctx.quadraticCurveTo(-30, -5, -16, -6);
+      ctx.quadraticCurveTo(0, -12, 20, -6);
+      ctx.quadraticCurveTo(30, -4, 30, 2);
+      ctx.quadraticCurveTo(30, 8, 20, 8);
+      ctx.lineTo(-22, 8);
+      ctx.quadraticCurveTo(-30, 8, -30, 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // canopy glass
+      ctx.fillStyle = "rgba(120,200,255,0.5)";
+      ctx.beginPath();
+      ctx.ellipse(2, -3, 12, 4, 0, 0, TAU);
+      ctx.fill();
+      // headlight bar (leading edge)
+      ctx.fillStyle = "#eaf7ff";
+      ctx.fillRect(27, -2, 3, 6);
+      // twin thruster flares (trailing edge)
+      ctx.fillStyle = s.tint;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath(); ctx.ellipse(-31, 0, 3, 2.4, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-31, 6, 3, 2.4, 0, 0, TAU); ctx.fill();
+      ctx.restore();
     }
   }
 

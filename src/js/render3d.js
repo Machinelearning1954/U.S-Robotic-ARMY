@@ -18,8 +18,23 @@
 //   - post chain: threshold bloom, chromatic aberration, film grain,
 //     vignette, gamma — with an auto quality governor for weak GPUs
 import * as THREE from "../vendor/three.module.js";
+import { loadGLB } from "./glb.js";
 
 const UP_SCALE = 150; // world building-height multiplier
+
+// Optional GLB props — generated with an image-to-3D service (a local
+// FastAPI-TRIPOSR instance, Higgsfield generate_3d, Meshy…) and dropped
+// into src/assets/props/. Each entry lists sources tried in order; when
+// none resolve, the procedural stand-in keeps rendering. See docs/ASSETS.md.
+const PROPS = {
+  emitter: { sources: ["src/assets/props/emitter.glb"], size: 26 },
+  vesper: { sources: ["src/assets/props/vesper.glb"], size: 34 },
+  sweeper: { sources: ["src/assets/props/sweeper.glb"], size: 24 },
+  car: { sources: ["src/assets/props/car.glb"], size: 34 },
+  ped: { sources: ["src/assets/props/ped.glb"], size: 18 },
+  lamp: { sources: ["src/assets/props/lamp.glb"], size: 30 },
+  hovercar: { sources: ["src/assets/props/hovercar.glb"], size: 60 },
+};
 
 // ---------------------------------------------------------------------------
 // Full-screen post-processing shaders
@@ -98,6 +113,21 @@ export class Renderer3D {
     this.dyn = {};
     this.quality = 2; // 2 = full, 1 = no bloom / 1x pixel ratio
     this.frameEMA = 16;
+
+    // Kick off async GLB prop loads; a district rebuild swaps them in
+    // whenever one lands. Missing files just mean procedural stand-ins.
+    this.props = {};
+    for (const [name, def] of Object.entries(PROPS)) {
+      (async () => {
+        for (const src of def.sources) {
+          try {
+            this.props[name] = await loadGLB(src, { targetSize: def.size });
+            this.builtFor = null; // trigger rebuild with the real asset
+            return;
+          } catch (e) { /* try next source */ }
+        }
+      })();
+    }
 
     // --- post-processing chain (bloom + composite) ---
     this.postScene = new THREE.Scene();
@@ -322,14 +352,21 @@ export class Renderer3D {
       b.position.set(l.x, 26, l.y);
       const bm = new THREE.Mesh(bulbGeo, bulbMirrorMat);
       bm.position.set(l.x, -26, l.y);
-      const pole = new THREE.Mesh(poleGeo, poleMat);
-      pole.position.set(l.x, 13, l.y);
-      pole.castShadow = true;
+      if (this.props.lamp) {
+        const p = this.props.lamp.clone(true);
+        p.position.set(l.x, 0, l.y);
+        this.scene.add(p);
+      } else {
+        const pole = new THREE.Mesh(poleGeo, poleMat);
+        pole.position.set(l.x, 13, l.y);
+        pole.castShadow = true;
+        this.scene.add(pole);
+      }
       // additive halo: the rain-fog aura every real streetlight carries
       const halo = new THREE.Sprite(glowMat);
       halo.scale.setScalar(46);
       halo.position.set(l.x, 27, l.y);
-      this.scene.add(b, pole, halo);
+      this.scene.add(b, halo);
       this.mirror.add(bm);
       return b;
     });
@@ -349,14 +386,16 @@ export class Renderer3D {
       return sp;
     });
 
-    // Player: Vesper — an hourglass figure in a dark coat + a cyan lamp
-    // that follows her.
+    // Player: Vesper — a GLB model when one is provided, otherwise the
+    // procedural hourglass figure — plus a cyan lamp that follows her.
     this.dyn.player = new THREE.Group();
-    const figure = this.makeFigure({
-      height: 1.15, hipW: 1.55, shoulderW: 1.0,
-      outfit: 0x161f36, skin: 0xdfe9f2,
-      headGlow: 0x33e2ff,
-    });
+    const figure = this.props.vesper
+      ? this.props.vesper.clone(true)
+      : this.makeFigure({
+          height: 1.15, hipW: 1.55, shoulderW: 1.0,
+          outfit: 0x161f36, skin: 0xdfe9f2,
+          headGlow: 0x33e2ff,
+        });
     this.dyn.playerBody = figure;
     this.dyn.player.add(figure);
     this.dyn.playerLight = new THREE.PointLight(accent, 4800, 360, 1.8);
@@ -397,11 +436,15 @@ export class Renderer3D {
       }));
       halo.position.y = 12;
       grp.add(core, beam, light, halo);
+      // generated hardware model under the glow, when available
+      if (this.props.emitter) grp.add(this.props.emitter.clone(true));
       this.scene.add(grp);
       return { grp, core, beam, light, halo };
     });
 
     // Sweepers: drone bodies with rotor rings + volumetric-style scan cones.
+    // A GLB drone model replaces the sphere/rotor pair when provided; the
+    // status sphere shrinks into an indicator light riding on top of it.
     this.dyn.sweepers = g.sweepers.map(() => {
       const grp = new THREE.Group();
       const body2 = new THREE.Mesh(
@@ -416,6 +459,14 @@ export class Renderer3D {
       );
       rotor.rotation.x = Math.PI / 2;
       rotor.position.y = 38;
+      if (this.props.sweeper) {
+        const p = this.props.sweeper.clone(true);
+        p.position.y = 26;
+        grp.add(p);
+        body2.scale.setScalar(0.35); // becomes the alert-status beacon
+        body2.position.y = 46;
+        rotor.visible = false;
+      }
       // Ground wash of the scan cone…
       const disc = new THREE.Mesh(
         new THREE.CircleGeometry(190, 24, -0.62, 1.24),
@@ -440,8 +491,18 @@ export class Renderer3D {
     });
 
     // Cars: bodies with cabs, wheels, emissive lamps — mirrored in the wet.
+    // A GLB vehicle replaces the procedural body (procedural stays in the
+    // mirror world, where the reflection only needs a silhouette).
     this.dyn.cars = g.cars.map((c) => {
-      const grp = this.makeCar(c, false);
+      let grp;
+      if (this.props.car) {
+        grp = new THREE.Group();
+        const p = this.props.car.clone(true);
+        p.rotation.y = Math.PI / 2; // GLB convention: front toward +z → +x
+        grp.add(p);
+      } else {
+        grp = this.makeCar(c, false);
+      }
       const mir = this.makeCar(c, true);
       this.scene.add(grp);
       this.mirror.add(mir);
@@ -454,24 +515,33 @@ export class Renderer3D {
     this.dyn.peds = g.peds.map((ped, i) => {
       const grp = new THREE.Group();
       const seed = (i * 2654435761) % 1000 / 1000;
-      const curvy = seed < 0.55; // just over half the crowd
-      const fig = this.makeFigure({
-        height: 0.52 + (seed * 7 % 1) * 0.1,
-        hipW: curvy ? 1.5 + (seed * 13 % 1) * 0.45 : 1.0 + (seed * 13 % 1) * 0.2,
-        shoulderW: curvy ? 0.85 : 1.0 + (seed * 17 % 1) * 0.25,
-        outfit: 0x0d1420, skin: 0x9a8474,
-      });
-      const um = new THREE.Mesh(
-        new THREE.ConeGeometry(8, 4, 10),
-        new THREE.MeshStandardMaterial({ color: new THREE.Color(ped.tint).multiplyScalar(0.4), roughness: 0.5 })
-      );
-      um.position.y = 19;
-      grp.add(fig, um);
+      let fig;
+      if (this.props.ped) {
+        fig = this.props.ped.clone(true);
+        fig.scale.multiplyScalar(0.9 + (seed * 7 % 1) * 0.2);
+        fig.rotation.y = seed * Math.PI * 2;
+      } else {
+        const curvy = seed < 0.55; // just over half the crowd
+        fig = this.makeFigure({
+          height: 0.52 + (seed * 7 % 1) * 0.1,
+          hipW: curvy ? 1.5 + (seed * 13 % 1) * 0.45 : 1.0 + (seed * 13 % 1) * 0.2,
+          shoulderW: curvy ? 0.85 : 1.0 + (seed * 17 % 1) * 0.25,
+          outfit: 0x0d1420, skin: 0x9a8474,
+        });
+        const um = new THREE.Mesh(
+          new THREE.ConeGeometry(8, 4, 10),
+          new THREE.MeshStandardMaterial({ color: new THREE.Color(ped.tint).multiplyScalar(0.4), roughness: 0.5 })
+        );
+        um.position.y = 19;
+        grp.add(um);
+      }
+      grp.add(fig);
       this.scene.add(grp);
       return grp;
     });
 
     this.buildRain(g);
+    this.buildSkyCars(g);
 
     this.camPos = new THREE.Vector3(g.player.x, 560, g.player.y + 240);
   }
@@ -767,6 +837,74 @@ export class Renderer3D {
     return this.glowTex;
   }
 
+  // Luxury hovercars gliding over the district: a GLB body when provided,
+  // otherwise a sleek procedural wedge, each with an underglow disc, twin
+  // thruster sprites and a downward mist cone.
+  buildSkyCars(g) {
+    const glow = this.makeGlowTexture();
+    this.dyn.skyCars = g.skyCars.map((s) => {
+      const grp = new THREE.Group();
+      const tint = new THREE.Color(s.tint);
+      let body;
+      if (this.props.hovercar) {
+        body = this.props.hovercar.clone(true);
+      } else {
+        body = new THREE.Group();
+        const shell = new THREE.Mesh(
+          new THREE.SphereGeometry(20, 18, 10),
+          new THREE.MeshStandardMaterial({ color: 0x0e1622, roughness: 0.25, metalness: 0.8, emissive: tint, emissiveIntensity: 0.15 })
+        );
+        shell.scale.set(1, 0.32, 0.6);
+        shell.castShadow = true;
+        const canopy = new THREE.Mesh(
+          new THREE.SphereGeometry(9, 14, 10),
+          new THREE.MeshStandardMaterial({ color: 0x66c8ff, roughness: 0.1, metalness: 0.4, transparent: true, opacity: 0.6 })
+        );
+        canopy.scale.set(1, 0.5, 0.7);
+        canopy.position.set(2, 5, 0);
+        const strip = new THREE.Mesh(
+          new THREE.BoxGeometry(30, 1, 1.6),
+          new THREE.MeshBasicMaterial({ color: tint })
+        );
+        strip.position.set(-2, 2, 6.2);
+        const head = new THREE.Mesh(
+          new THREE.BoxGeometry(1.5, 2.2, 10),
+          new THREE.MeshBasicMaterial({ color: 0xeaf7ff })
+        );
+        head.position.set(19, 1, 0);
+        body.add(shell, canopy, strip, head);
+      }
+      // underglow disc on the belly
+      const disc = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glow, color: tint, blending: THREE.AdditiveBlending,
+        depthWrite: false, transparent: true, opacity: 0.7,
+      }));
+      disc.scale.setScalar(70);
+      disc.position.y = -6;
+      // twin thruster flares at the rear
+      const flareMat = new THREE.SpriteMaterial({
+        map: glow, color: tint, blending: THREE.AdditiveBlending,
+        depthWrite: false, transparent: true, opacity: 0.9,
+      });
+      const f1 = new THREE.Sprite(flareMat); f1.scale.setScalar(20); f1.position.set(-22, 0, -6);
+      const f2 = new THREE.Sprite(flareMat); f2.scale.setScalar(20); f2.position.set(-22, 0, 6);
+      // downward mist cone
+      const mist = new THREE.Mesh(
+        new THREE.ConeGeometry(26, s.alt, 16, 1, true),
+        new THREE.MeshBasicMaterial({
+          color: 0x9cd2ff, transparent: true, opacity: 0.06,
+          blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+        })
+      );
+      mist.position.y = -s.alt / 2;
+      const light = new THREE.PointLight(tint, 2600, 420, 1.8);
+      light.position.y = -4;
+      grp.add(body, disc, f1, f2, mist, light);
+      this.scene.add(grp);
+      return { grp, body };
+    });
+  }
+
   makeGroundTexture(g) {
     const px = 24; // texels per tile
     const c = document.createElement("canvas");
@@ -1045,6 +1183,16 @@ export class Renderer3D {
 
     this.syncStrike(g);
     this.syncRecon(g);
+
+    // Sky hovercars: place at altitude, bob, and face along their lane.
+    g.skyCars.forEach((s, i) => {
+      const m = this.dyn.skyCars[i];
+      if (!m) return;
+      const wx = s.vertical ? s.lane : s.pos;
+      const wy = s.vertical ? s.pos : s.lane;
+      m.grp.position.set(wx, s.alt + Math.sin(s.phase * 1.6) * 6, wy);
+      m.grp.rotation.y = s.vertical ? (s.dir > 0 ? -Math.PI / 2 : Math.PI / 2) : (s.dir > 0 ? 0 : Math.PI);
+    });
 
     // Neon sign flicker.
     for (const s of this.signs) {

@@ -70,6 +70,9 @@ full night-city realism pipeline, all procedural:
 - skyline variety: two facade texture variants, stepped setback tiers on the
   tallest towers, and AC-unit roof clutter
 - light halos on street lamps and emitters, rain splash rings on the asphalt
+- ambient luxury hovercars gliding over the district at altitude — glowing
+  underglow, twin thruster flares, downward hover-mist and a ground shadow
+  (in both the 2.5D and 3D views)
 - post chain: two-octave threshold bloom (tight neon + wide halo), teal-orange
   color grade, chromatic aberration, film grain, vignette, ACES tone mapping
   (lightning overdrives the exposure), MSAA — with an auto quality governor
