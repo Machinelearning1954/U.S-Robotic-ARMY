@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ---------------------------------------------------------------- map loading
 
@@ -34,6 +35,53 @@ class HeightField {
     const b = h(ix, iz + 1) * (1 - tx) + h(ix + 1, iz + 1) * tx;
     return a * (1 - tz) + b * tz;
   }
+}
+
+// ------------------------------------------------------------- tripo3d assets
+// Custom 3D models (e.g. generated on https://studio.tripo3d.ai or via
+// tripo_integration/generate_asset.py) are loaded from game/models/ per
+// models/manifest.json. Any missing/failed model falls back to the built-in
+// procedural mesh, so the game always runs.
+
+const assets = { unit: null, drone: null, objective: null };
+
+async function loadAssets() {
+  if (!location.protocol.startsWith('http')) return; // GLB fetch needs a server
+  let manifest;
+  try {
+    const res = await fetch('models/manifest.json');
+    if (!res.ok) return;
+    manifest = await res.json();
+  } catch { return; }
+  const loader = new GLTFLoader();
+  await Promise.all(Object.entries(manifest.models || {}).map(async ([role, cfg]) => {
+    if (!cfg || !cfg.file || !(role in assets)) return;
+    try {
+      const gltf = await loader.loadAsync(`models/${cfg.file}`);
+      assets[role] = { scene: gltf.scene, cfg };
+      console.info(`loaded ${role} model: models/${cfg.file}`);
+    } catch (e) {
+      console.warn(`model for "${role}" (${cfg.file}) failed to load — using built-in mesh`, e);
+    }
+  }));
+}
+
+// Clone a loaded asset, scaled to targetSize (largest dimension, meters) and
+// resting on y=0. Returns null when no asset is available for the role.
+function instantiateAsset(role, targetSize) {
+  const a = assets[role];
+  if (!a) return null;
+  const obj = a.scene.clone(true);
+  obj.rotation.y = ((a.cfg.rotateY || 0) * Math.PI) / 180;
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3());
+  const s = ((a.cfg.scale || 1) * targetSize) / Math.max(size.x, size.y, size.z, 1e-6);
+  obj.scale.setScalar(s);
+  box.setFromObject(obj);
+  obj.position.y = -box.min.y + (a.cfg.yOffset || 0);
+  const g = new THREE.Group();
+  g.add(obj);
+  return g;
 }
 
 // ------------------------------------------------------------------ constants
@@ -117,7 +165,23 @@ scene.add(pickPlane);
 
 // --------------------------------------------------------------------- units
 
+function selectionRing() {
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(1.4, 1.7, 32).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: 0x9fd08a, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
+  ring.position.y = 0.06;
+  ring.visible = false;
+  return ring;
+}
+
 function makeUnitMesh(color) {
+  const custom = instantiateAsset('unit', 2.6);
+  if (custom) {
+    const ring = selectionRing();
+    custom.add(ring);
+    custom.userData.ring = ring;
+    return custom;
+  }
   const g = new THREE.Group();
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(1.6, 0.8, 2.2),
@@ -131,17 +195,15 @@ function makeUnitMesh(color) {
     new THREE.CylinderGeometry(0.09, 0.09, 1.6, 8).rotateX(Math.PI / 2),
     new THREE.MeshStandardMaterial({ color: 0x222, metalness: 0.7 }));
   barrel.position.set(0, 1.3, 1.0);
-  const ring = new THREE.Mesh(
-    new THREE.RingGeometry(1.4, 1.7, 32).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ color: 0x9fd08a, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
-  ring.position.y = 0.06;
-  ring.visible = false;
+  const ring = selectionRing();
   g.add(body, turret, barrel, ring);
   g.userData.ring = ring;
   return g;
 }
 
 function makeDroneMesh() {
+  const custom = instantiateAsset('drone', 1.5);
+  if (custom) return custom;
   const g = new THREE.Group();
   const core = new THREE.Mesh(
     new THREE.OctahedronGeometry(0.7),
@@ -161,9 +223,13 @@ function makeObjectiveMesh() {
     new THREE.MeshBasicMaterial({ color: 0xc8a24a, transparent: true, opacity: 0.35 }));
   beam.position.y = 7;
   g.add(ring, beam);
+  const prop = instantiateAsset('objective', 3.5);
+  if (prop) g.add(prop);
   g.userData = { ring, beam };
   return g;
 }
+
+await loadAssets();
 
 const units = [];   // player robots
 const drones = [];  // hostiles
@@ -424,7 +490,7 @@ addEventListener('resize', () => {
 });
 
 // Debug/test handle
-window.__game = { units, drones, objectives, map, select };
+window.__game = { units, drones, objectives, map, select, assets };
 
 document.getElementById('loading').remove();
 tick();

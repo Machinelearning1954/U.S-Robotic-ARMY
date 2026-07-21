@@ -1,0 +1,8 @@
+{
+  "comment": "Custom 3D models for the game, e.g. generated with Tripo3D (https://studio.tripo3d.ai). Set 'file' to a .glb filename in this folder — or use tripo_integration/generate_asset.py --role <role> to fill this in automatically. A null file means the game uses its built-in procedural mesh for that role.",
+  "models": {
+    "unit":      { "file": null, "scale": 1.0, "rotateY": 0, "yOffset": 0 },
+    "drone":     { "file": null, "scale": 1.0, "rotateY": 0, "yOffset": 0 },
+    "objective": { "file": null, "scale": 1.0, "rotateY": 0, "yOffset": 0 }
+  }
+}

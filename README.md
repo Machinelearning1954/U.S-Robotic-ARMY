@@ -39,11 +39,34 @@ on it.
 See [`lingbot_map_integration/README.md`](lingbot_map_integration/README.md)
 for the full pipeline and map format.
 
+## Tripo3D integration
+
+Unit, drone, and objective models can be AI-generated with
+[Tripo3D](https://studio.tripo3d.ai) instead of the built-in placeholder
+meshes. Either generate in Tripo Studio and drop the GLB into `game/models/`
+(see [`game/models/README.md`](game/models/README.md)), or use the API
+end-to-end:
+
+```bash
+export TRIPO_API_KEY=tsk_...   # from https://platform.tripo3d.ai
+python tripo_integration/generate_asset.py \
+    --prompt "quadruped military robot, olive drab armor, game asset" --role unit
+python tripo_integration/generate_asset.py \
+    --prompt "menacing red combat quadcopter drone" --role drone
+```
+
+`generate_asset.py` creates the Tripo task, polls it, downloads the GLB into
+`game/models/`, and updates `manifest.json`. The game auto-scales each model
+to gameplay size and falls back to its procedural meshes when a model is
+missing, so custom assets are always optional.
+
 ## Repository layout
 
 ```
 game/                     # the game (open index.html to play)
   js/main.js              # gameplay: units, drones, objectives, rendering
   maps/                   # usra-map-v1 maps (.json + embedded .js)
+  models/                 # optional Tripo3D-generated GLB assets
 lingbot_map_integration/  # LingBot-Map → game map pipeline
+tripo_integration/        # Tripo3D → game asset generator
 ```
