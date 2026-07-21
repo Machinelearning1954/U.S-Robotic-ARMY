@@ -30,16 +30,24 @@ const UP_SCALE = 150; // world building-height multiplier
 // nano_banana_pro concept). Hosted on Higgsfield's CDN and fetched at runtime
 // by the player's browser; a committed local file always wins if present.
 const HF_COUPE = "https://d3u0tzju9qaucj.cloudfront.net/7d051b5a-7bfe-49fe-a484-24e7b3a9458a/f2ea3d25-7e38-4ffb-8445-59444c838dfd.glb";
+// Second variant: dark midnight-blue hypercar (Higgsfield image_to_3d).
+// Filled once the conversion job completes; empty until then (skipped).
+const HF_HYPERCAR = "";
 
 const PROPS = {
   emitter: { sources: ["src/assets/props/emitter.glb"], size: 26 },
   vesper: { sources: ["src/assets/props/vesper.glb"], size: 34 },
   sweeper: { sources: ["src/assets/props/sweeper.glb"], size: 24 },
   car: { sources: ["src/assets/props/car.glb", HF_COUPE], size: 34 },
+  car2: { sources: ["src/assets/props/car2.glb", HF_HYPERCAR], size: 34 },
   ped: { sources: ["src/assets/props/ped.glb"], size: 18 },
   lamp: { sources: ["src/assets/props/lamp.glb"], size: 30 },
   hovercar: { sources: ["src/assets/props/hovercar.glb", HF_COUPE], size: 60 },
+  hovercar2: { sources: ["src/assets/props/hovercar2.glb", HF_HYPERCAR], size: 60 },
 };
+
+// Empty-string / falsy sources are skipped by the loader, so an unfilled
+// variant URL simply falls through to the procedural body.
 
 // ---------------------------------------------------------------------------
 // Full-screen post-processing shaders
@@ -125,6 +133,7 @@ export class Renderer3D {
     for (const [name, def] of Object.entries(PROPS)) {
       (async () => {
         for (const src of def.sources) {
+          if (!src) continue; // unfilled variant URL — skip
           try {
             this.props[name] = await loadGLB(src, { targetSize: def.size });
             this.builtFor = null; // trigger rebuild with the real asset
@@ -496,13 +505,15 @@ export class Renderer3D {
     });
 
     // Cars: bodies with cabs, wheels, emissive lamps — mirrored in the wet.
-    // A GLB vehicle replaces the procedural body (procedural stays in the
-    // mirror world, where the reflection only needs a silhouette).
-    this.dyn.cars = g.cars.map((c) => {
+    // GLB vehicles replace the procedural body, alternating between whichever
+    // car variants loaded so the traffic isn't all one model (procedural
+    // stays in the mirror world, where the reflection only needs a silhouette).
+    const carModels = [this.props.car, this.props.car2].filter(Boolean);
+    this.dyn.cars = g.cars.map((c, i) => {
       let grp;
-      if (this.props.car) {
+      if (carModels.length) {
         grp = new THREE.Group();
-        const p = this.props.car.clone(true);
+        const p = carModels[i % carModels.length].clone(true);
         p.rotation.y = Math.PI / 2; // GLB convention: front toward +z → +x
         grp.add(p);
       } else {
@@ -847,12 +858,13 @@ export class Renderer3D {
   // thruster sprites and a downward mist cone.
   buildSkyCars(g) {
     const glow = this.makeGlowTexture();
-    this.dyn.skyCars = g.skyCars.map((s) => {
+    const hoverModels = [this.props.hovercar, this.props.hovercar2].filter(Boolean);
+    this.dyn.skyCars = g.skyCars.map((s, si) => {
       const grp = new THREE.Group();
       const tint = new THREE.Color(s.tint);
       let body;
-      if (this.props.hovercar) {
-        body = this.props.hovercar.clone(true);
+      if (hoverModels.length) {
+        body = hoverModels[si % hoverModels.length].clone(true);
       } else {
         body = new THREE.Group();
         const shell = new THREE.Mesh(
