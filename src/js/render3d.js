@@ -557,6 +557,7 @@ export class Renderer3D {
 
     this.buildRain(g);
     this.buildSkyCars(g);
+    this.buildHolos(g);
 
     this.camPos = new THREE.Vector3(g.player.x, 560, g.player.y + 240);
   }
@@ -850,6 +851,47 @@ export class Renderer3D {
     x.fillRect(0, 0, 128, 128);
     this.glowTex = new THREE.CanvasTexture(c);
     return this.glowTex;
+  }
+
+  // Street hologram projectors: a glass cube beaming an additive light cone
+  // up to a translucent, slowly-rotating holographic bust with an emissive
+  // rim and a point light. Purely cosmetic set dressing.
+  buildHolos(g) {
+    this.dyn.holos = (g.holos || []).map((ho) => {
+      const grp = new THREE.Group();
+      const tint = new THREE.Color(ho.tint);
+      // glass projector cube
+      const cube = new THREE.Mesh(
+        new THREE.BoxGeometry(12, 10, 12),
+        new THREE.MeshStandardMaterial({ color: 0x14202f, roughness: 0.1, metalness: 0.6, transparent: true, opacity: 0.8, emissive: tint, emissiveIntensity: 0.3 })
+      );
+      cube.position.y = 5;
+      cube.castShadow = true;
+      // upward light cone
+      const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(20, 60, 20, 1, true),
+        new THREE.MeshBasicMaterial({ color: tint, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+      );
+      cone.position.y = 42;
+      // holographic bust: head + shoulders, translucent + emissive
+      const bust = new THREE.Group();
+      const holoMat = new THREE.MeshBasicMaterial({ color: tint, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false });
+      const head = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 14), holoMat);
+      head.position.y = 6;
+      const hair = new THREE.Mesh(new THREE.SphereGeometry(6.3, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), holoMat);
+      hair.position.y = 7;
+      const shoulders = new THREE.Mesh(new THREE.CylinderGeometry(4, 11, 10, 16, 1, true), holoMat);
+      shoulders.position.y = -5;
+      bust.add(head, hair, shoulders);
+      bust.position.y = 60;
+      bust.scale.setScalar(1.4);
+      const light = new THREE.PointLight(tint, 1400, 220, 2);
+      light.position.y = 55;
+      grp.add(cube, cone, bust, light);
+      grp.position.set(ho.x, 0, ho.y);
+      this.scene.add(grp);
+      return { grp, bust, cone, light, tint };
+    });
   }
 
   // Luxury hovercars gliding over the district: a GLB body when provided,
@@ -1199,6 +1241,17 @@ export class Renderer3D {
 
     this.syncStrike(g);
     this.syncRecon(g);
+
+    // Hologram busts slowly rotate and flicker.
+    (g.holos || []).forEach((ho, i) => {
+      const m = this.dyn.holos && this.dyn.holos[i];
+      if (!m) return;
+      m.bust.rotation.y = ho.phase * 0.7;
+      const flick = 0.82 + 0.18 * Math.sin(now * 0.02 + ho.phase * 7);
+      m.bust.children.forEach((c) => { c.material.opacity = 0.5 * flick; });
+      m.cone.material.opacity = 0.1 * flick;
+      m.light.intensity = 1400 * flick;
+    });
 
     // Sky hovercars: place at altitude, bob, and face along their lane.
     g.skyCars.forEach((s, i) => {

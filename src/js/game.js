@@ -241,6 +241,35 @@ export class Game {
       };
     });
 
+    // Volumetric hologram projectors: glass-cube pedestals on the sidewalks
+    // beaming a lifelike, slowly-rotating holographic bust — cyberpunk street
+    // advertising (inspired by the "sharper, more lifelike holograms" reel).
+    this.holos = [];
+    {
+      const spots = [];
+      for (let y = 1; y < d.rows - 1; y++) {
+        for (let x = 1; x < d.cols - 1; x++) {
+          if (this.grid[y][x]) continue;
+          const adj = this.grid[y-1][x] || this.grid[y+1][x] || this.grid[y][x-1] || this.grid[y][x+1];
+          if (adj) spots.push({ x, y });
+        }
+      }
+      // shuffle deterministically and take a spread-out handful
+      for (let i = spots.length - 1; i > 0; i--) {
+        const j = (rng() * (i + 1)) | 0;
+        [spots[i], spots[j]] = [spots[j], spots[i]];
+      }
+      const want = Math.min(5, spots.length);
+      for (let i = 0; i < want; i++) {
+        const c = spots[i];
+        this.holos.push({
+          x: (c.x + 0.5) * d.tile, y: (c.y + 0.5) * d.tile,
+          tint: ["#33e2ff", "#7ad9ff", "#59b6ff"][i % 3],
+          phase: rng() * TAU, seed: rng(),
+        });
+      }
+    }
+
     // Player spawns on a road tile near a corner.
     const spawn = this.findRoad(rng, 2, 2);
     this.player = {
@@ -609,6 +638,9 @@ export class Game {
       }
     }
 
+    // Hologram projectors idle-animate (rotation + flicker phase).
+    for (const ho of this.holos) ho.phase += dt;
+
     // Sky hovercars drift along their lane and wrap around the district.
     for (const s of this.skyCars) {
       s.pos += s.speed * s.dir * dt;
@@ -773,6 +805,7 @@ export class Game {
     this.drawPlayer(ctx, now);
     this.drawLamps(ctx, camX, camY, w, h);
     this.drawBuildings(ctx, camX, camY, w, h, cx, cy, now);
+    this.drawHolos(ctx, camX, camY, w, h, now);
     this.drawBirds(ctx, camX, camY, w, h);
     this.drawSkyCars(ctx, camX, camY, w, h, now);
     this.drawFog(ctx, camX, camY, w, h);
@@ -1291,6 +1324,68 @@ export class Game {
       ctx.globalAlpha = 0.85;
       ctx.beginPath(); ctx.ellipse(-31, 0, 3, 2.4, 0, 0, TAU); ctx.fill();
       ctx.beginPath(); ctx.ellipse(-31, 6, 3, 2.4, 0, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // Street hologram projectors: a small glass cube on the pavement beaming a
+  // light cone up to a translucent, slowly-rotating holographic bust with
+  // scanlines and a flicker — "sharper, more lifelike" volumetric display.
+  drawHolos(ctx, camX, camY, w, h, now) {
+    for (const ho of this.holos) {
+      const sx = ho.x - camX, sy = ho.y - camY;
+      if (sx < -80 || sx > w + 80 || sy < -160 || sy > h + 80) continue;
+      const flick = 0.82 + 0.18 * Math.sin(now * 0.02 + ho.phase * 7) * (Math.random() < 0.04 ? 0.4 : 1);
+      const yaw = Math.sin(ho.phase * 0.7);           // slow turn of the bust
+      const headY = sy - 52;                           // bust floats above cube
+
+      ctx.save();
+
+      // glass projector cube on the pavement
+      ctx.fillStyle = "rgba(20,32,48,0.85)";
+      ctx.strokeStyle = ho.tint;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.rect(sx - 9, sy - 9, 18, 14); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = ho.tint;
+      ctx.globalAlpha = flick;
+      ctx.fillRect(sx - 5, sy - 3, 10, 2);             // emitter slit
+
+      // light cone from cube up to the bust
+      const cone = ctx.createLinearGradient(sx, sy - 6, sx, headY);
+      cone.addColorStop(0, ho.tint);
+      cone.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalAlpha = 0.16 * flick;
+      ctx.fillStyle = cone;
+      ctx.beginPath();
+      ctx.moveTo(sx - 3, sy - 6); ctx.lineTo(sx + 3, sy - 6);
+      ctx.lineTo(sx + 22, headY); ctx.lineTo(sx - 22, headY);
+      ctx.closePath(); ctx.fill();
+
+      // holographic bust (head + shoulders), translucent and rim-lit
+      ctx.translate(sx, headY);
+      ctx.scale(0.6 + 0.4 * Math.abs(Math.cos(ho.phase * 0.7)), 1); // fake yaw
+      ctx.globalAlpha = 0.5 * flick;
+      ctx.fillStyle = ho.tint;
+      // shoulders
+      ctx.beginPath();
+      ctx.moveTo(-15, 34); ctx.quadraticCurveTo(-14, 20, -7, 17);
+      ctx.lineTo(7, 17); ctx.quadraticCurveTo(14, 20, 15, 34);
+      ctx.closePath(); ctx.fill();
+      // head
+      ctx.beginPath(); ctx.ellipse(0, 2, 8, 10, 0, 0, TAU); ctx.fill();
+      // hair cap
+      ctx.beginPath(); ctx.ellipse(0, -3, 8.5, 7, 0, Math.PI, TAU); ctx.fill();
+      // brighter rim
+      ctx.globalAlpha = 0.85 * flick;
+      ctx.strokeStyle = "#eafcff";
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.ellipse(0, 2, 8, 10, 0, -0.6, 1.2); ctx.stroke();
+      // scanlines across the whole projection
+      ctx.globalAlpha = 0.28 * flick;
+      ctx.strokeStyle = "rgba(180,240,255,0.6)";
+      for (let ly = -14; ly < 36; ly += 3) {
+        ctx.beginPath(); ctx.moveTo(-16, ly); ctx.lineTo(16, ly); ctx.stroke();
+      }
       ctx.restore();
     }
   }

@@ -73,6 +73,9 @@ full night-city realism pipeline, all procedural:
 - ambient luxury hovercars gliding over the district at altitude — glowing
   underglow, twin thruster flares, downward hover-mist and a ground shadow
   (in both the 2.5D and 3D views)
+- street volumetric-hologram projectors: glass cubes beaming a light cone up
+  to a translucent, slowly-rotating holographic bust with scanlines and
+  flicker (both view modes)
 - post chain: two-octave threshold bloom (tight neon + wide halo), teal-orange
   color grade, chromatic aberration, film grain, vignette, ACES tone mapping
   (lightning overdrives the exposure), MSAA — with an auto quality governor
