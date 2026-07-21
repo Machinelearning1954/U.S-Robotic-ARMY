@@ -26,14 +26,19 @@ const UP_SCALE = 150; // world building-height multiplier
 // FastAPI-TRIPOSR instance, Higgsfield generate_3d, Meshy…) and dropped
 // into src/assets/props/. Each entry lists sources tried in order; when
 // none resolve, the procedural stand-in keeps rendering. See docs/ASSETS.md.
+// Higgsfield image_to_3d GLB of the luxury coupe (generated from a Higgsfield
+// nano_banana_pro concept). Hosted on Higgsfield's CDN and fetched at runtime
+// by the player's browser; a committed local file always wins if present.
+const HF_COUPE = "https://d3u0tzju9qaucj.cloudfront.net/7d051b5a-7bfe-49fe-a484-24e7b3a9458a/f2ea3d25-7e38-4ffb-8445-59444c838dfd.glb";
+
 const PROPS = {
   emitter: { sources: ["src/assets/props/emitter.glb"], size: 26 },
   vesper: { sources: ["src/assets/props/vesper.glb"], size: 34 },
   sweeper: { sources: ["src/assets/props/sweeper.glb"], size: 24 },
-  car: { sources: ["src/assets/props/car.glb"], size: 34 },
+  car: { sources: ["src/assets/props/car.glb", HF_COUPE], size: 34 },
   ped: { sources: ["src/assets/props/ped.glb"], size: 18 },
   lamp: { sources: ["src/assets/props/lamp.glb"], size: 30 },
-  hovercar: { sources: ["src/assets/props/hovercar.glb"], size: 60 },
+  hovercar: { sources: ["src/assets/props/hovercar.glb", HF_COUPE], size: 60 },
 };
 
 // ---------------------------------------------------------------------------
