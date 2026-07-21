@@ -80,8 +80,32 @@ const BLUR_FRAG = /* glsl */ `
   }
 `;
 
+// Volumetric light shafts (crepuscular / "god" rays): march from each pixel
+// toward the light's screen position through the thresholded bright buffer,
+// accumulating with decay so bright emitters and the moon streak through the
+// rainy air. Radial-blur scattering, the classic real-time approximation.
+const GODRAY_FRAG = /* glsl */ `
+  uniform sampler2D tBright; uniform vec2 uLight; uniform float uActive;
+  varying vec2 vUv;
+  void main() {
+    const int N = 24;
+    vec2 dir = (uLight - vUv) / float(N) * 0.85;
+    vec2 uv = vUv;
+    float decay = 1.0, sum = 0.0, w = 0.0;
+    for (int i = 0; i < N; i++) {
+      uv += dir;
+      float s = dot(texture2D(tBright, uv).rgb, vec3(0.33));
+      sum += s * decay;
+      w += decay;
+      decay *= 0.93;
+    }
+    gl_FragColor = vec4(vec3(sum / w) * uActive, 1.0);
+  }
+`;
+
 const COMPOSITE_FRAG = /* glsl */ `
   uniform sampler2D tScene; uniform sampler2D tBloom; uniform sampler2D tBloomWide;
+  uniform sampler2D tGod; uniform vec3 uGodTint;
   uniform float time; uniform float bloomAmt; uniform float grainAmt;
   varying vec2 vUv;
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -97,6 +121,8 @@ const COMPOSITE_FRAG = /* glsl */ `
     // two bloom octaves: tight neon glow + wide atmospheric halo
     c += texture2D(tBloom, vUv).rgb * bloomAmt * 0.75;
     c += texture2D(tBloomWide, vUv).rgb * bloomAmt * 0.65;
+    // volumetric light shafts, tinted moon-cool
+    c += texture2D(tGod, vUv).r * uGodTint;
     // teal-orange grade: cool shadows, warm highlights, gentle saturation lift
     float l = dot(c, vec3(0.299, 0.587, 0.114));
     c *= mix(vec3(0.92, 1.03, 1.12), vec3(1.07, 1.01, 0.94), smoothstep(0.08, 0.75, l));
@@ -155,13 +181,19 @@ export class Renderer3D {
       vertexShader: QUAD_VERT, fragmentShader: BLUR_FRAG, depthTest: false,
       uniforms: { tex: { value: null }, dir: { value: new THREE.Vector2() } },
     });
+    this.matGodray = new THREE.ShaderMaterial({
+      vertexShader: QUAD_VERT, fragmentShader: GODRAY_FRAG, depthTest: false,
+      uniforms: { tBright: { value: null }, uLight: { value: new THREE.Vector2(0.5, 0.1) }, uActive: { value: 0 } },
+    });
     this.matComposite = new THREE.ShaderMaterial({
       vertexShader: QUAD_VERT, fragmentShader: COMPOSITE_FRAG, depthTest: false,
       uniforms: {
         tScene: { value: null }, tBloom: { value: null }, tBloomWide: { value: null },
+        tGod: { value: null }, uGodTint: { value: new THREE.Color(0.42, 0.55, 0.78) },
         time: { value: 0 }, bloomAmt: { value: 0.95 }, grainAmt: { value: 0.028 },
       },
     });
+    this._moonNDC = new THREE.Vector3();
     this.resize();
   }
 
@@ -174,13 +206,15 @@ export class Renderer3D {
     const ph = Math.max(2, Math.floor(h * this.ratio));
     if (this.rtScene) {
       this.rtScene.dispose(); this.rtBloomA.dispose(); this.rtBloomB.dispose();
-      this.rtBloomC.dispose(); this.rtBloomD.dispose();
+      this.rtBloomC.dispose(); this.rtBloomD.dispose(); this.rtGod.dispose();
     }
     this.rtScene = new THREE.WebGLRenderTarget(pw, ph, { samples: 4 });
     this.rtBloomA = new THREE.WebGLRenderTarget(pw >> 2, ph >> 2);
     this.rtBloomB = new THREE.WebGLRenderTarget(pw >> 2, ph >> 2);
     this.rtBloomC = new THREE.WebGLRenderTarget(pw >> 3, ph >> 3);
     this.rtBloomD = new THREE.WebGLRenderTarget(pw >> 3, ph >> 3);
+    this.rtGod = new THREE.WebGLRenderTarget(pw >> 2, ph >> 2);
+    this.rtGod.texture.minFilter = THREE.LinearFilter;
     for (const rt of [this.rtBloomA, this.rtBloomB, this.rtBloomC, this.rtBloomD]) {
       rt.texture.minFilter = THREE.LinearFilter;
     }
@@ -1348,11 +1382,22 @@ export class Renderer3D {
       this.matBlur.uniforms.dir.value.set(0, 1.5 / this.rtBloomC.height);
       this.renderer.setRenderTarget(this.rtBloomD);
       this.renderer.render(this.postScene, this.postCam);
+      // volumetric light shafts: march the bloom buffer toward a fixed sky
+      // anchor near the top of the frame, so the bright skyline and moon-lit
+      // sky streak downward through the rainy air. A slow drift keeps it alive.
+      const gx = 0.5 + Math.sin(now * 0.0004) * 0.12;
+      this.postQuad.material = this.matGodray;
+      this.matGodray.uniforms.tBright.value = this.rtBloomA.texture;
+      this.matGodray.uniforms.uLight.value.set(gx, 0.88);
+      this.matGodray.uniforms.uActive.value = 0.85;
+      this.renderer.setRenderTarget(this.rtGod);
+      this.renderer.render(this.postScene, this.postCam);
       // composite to screen
       this.postQuad.material = this.matComposite;
       this.matComposite.uniforms.tScene.value = this.rtScene.texture;
       this.matComposite.uniforms.tBloom.value = this.rtBloomA.texture;
       this.matComposite.uniforms.tBloomWide.value = this.rtBloomD.texture;
+      this.matComposite.uniforms.tGod.value = this.rtGod.texture;
       this.matComposite.uniforms.time.value = now * 0.001;
       this.renderer.setRenderTarget(null);
       this.renderer.render(this.postScene, this.postCam);
@@ -1482,7 +1527,10 @@ export class Renderer3D {
   }
 
   dispose() {
-    if (this.rtScene) { this.rtScene.dispose(); this.rtBloomA.dispose(); this.rtBloomB.dispose(); }
+    if (this.rtScene) {
+      this.rtScene.dispose(); this.rtBloomA.dispose(); this.rtBloomB.dispose();
+      this.rtBloomC.dispose(); this.rtBloomD.dispose(); this.rtGod.dispose();
+    }
     this.renderer.dispose();
   }
 }

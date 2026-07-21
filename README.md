@@ -76,10 +76,11 @@ full night-city realism pipeline, all procedural:
 - street volumetric-hologram projectors: glass cubes beaming a light cone up
   to a translucent, slowly-rotating holographic bust with scanlines and
   flicker (both view modes)
-- post chain: two-octave threshold bloom (tight neon + wide halo), teal-orange
-  color grade, chromatic aberration, film grain, vignette, ACES tone mapping
-  (lightning overdrives the exposure), MSAA — with an auto quality governor
-  that sheds post/shadows on weak GPUs
+- post chain: two-octave threshold bloom (tight neon + wide halo), volumetric
+  light shafts / god rays (radial scatter of the bright skyline toward a
+  drifting sky anchor), teal-orange color grade, chromatic aberration, film
+  grain, vignette, ACES tone mapping (lightning overdrives the exposure),
+  MSAA — with an auto quality governor that sheds post/shadows on weak GPUs
 
 Three.js r170 is vendored at `src/vendor/three.module.js` (MIT — see
 `src/vendor/THREE-LICENSE`), so the game remains fully self-contained. The
