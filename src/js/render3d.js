@@ -31,8 +31,7 @@ const UP_SCALE = 150; // world building-height multiplier
 // by the player's browser; a committed local file always wins if present.
 const HF_COUPE = "https://d3u0tzju9qaucj.cloudfront.net/7d051b5a-7bfe-49fe-a484-24e7b3a9458a/f2ea3d25-7e38-4ffb-8445-59444c838dfd.glb";
 // Second variant: dark midnight-blue hypercar (Higgsfield image_to_3d).
-// Filled once the conversion job completes; empty until then (skipped).
-const HF_HYPERCAR = "";
+const HF_HYPERCAR = "https://d3u0tzju9qaucj.cloudfront.net/7d051b5a-7bfe-49fe-a484-24e7b3a9458a/82a45175-132a-4bb4-ab36-c9a1c19e62c7.glb";
 
 const PROPS = {
   emitter: { sources: ["src/assets/props/emitter.glb"], size: 26 },
