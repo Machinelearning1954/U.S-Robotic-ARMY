@@ -171,3 +171,25 @@ foils that scale with your speed. Skim 60 metres and the island pays **+25 —
   (Rule Zero — no real brands); the Flying Fish is an original shape named for
   the island fish that actually flies. It also plays nice with the existing
   splashdown-clip bonus — hit the water fast and OnWatch buys the clip.
+
+
+## The Comet — jet-turbine road car with afterburner (live in the prototype, v1.25)
+
+A jet-engine street car parked on the strip: low white-and-black body, a real
+**turbine nacelle** across the rear deck with a spinning intake fan, a red
+light bar, and an underglow. Board it with **E** like any ride. Hold **SHIFT**
+on land and the **afterburner lights** — a blue flame cone blooms off the
+tailpipe, top speed jumps ~62% and thrust with it, while a **spool meter**
+drains; let go (or empty it) and the spool recharges. First burn pays **+15**.
+Water kills the burn (it's a road car). The spool state shows in `st()` for
+tuning.
+
+- **Boundary:** from an AI reel of a real manufacturer's jet-car concept ("if
+  BMW built a jet for the Autobahn"). The **make and badge are not depicted**
+  (Rule Zero — no real brands); the Comet is an original shape. The afterburner
+  reuses the existing per-vehicle speed model — no new movement system, just a
+  boost multiplier gated to this ride on land.
+
+Headless-verified: boards with E, SHIFT lights the burn (flame visible, meter
+drains), releasing recharges the spool, first burn pays +15; part of the v1.25
+full-functionality sweep (14/14 checks, 0 page errors).
