@@ -24,6 +24,7 @@ staying out of the sightlines of Meridian's roaming **sweepers**.
 | `Space` | Pulse the resonance scanner |
 | `E` | Neutralize an emitter when in range |
 | `R` | OVERWATCH recon pass (once per district) — a Mach-3 bird flashes all live emitters onto the minimap |
+| `O` | Graphics settings — presets, per-effect toggles, render scale, FPS counter |
 
 - The **RESONANCE** meter climbs as you close on the nearest live emitter, and
   the screen-edge "tingle" sharpens with proximity — that's your detection cue.
@@ -121,6 +122,11 @@ neon signage, and roof clutter (AC units, blinking antennas). On top of that:
   resonance "tingle" that rims the screen as you near an emitter
 - an adaptive quality governor that sheds grain → bloom → lighting refresh
   rate when the frame budget is tight, so it stays smooth on weak hardware
+- an in-game **Graphics menu** (`O`) that maps a GTA-6-style optimization
+  guide onto the real renderer: Auto / Cinematic / Balanced / Performance
+  presets, per-effect toggles (shadows, wet-street reflections, volumetric
+  god rays, bloom, film grain), an upscaler-style render-scale slider, and an
+  FPS counter — persisted in localStorage and read live by both renderers
 
 Systemic layer (all fictional, all procedural):
 

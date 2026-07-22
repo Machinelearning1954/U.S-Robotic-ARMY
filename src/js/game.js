@@ -35,6 +35,8 @@ export class Game {
     this.ctx = canvas.getContext("2d");
     this.hud = hud;
     this.onEnd = onEnd;
+    this.gfx = hud.gfx || { preset: "auto", bloom: true, grain: true, renderScale: 1 };
+    this.uiPaused = false; // graphics panel open: freeze sim, keep rendering
     this.holo = hud.holo ? new HandlerHologram(hud.holo) : null;
     this.input = new Input();
     this.running = false;
@@ -427,11 +429,18 @@ export class Game {
     this.last = t;
     this.frameNo++;
     this.frameEma = this.frameEma * 0.95 + dt * 0.05;
-    if (--this.qualityCooldown <= 0) {
-      if (this.frameEma > 0.025 && this.quality > 0) { this.quality--; this.qualityCooldown = 90; }
-      else if (this.frameEma < 0.014 && this.quality < 2) { this.quality++; this.qualityCooldown = 180; }
+    // Adaptive quality only in Auto mode; named presets pin the 2.5D tier.
+    if (!this.gfx || this.gfx.preset === "auto") {
+      if (--this.qualityCooldown <= 0) {
+        if (this.frameEma > 0.025 && this.quality > 0) { this.quality--; this.qualityCooldown = 90; }
+        else if (this.frameEma < 0.014 && this.quality < 2) { this.quality++; this.qualityCooldown = 180; }
+      }
+    } else {
+      this.quality = this.gfx.grain ? 2 : (this.gfx.bloom ? 1 : 0);
     }
-    if (!this.pausedForOverlay) {
+    if (this.uiPaused) {
+      this.render(); // graphics panel open: live preview, no simulation
+    } else if (!this.pausedForOverlay) {
       this.update(dt);
       this.render();
     }
@@ -493,7 +502,7 @@ export class Game {
         this._loading3d = true;
         import("./render3d.js")
           .then(({ Renderer3D }) => {
-            this.r3d = new Renderer3D(document.getElementById("stage3d"));
+            this.r3d = new Renderer3D(document.getElementById("stage3d"), this.gfx);
             this.mode3d = true;
             document.getElementById("game").classList.add("mode3d");
           })
@@ -830,8 +839,11 @@ export class Game {
     this.drawStrike(ctx, w, h);
     this.drawRecon(ctx, w, h);
     this.drawRain(ctx, w, h);
-    if (this.quality >= 1) this.compositeBloom(ctx, w, h);
-    if (this.quality >= 2) this.drawGrain(ctx, w, h);
+    const auto = !this.gfx || this.gfx.preset === "auto";
+    const bloomOn = auto ? this.quality >= 1 : this.gfx.bloom;
+    const grainOn = auto ? this.quality >= 2 : this.gfx.grain;
+    if (bloomOn) this.compositeBloom(ctx, w, h);
+    if (grainOn) this.drawGrain(ctx, w, h);
     this.drawVignette(ctx, w, h);
     this.drawScannerTingle(ctx, w, h, now);
     this.drawMinimap(ctx, w, h);

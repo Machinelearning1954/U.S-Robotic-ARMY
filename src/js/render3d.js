@@ -135,10 +135,13 @@ const COMPOSITE_FRAG = /* glsl */ `
 `;
 
 export class Renderer3D {
-  constructor(canvas) {
+  constructor(canvas, gfx) {
     this.canvas = canvas;
+    this.gfx = gfx || { preset: "auto", shadows: true, reflections: true, godrays: true, bloom: true, grain: true, renderScale: 1 };
+    this.baseRatio = Math.min(window.devicePixelRatio || 1, 2);
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-    this.ratio = Math.min(window.devicePixelRatio || 1, 2);
+    this._scale = this.gfx.preset === "auto" ? 1 : (this.gfx.renderScale || 1);
+    this.ratio = this.baseRatio * this._scale;
     this.renderer.setPixelRatio(this.ratio);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.25;
@@ -1265,8 +1268,50 @@ export class Renderer3D {
   }
 
   // ---------- per-frame sync ----------
+  // Apply the shared graphics settings (presets / per-effect toggles / render
+  // scale). In Auto mode the frame-rate governor runs untouched; a named or
+  // custom preset pins quality, render scale, shadows and reflections.
+  applyGfx() {
+    const g = this.gfx;
+    if (!g) return;
+    if (g.preset === "auto") {
+      if (this._manual) { // returning to Auto: restore full defaults
+        this._manual = false;
+        this._scale = 1; this.ratio = this.baseRatio; this.renderer.setPixelRatio(this.ratio);
+        this.renderer.shadowMap.enabled = true; if (this.moon) this.moon.castShadow = true;
+        if (this.mirror) this.mirror.visible = true;
+        this._shadowDirty = true; this.resize();
+      }
+      return;
+    }
+    this._manual = true;
+    if (this._scale !== g.renderScale) {
+      this._scale = g.renderScale;
+      this.ratio = this.baseRatio * this._scale;
+      this.renderer.setPixelRatio(this.ratio);
+      this.resize();
+    }
+    this.quality = (g.bloom || g.godrays || g.grain) ? 2 : 1;
+    if (this.renderer.shadowMap.enabled !== !!g.shadows) {
+      this.renderer.shadowMap.enabled = !!g.shadows;
+      if (this.moon) this.moon.castShadow = !!g.shadows;
+      this._shadowDirty = true;
+    }
+    if (this.mirror) this.mirror.visible = !!g.reflections;
+    if (this._shadowDirty) {
+      this.scene.traverse((o) => {
+        if (o.material) {
+          if (Array.isArray(o.material)) o.material.forEach((m) => (m.needsUpdate = true));
+          else o.material.needsUpdate = true;
+        }
+      });
+      this._shadowDirty = false;
+    }
+  }
+
   render(g, now) {
     if (this.builtFor !== g.d.id) this.build(g);
+    this.applyGfx();
     const d = this.dyn;
     const t0 = performance.now();
 
@@ -1485,11 +1530,12 @@ export class Renderer3D {
       // volumetric light shafts: march the bloom buffer toward a fixed sky
       // anchor near the top of the frame, so the bright skyline and moon-lit
       // sky streak downward through the rainy air. A slow drift keeps it alive.
+      const gfx = this.gfx || {};
       const gx = 0.5 + Math.sin(now * 0.0004) * 0.12;
       this.postQuad.material = this.matGodray;
       this.matGodray.uniforms.tBright.value = this.rtBloomA.texture;
       this.matGodray.uniforms.uLight.value.set(gx, 0.88);
-      this.matGodray.uniforms.uActive.value = 0.85;
+      this.matGodray.uniforms.uActive.value = (gfx.godrays === false) ? 0 : 0.85;
       this.renderer.setRenderTarget(this.rtGod);
       this.renderer.render(this.postScene, this.postCam);
       // composite to screen
@@ -1498,6 +1544,8 @@ export class Renderer3D {
       this.matComposite.uniforms.tBloom.value = this.rtBloomA.texture;
       this.matComposite.uniforms.tBloomWide.value = this.rtBloomD.texture;
       this.matComposite.uniforms.tGod.value = this.rtGod.texture;
+      this.matComposite.uniforms.bloomAmt.value = (gfx.bloom === false) ? 0 : 0.95;
+      this.matComposite.uniforms.grainAmt.value = (gfx.grain === false) ? 0 : 0.028;
       this.matComposite.uniforms.time.value = now * 0.001;
       this.renderer.setRenderTarget(null);
       this.renderer.render(this.postScene, this.postCam);
@@ -1507,9 +1555,10 @@ export class Renderer3D {
     }
 
     // Auto quality governor: if the GPU can't hold ~38fps, drop the post
-    // chain and render scale once rather than stuttering forever.
+    // chain and render scale once rather than stuttering forever. Only in Auto
+    // mode — named/custom presets keep exactly the settings the player chose.
     this.frameEMA = this.frameEMA * 0.95 + (performance.now() - t0) * 0.05;
-    if (this.quality === 2 && this.frameEMA > 26) {
+    if ((!this.gfx || this.gfx.preset === "auto") && this.quality === 2 && this.frameEMA > 26) {
       this.quality = 1;
       this.ratio = 1;
       this.renderer.setPixelRatio(1);

@@ -42,6 +42,7 @@
           <li><span class="key">R</span> — call the OVERWATCH recon pass (once per district): a Mach-3 bird flashes every live emitter onto your map</li>
           <li><span class="key">M</span> — mute / unmute audio</li>
           <li><span class="key">V</span> — toggle the 3D camera (WebGL)</li>
+          <li><span class="key">O</span> — graphics settings: presets, per-effect toggles, render scale, FPS counter</li>
           <li>The <strong>resonance meter</strong> climbs as you near an emitter. The scanner tingle sharpens with proximity.</li>
           <li>Avoid <strong>Meridian sweepers</strong> — linger in a cone and suspicion turns into a confirmed sighting, raising exposure. At max exposure a <strong>lockdown</strong> starts: stay unseen until it passes, or the run ends.</li>
           <li><strong>Weather shifts</strong> between drizzle, rain, and storms — storm cells make your scanner readings jump.</li>
@@ -98,12 +99,41 @@
           <canvas id="holo" width="160" height="200" aria-hidden="true"></canvas>
           <div id="radioText" class="radio-text"></div>
         </div>
+        <div id="fps" class="fps" hidden>-- FPS</div>
+        <button id="gfxBtn" class="gfx-btn" title="Graphics settings (O)">&#9881;</button>
       </div>
       <div id="overlay" class="overlay">
         <div class="overlay-card">
           <h2 id="overTitle">—</h2>
           <p id="overBody">—</p>
           <button id="overBtn" class="btn primary">CONTINUE</button>
+        </div>
+      </div>
+
+      <!-- Graphics settings (press O). Presets + per-effect toggles + an
+           upscaler-style render-scale slider + FPS counter, mapping a GTA-6
+           optimization guide onto the game's real renderer features. -->
+      <div id="gfx" class="overlay">
+        <div class="overlay-card gfx-card">
+          <h2>GRAPHICS</h2>
+          <div class="gfx-presets">
+            <button class="btn ghost gfx-preset" data-preset="auto">Auto</button>
+            <button class="btn ghost gfx-preset" data-preset="cinematic">Cinematic</button>
+            <button class="btn ghost gfx-preset" data-preset="balanced">Balanced</button>
+            <button class="btn ghost gfx-preset" data-preset="performance">Performance</button>
+          </div>
+          <p class="gfx-note" id="gfxNote">Auto adapts quality to your frame rate.</p>
+          <div class="gfx-rows">
+            <label class="gfx-row"><span>Shadows</span><input type="checkbox" data-gfx="shadows"></label>
+            <label class="gfx-row"><span>Reflections (wet streets)</span><input type="checkbox" data-gfx="reflections"></label>
+            <label class="gfx-row"><span>Volumetric lighting (god rays)</span><input type="checkbox" data-gfx="godrays"></label>
+            <label class="gfx-row"><span>Bloom</span><input type="checkbox" data-gfx="bloom"></label>
+            <label class="gfx-row"><span>Film grain</span><input type="checkbox" data-gfx="grain"></label>
+            <label class="gfx-row"><span>Render scale <b id="rsVal">100%</b></span>
+              <input type="range" min="50" max="100" step="5" data-gfx="renderScale"></label>
+            <label class="gfx-row"><span>FPS counter</span><input type="checkbox" data-gfx="showFps"></label>
+          </div>
+          <button id="gfxClose" class="btn primary">DONE (O)</button>
         </div>
       </div>
     </section>

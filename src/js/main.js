@@ -54,6 +54,93 @@ const hud = {
   holo: document.getElementById("holo"),
 };
 
+// ---------------------------------------------------------------------------
+// Graphics settings — a GTA-6-style optimization menu wired to the game's real
+// renderer features (presets, per-effect toggles, an upscaler-style render
+// scale, and an FPS counter). Persisted in localStorage; read live each frame
+// by both the 2.5D and 3D renderers via the shared `gfx` object.
+// ---------------------------------------------------------------------------
+const GFX_KEY = "rez_gfx";
+const gfx = {
+  preset: "auto", shadows: true, reflections: true, godrays: true,
+  bloom: true, grain: true, renderScale: 1, showFps: false,
+};
+try { Object.assign(gfx, JSON.parse(localStorage.getItem(GFX_KEY) || "{}")); } catch (e) {}
+hud.gfx = gfx; // Game + Renderer3D read this
+
+const GFX_PRESETS = {
+  cinematic:   { shadows: true,  reflections: true,  godrays: true,  bloom: true,  grain: true,  renderScale: 1.0 },
+  balanced:    { shadows: true,  reflections: true,  godrays: false, bloom: true,  grain: true,  renderScale: 0.85 },
+  performance: { shadows: false, reflections: false, godrays: false, bloom: false, grain: false, renderScale: 0.6 },
+};
+const GFX_NOTES = {
+  auto: "Auto adapts quality to your frame rate.",
+  cinematic: "Everything on — best on a strong GPU.",
+  balanced: "High detail; god rays off, 85% render scale.",
+  performance: "Effects off, 60% render scale for max FPS.",
+  custom: "Custom — tune each effect below.",
+};
+const gfxPanel = document.getElementById("gfx");
+const gfxNote = document.getElementById("gfxNote");
+const rsVal = document.getElementById("rsVal");
+const fpsEl = document.getElementById("fps");
+
+function saveGfx() { try { localStorage.setItem(GFX_KEY, JSON.stringify(gfx)); } catch (e) {} }
+function syncGfxPanel() {
+  document.querySelectorAll(".gfx-preset").forEach((b) =>
+    b.classList.toggle("active", b.dataset.preset === gfx.preset));
+  gfxNote.textContent = GFX_NOTES[gfx.preset] || GFX_NOTES.custom;
+  const auto = gfx.preset === "auto";
+  document.querySelectorAll("[data-gfx]").forEach((el) => {
+    const k = el.dataset.gfx;
+    if (el.type === "checkbox") el.checked = !!gfx[k];
+    else if (el.type === "range") el.value = Math.round(gfx.renderScale * 100);
+    // effect toggles are governed automatically in Auto mode
+    const isEffect = !["showFps", "renderScale"].includes(k);
+    el.closest(".gfx-row").classList.toggle("disabled", auto && isEffect);
+  });
+  rsVal.textContent = Math.round(gfx.renderScale * 100) + "%";
+  fpsEl.hidden = !gfx.showFps;
+  saveGfx();
+}
+function applyPreset(name) {
+  if (GFX_PRESETS[name]) Object.assign(gfx, GFX_PRESETS[name]);
+  gfx.preset = name;
+  syncGfxPanel();
+}
+document.querySelectorAll(".gfx-preset").forEach((b) =>
+  b.addEventListener("click", () => applyPreset(b.dataset.preset)));
+document.querySelectorAll("[data-gfx]").forEach((el) =>
+  el.addEventListener("input", () => {
+    const k = el.dataset.gfx;
+    if (el.type === "checkbox") gfx[k] = el.checked;
+    else if (el.type === "range") gfx.renderScale = (+el.value) / 100;
+    // flipping an actual effect drops us out of a named preset into Custom
+    if (!["showFps", "renderScale"].includes(k)) gfx.preset = "custom";
+    syncGfxPanel();
+  }));
+
+let gfxOpen = false;
+function toggleGfx(open) {
+  gfxOpen = open === undefined ? !gfxOpen : open;
+  gfxPanel.classList.toggle("show", gfxOpen);
+  if (game) game.uiPaused = gfxOpen; // freeze the sim but keep rendering (live preview)
+  if (gfxOpen) syncGfxPanel();
+}
+document.getElementById("gfxBtn").addEventListener("click", () => toggleGfx());
+document.getElementById("gfxClose").addEventListener("click", () => toggleGfx(false));
+window.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "o" && screens.game.classList.contains("active")) {
+    e.preventDefault(); toggleGfx();
+  }
+});
+// FPS readout, driven off the game loop's smoothed frame time.
+setInterval(() => {
+  if (gfx.showFps && game && screens.game.classList.contains("active")) {
+    fpsEl.textContent = (game.frameEma > 0 ? Math.round(1 / game.frameEma) : 0) + " FPS";
+  }
+}, 250);
+
 const overlay = document.getElementById("overlay");
 const overlayCard = overlay.querySelector(".overlay-card");
 const overTitle = document.getElementById("overTitle");
