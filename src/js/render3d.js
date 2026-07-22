@@ -1003,9 +1003,10 @@ export class Renderer3D {
     c.width = g.cols * px; c.height = g.rows * px;
     const x = c.getContext("2d");
     // parallel height + roughness canvases for normal/roughness maps
+    // (willReadFrequently: the height canvas is read back by makeNormalMap)
     const hgt = document.createElement("canvas");
     hgt.width = c.width; hgt.height = c.height;
-    const xh = hgt.getContext("2d");
+    const xh = hgt.getContext("2d", { willReadFrequently: true });
     const rgh = document.createElement("canvas");
     rgh.width = c.width; rgh.height = c.height;
     const xr = rgh.getContext("2d");
@@ -1100,7 +1101,8 @@ export class Renderer3D {
     c.width = c.height = e.width = e.height = hgt.width = hgt.height = 512;
     const x = c.getContext("2d");
     const xe = e.getContext("2d");
-    const xh = hgt.getContext("2d");
+    // willReadFrequently: the height canvas is read back by makeNormalMap
+    const xh = hgt.getContext("2d", { willReadFrequently: true });
     x.fillStyle = "#0a0e1a";
     x.fillRect(0, 0, 512, 512);
     xe.fillStyle = "#000";
