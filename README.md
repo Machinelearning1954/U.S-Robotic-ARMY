@@ -69,7 +69,8 @@ full night-city realism pipeline, all procedural:
   proud ledges) and streets (curbs, paint, grain), plus a roughness map with
   slick patches so lamp light smears like standing water
 - skyline variety: two facade texture variants, stepped setback tiers on the
-  tallest towers, and AC-unit roof clutter
+  tallest towers, AC-unit roof clutter, and luxury rooftop penthouses on the
+  tallest towers (glass crown, glowing infinity pool, helipad, roof gardens)
 - light halos on street lamps and emitters, rain splash rings on the asphalt
 - ambient luxury hovercars gliding over the district at altitude — glowing
   underglow, twin thruster flares, downward hover-mist and a ground shadow

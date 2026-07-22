@@ -1264,7 +1264,31 @@ export class Game {
       ctx.stroke();
       // Roof clutter: AC units and a blinking aviation light on the tallest.
       const rw = rx2 - rx;
-      if (m.ac && rw > 26) {
+      // Luxury rooftop penthouse on the tallest towers: infinity pool,
+      // helipad ring, and rooftop greenery (top-down view).
+      if (m.h > 0.82 && rw > 30) {
+        const rh = ry2 - ry;
+        // glowing infinity pool
+        ctx.fillStyle = "rgba(42,208,255,0.7)";
+        ctx.fillRect(rx + rw * 0.5, ry + rh * 0.14, rw * 0.36, rh * 0.3);
+        ctx.fillStyle = "rgba(180,240,255,0.35)";
+        ctx.fillRect(rx + rw * 0.5, ry + rh * 0.14, rw * 0.36, rh * 0.1);
+        // helipad ring + H
+        const hx = rx + rw * 0.26, hy = ry + rh * 0.66, hr = rw * 0.15;
+        ctx.strokeStyle = "rgba(255,207,106,0.85)";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(hx, hy, hr, 0, TAU); ctx.stroke();
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(hx - hr * 0.4, hy - hr * 0.45); ctx.lineTo(hx - hr * 0.4, hy + hr * 0.45);
+        ctx.moveTo(hx + hr * 0.4, hy - hr * 0.45); ctx.lineTo(hx + hr * 0.4, hy + hr * 0.45);
+        ctx.moveTo(hx - hr * 0.4, hy); ctx.lineTo(hx + hr * 0.4, hy);
+        ctx.stroke();
+        // rooftop greenery
+        ctx.fillStyle = "#1f5a32";
+        ctx.fillRect(rx + rw * 0.14, ry + rh * 0.14, rw * 0.14, rh * 0.14);
+        ctx.fillRect(rx + rw * 0.68, ry + rh * 0.72, rw * 0.14, rh * 0.14);
+      } else if (m.ac && rw > 26) {
         ctx.fillStyle = this.shades.ac;
         ctx.fillRect(rx + rw * 0.18, ry + rw * 0.2, rw * 0.2, rw * 0.14);
         ctx.fillRect(rx + rw * 0.58, ry + rw * 0.55, rw * 0.16, rw * 0.2);

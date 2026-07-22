@@ -597,6 +597,7 @@ export class Renderer3D {
     this.buildHolos(g);
     this.buildLandmark(g);
     this.buildCrocs(g);
+    this.buildPenthouses(g);
 
     this.camPos = new THREE.Vector3(g.player.x, 560, g.player.y + 240);
   }
@@ -890,6 +891,58 @@ export class Renderer3D {
     x.fillRect(0, 0, 128, 128);
     this.glowTex = new THREE.CanvasTexture(c);
     return this.glowTex;
+  }
+
+  // Futuristic rooftop penthouses crowning the tallest towers: a glass
+  // penthouse box, a glowing infinity pool, a helipad ring, and rooftop
+  // planters. Cosmetic skyline luxury (inspired by the sci-fi penthouse reel).
+  buildPenthouses(g) {
+    const tall = [];
+    for (let y = 0; y < g.rows; y++) {
+      for (let x = 0; x < g.cols; x++) {
+        if (g.grid[y][x] && g.blockMeta[y][x].h > 0.82) tall.push({ x, y, h: g.blockMeta[y][x].h });
+      }
+    }
+    tall.sort((a, b) => b.h - a.h);
+    const chosen = tall.slice(0, 12);
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x2a3a52, roughness: 0.06, metalness: 0.5, transparent: true,
+      opacity: 0.4, emissive: 0xfff0d0, emissiveIntensity: 0.28, side: THREE.DoubleSide,
+    });
+    const slabMat = new THREE.MeshStandardMaterial({ color: 0x11182a, roughness: 0.8 });
+    const poolMat = new THREE.MeshBasicMaterial({ color: 0x2ad0ff, transparent: true, opacity: 0.75 });
+    const padMat = new THREE.MeshStandardMaterial({ color: 0x0d1422, roughness: 0.85 });
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xffcf6a });
+    const greenMat = new THREE.MeshStandardMaterial({ color: 0x1f5a32, roughness: 0.9 });
+    this.penthousePools = [];
+    for (const t of chosen) {
+      const h = t.h * UP_SCALE;
+      const s = g.tile - 6;
+      const cx = (t.x + 0.5) * g.tile, cz = (t.y + 0.5) * g.tile;
+      const grp = new THREE.Group();
+      grp.position.set(cx, h, cz);
+      // roof slab
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(s * 0.86, 2, s * 0.86), slabMat);
+      roof.position.y = 1; roof.receiveShadow = true; grp.add(roof);
+      // glass penthouse box
+      const ph = new THREE.Mesh(new THREE.BoxGeometry(s * 0.62, 26, s * 0.62), glassMat);
+      ph.position.set(-s * 0.1, 15, -s * 0.1); ph.castShadow = true; grp.add(ph);
+      // glowing infinity pool
+      const pool = new THREE.Mesh(new THREE.BoxGeometry(s * 0.34, 1.5, s * 0.5), poolMat);
+      pool.position.set(s * 0.26, 2.4, s * 0.18); grp.add(pool);
+      this.penthousePools.push(pool);
+      // helipad ring
+      const pad = new THREE.Mesh(new THREE.CylinderGeometry(s * 0.16, s * 0.16, 1.5, 20), padMat);
+      pad.position.set(-s * 0.24, 2.4, s * 0.22); grp.add(pad);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(s * 0.14, 0.7, 6, 22), ringMat);
+      ring.rotation.x = -Math.PI / 2; ring.position.set(-s * 0.24, 3.3, s * 0.22); grp.add(ring);
+      // rooftop planters
+      for (const [dx, dz] of [[-0.32, 0.3], [0.3, -0.32], [-0.34, -0.3]]) {
+        const box = new THREE.Mesh(new THREE.BoxGeometry(6, 5, 6), greenMat);
+        box.position.set(dx * s, 3.5, dz * s); grp.add(box);
+      }
+      this.scene.add(grp);
+    }
   }
 
   // Ambient crocodiles: a low segmented body with a ridged back, a broad
