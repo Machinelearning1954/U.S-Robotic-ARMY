@@ -1109,3 +1109,32 @@ town rich), so three visits hear the full bank. First completed palaver pays
   The product's UI and branding are **not** depicted — only the separable
   five-voices idea, rebuilt as island oral tradition with original characters
   and original dialogue.
+
+
+## The Harbor Derby — playable island football (live in the prototype, v1.24)
+
+The island gets a pitch. On the flat ground east of the strip (a probed-clear
+site) there's a full football ground — green turf, painted touchlines, centre
+circle, two netted goals, and a live scoreboard on a pole — where **HARBOR
+SHARKS** (you) play **REEF RANGERS**. Walk to the centre spot on foot and dwell
+a moment to **kick off** a timed match. You play as the Don, on foot: run into
+the ball to move it — a gentle touch when you jog, a proper strike when you
+sprint — and put it in the Rangers' goal. Their three outfielders chase you
+down and a gold-shirted keeper guards the net (beat them with a struck shot,
+not a tap); your two team-mates press up to help. Score both ways is live on
+the board with a match clock. At full time: **Sharks win +40 first time (+15
+after), a draw +10, a loss +5 for the run-out**. Wander off the pitch mid-match
+and it's abandoned. The result and your first win persist in the save.
+
+- **Boundary:** the request pointed at FIFA-style open-source repos. **FIFA and
+  EA are trademarks** and are used nowhere; the **real-footballer ratings
+  datasets were excluded** (real people, Rule Zero); and **no external code was
+  merged** — the single-file guarantee holds. Football itself is a sport, not
+  anyone's IP: the pitch, both teams, the players, the ball physics, and the
+  arcade match logic are all written from scratch for this game.
+
+Headless-verified: dwell kicks off a 100-second match; the on-foot kick drives
+the ball toward goal with speed-scaled power; struck shots beat the keeper and
+score (ball resets to centre); the undefended end concedes; the ball bounces in
+off the touchline; full time pays out by result and increments the play count;
+zero page errors.
