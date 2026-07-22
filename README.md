@@ -76,6 +76,9 @@ full night-city realism pipeline, all procedural:
 - street volumetric-hologram projectors: glass cubes beaming a light cone up
   to a translucent, slowly-rotating holographic bust with scanlines and
   flicker (both view modes)
+- a signature sail-tower landmark (Burj-style) on its own island plaza that
+  towers over the city blocks — curved glass sail, mast spire with an aircraft
+  beacon, cantilevered helipad, and colour-cycling facade wash lighting
 - post chain: two-octave threshold bloom (tight neon + wide halo), volumetric
   light shafts / god rays (radial scatter of the bright skyline toward a
   drifting sky anchor), teal-orange color grade, chromatic aberration, film

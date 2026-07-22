@@ -592,6 +592,7 @@ export class Renderer3D {
     this.buildRain(g);
     this.buildSkyCars(g);
     this.buildHolos(g);
+    this.buildLandmark(g);
 
     this.camPos = new THREE.Vector3(g.player.x, 560, g.player.y + 240);
   }
@@ -885,6 +886,91 @@ export class Renderer3D {
     x.fillRect(0, 0, 128, 128);
     this.glowTex = new THREE.CanvasTexture(c);
     return this.glowTex;
+  }
+
+  // Signature sail-tower landmark (Burj-style): a curved glass sail extruded
+  // from a side silhouette, a leading-edge spine + mast spire, a cantilevered
+  // helipad, on an island plaza — with colour-cycling facade wash lights that
+  // make it the unmistakable hero of the skyline.
+  buildLandmark(g) {
+    const L = g.landmark;
+    if (!L) return;
+    const grp = new THREE.Group();
+    grp.position.set(L.x, 0, L.y);
+    const TOWER = 430;   // far taller than any city block (~150)
+
+    // island plaza + causeway
+    const island = new THREE.Mesh(
+      new THREE.CylinderGeometry(96, 104, 10, 40),
+      new THREE.MeshStandardMaterial({ color: 0x141c2a, roughness: 0.9, metalness: 0.1 })
+    );
+    island.position.y = 5; island.receiveShadow = true;
+    grp.add(island);
+
+    // sail silhouette (side profile): near-vertical leading edge + curved back
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(150, 0);                       // base depth
+    shape.quadraticCurveTo(60, TOWER * 0.55, 14, TOWER); // curved back down-up to spire
+    shape.lineTo(6, TOWER);
+    shape.quadraticCurveTo(0, TOWER * 0.5, 0, 0); // leading edge
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: 132, bevelEnabled: false, curveSegments: 24 });
+    geo.translate(-75, 0, -66);
+    const sailMat = new THREE.MeshStandardMaterial({
+      color: 0x0c1420, roughness: 0.18, metalness: 0.55,
+      emissive: 0xffd9a0, emissiveIntensity: 0.35,
+    });
+    const sail = new THREE.Mesh(geo, sailMat);
+    sail.castShadow = true; sail.position.y = 10;
+    this.landmarkSail = sail;
+    grp.add(sail);
+
+    // convex glass face across the front (the lit "belly" of the sail)
+    const faceMat = new THREE.MeshStandardMaterial({
+      color: 0x1a2740, roughness: 0.08, metalness: 0.7,
+      emissive: 0xfff0d0, emissiveIntensity: 0.5, side: THREE.DoubleSide,
+    });
+    const face = new THREE.Mesh(new THREE.CylinderGeometry(70, 70, TOWER, 24, 1, true, -0.6, 1.2), faceMat);
+    face.position.set(48, TOWER / 2 + 10, 0);
+    this.landmarkFace = face;
+    grp.add(face);
+
+    // leading-edge mast + spire
+    const mast = new THREE.Mesh(
+      new THREE.CylinderGeometry(3, 5, TOWER + 30, 8),
+      new THREE.MeshStandardMaterial({ color: 0xdfe8f2, roughness: 0.4, metalness: 0.6 })
+    );
+    mast.position.set(-66, (TOWER + 30) / 2 + 10, 0);
+    const spire = new THREE.Mesh(
+      new THREE.ConeGeometry(3, 44, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
+    );
+    spire.position.set(-66, TOWER + 52, 0);
+    // aircraft beacon at the tip
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(4, 10, 10), new THREE.MeshBasicMaterial({ color: 0xff3048 }));
+    beacon.position.set(-66, TOWER + 74, 0);
+    this.landmarkBeacon = beacon;
+    grp.add(mast, spire, beacon);
+
+    // cantilevered helipad near the top
+    const heli = new THREE.Mesh(
+      new THREE.CylinderGeometry(26, 26, 4, 20),
+      new THREE.MeshStandardMaterial({ color: 0x1b2436, roughness: 0.7, emissive: 0x33e2ff, emissiveIntensity: 0.15 })
+    );
+    heli.position.set(-30, TOWER * 0.86, 60);
+    grp.add(heli);
+
+    // colour-cycling facade wash lights at the base, aimed up the sail
+    this.landmarkLights = [-40, 0, 40].map((dz) => {
+      const sp = new THREE.SpotLight(0x3060ff, 9000, TOWER * 1.4, 0.6, 0.7, 1.3);
+      sp.position.set(60, 12, dz);
+      const tgt = new THREE.Object3D(); tgt.position.set(10, TOWER, dz);
+      grp.add(sp, tgt); sp.target = tgt;
+      return sp;
+    });
+
+    this.scene.add(grp);
+    this.landmarkGrp = grp;
   }
 
   // Street hologram projectors: a glass cube beaming an additive light cone
@@ -1277,6 +1363,18 @@ export class Renderer3D {
 
     this.syncStrike(g);
     this.syncRecon(g);
+
+    // Landmark: cycle the facade wash colour and blink the mast beacon.
+    if (g.landmark && this.landmarkLights) {
+      const hue = (Math.sin(g.landmark.phase) * 0.5 + 0.5) * 0.83 + 0.53; // 0.53..1.36 (wrap)
+      const col = new THREE.Color().setHSL(hue % 1, 0.85, 0.55);
+      for (const sp of this.landmarkLights) sp.color.copy(col);
+      if (this.landmarkFace) this.landmarkFace.material.emissive.copy(col).multiplyScalar(0.6);
+      if (this.landmarkBeacon) {
+        const on = Math.sin(now * 0.006) > 0;
+        this.landmarkBeacon.material.color.setHex(on ? 0xff3048 : 0x3a1015);
+      }
+    }
 
     // Hologram busts slowly rotate and flicker.
     (g.holos || []).forEach((ho, i) => {

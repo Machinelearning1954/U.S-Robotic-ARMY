@@ -241,6 +241,11 @@ export class Game {
       };
     });
 
+    // Signature skyline landmark: a sail-shaped luxury tower on its own island
+    // plaza, rising far above the city blocks with color-cycling wash lighting
+    // (inspired by the Burj Al Arab). One per district at a fixed anchor.
+    this.landmark = { x: this.worldW * 0.32, y: this.worldH * 0.26, phase: rng() * TAU };
+
     // Volumetric hologram projectors: glass-cube pedestals on the sidewalks
     // beaming a lifelike, slowly-rotating holographic bust — cyberpunk street
     // advertising (inspired by the "sharper, more lifelike holograms" reel).
@@ -640,6 +645,8 @@ export class Game {
 
     // Hologram projectors idle-animate (rotation + flicker phase).
     for (const ho of this.holos) ho.phase += dt;
+    // Landmark facade-lighting colour cycle.
+    if (this.landmark) this.landmark.phase += dt * 0.35;
 
     // Sky hovercars drift along their lane and wrap around the district.
     for (const s of this.skyCars) {
@@ -805,6 +812,7 @@ export class Game {
     this.drawPlayer(ctx, now);
     this.drawLamps(ctx, camX, camY, w, h);
     this.drawBuildings(ctx, camX, camY, w, h, cx, cy, now);
+    this.drawLandmark(ctx, camX, camY, w, h, now);
     this.drawHolos(ctx, camX, camY, w, h, now);
     this.drawBirds(ctx, camX, camY, w, h);
     this.drawSkyCars(ctx, camX, camY, w, h, now);
@@ -1250,8 +1258,9 @@ export class Game {
     for (const s of this.skyCars) {
       const wx = s.vertical ? s.lane : s.pos;
       const wy = s.vertical ? s.pos : s.lane;
-      const sx = wx - camX, gy = wy - camY;
-      if (sx < -160 || sx > w + 160 || gy < -160 || gy > h + 260) continue;
+      const scrX = wx - camX, scrY = wy - camY; // cull in screen space
+      if (scrX < -160 || scrX > w + 160 || scrY < -160 || scrY > h + 260) continue;
+      const sx = wx, gy = wy;              // draw in world space (translated ctx)
       const bob = Math.sin(s.phase * 1.6) * 4;
       const cy = gy - s.alt + bob;         // elevated body position
       const face = s.dir * (s.vertical ? 1 : 1);
@@ -1328,13 +1337,77 @@ export class Game {
     }
   }
 
+  // Signature sail-tower landmark (Burj-style) seen from the top-down view:
+  // a stone island plaza, the sail's lens-shaped footprint with lit window
+  // rows tinted by the cycling wash colour, and a pulsing mast beacon.
+  drawLandmark(ctx, camX, camY, w, h, now) {
+    const L = this.landmark;
+    if (!L) return;
+    // cull in screen space, but draw in world space (this runs inside the
+    // camera-translated context, like drawBirds/drawEmitters).
+    const scrX = L.x - camX, scrY = L.y - camY;
+    if (scrX < -140 || scrX > w + 140 || scrY < -160 || scrY > h + 140) return;
+    const sx = L.x, sy = L.y;
+    // slow wash colour cycle (blue -> violet -> gold -> teal)
+    const hue = (Math.sin(L.phase) * 0.5 + 0.5) * 300 + 190;
+    const wash = `hsl(${hue % 360}, 85%, 62%)`;
+
+    ctx.save();
+    // ground wash glow around the plaza
+    const glow = ctx.createRadialGradient(sx, sy, 8, sx, sy, 120);
+    glow.addColorStop(0, `hsla(${hue % 360},85%,60%,0.28)`);
+    glow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(sx - 120, sy - 120, 240, 240);
+
+    // island plaza
+    ctx.fillStyle = "#151d2b";
+    ctx.strokeStyle = "rgba(120,150,190,0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(sx, sy, 60, 46, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    // access causeway
+    ctx.strokeStyle = "rgba(90,120,160,0.4)";
+    ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.moveTo(sx - 58, sy + 20); ctx.lineTo(sx - 110, sy + 46); ctx.stroke();
+
+    // sail footprint: a lens (two arcs) with the convex glass face
+    ctx.lineWidth = 1.5;
+    ctx.fillStyle = "#0e1626";
+    ctx.strokeStyle = wash;
+    ctx.beginPath();
+    ctx.moveTo(sx - 26, sy + 30);
+    ctx.quadraticCurveTo(sx + 40, sy, sx - 26, sy - 30);   // convex glass face
+    ctx.quadraticCurveTo(sx - 34, sy, sx - 26, sy + 30);   // spine (leading edge)
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // lit window rows following the curve
+    ctx.strokeStyle = `hsla(${hue % 360},90%,70%,0.55)`;
+    ctx.lineWidth = 1;
+    for (let i = -4; i <= 4; i++) {
+      const t = i / 5;
+      ctx.beginPath();
+      ctx.moveTo(sx - 26, sy + t * 28);
+      ctx.quadraticCurveTo(sx + 30 * (1 - Math.abs(t)) + 6, sy + t * 20, sx - 26, sy + t * 28);
+      ctx.stroke();
+    }
+
+    // pulsing mast beacon at the spire tip
+    const beat = 0.5 + 0.5 * Math.sin(now * 0.006);
+    ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.5 * beat})`;
+    ctx.beginPath(); ctx.arc(sx - 30, sy, 3 + beat * 2, 0, TAU); ctx.fill();
+    ctx.fillStyle = wash;
+    ctx.globalAlpha = 0.5 * beat;
+    ctx.beginPath(); ctx.arc(sx - 30, sy, 9, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+
   // Street hologram projectors: a small glass cube on the pavement beaming a
   // light cone up to a translucent, slowly-rotating holographic bust with
   // scanlines and a flicker — "sharper, more lifelike" volumetric display.
   drawHolos(ctx, camX, camY, w, h, now) {
     for (const ho of this.holos) {
-      const sx = ho.x - camX, sy = ho.y - camY;
-      if (sx < -80 || sx > w + 80 || sy < -160 || sy > h + 80) continue;
+      const scrX = ho.x - camX, scrY = ho.y - camY;
+      if (scrX < -80 || scrX > w + 80 || scrY < -160 || scrY > h + 80) continue;
+      const sx = ho.x, sy = ho.y; // draw in world space (translated context)
       const flick = 0.82 + 0.18 * Math.sin(now * 0.02 + ho.phase * 7) * (Math.random() < 0.04 ? 0.4 : 1);
       const yaw = Math.sin(ho.phase * 0.7);           // slow turn of the bust
       const headY = sy - 52;                           // bust floats above cube
