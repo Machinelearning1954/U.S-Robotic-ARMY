@@ -1,0 +1,151 @@
+/* ===================== U.S. Robotic Army — Reel Defense ===================== */
+
+:root {
+  --bg: #05070a;
+  --panel: #0b0f14;
+  --accent: #35e06f;      /* military green */
+  --accent-2: #1f9d54;
+  --danger: #ff4d4d;
+  --text: #d7e2dd;
+  --muted: #7f8c86;
+  --gold: #f5c451;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Courier New", ui-monospace, monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Screen switching */
+.screen { display: none; width: 100%; max-width: 960px; }
+.screen.active { display: block; }
+
+.panel {
+  background: linear-gradient(180deg, rgba(53, 224, 111, 0.05), rgba(0, 0, 0, 0.2));
+  border: 1px solid rgba(53, 224, 111, 0.25);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 0 40px rgba(53, 224, 111, 0.08) inset;
+}
+
+.title {
+  font-size: clamp(28px, 6vw, 52px);
+  letter-spacing: 6px;
+  margin: 0;
+  color: var(--accent);
+  text-shadow: 0 0 18px rgba(53, 224, 111, 0.5);
+}
+
+.subtitle {
+  margin: 4px 0 20px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.briefing {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.briefing-text { flex: 1 1 320px; }
+.briefing-text h2 { color: var(--accent); letter-spacing: 2px; }
+.briefing-text p { line-height: 1.6; color: var(--text); }
+
+.controls { list-style: none; padding: 0; margin: 18px 0; }
+.controls li { margin: 8px 0; color: var(--muted); }
+.key {
+  display: inline-block;
+  background: #0e1620;
+  border: 1px solid rgba(53, 224, 111, 0.35);
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.btn {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  letter-spacing: 3px;
+  padding: 12px 26px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  transition: all 0.15s ease;
+  margin-top: 12px;
+}
+.btn-primary { background: var(--accent-2); color: #041007; border-color: var(--accent); font-weight: bold; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(53, 224, 111, 0.3); }
+
+/* Reel embed area */
+.reel-wrap { flex: 0 0 340px; max-width: 100%; }
+.reel-wrap h3 { color: var(--gold); letter-spacing: 2px; margin-top: 0; }
+.reel-fallback { font-size: 13px; color: var(--muted); }
+.reel-fallback a { color: var(--accent); }
+
+/* HUD + game */
+.hud {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 10px;
+  letter-spacing: 3px;
+  font-size: 15px;
+}
+.hud-item span { color: var(--accent); font-weight: bold; }
+
+#game-canvas {
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 4 / 3;
+  background: radial-gradient(circle at 50% 20%, #0d1a12 0%, #05070a 70%);
+  border: 1px solid rgba(53, 224, 111, 0.3);
+  border-radius: 8px;
+  touch-action: none;
+}
+
+#screen-game { position: relative; }
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  letter-spacing: 8px;
+  color: var(--accent);
+  background: rgba(5, 7, 10, 0.6);
+}
+.hidden { display: none; }
+
+.final-score { font-size: 22px; letter-spacing: 2px; }
+.final-score span { color: var(--gold); font-weight: bold; }
+
+#screen-end .reel-wrap { margin: 20px auto; text-align: center; }
+#screen-end .panel { text-align: center; }
+
+@media (max-width: 640px) {
+  .briefing { flex-direction: column; }
+  .reel-wrap { flex: 1 1 auto; }
+}

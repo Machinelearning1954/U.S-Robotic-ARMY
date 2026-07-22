@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>U.S. Robotic Army — Reel Defense</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ===================== START / BRIEFING SCREEN ===================== -->
+    <section id="screen-start" class="screen active">
+      <div class="panel">
+        <h1 class="title">U.S. ROBOTIC ARMY</h1>
+        <p class="subtitle">REEL DEFENSE</p>
+
+        <div class="briefing">
+          <div class="briefing-text">
+            <h2>Mission Briefing</h2>
+            <p>
+              Enemy drone swarms are inbound. Command your battle unit,
+              hold the line, and survive all waves. Study the field report
+              below before you deploy, soldier.
+            </p>
+            <ul class="controls">
+              <li><span class="key">&larr; &rarr;</span> or <span class="key">A / D</span> — Move</li>
+              <li><span class="key">Space</span> — Fire</li>
+              <li><span class="key">P</span> — Pause</li>
+            </ul>
+            <button id="btn-deploy" class="btn btn-primary">DEPLOY &#9654;</button>
+          </div>
+
+          <!-- The Instagram reel is embedded here as the "field report" -->
+          <div class="reel-wrap" id="reel-briefing">
+            <h3>Field Report</h3>
+            <blockquote
+              class="instagram-media"
+              data-instgrm-permalink="https://www.instagram.com/reel/DayWHhDOIG3/"
+              data-instgrm-version="14"
+              style="background:#0b0f14;border:0;margin:0;max-width:340px;min-width:260px;width:100%;">
+            </blockquote>
+            <p class="reel-fallback">
+              Reel not loading?
+              <a href="https://www.instagram.com/reel/DayWHhDOIG3/" target="_blank" rel="noopener">
+                Watch it on Instagram &#8599;
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== GAME SCREEN ===================== -->
+    <section id="screen-game" class="screen">
+      <div class="hud">
+        <div class="hud-item">SCORE <span id="hud-score">0</span></div>
+        <div class="hud-item">WAVE <span id="hud-wave">1</span></div>
+        <div class="hud-item">HULL <span id="hud-lives">100</span>%</div>
+      </div>
+      <canvas id="game-canvas" width="800" height="600"></canvas>
+      <div id="pause-overlay" class="overlay hidden"><span>PAUSED</span></div>
+    </section>
+
+    <!-- ===================== GAME OVER / VICTORY SCREEN ===================== -->
+    <section id="screen-end" class="screen">
+      <div class="panel">
+        <h1 id="end-title" class="title">MISSION COMPLETE</h1>
+        <p id="end-message" class="subtitle"></p>
+        <p class="final-score">Final Score: <span id="end-score">0</span></p>
+
+        <div class="reel-wrap" id="reel-reward">
+          <h3>Watch the reel again</h3>
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/reel/DayWHhDOIG3/"
+            data-instgrm-version="14"
+            style="background:#0b0f14;border:0;margin:0 auto;max-width:340px;min-width:260px;width:100%;">
+          </blockquote>
+        </div>
+
+        <button id="btn-restart" class="btn btn-primary">REDEPLOY &#8635;</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Instagram official embed script (renders the reel client-side) -->
+  <script async src="https://www.instagram.com/embed.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
