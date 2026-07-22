@@ -117,7 +117,9 @@ neon signage, and roof clutter (AC units, blinking antennas). On top of that:
 - a dynamic night-lighting layer (street lamps, headlights, emitters and the
   player punch holes in the darkness)
 - wet streets: puddles with neon reflection smears, rain, ground splashes
-- ambient life: traffic with headlight cones and pedestrians under umbrellas
+- ambient life: traffic with headlight cones and pedestrians under umbrellas,
+  plus crocodiles prowling the flooded streets (ridged backs, glinting eyes,
+  a faint water wake — in both view modes)
 - post-processing: quarter-res bloom, film grain, vignette, and the
   resonance "tingle" that rims the screen as you near an emitter
 - an adaptive quality governor that sheds grain → bloom → lighting refresh

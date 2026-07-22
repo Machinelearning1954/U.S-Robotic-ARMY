@@ -596,6 +596,7 @@ export class Renderer3D {
     this.buildSkyCars(g);
     this.buildHolos(g);
     this.buildLandmark(g);
+    this.buildCrocs(g);
 
     this.camPos = new THREE.Vector3(g.player.x, 560, g.player.y + 240);
   }
@@ -889,6 +890,42 @@ export class Renderer3D {
     x.fillRect(0, 0, 128, 128);
     this.glowTex = new THREE.CanvasTexture(c);
     return this.glowTex;
+  }
+
+  // Ambient crocodiles: a low segmented body with a ridged back, a broad
+  // snout and glinting eyes, prowling the flooded streets with a slow yaw sway.
+  buildCrocs(g) {
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x223629, roughness: 0.85, metalness: 0.1 });
+    const scuteMat = new THREE.MeshStandardMaterial({ color: 0x2e4838, roughness: 0.8 });
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffd678 });
+    this.dyn.crocs = (g.crocs || []).map(() => {
+      const grp = new THREE.Group();
+      // body (elongated, flattened)
+      const body = new THREE.Mesh(new THREE.CapsuleGeometry(5, 26, 4, 10), bodyMat);
+      body.rotation.z = Math.PI / 2; body.position.y = 4; body.scale.set(1, 0.55, 1);
+      body.castShadow = true;
+      // snout
+      const snout = new THREE.Mesh(new THREE.ConeGeometry(4.5, 16, 8), bodyMat);
+      snout.rotation.z = -Math.PI / 2; snout.position.set(22, 3.5, 0); snout.scale.set(1, 0.5, 1);
+      // ridged back scutes
+      for (let i = -3; i <= 3; i++) {
+        for (const dz of [-2.6, 2.6]) {
+          const s = new THREE.Mesh(new THREE.ConeGeometry(1.4, 4, 4), scuteMat);
+          s.position.set(i * 4.2, 7, dz);
+          grp.add(s);
+        }
+      }
+      // tail
+      const tail = new THREE.Mesh(new THREE.ConeGeometry(4.2, 22, 8), bodyMat);
+      tail.rotation.z = Math.PI / 2; tail.position.set(-24, 3.5, 0); tail.scale.set(1, 0.5, 1);
+      // eyes
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(1.3, 8, 8), eyeMat);
+      eyeL.position.set(17, 6, -2.4);
+      const eyeR = eyeL.clone(); eyeR.position.z = 2.4;
+      grp.add(body, snout, tail, eyeL, eyeR);
+      this.scene.add(grp);
+      return { grp };
+    });
   }
 
   // Signature sail-tower landmark (Burj-style): a curved glass sail extruded
@@ -1420,6 +1457,17 @@ export class Renderer3D {
         this.landmarkBeacon.material.color.setHex(on ? 0xff3048 : 0x3a1015);
       }
     }
+
+    // Crocodiles slink along their lane with a slow yaw sway.
+    (g.crocs || []).forEach((c, i) => {
+      const m = this.dyn.crocs && this.dyn.crocs[i];
+      if (!m) return;
+      const wx = c.vertical ? c.lane : c.pos;
+      const wy = c.vertical ? c.pos : c.lane;
+      const ang = c.vertical ? (c.dir > 0 ? -Math.PI / 2 : Math.PI / 2) : (c.dir > 0 ? 0 : Math.PI);
+      m.grp.position.set(wx, 0, wy);
+      m.grp.rotation.y = ang + Math.sin(c.phase * 2.2) * 0.12;
+    });
 
     // Hologram busts slowly rotate and flicker.
     (g.holos || []).forEach((ho, i) => {

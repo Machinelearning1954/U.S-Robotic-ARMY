@@ -243,6 +243,21 @@ export class Game {
       };
     });
 
+    // Ambient crocodiles prowling the flooded streets — low, scaly, ridged
+    // backs, glinting eyes and a faint water wake. Wildlife set dressing that
+    // suits the rain-slick, puddle-strewn city.
+    this.crocs = Array.from({ length: 2 }, (_, i) => {
+      const vertical = i % 2 === 1;
+      return {
+        vertical,
+        lane: (0.35 + 0.3 * rng()) * (vertical ? this.worldW : this.worldH),
+        dir: rng() < 0.5 ? 1 : -1,
+        pos: rng() * (vertical ? this.worldH : this.worldW),
+        speed: 16 + rng() * 14,
+        phase: rng() * TAU,
+      };
+    });
+
     // Signature skyline landmark: a sail-shaped luxury tower on its own island
     // plaza, rising far above the city blocks with color-cycling wash lighting
     // (inspired by the Burj Al Arab). One per district at a fixed anchor.
@@ -652,6 +667,15 @@ export class Game {
       }
     }
 
+    // Crocodiles prowl slowly along their lane and wrap around the district.
+    for (const c of this.crocs) {
+      c.pos += c.speed * c.dir * dt;
+      const max = c.vertical ? this.worldH : this.worldW;
+      if (c.pos > max + 60) c.pos = -60;
+      else if (c.pos < -60) c.pos = max + 60;
+      c.phase += dt;
+    }
+
     // Hologram projectors idle-animate (rotation + flicker phase).
     for (const ho of this.holos) ho.phase += dt;
     // Landmark facade-lighting colour cycle.
@@ -821,6 +845,7 @@ export class Game {
     this.drawPlayer(ctx, now);
     this.drawLamps(ctx, camX, camY, w, h);
     this.drawBuildings(ctx, camX, camY, w, h, cx, cy, now);
+    this.drawCrocs(ctx, camX, camY, w, h, now);
     this.drawLandmark(ctx, camX, camY, w, h, now);
     this.drawHolos(ctx, camX, camY, w, h, now);
     this.drawBirds(ctx, camX, camY, w, h);
@@ -1345,6 +1370,74 @@ export class Game {
       ctx.globalAlpha = 0.85;
       ctx.beginPath(); ctx.ellipse(-31, 0, 3, 2.4, 0, 0, TAU); ctx.fill();
       ctx.beginPath(); ctx.ellipse(-31, 6, 3, 2.4, 0, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // Ambient crocodiles seen from the top-down view: a long dark scaly body
+  // with a ridged back, a broad snout with glinting eyes, a tapering tail,
+  // and a faint water wake. Drawn in world space (translated context).
+  drawCrocs(ctx, camX, camY, w, h, now) {
+    for (const c of this.crocs) {
+      const wx = c.vertical ? c.lane : c.pos;
+      const wy = c.vertical ? c.pos : c.lane;
+      const scrX = wx - camX, scrY = wy - camY;
+      if (scrX < -70 || scrX > w + 70 || scrY < -70 || scrY > h + 70) continue;
+      const ang = c.vertical ? (c.dir > 0 ? Math.PI / 2 : -Math.PI / 2) : (c.dir > 0 ? 0 : Math.PI);
+      const sway = Math.sin(c.phase * 2.2) * 0.12;
+
+      ctx.save();
+      ctx.translate(wx, wy);
+      ctx.rotate(ang + sway);
+
+      // water wake around the body
+      ctx.fillStyle = "rgba(120,170,180,0.10)";
+      ctx.beginPath(); ctx.ellipse(0, 0, 34, 12, 0, 0, TAU); ctx.fill();
+
+      // tail (tapers behind), swings opposite the head
+      ctx.strokeStyle = "#1a2a22";
+      ctx.lineWidth = 7;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-14, 0);
+      ctx.quadraticCurveTo(-24, Math.sin(c.phase * 2.2) * 5, -34, Math.sin(c.phase * 2.2) * 9);
+      ctx.stroke();
+
+      // body
+      ctx.fillStyle = "#20342a";
+      ctx.strokeStyle = "#0d1712";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(-2, 0, 18, 7, 0, 0, TAU);
+      ctx.fill(); ctx.stroke();
+
+      // ridged back scutes (two rows)
+      ctx.fillStyle = "#2c4636";
+      for (let i = -3; i <= 3; i++) {
+        const bx = -2 + i * 4.4;
+        for (const off of [-2.4, 2.4]) {
+          ctx.beginPath();
+          ctx.moveTo(bx - 1.6, off);
+          ctx.lineTo(bx, off + Math.sign(off) * -0.2 - Math.sign(off) * 1.2);
+          ctx.lineTo(bx + 1.6, off);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+
+      // head / broad snout
+      ctx.fillStyle = "#243a2e";
+      ctx.strokeStyle = "#0d1712";
+      ctx.beginPath();
+      ctx.moveTo(14, -6);
+      ctx.quadraticCurveTo(30, -3.5, 33, 0);
+      ctx.quadraticCurveTo(30, 3.5, 14, 6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // glinting eyes on top of the head
+      const glint = 0.6 + 0.4 * Math.sin(now * 0.005 + c.phase);
+      ctx.fillStyle = `rgba(255,214,120,${glint})`;
+      ctx.beginPath(); ctx.arc(17, -3.2, 1.4, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(17, 3.2, 1.4, 0, TAU); ctx.fill();
       ctx.restore();
     }
   }
