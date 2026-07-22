@@ -256,3 +256,26 @@ for a one-time **+25**: *"the flagship and her wing, untouchable and exact."*
   bomber escort. The real aircraft, national livery, fighters, and bombers are
   **not** depicted — only the majesty of a flagship in formation was kept, and
   every plane in it is invented and unarmed.
+
+
+## The Eyrie — cliffside cave dwelling (live in the prototype, v1.26)
+
+A hermit's lodge carved into a rock spire on the island's high ground: climb the
+long **ladder** and press **E** to step inside a warm carved cave — a bed under
+a red blanket, a wood stove with an ember glow and a flue, a table of cooking
+pots, a hanging lantern, and a bright window looking out over the valley. Walk
+to the bed and dwell to **rest**: the night passes to a clean dawn and a clear
+head (calms paranoia, clears static, refills breath). First climb pays **+20**,
+first rest **+15**; both persist in the save. Press **E** at the mouth to climb
+back down.
+
+- **Non-lethal, as ever:** there is no fall damage anywhere in the game — you
+  always climb, never fall.
+- **Boundary:** built from an AI-art reel of a cozy cliff cave. **No real place,
+  brand, or person is depicted** — an original island landmark and interior,
+  modelled from engine primitives like every other build.
+- **Interior pockets note (for the record):** the cave interior is a separate
+  world "pocket," and it is placed **inside the world movement clamp (±594 x,
+  ±394 z)** so the player can actually walk to the bed — a lesson learned when
+  the first placement sat outside the clamp and the player was pulled back to
+  the boundary. Future interiors should stay inside those bounds.
