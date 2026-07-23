@@ -1138,3 +1138,22 @@ the ball toward goal with speed-scaled power; struck shots beat the keeper and
 score (ball resets to centre); the undefended end concedes; the ball bounces in
 off the touchline; full time pays out by result and increments the play count;
 zero page errors.
+
+
+## The Red Carpet — paparazzi arrival at the Bassline (live in the prototype, v1.31)
+
+Outside the Bassline club, a **red carpet** with a gold-trim runner, a
+step-and-repeat "NEON HARBOR" backdrop, velvet-rope stanchions, and a line of
+**five photographers** whose camera **flashes pop** — slow when the carpet's
+empty, a frenzy when you walk it (a white key light ramps with the flashes).
+Walk the carpet on foot and dwell to bank a **COVER SHOT**: first walk **+20**,
+and after that the payout **scales with your wardrobe** (dressing up literally
+pays — `+10 + wardrobe tier`). Ties the game's fame/clout economy to its
+existing wardrobe system. Saved.
+
+- **Boundary:** built from an AI glamour reel (a gown, a night street, flashing
+  lights, and a flirty caption). The **suggestive framing, the officer's
+  sidearm, and the third-party AI-generated person are all excluded** — only
+  the wholesome kernel was kept: *arriving somewhere glamorous with cameras
+  flashing.* Original backdrop, carpet, and crowd; no real person, no weapon,
+  broad-audience.
