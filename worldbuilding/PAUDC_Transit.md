@@ -162,3 +162,23 @@ foot for a one-time **+20** ("one island, every line connected").
   listing that game's city names — those are someone else's IP and are **not**
   used. Only the separable idea was kept (the world reads as one connected
   network), rebuilt entirely on PAUDC's own invented lines and places.
+
+
+## The Control Tower — airfield approach radar (live in the prototype, v1.33)
+
+An air-traffic control tower at the Plantin Airways airfield: a glass-cabbed
+tower with a **rotating radar dish** on the roof and an **approach scope** on
+the cab face. The scope sweeps a green radar and plots the island's **own
+aircraft aloft** — the Island Hop on its circuit (H), the Needle on a test run
+(N), Island One overhead (1), the flypast (F) — live, relative to the field.
+Walk up on foot and dwell for **+20** ("the approach scope keeps every friendly
+wing in sight — air traffic, never targets"). It's the air-side companion to the
+sea-side Harbor Watch. Saved.
+
+- **Boundary:** built from an "F-22 Raptor sees enemy jets first" reel (a real
+  fighter, target-lock reticles, enemy radar). The **real aircraft, the weapons,
+  and the enemy-detection are all excluded** — non-lethal floor, and the
+  island's watch doctrine (never targets, never hunts). Only the radar-scope
+  idea was kept, and inverted: the tower tracks **friendly** aircraft for
+  air-traffic safety, never an adversary. All craft on the scope are the game's
+  own fictional aircraft.
