@@ -279,3 +279,19 @@ back down.
   ±394 z)** so the player can actually walk to the bed — a lesson learned when
   the first placement sat outside the clamp and the player was pulled back to
   the boundary. Future interiors should stay inside those bounds.
+
+
+## The Roadworks — a construction zone on the boulevard (live in the prototype, v1.30)
+
+A stretch of torn-up harbour road under repair: a patch of raw asphalt, a line of
+orange jersey barriers along the road edge, cones, a warning sign, a working
+**excavator** (its boom and stick swing slowly, bucket digging), and a **hi-vis
+crew** of four in yellow vests and hardhats. Roll or walk up; dwell on foot near
+the crew for the foreman's wave-through — first visit **+15**, then rotating
+site call-outs ("harbour road resurfacing… new drainage before storm season…
+the island keeps building"). Saved.
+
+- **Boundary:** built from a "GTA.6" fan reel of a torn-up beachfront boulevard.
+  The **GTA branding and the "Vice Point" naming are not used** (Rockstar IP,
+  Rule Zero). A roadworks scene is generic, non-lethal city life — the barriers,
+  excavator, crew, and street are all original, invented for the island.
