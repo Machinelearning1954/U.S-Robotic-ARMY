@@ -193,3 +193,28 @@ render, so the adaptive tier never pays: no rain, no asphalt, or no high tier
 Headless-verified: puddle stays OFF in rain at adaptive tier (cost gate), ON
 at Max tier on wet asphalt, OFF again when skies clear; night crowd and loft
 hologram still animate off their cached heights; zero page errors.
+
+
+## Shipped v1.29 — Performance HUD + anisotropic texture sharpening
+
+Request came in as an RTX-5060 FPS-benchmark reel ("55 FPS / HIGH"). No real
+GPU/brand names ship — the honest, original equivalents do:
+
+- **Performance HUD (comma key):** an on-screen readout of live **FPS +
+  frametime (ms)** and a **quality-tier badge** (ADAPTIVE / MAX FIDELITY /
+  OVERKILL) that reflects the Z-key gfx tier — the game's own benchmark
+  overlay. FPS colour-codes (green ≥50, amber ≥30, red below); the badge
+  recolours per tier. Smoothed instantaneous FPS, updated ~5×/sec.
+- **Anisotropic texture sharpening:** a one-time load pass sets max
+  anisotropy on every mapped texture (73 in the current build), so ground,
+  roads, and water stay crisp at grazing angles instead of blurring — a real,
+  cheap clarity win at essentially no runtime cost.
+
+Together with the existing tiers, the graphics-boost story is now: **Z** cycles
+Adaptive→Max→OVERKILL (supersampling + 8K shadows, v1.21), wet-street mirror
+puddles at Max+ (v1.22), and the **comma** HUD lets you watch the FPS/quality
+tradeoff live like a benchmark.
+
+Headless-verified: 73 textures upgraded at load; comma toggles the HUD (FPS +
+ms + tier badge render); cycling Z flips the badge to OVERKILL; `st().fps`
+populates; 0 page errors.
