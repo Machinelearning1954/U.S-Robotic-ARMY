@@ -295,3 +295,22 @@ the island keeps building"). Saved.
   The **GTA branding and the "Vice Point" naming are not used** (Rockstar IP,
   Rule Zero). A roadworks scene is generic, non-lethal city life — the barriers,
   excavator, crew, and street are all original, invented for the island.
+
+
+## The Skylanes & the Marina — "year 2150" (live in the prototype, v1.34)
+
+Two original layers that give the harbour its future-city feel, straight from a
+"traffic flies and luxury floats" vision:
+
+- **The Skylanes:** a persistent stream of **ten flying craft** cruising elliptical
+  lanes high over the district at dusk — sleek hulls, glowing cyan engines that
+  pulse, each on its own orbit and speed. Ambient, always aloft. Stand downtown
+  on foot and look up for a one-time **+20** ("year-2150 traffic streaming over
+  the harbour — the island flies now").
+- **The Marina:** a cluster of **eight moored luxury yachts** in two dock rows on
+  the golden bay water, each with an underglow in a different neon, linked by
+  timber docks. Come close for **+10** ("where luxury floats"). Both saved.
+
+- **Boundary:** built from an AI futuristic-city reel — fully fiction-safe, no
+  IP, no real place, no people, no weapons. Every craft, yacht, and dock is
+  original, built from engine primitives.
