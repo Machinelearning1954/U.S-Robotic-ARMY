@@ -712,3 +712,21 @@ weather, not on you."* First visit **+20**; saved.
   ("watches WITH you, never AT you"). What was kept is only the silhouette, and
   the "rifle" is re-cast as a **spotting scope** that reads the sky and the
   harbour, never a person. Original design, no IP, no real person.
+
+
+## The Strength Trial — the island corps' PT yard (live in the prototype, v1.32)
+
+A packed-earth training yard flying the **island flag** (black-green-gold) where
+the island's own service corps drills. A squad stands at attention in two ranks,
+and a **demonstrator pair** performs the signature feat: one recruit holds a
+plank balanced on three bottles while a partner sits on their back. Walk up on
+foot and dwell to attempt it — hold the form and pass for **+25** ("island
+strong: you carry each other"), then rotating drill-sergeant lines.
+
+- **Boundary:** built from a military-recruit drill reel showing a **real army
+  and national flag**. No real armed forces or flags are depicted — not the one
+  in the clip, and **not the real US or Jamaican militaries** named in the
+  request. It's rendered entirely as the island's **own fictional non-lethal
+  corps (PAUDC)** in the black-green-gold colorway; the fatigues are plain olive
+  with a gold accent, not real camouflage. Only the **fitness feat** was kept —
+  no weapons, no real service depicted.
