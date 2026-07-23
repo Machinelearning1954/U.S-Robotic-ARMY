@@ -694,3 +694,21 @@ people. What ships is the non-lethal inversion of all three:
 All three persist in the save. Headless-verified: scopes plot the four real
 vessel positions, storm mode redraws clean, all three dwell rewards pay, the
 hologram animates, zero page errors.
+
+
+## The Nightjar — rooftop watch-bot over the skyline (live in the prototype, v1.28)
+
+A sleek black watch-bot kneeling on a stone ledge on the high ground, a glowing
+blue visor-slit under its helm, a long **survey scope** on a monopod that slowly
+**pans the horizon**. Walk up on foot and it shares a **night-watch read** — a
+line about the live world it's watching (towers lit or day-hazed, rain on the
+glass, a flight crossing west, a flock threading the towers) — and closes every
+report the same way: *"nothing moving that shouldn't — the watch is on the
+weather, not on you."* First visit **+20**; saved.
+
+- **Boundary:** built from a reel of a combat robot kneeling with a **sniper
+  rifle** ("you never see it coming"). The **weapon and the assassin framing
+  are removed entirely** — non-lethal floor, and the island's watch doctrine
+  ("watches WITH you, never AT you"). What was kept is only the silhouette, and
+  the "rifle" is re-cast as a **spotting scope** that reads the sky and the
+  harbour, never a person. Original design, no IP, no real person.
