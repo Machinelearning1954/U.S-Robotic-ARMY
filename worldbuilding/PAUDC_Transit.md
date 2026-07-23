@@ -112,6 +112,16 @@ your hold while a repair meter fills over a few seconds. Seal it and you bank cl
   canopy instead) — two very different ways to leave, or work on, the same plane.
 
 
+
+**Engine-bay upgrade (v1.27):** the fuselage now carries an **openable engine
+bay** right where you work. Start the sky-rig and a hinged hatch **lifts open**
+to reveal a glowing engine core and ducting; button it up and the hatch settles
+back flush. Built after a near-identical reel ("is he really fixing a Harrier
+mid-air?") — same boundary as the original: the source showed a **real military
+aircraft**, which the rules don't allow, so only the *idea* (an open-engine
+in-flight repair) was kept and rendered on PAUDC's **own fictional airliner**.
+No real aircraft, weapon, or procedure depicted.
+
 ## The Sea Puss — Reef School research submersible (live in the prototype, v0.84)
 
 The Reef School's own **unarmed research submersible**, moored at a green buoy in
