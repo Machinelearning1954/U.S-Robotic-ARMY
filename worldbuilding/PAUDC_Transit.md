@@ -182,3 +182,21 @@ sea-side Harbor Watch. Saved.
   idea was kept, and inverted: the tower tracks **friendly** aircraft for
   air-traffic safety, never an adversary. All craft on the scope are the game's
   own fictional aircraft.
+
+
+## The Low Pass — an air-show flypast over the carrier (live in the prototype, v1.36)
+
+A recurring spectacle over the island's fictional carrier: an **unarmed
+flying-wing display craft** comes screaming in from one side and makes a
+**dramatic low pass** the length of the deck — dipping to a few metres off the
+steel at the centre, faint blue underglow, a low rumble through the Soundring as
+it howls overhead — then pulls away. It only runs when someone's near enough to
+see it, and rearms on a cooldown so it stays an event. Watch it from the carrier
+deck (or nearby) for a one-time **+25** ("pure spectacle, no teeth"). Saved.
+
+- **Boundary:** built from a B-2-Spirit-low-pass-over-a-carrier clip. The **B-2
+  (a real bomber), the real carrier, and any weapons are all excluded** —
+  non-lethal floor, no real aircraft, no real service. It's the island's OWN
+  unarmed display wing (no markings, no bomb bay) over its OWN fictional carrier
+  (which already ships with no classified internals). Only the air-show
+  *spectacle* of a low pass was kept.
