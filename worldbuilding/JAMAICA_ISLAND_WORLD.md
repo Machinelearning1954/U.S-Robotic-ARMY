@@ -314,3 +314,19 @@ Two original layers that give the harbour its future-city feel, straight from a
 - **Boundary:** built from an AI futuristic-city reel — fully fiction-safe, no
   IP, no real place, no people, no weapons. Every craft, yacht, and dock is
   original, built from engine primitives.
+
+
+## The Bamboo Raft — misty reed-inlet river phantom (live in the prototype, v1.37)
+
+A quiet reed inlet on the shoreline: a **bamboo-pole raft** bobs on the water,
+ringed by tall bamboo and reed stalks, with a **heron** working the shallows
+nearby. On the raft, draped in foliage, kneels the **River Phantom** — a
+naturalist blended into the reeds with a **monocular** to the mist. Stand on the
+bank and dwell for **+20** ("counts the wild, never a soul"), then rotating
+nature notes (a kingfisher takes a fish, dragonflies stitching the mist). Saved.
+
+- **Boundary:** built from a "Bamboo River Phantom" reel — a ghillie **sniper**
+  on a raft. The **rifle and the sniper/assassin framing are removed** (non-lethal
+  floor), and the figure is re-cast per the island's watch doctrine: a wildlife
+  watcher with a **monocular, not a weapon**, who observes the river's life and
+  never a person. Original raft, reeds, heron, and figure.
