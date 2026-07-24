@@ -218,3 +218,28 @@ tradeoff live like a benchmark.
 Headless-verified: 73 textures upgraded at load; comma toggles the HUD (FPS +
 ms + tier badge render); cycling Z flips the badge to OVERKILL; `st().fps`
 populates; 0 page errors.
+
+
+## Shipped v1.35 — Mobile playability (touch controls for phones)
+
+Request framed as "a digital PS5 to run this on Android Fold 6 / iPhone 16."
+Honest scope: you can't conjure console hardware, and you don't need to — WebGL
+runs fine on those phones. What was actually missing was **playable touch
+input**. The game already had movement pads and a coarse-pointer media query
+that reveals them; it was missing the two make-or-break actions:
+
+- **E button (board / enter / interact)** — dispatches a real key event so every
+  existing keydown handler fires; without it you couldn't get into any of the
+  11 vehicles or any building on a phone.
+- **SPACE button (dive / hold)** — held via the keys map like movement, so
+  free-diving works with a press-and-hold.
+
+Both auto-appear on touch devices (thumb row above forward/back). The existing
+mobile perf path is unchanged and adequate: MSAA off on mobile user-agents,
+device-pixel-ratio capped, and the adaptive down-scaler protects weak frames —
+so a Fold 6 / iPhone 16 runs it smoothly. Higher-end phones can still push the
+Z-key tiers.
+
+Headless-verified on an emulated phone (hasTouch, 412×915, DPR 3): the E, SPACE,
+move, and foot buttons all render (display:block) under a coarse pointer; the E
+button boards a vehicle; the SPACE button dives and releases back up; 0 errors.
