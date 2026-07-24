@@ -200,3 +200,19 @@ deck (or nearby) for a one-time **+25** ("pure spectacle, no teeth"). Saved.
   unarmed display wing (no markings, no bomb bay) over its OWN fictional carrier
   (which already ships with no classified internals). Only the air-show
   *spectacle* of a low pass was kept.
+
+
+## The Trap — arrested carrier landing you summon from the deck (live in the prototype, v1.38)
+
+Stand on the island carrier's flight deck and a **trainer flies the approach**:
+it comes in from astern down the glideslope, the LSO calling the ball ("ROGER
+BALL, on glideslope… a little power… CUT! HOOK DOWN — TRAP, three-wire"), and
+catches the wire on the deck. First perfect trap pays **+25** (saved); dwell on
+the deck again to watch another approach. Pairs with the Low Pass (v1.36) to give
+the roamable carrier real flight-deck life.
+
+- **Boundary:** built from a "perfect fighter-jet carrier landing" POV reel (a
+  **real US Navy carrier + fighter**). The real carrier, the real jet, and any
+  weapons are all excluded — it runs on the island's OWN fictional carrier with
+  an original, unmarked, unarmed trainer. Only the *spectacle of an arrested
+  landing* was kept; the non-lethal floor holds.
