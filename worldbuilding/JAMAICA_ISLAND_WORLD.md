@@ -330,3 +330,19 @@ nature notes (a kingfisher takes a fish, dragonflies stitching the mist). Saved.
   floor), and the figure is re-cast per the island's watch doctrine: a wildlife
   watcher with a **monocular, not a weapon**, who observes the river's life and
   never a person. Original raft, reeds, heron, and figure.
+
+
+## The Sail — original sail-tower on its own islet (live in the prototype, v1.39)
+
+The harbour's new marquee landmark: an original **sail-shaped luxury tower** on
+its own **artificial islet**, reached by a causeway. A tall billowing white
+shell with a deep-blue glass front, a mast peak with a blinking red aviation
+beacon, and a **cantilevered helipad with a gold "H"** — trimmed in the island's
+green-and-gold colorway. A photo-mode magnet and a skyline signature. Come near
+(walk the causeway, or arrive by boat) for **+20** ("luxury isn't a place; it's
+the view"). Saved.
+
+- **Boundary:** built from a Burj-Al-Arab-from-above reel. **The Burj Al Arab is
+  a real, trademarked building and is NOT reproduced** — only the *archetype* of
+  a sail-shaped hotel on a private islet was kept, rebuilt with original
+  proportions and the island's own colorway. No real place or building depicted.
