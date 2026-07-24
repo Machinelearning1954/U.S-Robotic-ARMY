@@ -461,4 +461,30 @@
   window.addEventListener("load", () => {
     if (window.instgrm && window.instgrm.Embeds) window.instgrm.Embeds.process();
   });
+
+  // ---- GTA VI live countdown (integrated from the Field Report reel) -----
+  // Ticks down to the Vice City release date shown in the reel.
+  const GTA6_RELEASE = new Date(2026, 10, 19, 0, 0, 0); // month is 0-based: 10 = November
+  const cd = {
+    days: document.getElementById("cd-days"),
+    hours: document.getElementById("cd-hours"),
+    mins: document.getElementById("cd-mins"),
+    secs: document.getElementById("cd-secs"),
+  };
+  const pad2 = (n) => String(n).padStart(2, "0");
+  function tickCountdown() {
+    if (!cd.days) return;
+    let diff = Math.max(0, GTA6_RELEASE.getTime() - Date.now());
+    const dayMs = 86400000;
+    const days = Math.floor(diff / dayMs); diff -= days * dayMs;
+    const hours = Math.floor(diff / 3600000); diff -= hours * 3600000;
+    const mins = Math.floor(diff / 60000); diff -= mins * 60000;
+    const secs = Math.floor(diff / 1000);
+    cd.days.textContent = days;
+    cd.hours.textContent = pad2(hours);
+    cd.mins.textContent = pad2(mins);
+    cd.secs.textContent = pad2(secs);
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
 })();

@@ -5,7 +5,9 @@ and hold the line against five escalating waves of enemy drones.
 
 The Instagram reel is integrated directly into the game:
 
-- **Briefing screen** — the reel plays as the pre-mission "Field Report."
+- **Briefing screen** — a **live GTA VI countdown** (Vice City neon styling)
+  ticks down in real time to the release date shown in the reel,
+  **November 19, 2026**, above the embedded "Field Report" reel.
 - **End screen** — the reel is offered again as a post-mission replay.
 
 Reel: <https://www.instagram.com/reel/DayWHhDOIG3/>
