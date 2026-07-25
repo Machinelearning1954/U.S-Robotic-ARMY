@@ -173,3 +173,14 @@ Jamaican honorific) works behind it in his yellow hat, tool-arm bobbing, a spinn
   carried only a profile name, no viewable frame, so nothing was copied and **no
   real person is depicted** — Maas Jack is an original character built from the
   generic idiom alone. All meshes from primitives; patois written original.
+
+### Maas Jack — Trade Trials (interactive progression, v1.54)
+
+Maas Jack is no longer just flavour: hang around his stall on foot and **he puts you
+to work**, apprenticing you through one trade per session — **mechanic, barber,
+carpenter, fisherman, sound-man** (+8 each, tracked as `tradesLearned` n/5). Learn
+all five and you become the **MASTER OF ALL TRADES** (+40) — his spinning sign turns
+gold to mark it. First meet still greets you (+25). The whole loop persists in the
+save. It's the interactive payoff of the "Jack of All Trades" idea: not watching one
+man do everything, but *becoming* him. Still an original character built from the
+generic idiom only — no real person depicted.
