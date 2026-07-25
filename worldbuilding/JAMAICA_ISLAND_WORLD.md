@@ -346,3 +346,24 @@ the view"). Saved.
   a real, trademarked building and is NOT reproduced** — only the *archetype* of
   a sail-shaped hotel on a private islet was kept, rebuilt with original
   proportions and the island's own colorway. No real place or building depicted.
+
+
+## The Future District batch — Welcome Plaza & Sea Tube (live in the prototype, v1.40)
+
+Two builds from a trio of AI future-city reels (robot greeters in a grand
+plaza / a golden holo street with glowing trees / an underwater city):
+
+- **The Welcome Plaza:** a pale plaza pad at the district's edge where **two
+  polished greeter robots** flank the walk — glowing visors, chest lights, and
+  **waving arms** — under an animated **LED wall** scrolling greetings
+  ("WELKOM · BIENVENIDO · AKWABA"), with six **glowing trees** lining the
+  approach. Walk between the greeters for **+15**; the sign-off is doctrine:
+  *"they hold the door, never the data."* Greet, never scan.
+- **The Sea Tube:** on the seabed of the dive waters, a **glass transit tube**
+  on legs with ring ribs, a **lit shuttle gliding** its length back and forth,
+  ending at a **glass dome settlement** glowing warm on the sea floor.
+  Free-dive down near the line (SPACE to dive) for **+20** — "the future runs
+  underwater." A destination for the island's divers, near the wreck fields.
+
+Both saved. Boundary: all three reels are AI concepts — no real place, brand,
+person, or weapon; every structure and robot is original, from primitives.
