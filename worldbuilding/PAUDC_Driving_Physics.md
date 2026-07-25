@@ -193,3 +193,20 @@ tuning.
 Headless-verified: boards with E, SHIFT lights the burn (flame visible, meter
 drains), releasing recharges the spool, first burn pays +15; part of the v1.25
 full-functionality sweep (14/14 checks, 0 page errors).
+
+
+## The Pearl — luxury water-limousine with a cabin POV (live in the prototype, v1.49)
+
+A pearl-white luxury sedan that runs **land AND sea** — parked on the harbour
+front, board it with **E**. Triple **stern thrusters** with amber flame cones
+fire when you open it up on the water (throttle + water + speed), and it skims
+the bay near full speed (wacc 30 / wmax 32). Its trick over the Flying Fish and
+Comet is the **crafted white-leather cabin you actually sit in**: press **V**
+for first-person and the interior renders — white dash, twin teal screens, a
+chromed wheel, quilted seats, roof rails. First ride pays **+15** ("ride it like
+money"). Saved.
+
+- **Boundary:** from a luxury-sedan-skims-Hong-Kong reel of a **real-brand
+  Maybach**. The **make and badge are not depicted** (Rule Zero) and the place
+  is fictionalised; the Pearl is an original shape. It's the fusion the roster
+  didn't have — a road car with a real interior that's also a boat.
