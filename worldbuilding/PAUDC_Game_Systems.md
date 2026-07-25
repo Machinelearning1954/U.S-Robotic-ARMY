@@ -1176,3 +1176,20 @@ all six for **+30 — "BUSH & BENCH."** Saved; restored saves re-light the LEDs.
   miracle claims on this bench; just careful science."** The lab honours the
   real Caribbean bush-medicine tradition with respect, invented characters,
   and original models.
+
+
+## The Echo Table — how shape steers waves (live in the prototype, v1.47)
+
+A district science exhibit: a dark wave-lab table where an **emitter dish**
+sends glowing wave rings at two shapes side by side. At the **FLAT PLATE** lane
+the rings hit and **bounce straight back** to the source; at the **FACETED
+WEDGE** lane they hit and go **scattering off-axis**, tilting and fading into
+nothing. Two labelled fates, running forever. Dwell for **+20** — *"flat gives
+the wave straight back; angles send it elsewhere. Shape steers waves."* Saved.
+
+- **Boundary:** from a "science of stealth / why the B-2 doesn't reflect radar"
+  explainer. The **B-2 (a real bomber) and the military-stealth framing are
+  excluded** — no aircraft appears at all. Only the pure wave physics was kept,
+  as an exhibit in the island's science row ("physics, not magic"). On the
+  "GTA-6-level graphics" note: the exhibit's glow rings ride the existing
+  pipeline — bloom, and the Z-key Adaptive → Max → OVERKILL supersampling tiers.
