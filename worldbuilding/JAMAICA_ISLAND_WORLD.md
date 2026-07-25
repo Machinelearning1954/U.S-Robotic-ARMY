@@ -403,3 +403,18 @@ Rotors idle slow between runs and blur fast in flight. Dwell at the post for
   humanitarian kernel (the high-altitude medical drone), as Green Cross canon.
   The two masts fly the **island colourway and Alexandria's pennant** — the
   world's own stand-ins for the two-flag request, per the Twin Harbors Accord.
+
+
+## The Reef Room — the Sail's underwater suite (live in the prototype, v1.46)
+
+The Sail gets its signature room: a **DIVE LIFT hatch on the islet** drops you
+into a warm concrete suite whose **entire east wall is glass into a living
+reef** — nine coral heads, five fish crossing the pane in slow arcs, blue reef
+light through the water, and a warm caustic shimmer playing on the ceiling. Low
+platform bed with a rumpled duvet; a shelf niche with a vase. First descent
+**+20**; **rest on the bed** to pass the night ("slept under the sea — woke to
+fish crossing the glass", first rest **+15**). E at the door rides you back up.
+Both saved. Interior pocket placed inside the world clamp (the v1.26 lesson).
+
+- **Boundary:** from an underwater-bedroom concept reel — no real hotel, brand,
+  or place; the suite, reef, and fish are original, from primitives.
