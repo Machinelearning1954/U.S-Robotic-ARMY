@@ -418,3 +418,18 @@ Both saved. Interior pocket placed inside the world clamp (the v1.26 lesson).
 
 - **Boundary:** from an underwater-bedroom concept reel — no real hotel, brand,
   or place; the suite, reef, and fish are original, from primitives.
+
+
+## The Current Farm — the island's clean-energy district (live in the prototype, v1.48)
+
+West of the district, the thing that powers all that neon: **four offshore wind
+turbines** standing in the bay with blades turning, a **circular solar fan** —
+three rings of tilted panels — around a faceted **grid tower** whose three
+charge bands **pulse light upward** like current climbing. Walk to the tower's
+base for **+20** — *"wind off the bay, sun off the fan, charge climbing the
+tower. The neon runs clean; nothing burns."* Saved.
+
+- **Boundary:** from a "futuristic cities" clean-energy reel; the real-place
+  framing is fictionalized as always. Turbines, panels, and tower are original,
+  from primitives. Purely civil infrastructure — the harbour's lights finally
+  have a source.
