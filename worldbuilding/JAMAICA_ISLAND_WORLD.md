@@ -433,3 +433,29 @@ tower. The neon runs clean; nothing burns."* Saved.
   framing is fictionalized as always. Turbines, panels, and tower are original,
   from primitives. Purely civil infrastructure — the harbour's lights finally
   have a source.
+
+## Anansi's Lantern — the settled sub, now a reef (live in the prototype, v1.50)
+
+Out in the deep dive waters east of the harbour (around **150, -250**, on a seabed
+about **17 units down**), a long dark hull has come to rest on the sand: **Anansi's
+Lantern**, a retired **deep-survey submersible** that was deliberately sunk to seed
+an artificial reef. Free-dive down to it (on foot, in the water, hold dive) and the
+harbour marks the find — **+20**, once.
+
+- **What's down there:** a capsule hull with a rounded bow and stern, a deck casing
+  and conning-tower sail, a couple of masts, a four-bladed survey screw — and a
+  **warm running lamp still burning** on the sail, throwing light into the dark. The
+  **coral took it back**: reef blooms cling all along the hull, silt drifts around
+  the base, and bubbles rise off the deck and fade as they climb. It reads exactly
+  like the reel that inspired it — *a submarine settled onto the seabed* — but it is
+  a wreck the sea made peaceful, not a machine at work.
+- **Where it fits:** joins the underwater layer — the Sea Tube, the Reef Room, the
+  coral tunnel — as a free-dive landmark for divers who go looking in the deep.
+- **Boundary:** the reference was an **Operation Ivy Bells / USS Halibut** reel — a
+  **real Navy submarine** on a **real Cold-War operation to tap undersea comms
+  cables**. All of that is **out**: no real military vessel, no military framing, and
+  **no surveillance** (the island watches *with* you, never *at* you — a spy sub that
+  taps cables is the exact opposite of the doctrine). What's kept is only the *image*
+  — a hull at rest on a dark seabed, a light still glowing, silt and bubbles. Ours is
+  an original, retired **civil survey** submersible turned reef and dive attraction.
+  No weapons, no tapping, no real names; every mesh built from primitives.
