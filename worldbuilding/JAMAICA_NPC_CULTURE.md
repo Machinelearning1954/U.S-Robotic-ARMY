@@ -155,3 +155,21 @@ generation family compound where **Sunday dinner never ends**:
 - **Boundary:** entirely warm and non-lethal; a celebration of big family-oriented
   Jamaican life. All figures are generic original NPCs (no real person depicted),
   every mesh built from primitives, patois lines written original for the world.
+
+## Maas Jack — the Jack of All Trades (roadside NPC, live in the prototype, v1.53)
+
+By the harbour town (**-40, 60**) stands **Maas Jack's** trade-stall — a counter
+under a zinc awning with a backboard hung with the tools of a dozen trades: wrench,
+comb, paintbrush, fishing rod, guitar, hammer, cook-pot. Maas Jack ("Maas" is the
+Jamaican honorific) works behind it in his yellow hat, tool-arm bobbing, a spinning
+"trade of the day" sign over the awning.
+
+- **What it does:** pass by on foot and he claims every job on the island — one man,
+  every trade. First meet **+25**; after that he calls out his services in patois on
+  a loop ("Engine a gi' yuh trouble? Maas Jack fix it." / "Whatever yuh need, me is
+  di Jack of all trades."). A warm bit of island street life and a nod to the
+  everyman hustler.
+- **Boundary:** the reference was a social "Jack of All Trades" handle; the embed
+  carried only a profile name, no viewable frame, so nothing was copied and **no
+  real person is depicted** — Maas Jack is an original character built from the
+  generic idiom alone. All meshes from primitives; patois written original.
