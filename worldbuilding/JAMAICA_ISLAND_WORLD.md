@@ -384,3 +384,22 @@ lines. Saved.
   it **at home in the island's own mountains**. The robots are farming arms —
   nothing armed, nothing watching people. Original dome, benches, plants, and
   arms, from primitives.
+
+
+## The Range Rescue — high-altitude medevac drone post (live in the prototype, v1.44)
+
+Up in the Blue Range near the grow-dome: a white rescue hut with a green cross,
+a marked drone pad, and a **six-rotor medevac drone** that runs a perpetual
+supply cycle — spin-up, lift to altitude, fly the high line downslope, **lower a
+yellow medical crate on a winch** into a gold drop ring, raise, return, land.
+Rotors idle slow between runs and blur fast in flight. Dwell at the post for
+**+20** ("supplies down, nobody armed"). Saved.
+
+- **Boundary:** from a defense-account batch (armed troops with a rescue drone;
+  a nuclear submarine; real flags — request asked to re-flag with Jamaican +
+  American flags). The **weapons, the real militaries, and all real flags are
+  excluded** — and re-flagging real hardware to other real nations is still
+  real-nation military content, which this world doesn't do. Kept only the
+  humanitarian kernel (the high-altitude medical drone), as Green Cross canon.
+  The two masts fly the **island colourway and Alexandria's pennant** — the
+  world's own stand-ins for the two-flag request, per the Twin Harbors Accord.
