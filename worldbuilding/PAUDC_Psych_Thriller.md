@@ -297,3 +297,42 @@ rebuild contradicts what you thought you knew. No film content is depicted.
   real therapy, technique, drug, diagnosis, or institution.
 - **Non-lethal, merciful resolution** — same power-fantasy floor as the rest of the
   game; the twist heals rather than punishes.
+
+---
+
+## The Listening Booth & The Yard — the twist you can walk into (live in the prototype, v1.51)
+
+The Static Hour's central turn — *the man in the static is you* — is now a **place**
+in the world, and its cure is now a **family**.
+
+On a lonely harbour edge (around **-153, -14**), a dead **listening booth** stands
+wired to the Numbers Station: a narrow glass box, a bare bulb, an old speaker grille,
+a black mirror on the back wall. A few steps away (**-146, -22**) is **The Baptiste
+Yard** — a big, warm, family-oriented gathering: a pot on the fire, dominoes on the
+table, and **eight kin** (elders, aunties, youth) around it in bright cloth, the
+warm lamp throwing gold across the sand.
+
+**The beat (one-time story discovery):** come to the booth **on foot, alone, after
+dark**. The dead speaker wakes and the station **reads your own life back at you** —
+lines composed live from *your* playthrough (your clout, that you rode the Pearl,
+that you dove to the Lantern, the harbour secrets you learned). Then **The Double**
+fades in behind the glass: a pale, still figure wearing your own silhouette. The
+turn lands — *the one standing in the static wears your face; he always did.* What
+breaks it is not a weapon. **The Yard pulls you back**: Auntie Blades calls your
+name, the pot's still warm, the whole family is right there. You come to the table.
+**+25**, once.
+
+- **Mechanical payoff (`metStatic`):** having met the Static Man and been pulled home
+  by kin, the arc's grip loosens **permanently** — in the Static Hour mode, paranoia
+  now builds noticeably slower (gain 0.17 → 0.115). The story beat literally changes
+  how the survival mode plays. In daylight the booth is dead and says so; the station
+  only speaks at night.
+- **Family as the theme, not decoration:** the whole arc's rule is that PAUDC's
+  warmth is your defense — crowds, music, kitchens, kin quiet the static. The Yard
+  makes that literal and gives the psychological thriller a distinctly Jamaican
+  heart: the thing that beats the cold is a big family at a full table.
+- **Boundary:** pure tension, zero gore, non-lethal. The Double never attacks and
+  cannot be fought; it simply *is*, then it lifts. No real broadcast, technique,
+  agency, or person — the Numbers Station and the Static Man are invented plot
+  devices, consistent with the arc's original canon. Every mesh is built from
+  primitives; no real people are depicted (the kin are generic original figures).
