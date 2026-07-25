@@ -747,3 +747,20 @@ on foot for **+15** ("pennants, not weapons"), then rotating protocol lines
   (other games' IP; non-lethal floor). The scene is re-cast as canon diplomacy:
   the Twin Harbors Accord's envoy arriving, met by an **unarmed ceremonial
   guard**. Original jet, robots, and characters.
+
+
+## The Storm Walkers Parade — readiness march on the boulevard (live in the prototype, v1.45)
+
+On a rolling schedule, the island's **Storm Walkers** — the hurricane-response
+robots, canon since v0.90 — leave the yard and **parade the harbour boulevard**
+in a five-strong wedge: heavy legs swinging in step, gold service bands, blue
+visors, **hands empty**. It's a readiness drill and the town treats it like a
+show. Catch the march from the kerb for **+20** ("hands empty, ready for
+weather"). The parade only runs when someone's near enough to see it, then
+rests and re-arms. Saved.
+
+- **Boundary:** built from an "Army Robotic Soldier / Future War Technology"
+  reel of combat robots **firing rifles**. The weapons, the combat, and the
+  real-army framing are **all excluded** — the same ruling as every armed-robot
+  request in this project. Only the marching-formation spectacle was kept, on
+  the island's own non-lethal response machines. Empty hands, by design.
