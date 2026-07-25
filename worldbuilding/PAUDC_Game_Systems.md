@@ -1157,3 +1157,22 @@ existing wardrobe system. Saved.
   the wholesome kernel was kept: *arriving somewhere glamorous with cameras
   flashing.* Original backdrop, carpet, and crowd; no real person, no weapon,
   broad-audience.
+
+
+## The Bush Lab — botanical discovery & healing research (live in the prototype, v1.42)
+
+The island's **ethnobotany lab**: a green-roofed open pavilion over six raised
+beds, each growing one of the island's healing plants — **cerasee, soursop
+leaf, ginger root, moringa, guinea hen weed, sea moss** — with a bench of
+flasks and a centrifuge where **the elder and the botanist work one table**.
+Walk the beds on foot and dwell at each to read it (its LED goes teal); read
+all six for **+30 — "BUSH & BENCH."** Saved; restored saves re-light the LEDs.
+
+- **Boundary & tone:** from a "scientists study traditional healing plants"
+  carousel. The account's branding is excluded — and so are **overhyped cure
+  claims** (the source's "kills 95% of cancer cells" framing is exactly what
+  this game won't sell). Every bed note is measured — "brewed for generations;
+  the lab is charting why" — and the completion line says it outright: **"no
+  miracle claims on this bench; just careful science."** The lab honours the
+  real Caribbean bush-medicine tradition with respect, invented characters,
+  and original models.
