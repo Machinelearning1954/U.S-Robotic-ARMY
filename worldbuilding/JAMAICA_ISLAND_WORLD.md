@@ -367,3 +367,20 @@ plaza / a golden holo street with glowing trees / an underwater city):
 
 Both saved. Boundary: all three reels are AI concepts — no real place, brand,
 person, or weapon; every structure and robot is original, from primitives.
+
+
+## The Blue Range Dome — high-mountain robot grow-house (live in the prototype, v1.43)
+
+Up on the island's high range (its fictionalized Blue Mountains — coffee
+country), a **geodesic grow-dome**: a transparent shell with a wireframe
+lattice, three hydroponic benches of greens, a row of **coffee shrubs with red
+cherries**, and **three white robot arms** that sweep and tend the beds all day
+— shoulder, elbow, and gripper articulating on their own rhythms. Walk in on
+foot for **+20** ("the mountain feeds the harbour"), then rotating grower's-log
+lines. Saved.
+
+- **Boundary:** from a "what will humanity eat on Mars?" greenhouse reel. The
+  Mars framing and the account's branding are excluded; the request re-rooted
+  it **at home in the island's own mountains**. The robots are farming arms —
+  nothing armed, nothing watching people. Original dome, benches, plants, and
+  arms, from primitives.
