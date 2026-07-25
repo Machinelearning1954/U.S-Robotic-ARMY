@@ -132,3 +132,26 @@ the existing reactive behaviors (scatter from a fast passing vehicle, the BII
 "unsolicited attention" report if the player tails someone too long) so street
 life reads as reacting to the world, not just looping a path. Fully original
 ambient behavior; no real person depicted.
+
+## The Big Yard — First Sunday (family homestead, live in the prototype, v1.52)
+
+The warmest place on the island, and the deliberate opposite of the Static Hour's
+cold booth. On flat ground north of the harbour (**90, 140**) sits a three-
+generation family compound where **Sunday dinner never ends**:
+
+- **Who's there:** **Granny at the pot** (the white-clad elder tending the fire),
+  **elders rocking on the veranda**, a full set of **aunties, uncles and parents**
+  standing round the table and the stove, four adults deep in a **dominoes** game on
+  the green table, and a **yard full of pickney and cousins** — five kids running
+  little loops after a red ball. Warm string lights, a speaker drifting music notes,
+  a table piled with dishes (rice & peas, curry, plantain, callaloo, festival,
+  sorrel).
+- **What it does:** walk in on foot and the family **welcomes and claims you** — you
+  eat and you're made **IRIE** (calm hands: the wanted meter cools twice as fast) and
+  **WELL FED** (the small speed boost). First visit **+30**; after that every visit
+  re-greets you in patois and keeps you irie. This is the game's thesis made a
+  landmark: *family warmth is your strength.* It's also the antidote pole to the
+  psych-thriller — the Static Hour's grip is what the Yard exists to break.
+- **Boundary:** entirely warm and non-lethal; a celebration of big family-oriented
+  Jamaican life. All figures are generic original NPCs (no real person depicted),
+  every mesh built from primitives, patois lines written original for the world.
