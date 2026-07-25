@@ -730,3 +730,20 @@ strong: you carry each other"), then rotating drill-sergeant lines.
   corps (PAUDC)** in the black-green-gold colorway; the fatigues are plain olive
   with a gold accent, not real camouflage. Only the **fitness feat** was kept —
   no weapons, no real service depicted.
+
+
+## The Envoy — a state arrival on the apron (live in the prototype, v1.41)
+
+On the airfield apron, the **Alexandria envoy's private jet** sits with its
+airstair down: a sleek white bizjet (swept wings, T-tail, aft nacelles), two
+dignitaries at the foot of the steps — the island's rep and the envoy — and a
+**receiving ring of six ceremonial robots**, polished shells with glowing
+visors, each bearing a **pennant staff** in the two harbours' colours. Walk up
+on foot for **+15** ("pennants, not weapons"), then rotating protocol lines
+("the Accord holds: storms shared, rescues shared, nothing armed"). Saved.
+
+- **Boundary:** from a "GTA Dubai Online PUBG Style" reel of SWAT robots with
+  rifles guarding a jet. The **GTA/PUBG branding and the rifles are excluded**
+  (other games' IP; non-lethal floor). The scene is re-cast as canon diplomacy:
+  the Twin Harbors Accord's envoy arriving, met by an **unarmed ceremonial
+  guard**. Original jet, robots, and characters.
