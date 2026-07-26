@@ -1193,3 +1193,42 @@ the wave straight back; angles send it elsewhere. Shape steers waves."* Saved.
   as an exhibit in the island's science row ("physics, not magic"). On the
   "GTA-6-level graphics" note: the exhibit's glow rings ride the existing
   pipeline — bloom, and the Z-key Adaptive → Max → OVERKILL supersampling tiers.
+
+## The Marquee — your own channel, in-world (live in the prototype, v1.63)
+
+A drive-in screen in the harbour (**-30, 90**): a 28m screen on a steel frame with
+legs, speaker posts, benches and a cool wash of light. Dwell nearby for **+20**, and
+press **E** to open the channel.
+
+### The hard constraint, stated once so nobody re-litigates it
+
+**A YouTube or Facebook video cannot be painted onto a 3D surface.** Their streams are
+CORS-locked, and both platforms' terms require playback through their official embed
+player — so there is no lawful *or* technically working way to pull those pixels into a
+WebGL texture. Any "solution" that claims otherwise breaks their ToS and fails in the
+browser anyway. What the Marquee does instead are the two legitimate routes:
+
+1. **First-party clips play on the screen for real.** Point `MEDIA.clip` at a video you
+   own — a file next to the HTML, or `?clip=<url>` — and it plays on the drive-in screen.
+   There is no `VideoTexture` in this build, so frames are pumped `video → canvas →
+   CanvasTexture` each frame. *Verified: a real clip plays at 320×180, looping.*
+2. **Official link-out to your channels.** Press **E** and the real YouTube/Facebook page
+   opens in a new tab — the supported route, with **no third-party iframe, SDK, cookie or
+   tracker shipped inside the game**. (Shipping embeds is exactly what makes
+   `game/army.html` unshippable; the Marquee deliberately avoids that.)
+
+With nothing configured it still works forever, offline: the screen plays an animated
+procedural house card that names the channels and prompts **E**.
+
+**Setup:** edit `MEDIA` at the top of the Marquee block — `youtube`, `facebook`, `clip`,
+`title` — or pass `?yt=…&fb=…&clip=…` without touching the file.
+
+### Related fix: the file is now actually self-contained
+
+Building this caught a **pre-existing** contradiction: the game fetched an AI-pipeline
+`.glb` from a **CloudFront CDN on every boot**, which broke the headline sale claim
+("one self-contained file, no external assets, no server"), phoned out to a third party
+before the player did anything, and would have silently downgraded that vehicle forever
+once the link rotted. The box-jeep fallback always existed, so the remote mesh is now
+**opt-in only** (`?mesh=1`). *Verified: the default build issues zero external requests.*
+Provenance for any AI-generated mesh must be settled before it ships in a sold build.
