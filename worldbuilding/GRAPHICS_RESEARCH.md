@@ -243,3 +243,35 @@ Z-key tiers.
 Headless-verified on an emulated phone (hasTouch, 412×915, DPR 3): the E, SPACE,
 move, and foot buttons all render (display:block) under a coarse pointer; the E
 button boards a vehicle; the SPACE button dives and releases back up; 0 errors.
+
+## v1.58 — DEEP FOCUS: contact shadows + shadow polish
+
+An audit of the render pipeline found the colour side already in good shape —
+**ACES filmic tone mapping** (exposure 1.22), **sRGB output colour management**, and
+**hardware-max anisotropic filtering** (16×) were all live. The remaining visual gap
+was **grounding**: with a single directional light, rides read as though they float a
+hair above the road, which is the classic tell that separates a hobby WebGL scene
+from a shipped one.
+
+**What was added**
+
+- **Contact-shadow (ambient-occlusion) pools.** A procedurally drawn radial-gradient
+  `CanvasTexture` quad is pooled under **every ride and under the player** (12 pools).
+  Each frame the pool snaps to its object's ground position, inherits its heading, and
+  responds to height: sitting down it's tight and dark (opacity ~0.5, scale 1.0); lift
+  the object and it **fades and spreads** the way a real soft shadow does (measured
+  0.50 → 0.14 opacity, 1.0 → 1.55 scale at 5 units up), vanishing entirely by ~7u.
+  Pools only draw within 200u of the player and are slightly softer at night.
+- **Shadow acne / peter-panning fix.** `normalBias 0.02` and `bias -0.0004` on the
+  directional light clean up the shimmering self-shadowing the 260u shadow camera
+  showed across flat ground.
+
+**Cost:** one unlit, depth-write-disabled textured quad per object, culled by range —
+no new lights, no extra render passes, no custom shaders (the inlined build has no
+`ShaderPass`). It stacks on top of every existing tier, so Adaptive / Max Fidelity /
+OVERKILL all get it.
+
+**Verified headless (11/11):** tone mapping, exposure, normal-bias, sRGB + anisotropy
+all confirmed; a pool exists per ride + player; pools render near the player; each
+pool sits exactly under its object (dx/dz = 0.00); lifting fades and spreads it; the
+rendered frame provably differs with the pass on vs off; 0 page errors.
