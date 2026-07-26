@@ -184,3 +184,19 @@ gold to mark it. First meet still greets you (+25). The whole loop persists in t
 save. It's the interactive payoff of the "Jack of All Trades" idea: not watching one
 man do everything, but *becoming* him. Still an original character built from the
 generic idiom only — no real person depicted.
+
+## The Teppan — an island hibachi flat-top grill (live in the prototype, v1.56)
+
+By the harbour town (**60, 80**) a chef works a big steel flat-top: shrimp, steak,
+cracked egg, broccoli, onion rings, pepper, carrot and a noodle pile all sizzling at
+once, steam pouring up, stools along the diner side, and every few seconds the
+**onion-volcano flares** in orange flame. Walk up and the chef **plates you hot** —
+you leave **WELL FED** (speed boost) and **IRIE** (calm hands). First serve **+25**;
+after that it's "Order up! Eat while it hot, star." on a loop.
+
+- **Where it fits:** joins the island's food-and-family warmth (the Big Yard's pot,
+  Fort Flavor) as another place the world feeds you.
+- **Boundary:** from a hibachi/teppanyaki cook clip; the real restaurant name on the
+  plate is **out** (no real brand). Kept only the joy of the cook — an original
+  island teppan counter, all ingredients and flames built from primitives, patois
+  written original; no real person depicted. Non-lethal.
