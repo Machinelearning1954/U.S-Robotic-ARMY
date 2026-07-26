@@ -478,3 +478,22 @@ to clock it — **+20**, once.
   place fictionalised to our harbour). Kept only the spectacle — a vertical-landing
   air-taxi and its downwash. Non-lethal, no weapons; the Kestrel is an original
   craft, every mesh built from primitives.
+
+## The Sunline — power beamed from orbit (live in the prototype, v1.57)
+
+West of the harbour near the Current Farm (**-330, 60**), an orbital collector — two
+big solar wings and a down-facing emitter — pours a **column of light** onto a ground
+**rectenna** (a tilted receiving array on a stand with a glowing hub). Charge rings
+run down the widening beam, and a **civilian endurance glider** — long thin solar
+wings, a slim pod, no turret and no weapons — circles the column, panels aglow, the
+craft that never has to land. Stand by the rectenna to clock it — **+20**, once.
+
+- **Where it fits:** extends the Current Farm's clean-energy doctrine ("the neon runs
+  clean; nothing burns") from the ground to the sky — the island now draws power from
+  orbit.
+- **Boundary:** the reference set was a solar-powered **military ISR/surveillance
+  drone** charged from space, with soldiers, tactical optics, real-nation framing and
+  a real startup/product name. All of that is **out** (no real military; the island
+  watches *with* you, never *at* you; Rule Zero). Kept only the clean-energy kernel —
+  power beamed from orbit to a civilian receiver and a weaponless endurance glider.
+  Non-lethal, no surveillance; every mesh built from primitives.
