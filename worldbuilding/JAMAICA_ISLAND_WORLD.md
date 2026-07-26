@@ -497,3 +497,23 @@ craft that never has to land. Stand by the rectenna to clock it — **+20**, onc
   watches *with* you, never *at* you; Rule Zero). Kept only the clean-energy kernel —
   power beamed from orbit to a civilian receiver and a weaponless endurance glider.
   Non-lethal, no surveillance; every mesh built from primitives.
+
+## The Sky Clinic — a flown-in mountain field hospital (live in the prototype, v1.62)
+
+High in the range at (**-250, 300**, ~45u up) a landing shelf is cut into the
+mountain, ringed with lights. On a 30-second cycle a **heavy tilt-rotor lifter**
+carries a **modular clinic** down on four sling cables, sets it on the pad, **unhooks**,
+and climbs away — the ward arrives where no road goes. The module has doors, lit
+windows, and a medical mark. Dwell on the shelf to clock it — **+25**, once.
+
+- **Where it fits:** joins Range Rescue and the Blue Range Dome as the high-range
+  humanitarian cluster. Non-lethal by nature: this is a machine that delivers care.
+- **Boundary:** the reference was captioned as a national **army** "drone miracle" and
+  carried a **national flag** on the fuselage, with soldiers below — all excluded (no
+  real military, no real flags, real nations are never military actors here). The
+  aircraft is original and carries **no armament of any kind**.
+- **The Red Cross emblem is deliberately NOT reproduced.** The red cross on white is a
+  protected emblem under the Geneva Conventions and belongs to the ICRC; reproducing it
+  on a fictional vehicle would be both a legal and an ethical error. The module instead
+  wears an **original teal cross with a pulse line**, drawn procedurally — verified at
+  the pixel level to contain **zero** red-cross pixels.
