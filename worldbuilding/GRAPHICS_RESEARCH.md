@@ -371,3 +371,58 @@ renders on screen; 0 page errors.
 **Boundary:** the reference was a hardware-benchmark video for real, named consumer
 GPUs and CPUs. No vendor, product, or model name appears in the game — the overlay
 reports only our own renderer's numbers.
+
+## v1.61 — LACQUER & LIGHT (and the honest ceiling)
+
+### The ceiling, measured
+
+Asked to reach "GTA 6 level," the engine was audited rather than guessed at. The
+inlined three.js build is a **stripped bundle**, and the following are simply **absent**:
+
+| Missing | What it rules out |
+|---|---|
+| `MeshStandardMaterial` / `MeshPhysicalMaterial` | **PBR** — no metalness/roughness rendering |
+| `CubeTexture`, `PMREMGenerator`, `*ReflectionMapping` | **Environment reflections / IBL** |
+| `ShaderPass`, `SSAOPass`, `SMAAPass` | **SSAO, SSR, TAA/upscaling, volumetric fog, any custom post FX** |
+| `FogExp2`, `DataTexture` | exponential height fog, procedural data textures |
+
+Available: Lambert / Phong / Basic materials, `EffectComposer` + `RenderPass` +
+`UnrealBloomPass` + `OutputPass`, `Reflector`, `InstancedMesh`, `CanvasTexture`.
+**Conclusion: true modern-AAA fidelity is not reachable on this engine** — it would
+require replacing the inlined renderer with a full three.js build (a large, risky
+migration across ~10.7k lines). Everything below is the honest remaining ceiling
+*within* the current engine.
+
+### (a) Specular paint — the biggest remaining gap
+
+`MeshLambertMaterial` has **no specular term at all**, and 1,654 surfaces used it —
+including every vehicle body. Nothing on a car could ever catch a highlight; paint
+read as matte paper. Every ride's Lambert surfaces are now rebuilt as **Phong with
+tuned specular + shininess** (48 materials converted, colours preserved), so bodywork
+catches the sun, streetlights and neon and reads as lacquer over metal.
+
+### (b) Night light shafts
+
+Strong point lights now hang a soft additive cone (22 shafts), fading in only with
+darkness and scaled by each lamp's own intensity, so lamps throw a **visible cone of
+light** at night instead of merely brightening the ground. Peak opacity 0.16 — a
+suggestion of haze, not a solid cone.
+
+### (c) The bloom wash — a real bug this exposed
+
+Screenshotting the night frame (rather than trusting the code) revealed the single
+worst thing about this game's looks: **place-name labels never culled with distance**,
+so every landmark on the island stacked into one overlapping wall of near-white text —
+and being unlit and bright, it fed the bloom until the entire frame washed out to
+white, worst at OVERKILL where bloom is strongest. Fixed in three parts: labels now
+**fade with distance** (crisp inside 52u, gone by 150u), the text was **dimmed**
+(`#a8ddd3`) and its glow softened so it sits under the bloom threshold, and sprites
+were **scaled down** 46→36 wide. The frame went from an unreadable white sheet to a
+legible night scene.
+
+**Verified headless (11/11 + full regression sweep, 0 failures):** 48 materials
+converted with **zero** Lambert left on any ride, all with specular + shininess and
+original colours preserved (53 distinct hues); 22 shafts built; shafts **off** at
+midday, **21 lit** at night, peak opacity 0.16; night frame provably changes; whole-
+frame draw calls stay sane (~1,032 / 374K tris); 0 page errors. The regression sweep
+(vehicles, afterburner, derby, palaver, audio, photo, save/load) still passes clean.
