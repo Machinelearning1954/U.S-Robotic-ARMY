@@ -7656,10 +7656,31 @@ const MEDIA={
   clip:'',               // a video YOU own, next to this file, e.g. 'media/reel1.webm' or .mp4
   title:'NEON HARBOR TV'
 };
+// SECURITY (red-team findings A1-A3). These three values arrive from the QUERY STRING, so they are
+// attacker-controlled whenever someone can hand a player a crafted link to a hosted build:
+//   ?yt=javascript:...  -> script execution in the game's own origin (save data, page, everything)
+//   ?fb=data:text/html  -> same class of navigation smuggling
+//   ?clip=https://evil  -> forces the "no external requests" build to fetch an attacker's host,
+//                          leaking the player's IP/User-Agent and breaking self-containment.
+// Links are therefore restricted to https:, and a query-supplied clip must be a RELATIVE path
+// (your own file next to the HTML). A developer editing MEDIA in the file directly is trusted.
+function safeChannelURL(u){
+  try{const p=new URL(u,location.href);return p.protocol==='https:'?p.href:null;}catch(e){return null;}
+}
+function safeRelativeClip(u){
+  if(typeof u!=='string'||!u)return null;
+  if(/^[a-z][a-z0-9+.-]*:/i.test(u))return null;   // any scheme (javascript:, data:, https:) refused
+  if(u.startsWith('//')||u.startsWith('\\'))return null;         // protocol-relative refused
+  return u;
+}
 {try{const q=new URLSearchParams(location.search);   // or override without editing the file
-  if(q.get('clip'))MEDIA.clip=q.get('clip');
-  if(q.get('yt'))MEDIA.youtube=q.get('yt');
-  if(q.get('fb'))MEDIA.facebook=q.get('fb');}catch(e){}}
+  if(q.get('clip')){const c=safeRelativeClip(q.get('clip'));
+    if(c)MEDIA.clip=c;else console.warn('[marquee] ?clip= must be a relative path to your own file — ignored');}
+  if(q.get('yt')){const y=safeChannelURL(q.get('yt'));
+    if(y)MEDIA.youtube=y;else console.warn('[marquee] ?yt= must be an https: URL — ignored');}
+  if(q.get('fb')){const f=safeChannelURL(q.get('fb'));
+    if(f)MEDIA.facebook=f;else console.warn('[marquee] ?fb= must be an https: URL — ignored');}
+}catch(e){}}
 const MARQUEE={X:-30,Z:90};
 let marqueeSeen=false,mqT=0,mqMsgT=0,mqCardT=0,mqCanvas=null,mqCtx=null,mqTex=null,mqScreen=null,mqVideo=null,mqVideoOK=false,mqFrames=0,mqPick=0;
 function mqDrawCard(tms){ // the house card: animated, procedural, works with zero configuration
@@ -7710,7 +7731,9 @@ function mqOpenChannel(){
   const links=[];if(MEDIA.youtube)links.push(['YOUTUBE',MEDIA.youtube]);if(MEDIA.facebook)links.push(['FACEBOOK',MEDIA.facebook]);
   if(!links.length){toast('THE MARQUEE — no channel set yet. Put your links in MEDIA at the top of the file (youtube / facebook), or load the game with ?yt=<url>&fb=<url>.');return null;}
   const pick=links[mqPick%links.length];mqPick++;
-  try{window.open(pick[1],'_blank','noopener,noreferrer');}catch(e){}
+  const safe=safeChannelURL(pick[1]);           // checked again at the sink, not just at the source
+  if(!safe){toast('THE MARQUEE — that channel link was rejected (https: only).');return null;}
+  try{window.open(safe,'_blank','noopener,noreferrer');}catch(e){}
   toast('THE MARQUEE — opening '+pick[0]+' in a new tab. The screen keeps rolling.');
   return pick[0];
 }
@@ -11889,12 +11912,21 @@ function saveGame(){try{
     skimDist:Math.round(skimDist),
     sentry:sentryMasts.map(m=>m.tuned)}));
 }catch(e){}}
+// SECURITY/ROBUSTNESS (red-team finding A4c): localStorage is user-writable, so a corrupted or
+// hand-edited save could push NaN/Infinity into the player transform and wedge the world. Every
+// number is now range-checked, not merely typeof-checked — NaN passes `typeof x === 'number'`.
+function numOr(v,dflt,lo,hi){
+  const n=typeof v==='number'?v:NaN;
+  if(!Number.isFinite(n))return dflt;
+  return Math.min(hi,Math.max(lo,n));
+}
 function loadGame(){try{
   const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
   const s=JSON.parse(raw);if(!s||s.v!==1)return false;
-  if(typeof s.clout==='number'){clout=s.clout;addClout(0);}
-  if(typeof s.tod==='number')tod=s.tod;
-  if(typeof s.px==='number'&&typeof s.pz==='number'){P.x=s.px;P.z=s.pz;P.a=s.pa||0;P.v=0;}
+  {const c=numOr(s.clout,null,-1e6,1e9);if(c!==null){clout=c;addClout(0);}}
+  {const t=numOr(s.tod,null,0,1);if(t!==null)tod=t;}
+  {const x=numOr(s.px,null,-594,594),z=numOr(s.pz,null,-394,394);
+   if(x!==null&&z!==null){P.x=x;P.z=z;P.a=numOr(s.pa,0,-99,99);P.v=0;}}
   if(typeof s.wardrobeIdx==='number')wardrobeIdx=s.wardrobeIdx;
   if(Array.isArray(s.wardrobeUnlocked))for(let i=0;i<wardrobeUnlocked.length;i++)wardrobeUnlocked[i]=!!s.wardrobeUnlocked[i]||i===0;
   if(s.raceBest!=null)raceBest=s.raceBest;

@@ -70,3 +70,33 @@ Development history (every version, with per-feature boundary notes and
 headless verification records in the commit messages) lives on the branch
 `claude/port-antonio-base-design-lvd49n` of the owner's repository — the
 provenance trail itself is part of the asset.
+
+## Security review (red team) — v1.67
+
+The shipped file was attacked rather than eyeballed. Findings and fixes:
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| A1 | `?yt=javascript:…` reached `window.open()` — **script execution in the game's own origin** (save data, page, everything) | **High** (hosted builds) | **Fixed** — https-only allowlist |
+| A2 | `?fb=data:text/html,…` — same navigation-smuggling class | Medium | **Fixed** — https-only allowlist |
+| A3 | `?clip=https://attacker/…` forced the "no external requests" build to fetch an arbitrary host, **leaking the player's IP/User-Agent** and breaking self-containment | Medium | **Fixed** — query-supplied clips must be relative paths |
+| A4 | Hostile `localStorage` save: crash / prototype pollution | — | Already safe (no crash, no pollution) |
+| A4c | `tod: NaN` was assignable, because **`typeof NaN === 'number'`** passed the old guard | Low | **Fixed** — range-checked `numOr()` on clout/tod/position |
+| A5 | Default build phoning home | — | Clean: **zero** external requests |
+
+**The attack scenario that mattered:** these three values come from the **query string**, so on a
+hosted build anyone who can hand a player a link controls them. A1 was a genuine XSS.
+
+Fixes: a scheme allowlist (`https:` only) applied **at the source and re-checked at the sink**, so a
+later edit can't silently reopen it; query-supplied clips restricted to relative paths (schemes and
+protocol-relative `//` refused) while a developer editing `MEDIA` in-file stays trusted; and
+`numOr()` range-checking every number read from the save.
+
+**Also corrected: a false positive in the harness itself.** A4c originally asserted `st().px`, a
+field `st()` never exposes — `undefined` read as "corrupted". The live transform was healthy all
+along. Reported as a non-finding rather than left inflating the count; the hardening it prompted was
+kept because `tod: NaN` was independently real.
+
+**Still outstanding (not code):** `game/army.html` embeds third-party social posts (9 references) and
+**must not ship**; the remote AI-generated `.glb` is opt-in only (`?mesh=1`) and needs provenance
+settled before it appears in a sold build.
