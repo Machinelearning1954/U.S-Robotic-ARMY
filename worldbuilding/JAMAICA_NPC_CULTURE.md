@@ -200,3 +200,34 @@ after that it's "Order up! Eat while it hot, star." on a loop.
   plate is **out** (no real brand). Kept only the joy of the cook — an original
   island teppan counter, all ingredients and flames built from primitives, patois
   written original; no real person depicted. Non-lethal.
+
+## Pedestrians get a skeleton (live in the prototype, v1.65)
+
+Until now every pedestrian was **three static boxes** — one solid block for both legs — so
+people *slid* around the island like chess pieces. Nothing reads as "fake" faster than a
+human gliding with stiff legs, and it was the biggest remaining believability gap.
+
+Each pedestrian is now **jointed**: hip → thigh → knee → shin → foot, and shoulder →
+upper arm → elbow → forearm, plus a torso and a **neck that turns**. Pivot *groups* carry
+the rotations with meshes hanging off them, so turning a joint swings everything below it,
+exactly like a skeleton.
+
+- **The cycle is driven by measured movement,** not by the AI's intended speed — each ped's
+  actual distance covered per frame sets the stride, so legs always match the ground. No
+  skating, no walking on the spot. Stride length and arm swing scale with speed.
+- **Biomechanically checked, not eyeballed:** the tests assert legs swing in **opposition**
+  (never both forward), knees **never hyperextend** forward, and arms **counter-swing**
+  against the legs.
+- **Idle is a separate state** — weight shifts, arms hang, a slow breath — so a stopped
+  pedestrian doesn't freeze mid-stride.
+- **They look at you.** Inside 9 units heads turn toward the player, then ease back. The
+  cheapest trick there is for making a crowd feel aware of you.
+- **Cost is bounded:** plain Euler rotations on pivot groups (no skinning, no bone
+  matrices, **no assets**), the phase only advances for peds that are moving, and anything
+  beyond 90 units stops animating entirely.
+
+**Why this rather than AI-generated people:** image-to-3D produces an **unrigged** mesh with
+no skeleton, so photoreal figures would slide around frozen — *worse* than stylised figures
+that move correctly. It would also have reintroduced external binary assets (the very thing
+fixed in v1.63) and unresolved likeness provenance for a game intended for sale. Motion,
+not resolution, is what makes people read as people.
