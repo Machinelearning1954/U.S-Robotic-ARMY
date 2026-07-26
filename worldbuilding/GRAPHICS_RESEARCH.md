@@ -275,3 +275,47 @@ OVERKILL all get it.
 all confirmed; a pool exists per ride + player; pools render near the player; each
 pool sits exactly under its object (dx/dz = 0.00); lifting fades and spreads it; the
 rendered frame provably differs with the pass on vs off; 0 page errors.
+
+## v1.59 — GROUNDCOVER: dense wind-swept grass field
+
+**Target:** a AAA shooter's "ultimate graphics" showcase frame. Stripped to its
+rendering techniques, the single feature carrying that frame is **dense ground
+foliage** — grass over every open surface, moving in the wind, thinning into haze at
+distance. Against it, this island's open ground was flat and bare.
+
+**What was added**
+
+A **single `InstancedMesh`** scatters thousands of grass tufts in **one draw call**,
+following the player like a detail field:
+
+- **Density.** 700 / 1,800 / **4,200** tufts by device tier, multiplied by the Z-key
+  graphics tier — **9,240 on OVERKILL**. Blades are scattered with an inward-biased
+  radial distribution (`r = u^0.62 · R`) so the near field, which is what the camera
+  actually sees, stays thick instead of spreading thin across the whole disc.
+- **Placement rules.** Every tuft snaps to terrain height and is rejected on water,
+  on the wet-sand line (`h < 0.8`), and within ~6u of the road ribbon — so grass
+  never grows through asphalt or out of the sea.
+- **Wind.** A rolling window of ~420 tufts per frame is re-leaned each frame, giving
+  every blade a few sway updates a second at bounded cost. Gusts breathe on a slow
+  sine and stiffen in rain.
+- **Travel.** Blades falling out of range are recycled ahead of the player on a
+  per-frame budget; a **long jump** (fast travel, leaving an interior, a respawn)
+  re-lays the whole field in one frame so the player never lands on bare ground.
+- **Art.** The blade texture is drawn procedurally at runtime — nine tapered blades
+  in deep greens with dry-straw variance, alpha-cut (`alphaTest 0.45`), anisotropy
+  clamped to the device max, lit by the scene and receiving shadow.
+
+**Cost:** one instanced draw call, no new lights and no custom shaders (the inlined
+build has no `ShaderPass`). Density and reach fall back automatically on weaker tiers.
+
+**Verified headless (10/10):** field populates (4,200 live); one InstancedMesh /
+one draw call; **zero** blades in water, **zero** on the road, **zero** off terrain
+height; the field recycles to follow a teleporting player (0 stragglers); wind
+provably mutates the instance buffer; OVERKILL thickens 4,200 → 9,240 and extends
+reach 40 → 52; the rendered frame provably differs with the field on vs off; 0 page
+errors.
+
+**Boundary:** the reference was a real, named commercial shooter. The game, its HUD,
+weapons, kill objectives and branding are all **out** under Rule Zero — what was
+taken is only the *rendering technique* (instanced ground foliage), which is a
+standard graphics method, rebuilt from scratch with procedurally drawn art.
