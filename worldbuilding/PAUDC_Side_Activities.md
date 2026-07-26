@@ -136,3 +136,26 @@ dancefloor and the Mud Run — the game's leisure register.
   character** (declined per Rule Zero — no copied characters or assets); only the
   generic poolside-lounge *vibe* was kept and rebuilt from scratch. Every mesh,
   NPC, and prop here is original. No real venue, brand, or person depicted.
+
+## Beach Volley — a playable sand rally (live in the prototype, v1.64)
+
+A sand court on the south beach (**210, -115**): lined boundaries, two timber posts and
+a net, a ball, and an opponent who plays you honestly.
+
+- **How it plays:** walk up and the opponent **serves** to you. **Run into the ball**
+  while it's low on your side and you bump it up and over the net — harder if you're
+  moving fast. The opponent tracks the ball's line and **returns anything on their
+  side**. The **net physically blocks** a shot driven flat into it. Every crossing adds
+  to the **rally**; the rally ends when the ball lands, in or out, and the ball hides
+  until the next serve.
+- **Rewards:** first rally **+15** (one-shot), and **+10** each time you beat your
+  **best rally** (best and plays are saved). Non-lethal by nature — the worst thing
+  that happens is the ball lands in the sand.
+- **Boundary:** the reference was a fan infographic for a big commercial game — its
+  **branding, logo, characters and city are all excluded** (Rule Zero). The list was
+  useful only as a **gap analysis**, and that audit was blunt: swimming, free-diving,
+  jet skis, boating, beach crowds, coastal wildlife, photo/"social" capture, the surf
+  drill and football were **already in this game**. The single real hole was interactive
+  beach **sport**, so that is what was built — original court, ball physics and
+  opponent, all from primitives. Generic sports are not anyone's IP; that game's
+  presentation is, and none of it is reproduced.
