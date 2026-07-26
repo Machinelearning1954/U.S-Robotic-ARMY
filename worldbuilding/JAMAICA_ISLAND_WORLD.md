@@ -459,3 +459,22 @@ harbour marks the find — **+20**, once.
   — a hull at rest on a dark seabed, a light still glowing, silt and bubbles. Ours is
   an original, retired **civil survey** submersible turned reef and dive attraction.
   No weapons, no tapping, no real names; every mesh built from primitives.
+
+## The Skydock — a waterfront VTOL air-taxi pad (live in the prototype, v1.55)
+
+On the harbour waterfront (**20, -90**), framed by three glass towers, sits **The
+Skydock**: a raised circular landing pad with a glowing target ring and edge lights.
+Overhead, an original luxury eVTOL air-taxi — **the Kestrel** — runs a 17-second
+cycle: it drops vertically from between the towers, its four ducted fans glowing
+harder as it nears the ground, a **downwash ring blooms on the surface** with spray
+rising, it settles light on the pad, holds, then lifts off again. Stand near the pad
+to clock it — **+20**, once.
+
+- **Where it fits:** joins the Skylanes (overhead traffic) and the Marina as the
+  luxury-future transit layer — the island "runs on wings now."
+- **Boundary:** the reference was an AI reel of a **branded flying car** (an AMG
+  badge / "AMG's rule since 1967" caption) descending to a **real Miami** waterfront.
+  The real **brand**, the real **place**, and the **creator** are all out (Rule Zero;
+  place fictionalised to our harbour). Kept only the spectacle — a vertical-landing
+  air-taxi and its downwash. Non-lethal, no weapons; the Kestrel is an original
+  craft, every mesh built from primitives.
