@@ -319,3 +319,55 @@ errors.
 weapons, kill objectives and branding are all **out** under Rule Zero — what was
 taken is only the *rendering technique* (instanced ground foliage), which is a
 standard graphics method, rebuilt from scratch with procedurally drawn art.
+
+## v1.60 — SCATTER + BENCHMARK OVERLAY
+
+**Target:** a GPU-comparison benchmark frame — dry terrain littered with stones and
+scrub, under an overlay reporting average FPS, **1% low**, **0.1% low**, frametime
+and hardware counters. Two separate asks live in that image: *more scene detail*, and
+*the instrumentation to measure it*. Both were built.
+
+### Stone & shingle scatter
+
+The companion to v1.59's grass. With foliage but no litter, ground still reads
+artificially clean. One more `InstancedMesh` (**one draw call**) scatters stones using
+the same follow-the-player recycling:
+
+- 220 / 700 / **1,500** stones by device tier × the Z-key tier — **2,600 on OVERKILL**
+  — reaching further than the grass (42/58/**74**u, 96u at OVERKILL) since stones stay
+  readable at distance.
+- **Per-instance non-uniform scale + yaw**, composed straight into the instance matrix,
+  so no two stones are alike (400/400 unique in a sample). ~10% roll as proper
+  **boulders**, the rest as shingle.
+- Each stone is **seated into** the terrain (sunk ~35% of its height), and rejected on
+  water and within ~6u of the road ribbon.
+
+### Benchmark overlay (comma key)
+
+The FPS counter became a real bench readout — the numbers a mean framerate hides:
+
+- **Average FPS + frametime**, and **1% low / 0.1% low** framerates computed from a
+  rolling 900-frame time buffer (sorted worst-first; the percentile *frametime*
+  inverted to FPS — the standard method).
+- **Whole-frame draw calls and triangle count**, plus **render scale** and live
+  **grass / stone** instance counts.
+- **A correctness note worth keeping:** reading `renderer.info` naively reports only
+  the composer's final fullscreen blit — **1 call, 2 triangles** — because three.js
+  resets those counters on *every* pass. The overlay therefore sets
+  `renderer.info.autoReset = false` while it's up and latches + clears the totals once
+  per frame, so the figures cover the entire frame (measured **1,638 draw calls /
+  495K triangles** at OVERKILL). `autoReset` is restored when the HUD is closed.
+- Entirely original instrumentation read from our own renderer — **no hardware, vendor
+  or product names** anywhere.
+
+**Verified headless (13/13):** 1,500 live stones; one InstancedMesh / one draw call;
+**zero** stones in water, **zero** on the road, **zero** floating above terrain;
+per-instance variety confirmed (400/400 unique, boulders present but a minority); the
+field follows a teleporting player with 0 stragglers; OVERKILL scales 1,500 → 2,600
+and reach 74 → 96; the bench reports whole-frame totals (911 calls / 374K tris, not
+the 1-call lie); 1% and 0.1% lows compute with 0.1% never above 1%; the overlay block
+renders on screen; 0 page errors.
+
+**Boundary:** the reference was a hardware-benchmark video for real, named consumer
+GPUs and CPUs. No vendor, product, or model name appears in the game — the overlay
+reports only our own renderer's numbers.
