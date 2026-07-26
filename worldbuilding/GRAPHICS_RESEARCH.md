@@ -426,3 +426,37 @@ original colours preserved (53 distinct hues); 22 shafts built; shafts **off** a
 midday, **21 lit** at night, peak opacity 0.16; night frame provably changes; whole-
 frame draw calls stay sane (~1,032 / 374K tris); 0 page errors. The regression sweep
 (vehicles, afterburner, derby, palaver, audio, photo, save/load) still passes clean.
+
+## v1.66 — GRAPHICS SETTINGS PANEL
+
+Until now the whole graphics stack was **one key cycling three presets**. Fine for a demo,
+not fine for a product: players expect to trade individual features for framerate on their
+own hardware, and a settings screen is part of what makes a game feel shippable.
+
+Open with the **GFX** chip (mouse/touch) or **F8**; arrow keys or a tap changes a row.
+Eight independent settings, applied **live** and remembered between sessions:
+
+| Setting | Options | What it really drives |
+|---|---|---|
+| RENDER SCALE | 0.75× – 1.6× | the renderer's pixel ratio (verified 0.75 → 1.6) |
+| GRASS DENSITY | OFF / LOW / MEDIUM / ULTRA | instanced grass count (verified 4,200 → 0 → 4,200) |
+| GROUND DETAIL | OFF / LOW / HIGH | instanced stone count (verified 0 → 1,500) |
+| SHADOW QUALITY | OFF / 1024 – 8192 | real shadow-map resize, and can disable shadows entirely |
+| WET REFLECTIONS | OFF / ON | the planar puddle reflector |
+| POST FX (BLOOM) | OFF / LOW / HIGH | bloom pass enable + strength (verified 0 → 0.8) |
+| LIGHT SHAFTS | OFF / ON | the v1.61 night light cones |
+| PLACE LABELS | NEAR / NORMAL / FAR | label fade distance (verified 2 → 25 visible) |
+
+Settings are stored under `paudc_gfx` and **re-applied on boot** — verified by reloading in
+a fresh page and confirming the shadow map came back at 2048 with bloom at 0.3, not just
+that the numbers were remembered.
+
+**Verified headless (13/13):** every row is asserted against the system it controls rather
+than against its own label — grass and stone instance counts, the actual shadow-map width,
+the renderer's pixel ratio, the bloom pass's enabled/strength, visible label count — plus
+storage round-trip, re-application after reload, and 0 page errors.
+
+**Note on the reference:** the categories here (water/grass/lighting/reflection/shadow/post/
+DoF/motion blur) are the generic vocabulary every renderer ships. Depth of field and motion
+blur are **not** offered because this engine has no `ShaderPass` — they exist on the
+`claude/engine-pbr-upgrade` branch and can be added to the panel if that branch is merged.
