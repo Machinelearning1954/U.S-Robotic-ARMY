@@ -159,3 +159,23 @@ a net, a ball, and an opponent who plays you honestly.
   beach **sport**, so that is what was built — original court, ball physics and
   opponent, all from primitives. Generic sports are not anyone's IP; that game's
   presentation is, and none of it is reproduced.
+
+## The Wrist Scout — a launched drone with a live holo feed (live in the prototype, v1.68)
+
+Press **J** on foot and a small quad lifts off your cuff; a **holographic panel** unfolds at
+your shoulder showing what it can see. Press **J** again to recall it (it also comes home on
+its own after 45s). First launch **+15**, saved.
+
+- **The feed is genuinely live.** It sweeps out ahead of you, then holds a slow orbit at
+  ~14 m above the ground, and the panel redraws ~7×/s from the **actual terrain** around the
+  drone — water, sand, greenery and high ground sampled from the real heightfield — with live
+  markers for you and for moving traffic, plus altitude readout and scanlines.
+- **Why it's drawn rather than rendered:** this build exports no `WebGLRenderTarget`, so a
+  true second-camera render-to-texture is impossible. Rather than fake a "camera" with a
+  static image, the panel reports real world data honestly. (On `claude/engine-pbr-upgrade`
+  a true render target *is* available, if you ever want an actual optical feed.)
+- **Surveillance doctrine, held.** The island watches *with* you, never *at* you. The feed
+  shows **ground, your own position, and anonymous motion dots** — it identifies no one and
+  tracks no person. The device says so on its own screen: **"NO ID · TERRAIN ONLY."**
+- **Boundary:** the reference reel named a real phone brand in its caption — excluded. The
+  drone, panel and UI are original, built from primitives and drawn at runtime.
