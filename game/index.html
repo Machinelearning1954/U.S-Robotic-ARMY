@@ -35,13 +35,22 @@
     }
     #status { left: 20px; bottom: 20px; min-width: 240px; }
     #mission { right: 20px; top: 20px; text-align: right; }
-    #status .label, #mission .label { font-size: 11px; letter-spacing: 2px; opacity: 0.75; text-transform: uppercase; }
-    #status .value, #mission .value { font-size: 22px; font-weight: 600; }
+    #status .label, #mission .label {
+      font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', monospace;
+      font-size: 11px; letter-spacing: 2px; opacity: 0.75; text-transform: uppercase;
+    }
+    #status .value, #mission .value {
+      font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', monospace;
+      font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums;
+    }
     #healthbar { width: 220px; height: 10px; margin-top: 6px; border: 1px solid rgba(0,255,120,0.5); border-radius: 5px; overflow: hidden; }
     #healthfill { height: 100%; width: 100%; background: linear-gradient(90deg, #1eff7e, #a8ff5e); transition: width 0.15s ease; }
     #healthfill.low { background: linear-gradient(90deg, #ff4d3a, #ff9d3a); }
 
-    #feed { position: absolute; left: 20px; top: 20px; font-size: 13px; line-height: 1.7; opacity: 0.9; }
+    #feed {
+      position: absolute; left: 20px; top: 20px; font-size: 13px; line-height: 1.7; opacity: 0.9;
+      font-family: ui-monospace, 'Cascadia Mono', Consolas, 'SF Mono', monospace;
+    }
     #feed div { animation: fade 4s forwards; }
     @keyframes fade { 0% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
 

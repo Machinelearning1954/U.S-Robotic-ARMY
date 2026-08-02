@@ -55,6 +55,9 @@ const state = {
   fireCooldown: 0,
   time: 0,
   gameOver: false,
+  // set when pointer lock is unavailable (e.g. sandboxed iframes): aim from
+  // plain mousemove deltas instead of locked-cursor movement
+  mouseFallback: false,
 };
 
 const keys = new Set();
@@ -121,20 +124,26 @@ function resetGame() {
 document.addEventListener('keydown', (e) => keys.add(e.code));
 document.addEventListener('keyup', (e) => keys.delete(e.code));
 
+function aimActive() {
+  return state.running &&
+    (state.mouseFallback || document.pointerLockElement === renderer.domElement);
+}
+
 document.addEventListener('mousemove', (e) => {
-  if (!state.running || document.pointerLockElement !== renderer.domElement) return;
+  if (!aimActive()) return;
   state.yaw -= e.movementX * 0.0024;
   state.pitch -= e.movementY * 0.0022;
   state.pitch = Math.max(-1.1, Math.min(0.55, state.pitch));
 });
 
 document.addEventListener('mousedown', () => {
-  if (!state.running || document.pointerLockElement !== renderer.domElement) return;
+  if (!aimActive()) return;
   shoot();
 });
 
 document.addEventListener('pointerlockchange', () => {
-  if (document.pointerLockElement !== renderer.domElement && state.running && !state.gameOver) {
+  if (document.pointerLockElement !== renderer.domElement
+      && state.running && !state.gameOver && !state.mouseFallback) {
     state.running = false;
     hud.overlay.classList.remove('hidden');
     hud.startBtn.textContent = 'Resume';
@@ -146,7 +155,20 @@ hud.startBtn.addEventListener('click', () => {
   if (state.gameOver) resetGame();
   hud.overlay.classList.add('hidden');
   state.running = true;
-  renderer.domElement.requestPointerLock();
+  try {
+    const p = renderer.domElement.requestPointerLock();
+    p?.catch?.(() => { state.mouseFallback = true; });
+  } catch {
+    state.mouseFallback = true;
+  }
+  // sandboxed iframes may deny pointer lock without rejecting: detect and
+  // fall back to plain mouse-delta aiming
+  setTimeout(() => {
+    if (state.running && document.pointerLockElement !== renderer.domElement) {
+      state.mouseFallback = true;
+      feed('pointer lock unavailable — move mouse to aim');
+    }
+  }, 700);
 });
 
 window.addEventListener('resize', () => {
