@@ -8,6 +8,7 @@ modules; the current module adds real-time 3D scene understanding.
 | Module | Description |
 |--------|-------------|
 | [`3d-mapping/`](3d-mapping/) | Streaming 3D scene reconstruction from ordinary RGB video using [LingBot-Map](https://github.com/Robbyant/lingbot-map), a feed-forward 3D foundation model. Produces camera poses, dense depth, and world-space point clouds at ~20 FPS without depth hardware. |
+| [`3d-studio/`](3d-studio/) | Forge3D Studio — a self-contained, brand-neutral recreation of a free-tier AI 3D generation studio (gallery with live 3D previews and filters, interactive GLB viewer, text/image-to-3D generation flow with a monthly credit system). Static files only; run with any file server. |
 
 ## Getting started
 

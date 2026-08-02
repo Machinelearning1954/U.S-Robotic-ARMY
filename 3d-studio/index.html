@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge3D Studio — Free</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⬡%3C/text%3E%3C/svg%3E">
+<script type="module" src="assets/vendor/model-viewer.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0e12;
+    --panel: #16181f;
+    --panel-2: #1d2029;
+    --border: #2a2e3a;
+    --text: #e8eaf0;
+    --muted: #8b91a3;
+    --accent: #6c5ce7;
+    --accent-2: #8f7ff7;
+    --good: #2ecc71;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  /* ---------- top bar ---------- */
+  header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 18px; border-bottom: 1px solid var(--border); background: var(--panel);
+    flex: 0 0 auto;
+  }
+  .logo { font-size: 17px; font-weight: 700; letter-spacing: .3px; }
+  .logo span { color: var(--accent-2); }
+  .badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: #23262f; color: var(--muted); border: 1px solid var(--border);
+  }
+  .spacer { flex: 1; }
+  #credits {
+    display: flex; align-items: center; gap: 6px; font-weight: 600;
+    background: var(--panel-2); border: 1px solid var(--border);
+    padding: 5px 12px; border-radius: 999px;
+  }
+  #credits em { font-style: normal; color: var(--accent-2); }
+  .btn {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--panel-2); color: var(--text); padding: 7px 14px; font-weight: 600;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-2); }
+  .btn.primary:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ---------- layout ---------- */
+  main { flex: 1; display: flex; min-height: 0; }
+
+  /* ---------- generate panel ---------- */
+  aside {
+    width: 300px; flex: 0 0 auto; border-right: 1px solid var(--border);
+    background: var(--panel); padding: 16px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .tabs { display: flex; background: var(--panel-2); border-radius: 8px; padding: 3px; }
+  .tabs button {
+    flex: 1; border: 0; background: transparent; color: var(--muted);
+    padding: 7px 0; border-radius: 6px; font-weight: 600; cursor: pointer;
+  }
+  .tabs button.active { background: var(--accent); color: #fff; }
+  textarea {
+    width: 100%; height: 96px; resize: vertical; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--panel-2); color: var(--text);
+    padding: 10px; font: inherit;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  .drop {
+    border: 1.5px dashed var(--border); border-radius: 8px; padding: 22px 10px;
+    text-align: center; color: var(--muted); cursor: pointer; background: var(--panel-2);
+  }
+  .drop:hover { border-color: var(--accent); }
+  .drop img { max-width: 100%; max-height: 120px; border-radius: 6px; }
+  .hint { font-size: 12px; color: var(--muted); }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  select {
+    width: 100%; padding: 7px 10px; border-radius: 8px; background: var(--panel-2);
+    border: 1px solid var(--border); color: var(--text); font: inherit;
+  }
+  #queue { display: flex; flex-direction: column; gap: 8px; }
+  .task {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 12px;
+  }
+  .task .bar { height: 4px; background: #2a2e3a; border-radius: 4px; margin-top: 6px; overflow: hidden; }
+  .task .bar i { display: block; height: 100%; width: 0; background: var(--accent-2); transition: width .4s; }
+  .task.done { border-color: var(--good); }
+  .freenote {
+    margin-top: auto; font-size: 11px; color: var(--muted);
+    border-top: 1px solid var(--border); padding-top: 10px;
+  }
+
+  /* ---------- gallery ---------- */
+  section { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .filters {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 12px 18px; border-bottom: 1px solid var(--border);
+  }
+  .chipgroup { display: flex; gap: 6px; align-items: center; }
+  .chipgroup .glabel { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-right: 2px; }
+  .chip {
+    cursor: pointer; font-size: 12px; font-weight: 600; padding: 4px 12px;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--panel-2); color: var(--muted);
+  }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #search {
+    margin-left: auto; padding: 6px 12px; border-radius: 999px; min-width: 180px;
+    border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font: inherit;
+  }
+  #grid {
+    flex: 1; overflow-y: auto; padding: 18px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px;
+    align-content: start;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card model-viewer { width: 100%; height: 190px; background: #101218; }
+  .card .meta { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .card .name { font-weight: 700; }
+  .card .tags { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; background: #23262f; color: var(--muted); }
+  .tag.gen { background: var(--accent); color: #fff; }
+  .card .actions { display: flex; gap: 6px; margin-top: 2px; }
+  .card .actions .btn { flex: 1; padding: 5px 0; font-size: 12px; text-align: center; }
+  .empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 60px 0; }
+
+  /* ---------- viewer modal ---------- */
+  #modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none;
+    align-items: center; justify-content: center; z-index: 50;
+  }
+  #modal.open { display: flex; }
+  .modal-box {
+    width: min(880px, 92vw); height: min(620px, 88vh); background: var(--panel);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modal-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .modal-head .name { font-weight: 700; font-size: 15px; }
+  #modalviewer { flex: 1; width: 100%; background: radial-gradient(circle at 50% 40%, #1c2030, #0d0e12 75%); }
+  footer {
+    flex: 0 0 auto; padding: 6px 18px; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--muted); background: var(--panel);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Forge<span>3D</span> Studio</div>
+  <span class="badge">Free plan</span>
+  <div class="spacer"></div>
+  <div id="credits" title="Free plan credits — resets monthly">⬡ <em id="creditval">600</em> credits</div>
+  <button class="btn" id="resetBtn" title="Reset demo state">Reset demo</button>
+</header>
+
+<main>
+  <aside>
+    <div class="tabs">
+      <button id="tabText" class="active">Text to 3D</button>
+      <button id="tabImage">Image to 3D</button>
+    </div>
+
+    <div id="textPane">
+      <textarea id="prompt" placeholder="Describe the model you want, e.g. “a weathered scout drone with folding rotors”"></textarea>
+    </div>
+
+    <div id="imagePane" style="display:none">
+      <div class="drop" id="drop">
+        <span id="dropLabel">Click to upload a reference image<br><span class="hint">PNG / JPG, single view</span></span>
+      </div>
+      <input type="file" id="file" accept="image/*" style="display:none">
+    </div>
+
+    <div class="field">
+      <label for="style">Style</label>
+      <select id="style">
+        <option>Realistic</option>
+        <option>Stylized</option>
+        <option>Low-poly</option>
+        <option>Sculpture</option>
+      </select>
+    </div>
+
+    <button class="btn primary" id="generate">Generate — 25 credits</button>
+    <div class="hint">Free plan: standard queue, 600 credits/month, GLB download.</div>
+
+    <div id="queue"></div>
+
+    <div class="freenote">
+      Demo build: generation is simulated locally in your browser.
+      See README.md to connect a real generation backend.
+    </div>
+  </aside>
+
+  <section>
+    <div class="filters">
+      <div class="chipgroup" data-key="category">
+        <span class="glabel">Category</span>
+        <button class="chip active" data-val="featured">Featured</button>
+        <button class="chip" data-val="all">All</button>
+      </div>
+      <div class="chipgroup" data-key="model_type">
+        <span class="glabel">Type</span>
+        <button class="chip active" data-val="all">All</button>
+        <button class="chip" data-val="character">Character</button>
+        <button class="chip" data-val="object">Object</button>
+        <button class="chip" data-val="vehicle">Vehicle</button>
+      </div>
+      <div class="chipgroup" data-key="use_case">
+        <span class="glabel">Use case</span>
+        <button class="chip active" data-val="all">All</button>
+        <button class="chip" data-val="game">Game</button>
+        <button class="chip" data-val="ar">AR/VR</button>
+        <button class="chip" data-val="print">3D print</button>
+      </div>
+      <input id="search" type="search" placeholder="Search models…">
+    </div>
+    <div id="grid"></div>
+  </section>
+</main>
+
+<footer>
+  Forge3D Studio demo — an open, brand-neutral recreation of a free-tier AI 3D studio.
+  Sample assets © Khronos Group glTF-Sample-Assets (various licenses, see README).
+</footer>
+
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="name" id="modalName"></span>
+      <div class="spacer"></div>
+      <a class="btn" id="modalDownload" download>Download GLB</a>
+      <button class="btn" id="modalClose">Close</button>
+    </div>
+    <model-viewer id="modalviewer" camera-controls auto-rotate shadow-intensity="1" exposure="1.1" ar></model-viewer>
+  </div>
+</div>
+
+<script>
+const CATALOG = [
+  { id: "helmet",  name: "Battle-Worn Helmet", src: "assets/models/DamagedHelmet.glb",  type: "object",    use: "game",  featured: true },
+  { id: "fox",     name: "Low-Poly Fox",       src: "assets/models/Fox.glb",            type: "character", use: "game",  featured: true },
+  { id: "truck",   name: "Milk Truck",         src: "assets/models/CesiumMilkTruck.glb",type: "vehicle",   use: "game",  featured: true },
+  { id: "duck",    name: "Rubber Duck",        src: "assets/models/Duck.glb",           type: "character", use: "print", featured: true },
+  { id: "walker",  name: "Rigged Walker",      src: "assets/models/CesiumMan.glb",      type: "character", use: "ar",    featured: false },
+  { id: "android", name: "Sci-Fi Android",     src: "assets/models/BrainStem.glb",      type: "character", use: "ar",    featured: false },
+];
+const GEN_COST = 25, MONTHLY_CREDITS = 600;
+const STAGES = ["Queued", "Meshing", "Texturing", "Finishing"];
+
+/* ---------- persisted state (free-tier credits + generated models) ---------- */
+const monthKey = new Date().toISOString().slice(0, 7);
+let state = JSON.parse(localStorage.getItem("forge3d") || "null");
+if (!state || state.month !== monthKey) {
+  state = { month: monthKey, credits: MONTHLY_CREDITS, generated: [] };
+}
+const save = () => localStorage.setItem("forge3d", JSON.stringify(state));
+
+/* ---------- filters (kept in URL like the original studio) ---------- */
+const params = new URLSearchParams(location.search);
+const filters = {
+  category: params.get("category") || "featured",
+  model_type: params.get("model_type") || "all",
+  use_case: params.get("use_case") || "all",
+  q: "",
+};
+document.querySelectorAll(".chipgroup").forEach(group => {
+  const key = group.dataset.key;
+  group.querySelectorAll(".chip").forEach(chip => {
+    chip.classList.toggle("active", chip.dataset.val === filters[key]);
+    chip.onclick = () => {
+      filters[key] = chip.dataset.val;
+      group.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c === chip));
+      const p = new URLSearchParams(location.search);
+      p.set(key, chip.dataset.val);
+      history.replaceState(null, "", "?" + p);
+      render();
+    };
+  });
+});
+document.getElementById("search").oninput = e => { filters.q = e.target.value.toLowerCase(); render(); };
+
+/* ---------- gallery ---------- */
+const grid = document.getElementById("grid");
+function allModels() {
+  return [...state.generated.map(g => ({ ...g, generated: true })), ...CATALOG];
+}
+function render() {
+  document.getElementById("creditval").textContent = state.credits;
+  const items = allModels().filter(m =>
+    (filters.category !== "featured" || m.featured || m.generated) &&
+    (filters.model_type === "all" || m.type === filters.model_type) &&
+    (filters.use_case === "all" || m.use === filters.use_case) &&
+    (!filters.q || m.name.toLowerCase().includes(filters.q))
+  );
+  grid.innerHTML = items.length ? "" : '<div class="empty">No models match these filters.</div>';
+  for (const m of items) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <model-viewer src="${m.src}" loading="lazy" reveal="auto" camera-controls disable-zoom auto-rotate interaction-prompt="none"></model-viewer>
+      <div class="meta">
+        <span class="name">${m.name}</span>
+        <span class="tags">
+          ${m.generated ? '<span class="tag gen">Generated</span>' : ""}
+          ${m.featured ? '<span class="tag">Featured</span>' : ""}
+          <span class="tag">${m.type}</span><span class="tag">${m.use}</span>
+        </span>
+        <div class="actions">
+          <button class="btn view">View</button>
+          <a class="btn" href="${m.src}" download>GLB</a>
+        </div>
+      </div>`;
+    card.querySelector(".view").onclick = () => openModal(m);
+    grid.appendChild(card);
+  }
+}
+
+/* ---------- viewer modal ---------- */
+const modal = document.getElementById("modal");
+function openModal(m) {
+  document.getElementById("modalName").textContent = m.name;
+  document.getElementById("modalviewer").src = m.src;
+  document.getElementById("modalDownload").href = m.src;
+  modal.classList.add("open");
+}
+document.getElementById("modalClose").onclick = () => modal.classList.remove("open");
+modal.onclick = e => { if (e.target === modal) modal.classList.remove("open"); };
+
+/* ---------- generation (simulated free-tier pipeline) ---------- */
+const tabs = { text: document.getElementById("tabText"), image: document.getElementById("tabImage") };
+let mode = "text";
+tabs.text.onclick = () => setMode("text");
+tabs.image.onclick = () => setMode("image");
+function setMode(m) {
+  mode = m;
+  tabs.text.classList.toggle("active", m === "text");
+  tabs.image.classList.toggle("active", m === "image");
+  document.getElementById("textPane").style.display = m === "text" ? "" : "none";
+  document.getElementById("imagePane").style.display = m === "image" ? "" : "none";
+}
+const drop = document.getElementById("drop"), file = document.getElementById("file");
+let uploadedName = null;
+drop.onclick = () => file.click();
+file.onchange = () => {
+  if (!file.files[0]) return;
+  uploadedName = file.files[0].name.replace(/\.[^.]+$/, "");
+  const url = URL.createObjectURL(file.files[0]);
+  document.getElementById("dropLabel").innerHTML = `<img src="${url}" alt="reference">`;
+};
+
+const genBtn = document.getElementById("generate");
+genBtn.onclick = () => {
+  const promptText = document.getElementById("prompt").value.trim();
+  if (mode === "text" && !promptText) return alert("Describe the model you want first.");
+  if (mode === "image" && !uploadedName) return alert("Upload a reference image first.");
+  if (state.credits < GEN_COST) return alert("Not enough credits — the free plan refills monthly.");
+
+  state.credits -= GEN_COST; save(); render();
+  const label = mode === "text" ? promptText : uploadedName;
+  const task = document.createElement("div");
+  task.className = "task";
+  task.innerHTML = `<span class="stage">Queued</span> — ${label}<div class="bar"><i></i></div>`;
+  document.getElementById("queue").prepend(task);
+
+  let step = 0;
+  const timer = setInterval(() => {
+    step++;
+    const pct = Math.min(100, step * 12.5);
+    task.querySelector(".bar i").style.width = pct + "%";
+    task.querySelector(".stage").textContent = STAGES[Math.min(STAGES.length - 1, Math.floor(step / 2))];
+    if (pct >= 100) {
+      clearInterval(timer);
+      task.classList.add("done");
+      task.querySelector(".stage").textContent = "Done";
+      const base = CATALOG[Math.floor(Math.random() * CATALOG.length)];
+      state.generated.unshift({
+        id: "gen-" + Date.now(),
+        name: label.length > 32 ? label.slice(0, 32) + "…" : label,
+        src: base.src, type: base.type, use: base.use, featured: false,
+      });
+      save(); render();
+      setTimeout(() => task.remove(), 4000);
+    }
+  }, 900);
+};
+
+document.getElementById("resetBtn").onclick = () => { localStorage.removeItem("forge3d"); location.reload(); };
+
+render();
+</script>
+</body>
+</html>
