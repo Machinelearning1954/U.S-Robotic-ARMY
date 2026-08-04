@@ -517,3 +517,25 @@ windows, and a medical mark. Dwell on the shelf to clock it — **+25**, once.
   on a fictional vehicle would be both a legal and an ethical error. The module instead
   wears an **original teal cross with a pulse line**, drawn procedurally — verified at
   the pixel level to contain **zero** red-cross pixels.
+
+## The Surge Wall — a storm barrier, not a border (live in the prototype, v1.69)
+
+A curtain of light standing out in the water off the south coast (**Z -125, spanning
+X -60 → 110**): nine luminous panels between concrete pylons, with a taller end-pylon.
+Come within 60 units to clock it — **+20**, once.
+
+- **It answers the weather.** Dormant on a fair day (a quarter-raised shimmer), and when a
+  storm comes up it **rises and blazes** — panels climbing to full height, the crown caps
+  turning from cyan to white — then settles again once the weather passes. It reads off the
+  existing storm state, so it belongs to canon already in the game (the Storm Desk, the
+  Storm Walkers, "who owns the storm") rather than sitting beside it.
+- **Boundary — this one was a refusal before it was a feature.** The reference was captioned
+  *"7,400 KM OF BORDER — ONE ELECTRONIC WALL"*: a national electronic **border** wall with
+  patrol vehicles at its foot. **Declined as designed.** A border wall's whole function is to
+  detect and stop **people**, which is the precise inverse of this island's standing rule —
+  it watches *with* you, never *at* you — and it is the same thing already refused for the
+  face-scan border, the ankle monitors and the targeting radar. The real nation as security
+  actor is out as well.
+- **What was kept is only the image** — a vast luminous curtain marching toward the horizon —
+  with its **purpose inverted**: this wall holds back the **sea**. It stops water, never
+  people. Nobody is scanned, stopped, or identified by it. All meshes from primitives.
