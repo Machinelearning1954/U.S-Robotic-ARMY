@@ -460,3 +460,26 @@ storage round-trip, re-application after reload, and 0 page errors.
 DoF/motion blur) are the generic vocabulary every renderer ships. Depth of field and motion
 blur are **not** offered because this engine has no `ShaderPass` — they exist on the
 `claude/engine-pbr-upgrade` branch and can be added to the panel if that branch is merged.
+
+## v1.70 — GERSTNER SEA
+
+The water was **three stacked sine waves**, which can only ever produce rolling hills: every
+crest as round as every trough. Real water is asymmetric — **sharp crests, broad flat
+troughs** — and that asymmetry is most of what makes a sea look like a sea.
+
+Replaced with a **five-layer Gerstner** surface (swell → chop → ripple). Gerstner waves get
+the asymmetry by displacing vertices **horizontally as well as vertically**, bunching them
+toward the crest. Rest positions are cached once, since horizontal displacement means x/z can
+no longer be read back from the mesh.
+
+**Verified (6/6):** five layers active; real relief (−0.92 → +0.85); **crest bunching measured
+at 0.19 mean / 0.36 max horizontal shift from rest** — the actual Gerstner signature; the sea
+animates; vertices provably move in x/z, not only y; 0 page errors.
+
+**A test-methodology note worth keeping.** The first version of this test asserted "more
+vertices below the mean height ⇒ broader troughs." That metric is *invalid under Gerstner*:
+horizontal bunching makes vertex sampling non-uniform (they crowd toward crests), so the
+fraction measures sampling density, not wave shape — and it read 0.475, "failing" a sea that
+was working correctly. Replaced with a direct measurement of displacement from rest. Third
+time this session a test was wrong rather than the code; each one was fixed in the test rather
+than by loosening the game.
