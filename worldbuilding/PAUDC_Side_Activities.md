@@ -179,3 +179,25 @@ its own after 45s). First launch **+15**, saved.
   tracks no person. The device says so on its own screen: **"NO ID · TERRAIN ONLY."**
 - **Boundary:** the reference reel named a real phone brand in its caption — excluded. The
   drone, panel and UI are original, built from primitives and drawn at runtime.
+
+## The Wash Bay — your ride gets dirty, and you clean it (live in the prototype, v1.71)
+
+A drive-through wash on the flats (**130, 90**): a concrete pad, two posts, a green arch of
+spray jets, and foam that boils up around a car being cleaned.
+
+- **Grime is a real state, not a prop.** Drive and your paint dulls — fastest through
+  **sand** (0.030/s), slower through **bush** (0.020/s), barely at all on **asphalt**
+  (0.005/s), and open **water rinses it off** (−0.020/s). It scales with speed. Dirt is
+  tracked **per vehicle**, so the car you thrash on the beach is filthy while the one in the
+  garage stays clean.
+- **It genuinely changes the paint.** Grime darkens and desaturates the body colour toward a
+  dusty brown and drops the specular hard (shininess 64 → 9.6 at full dirt), so a dirty car
+  stops catching the sun. Base colours are captured before anything is ever dulled, so the
+  original paint always comes back exactly.
+- **Washing:** roll into the bay and stop. Jets fire, foam rises, and the shine comes back in
+  about two seconds. First clean **+15**, saved.
+- **Boundary:** the reference was a **GTA 6 concept clip**. The logo and wordmark, the named
+  character, "Vice City", "Ocean Drive", the car design, the HUD and the minimap are **all
+  excluded** (Rule Zero). What was taken is the generic activity — washing a vehicle — which
+  nobody owns, and it earned its place because this game already tracks the surface under the
+  tyres and already gives bodywork a specular highlight. Everything built from primitives.
