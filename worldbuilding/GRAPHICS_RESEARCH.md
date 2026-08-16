@@ -483,3 +483,24 @@ fraction measures sampling density, not wave shape — and it read 0.475, "faili
 was working correctly. Replaced with a direct measurement of displacement from rest. Third
 time this session a test was wrong rather than the code; each one was fixed in the test rather
 than by loosening the game.
+
+## v1.72 — DEPTH-GRADED SEA
+
+The reference was a **GTA VI vs GTA V** marketing comparison. All branding excluded; what was
+useful was its own labelling of the difference — *"realistic oceans"* against *"simpler
+water"* — and the top image makes the point plainly: bright turquoise shallows grading to
+deep blue offshore.
+
+This game's sea was **one flat teal across the entire map**, which is the single biggest tell
+separating a toy ocean from a coastline. Real shallows are bright because light reaches the
+sand and bounces back; the colour deepens toward near-black as the bottom drops away.
+
+Water now carries **per-vertex colour baked from the actual seabed height** beneath each
+point, so the gradient follows real bathymetry — reefs and sandbars glow, trenches go dark —
+rather than being a painted-on pattern. It costs nothing at runtime because the seabed never
+moves, and it layers under the v1.70 Gerstner displacement rather than replacing it.
+
+**Verified (8/8):** the mesh carries a colour attribute and the material consumes it; a vertex
+in 1.6 m of water reads **(0.24, 0.68, 0.71)** turquoise while one in 27 m reads **(0.02,
+0.13, 0.26)** navy; a real gradient spans the map (green channel 0.13 → 0.86); the gradient
+provably tracks depth rather than position; Gerstner waves still animate on top; 0 page errors.
