@@ -539,3 +539,28 @@ Come within 60 units to clock it — **+20**, once.
 - **What was kept is only the image** — a vast luminous curtain marching toward the horizon —
   with its **purpose inverted**: this wall holds back the **sea**. It stops water, never
   people. Nobody is scanned, stopped, or identified by it. All meshes from primitives.
+
+## The Overlook — a clifftop pull-in above the sea (live in the prototype, v1.73)
+
+A paved spur on a headland with a low guard wall along the seaward edge, a bench, and two
+lamps that light after dark. Reaching it pays **+15 on foot — or +25 if you drive up**,
+because a pull-in is for arriving in something.
+
+- **The site finds itself.** Rather than hand-placing it, the code **scans the whole map at
+  build time** for the best headland: raised ground with plenty of deep water around it,
+  scored on elevation and on how much of the surroundings is open sea. It settled on
+  **(-185, -95)** — 5.7 m up with 31% open water in every direction.
+- **Why it exists:** the last two versions rebuilt the sea (v1.70 Gerstner swell, v1.72
+  depth-graded shallows) and there was nowhere good to *look* at it from. This is the vantage.
+- **Boundary:** the reference was a **real luxury marque** posed on a cliff. The brand name,
+  the winged badge and the model name are **all excluded** (Rule Zero), exactly as the Maybach
+  and AMG references were handled. Kept the composition, and the design language that is
+  nobody's trademark: a **full-width rear light bar and quad tailpipes**, added to the Pearl.
+  No badge, emblem or lettering is reproduced anywhere.
+
+### A note on the self-siting search
+
+The first pass required ground above **10 m** beside deep water and found **nothing** — this
+island's headlands top out lower than that, so it silently fell back to a hardcoded default at
+3.2 m with no view. Caught because the test asserted the *found* site's real elevation rather
+than trusting that the search had run. Threshold corrected to the terrain that actually exists.
