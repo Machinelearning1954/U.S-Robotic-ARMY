@@ -564,3 +564,28 @@ The first pass required ground above **10 m** beside deep water and found **noth
 island's headlands top out lower than that, so it silently fell back to a hardcoded default at
 3.2 m with no view. Caught because the test asserted the *found* site's real elevation rather
 than trusting that the search had run. Threshold corrected to the terrain that actually exists.
+
+## The Surge — the sea comes up over the land (live in the prototype, v1.74)
+
+Press **U** (or wait for one) and the island calls a **surge**: a warning goes out, the sea
+climbs **3.6 m** over about eleven seconds, holds, then ebbs back. Ride it out on high ground
+and stay dry for **+25**.
+
+- **Sea level is now a variable, not a constant.** Every water check in the game reads it —
+  swimming, boats, surface type, the wet check, even where groundcover may grow (**18 call
+  sites**). So when the sea rises the whole world responds on its own: shallows drown, the
+  shoreline walks inland, and you start swimming where you were standing a moment ago. There
+  is no special-cased "flood mode" anywhere.
+- **It finally gives the Surge Wall (v1.69) something to do.** The wall was built to stand up
+  against the sea and until now only rain ever triggered it; it now answers a surge too.
+- **The framing decision.** The reference was a **mass-casualty image** — a wall of water over
+  a crowded beach, people running. This game has a non-lethal floor, so the **disaster is kept
+  and the casualties are not**: the surge is *warned* before it lands, the wall breaks it, and
+  if the water catches you, **you swim** — swimming already exists, and nobody drowns on this
+  island. The game says so on screen when it gets you.
+- **Boundary:** the game branding in the reference is excluded (Rule Zero).
+
+**Verified (11/11):** starts at the ordinary tideline; a low dry point at 1.84 m provably turns
+to water as the sea rises and dries again as it falls; the water mesh moves with it; the full
+phase machine runs **warning → rising → peak → ebbing → calm**; it returns exactly to 0.4; the
+Surge Wall stands up for it; 0 page errors. The v1.71 and v1.72 suites still pass on top.
