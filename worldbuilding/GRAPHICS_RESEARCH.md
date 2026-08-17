@@ -504,3 +504,37 @@ moves, and it layers under the v1.70 Gerstner displacement rather than replacing
 in 1.6 m of water reads **(0.24, 0.68, 0.71)** turquoise while one in 27 m reads **(0.02,
 0.13, 0.26)** navy; a real gradient spans the map (green channel 0.13 → 0.86); the gradient
 provably tracks depth rather than position; Gerstner waves still animate on top; 0 page errors.
+
+## v1.75 — BUOYANCY & WAKES
+
+v1.70 gave the sea real Gerstner waves, but **nothing floated on them**: boats stayed pinned to
+a flat line while the water heaved underneath — which reads *worse* than having no waves at all,
+because the eye sees the contradiction.
+
+- **`seaWaveAt(x,z)` samples the same wave function analytically**, so a hull sits on the actual
+  surface. Verified against the mesh itself: worst disagreement across 46 sampled vertices was
+  **0.000**.
+- **Attitude comes from the water, not a canned animation.** The hull pitches from the slope
+  along its heading and rolls from the slope across its beam, sampled 2.6 m fore/aft and
+  port/starboard, then eased so it doesn't jitter.
+- **Wakes** are foam quads laid behind a moving vessel, spreading and fading as they age — and
+  each one **re-samples the surface every frame**, so foam rides the swell instead of clipping
+  through it. Back on land the hull eases level again.
+
+**Verified (11/11):** sampler matches the mesh exactly; a vessel on water is buoyant and its hull
+provably rises and falls (0.86 → 0.10); it pitches and rolls and the mesh rotation matches the
+computed attitude; a moving vessel lays foam that sits on the surface; the wake **decays**
+(0.505 → 0.459 → 0.414) once you stop laying it; it levels out on land; 0 page errors.
+
+**Test note:** the wake check originally asserted "gone within 9 seconds" and failed — headless
+sim time runs far slower than wall-clock, so that measured the harness, not the code. Rewritten
+to assert monotonically falling opacity, which tests the actual decay.
+
+## Regression sweep restored (`tests/regression-sweep.js`)
+
+The original sweep lived only in scratch space and was lost when the container reset. Rebuilt
+and now **committed to the repo** so it survives. 17 checks: st() shape, **zero external
+requests**, vehicle roster, groundcover, rigged pedestrians, sea state, on-foot and swimming,
+save/load round-trip, graphics settings actually biting, the benchmark, and the recent features
+(surge, scout, volley, no third-party embeds). Run with
+`npm i playwright-core && node tests/regression-sweep.js`.
