@@ -538,3 +538,27 @@ requests**, vehicle roster, groundcover, rigged pedestrians, sea state, on-foot 
 save/load round-trip, graphics settings actually biting, the benchmark, and the recent features
 (surge, scout, volley, no third-party embeds). Run with
 `npm i playwright-core && node tests/regression-sweep.js`.
+
+## v1.76 — WATER FX: splashes on impact, rings in the rain
+
+A water-feature comparison graphic (branding excluded) that was mostly a scorecard of work
+already done — Gerstner waves (v1.70), buoyancy + wakes (v1.75), depth transparency (v1.72).
+Two items on its GTA VI column were genuinely missing, and are now built:
+
+- **Splashes / foam bursts:** a foam pool blooms where something hits the water — the player
+  ducking under, a vessel entering the water, and bow spray thrown while running fast. Distinct
+  from the trailing wake, which is a continuous track.
+- **Rain rings:** while it rains, the surface near the camera dimples with expanding rings, the
+  "dynamic effects" panel from the reference. Rings spawn only on water.
+
+Both are cheap billboard pools that **re-sample the wave surface every frame**, so they ride the
+real swell rather than sitting at a fixed height — the same fix the wakes use.
+
+**Verified (8/8):** starts empty; a splash appears on the surface and fades; ducking under water
+throws one; rain dimples the water and the rings sit on water riding the surface; rings clear
+when the rain stops; 0 page errors. Full regression sweep still 17/17.
+
+**Bug caught:** the splash/ring position was set once at spawn, but seaWaveAt is time-varying, so
+they drifted off the moving surface within a frame — the test's on-surface assertion caught it.
+Fixed by re-sampling y each frame. Also renamed a `ringT` timer that collided with the LightRing
+feature's global (SyntaxError at load, caught before commit).
