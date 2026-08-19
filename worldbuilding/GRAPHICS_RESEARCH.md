@@ -562,3 +562,33 @@ when the rain stops; 0 page errors. Full regression sweep still 17/17.
 they drifted off the moving surface within a frame — the test's on-surface assertion caught it.
 Fixed by re-sampling y each frame. Also renamed a `ringT` timer that collided with the LightRing
 feature's global (SyntaxError at load, caught before commit).
+
+## v1.77 — OPTIMISATION: analytic water normals (measured 42% faster water update)
+
+Profiled the per-frame cost and found the hot path: `water.geometry.computeVertexNormals()`
+ran **every frame** at **~1.22 ms** — a full triangle traversal plus reallocation over 4,455
+vertices, roughly 7% of a 60 fps budget spent recomputing water lighting normals.
+
+Gerstner waves have a **closed-form surface normal** (GPU Gems). The wave loop already computes
+`cos`/`sin` of each wave's phase to displace the vertex; the normal is a few multiply-adds on
+those *same* values. So the normal is now accumulated **inline in the position loop** and
+`computeVertexNormals()` is gone entirely.
+
+**Measured, full-path A/B on the live 4,455-vertex mesh (80 iterations):**
+
+| | old (loop + computeVertexNormals) | new (loop with inline normals) |
+|---|---|---|
+| per frame | **2.131 ms** | **1.234 ms** |
+
+**0.90 ms saved per frame — a 42% cut to the water update**, ~5% of a 60 fps frame back. The
+analytic normals are provably unit-length and up-facing (222 sampled, 0 bad). Verified the sea
+still animates, shades and drives buoyancy correctly; full regression sweep 17/17.
+
+### On "RTX-level" graphics — the honest limit, restated
+
+The RTX brand name is not used anywhere in the game (Rule Zero, as with every real brand). The
+feature people mean by it — **real-time ray-traced reflections** — is not possible in this
+engine; it has no path-tracing and no `ShaderPass`. The closest achievable step is
+**environment-mapped reflections**, which are already built and waiting on the
+`claude/engine-pbr-upgrade` branch (v2.00). This release makes the water *faster*, not
+ray-traced; those are different requests and only one of them is achievable here.
