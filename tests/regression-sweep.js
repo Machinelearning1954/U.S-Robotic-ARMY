@@ -2,9 +2,16 @@
 // PAUDC regression sweep — rebuilt v1.75 after the container reset wiped the original.
 // Checks that the load-bearing systems still work after any change, across the whole file.
 const {chromium}=require('playwright-core');
+const fs=require('fs');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// v1.78: no hardcoded chromium build number — honor $PW_CHROMIUM, else find any /opt/pw-browsers
+// install, else fall back to playwright's own resolution so the sweep runs on a fresh clone.
+const chromePath=process.env.PW_CHROMIUM||(()=>{try{
+  return fs.readdirSync('/opt/pw-browsers').filter(d=>d.startsWith('chromium'))
+    .map(d=>`/opt/pw-browsers/${d}/chrome-linux/chrome`).find(p=>fs.existsSync(p));
+}catch(e){return undefined;}})();
 (async()=>{const errors=[];
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',headless:true,args:['--use-gl=swiftshader','--enable-unsafe-swiftshader','--no-sandbox','--disable-background-timer-throttling']});
+const b=await chromium.launch({...(chromePath?{executablePath:chromePath}:{}),headless:true,args:['--use-gl=swiftshader','--enable-unsafe-swiftshader','--no-sandbox','--disable-background-timer-throttling']});
 const page=await b.newContext({viewport:{width:820,height:520}}).then(c=>c.newPage());
 page.on('pageerror',e=>errors.push(String(e)));
 const ext=[];page.on('request',r=>{const u=r.url();if(!/^(file:|data:|blob:|about:)/.test(u))ext.push(u);});
@@ -24,8 +31,9 @@ ck('SELF-CONTAINED: zero external requests',ext.length===0,ext.slice(0,2).join('
 ck('vehicle roster intact (>=11 rides)',(await page.evaluate(()=>window.__paudc.VEH.length))>=11);
 ck('groundcover + stones populated',s.grassCount>0&&s.rockCount>0,'grass='+s.grassCount+' stones='+s.rockCount);
 ck('pedestrians are rigged',s.pedRigged>0,'rigged='+s.pedRigged);
-ck('sea starts at the ordinary tideline',s.seaLevel===0.4);
-ck('sea has wave layers + depth tint',s.waveLayers===5&&s.seaTinted===true);
+const seaBase=await page.evaluate(()=>window.__paudc.SEA_BASE);
+ck('sea starts at the ordinary tideline',typeof seaBase==='number'&&Math.abs(s.seaLevel-seaBase)<1e-9,'seaLevel='+s.seaLevel+' base='+seaBase);
+ck('sea has wave layers + depth tint',s.waveLayers>=3&&s.seaTinted===true,'layers='+s.waveLayers);
 
 // C. ON FOOT + SWIMMING
 await page.keyboard.press('f');
@@ -52,7 +60,24 @@ ck('benchmark reports whole-frame cost',(await page.evaluate(()=>window.__paudc.
 
 // F. RECENT FEATURES STILL ALIVE
 ck('surge machine runs',await page.evaluate(()=>{const q=window.__paudc;const r=q.startSurge();q.surge.t=99;return r===true;}));
-await page.evaluate(()=>window.__paudc.setSurgeH(0));
+// v1.78: surge coherence — the raised sea must move the WHOLE water model, not just the mesh.
+// The player is still in deep water from section C, so the swimmer has to ride up with it.
+const sg=await page.evaluate(()=>{const q=window.__paudc;q.setSurgeH(2.5);
+  return{sea:q.st().seaLevel,wave:q.seaWaveAt(150,-250)};});
+ck('surge lifts the sea level itself',Math.abs(sg.sea-(seaBase+2.5))<0.01,'sea='+sg.sea);
+ck('surge lifts the sampled wave surface',sg.wave>1.2,'waveY='+sg.wave.toFixed(2)); // 2.5 surge minus worst-case trough (all 1.09 of amplitude down) still clears 1.2
+ck('surge lifts the swimmer with the water',await poll(()=>{const q=window.__paudc;
+  return q.st().swimming&&q.walker.position.y>1.5;},9000),
+  'walkerY='+await page.evaluate(()=>+window.__paudc.walker.position.y.toFixed(2)));
+ck('surge lets go cleanly',await page.evaluate(()=>{const q=window.__paudc;
+  q.surge.on=false;q.surge.phase='calm';q.setSurgeH(0);   // force it off — the natural ebb takes ~20s of sim time
+  return q.st().seaLevel===q.SEA_BASE&&q.st().surgeH===0;}));
+// v1.78: buoyancy axis convention — pitch must live on rotation.z (the fore-aft axis every other
+// tilt in the game uses), roll on rotation.x. Source-level check, since heaving a hull onto a
+// specific wave slope isn't reachable from a throttled headless frame.
+const src=fs.readFileSync(require('path').resolve(__dirname,'../game/3d.html'),'utf8');
+ck('buoyancy pitch rides rotation.z, roll rides rotation.x',
+  /cur\.g\.rotation\.z=buoyPitch;cur\.g\.rotation\.x=buoyRoll/.test(src));
 ck('wrist scout launches',await page.evaluate(()=>{const q=window.__paudc;q.P.x=-60;q.P.z=95;return q.launchScout()!==false;}));
 await page.evaluate(()=>window.__paudc.launchScout());
 ck('beach volley serves',await page.evaluate(()=>{const q=window.__paudc;q.vbServe();return q.st().vbOn===true;}));

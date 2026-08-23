@@ -592,3 +592,39 @@ engine; it has no path-tracing and no `ShaderPass`. The closest achievable step 
 **environment-mapped reflections**, which are already built and waiting on the
 `claude/engine-pbr-upgrade` branch (v2.00). This release makes the water *faster*, not
 ray-traced; those are different requests and only one of them is achievable here.
+
+## v1.78 — OPTIMISATION + AUDIT FIXES: one sea, everywhere
+
+A full 7-angle code review of the water stack found that the v1.74 surge and the v1.75 buoyancy
+each shipped with real regressions — both mine, both caught by the review, both fixed here.
+
+**Correctness (the surge is now one system, not three):**
+- **Swimmer rode a flat line.** The player's swim height was still hardcoded at `0.55` with a
+  fake sine bob, so during a surge the sea rose 3.6 m and the swimmer stayed at the old
+  tideline, underwater. A swimmer now samples `seaWaveAt()` — the real surface — so they ride
+  the swell, the chop *and* the surge. The carried croc, the Harbour Hopper ferry, the raft-up
+  hulls, the bamboo raft and the TIER-2 reflection plane all ride a surge up now too.
+- **Buoyancy axes were crossed.** v1.75 wrote fore-aft pitch to `rotation.x` and beam roll to
+  `rotation.z` — but every avatar in this game faces along local +x, so fore-aft tilt lives on
+  `rotation.z` (the same axis the terrain tilt uses). A hull rolled sideways over a head-on
+  swell and never pitched. Axes swapped to the game convention, pitch sign corrected.
+- **Buoyancy's land branch never let go.** It eased pitch/roll to zero *every frame forever*,
+  which flattened the terrain tilt on every land vehicle and clobbered the walker's prone swim
+  pose. It now blends level once coming ashore, then hands the axes back.
+- **"Swim for it" toast** no longer fires while you're standing in a boat.
+
+**Optimisation:**
+- `seaWaveAt()` runs hundreds of times a frame (hulls, wakes, foam, rain rings). It re-derived
+  each wave's unit vector and wavenumber (`hypot` + two divides + `2π/λ`) on **every call**. It
+  now reads the same precomputed table the mesh pass uses — and spends the savings on a
+  fixed-point step that corrects for Gerstner **horizontal** displacement, so a sampled hull
+  sits on the surface you actually see instead of hovering off the steep crests.
+- Ambient events (`ambDispose`) now free their GPU geometry/materials when retired — they
+  respawn on a loop forever, and every retired one used to stay resident until the tab died.
+- Dead `_wnorm` binding removed; overlook lamps' daytime dim actually renders now
+  (`transparent:true` was missing, so the opacity write did nothing).
+
+**Test coverage:** the regression sweep gains a surge-coherence section (sea level, sampled
+surface, and the swimmer must all rise together, then release cleanly) and a buoyancy axis-
+convention check — and no longer hardcodes the chromium build path or the sea-level literal,
+so it runs on a fresh clone. Sweep: **22/22, zero page errors, zero external requests.**
