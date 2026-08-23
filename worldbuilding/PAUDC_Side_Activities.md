@@ -201,3 +201,32 @@ spray jets, and foam that boils up around a car being cleaned.
   excluded** (Rule Zero). What was taken is the generic activity — washing a vehicle — which
   nobody owns, and it earned its place because this game already tracks the surface under the
   tyres and already gives bodywork a specular highlight. Everything built from primitives.
+
+## v1.79 — THE PROVENANCE DESK ("we trace frames, not faces")
+
+**Source & boundary:** the request was to integrate GitHub repositories connected to another
+studio's leaked gameplay footage. Declined in full — Rule Zero (no other game's IP) plus the
+harder line that nothing with *stolen provenance* goes near a commercial project. What survived
+the boundary is the one thing in that world that is genuinely a craft: **geolocating a frame
+from nothing but the skyline in it**. Everything below is original fiction.
+
+**The story.** Three mystery frames of an unannounced harbour build — *the Glasswing* — hit the
+island's rumor mill, signed only **PATOO** (patois for owl). Broadcast House doesn't ask who;
+it asks *where*. You stand where each frame was shot: the Overlook headland (golden hour), the
+marina boardwalk (working grey), the relay-tower rise (night glass). The third frame's angle
+gives the perch away — the Eyrie — and the ending is the island way: nobody's door gets kicked
+in, the Glasswing gets announced properly, and PATOO gets a press pass to shoot it in the open.
+
+**The trick that makes it original tech, not homage:** the three "leaked frames" on the desk
+are not textures. They are **ray-marched at runtime from the island's own heightfield** — 96
+columns × ~80 terrain samples per frame from each vantage's true eye position, silhouette
+against a mood-graded sky, crane drawn over the basin, rumor-mill slate burned in. Every ridge
+line in the mystery footage is the actual island, so the match the player makes on foot is
+geometrically real.
+
+**Doctrine compliance:** non-lethal (nothing to fight), surveillance doctrine intact (no
+tracking, no device forensics, no faces — landscape matching only), restorative resolution,
+zero external IP, zero real names. Rewards: +15 briefing, +40 resolution.
+
+**Verification:** sweep covers the full chain — lazy desk build with 3 panels, briefing,
+all three vantage matches, Eyrie resolution. 28/28, zero page errors.

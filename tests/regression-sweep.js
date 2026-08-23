@@ -82,6 +82,18 @@ ck('wrist scout launches',await page.evaluate(()=>{const q=window.__paudc;q.P.x=
 await page.evaluate(()=>window.__paudc.launchScout());
 ck('beach volley serves',await page.evaluate(()=>{const q=window.__paudc;q.vbServe();return q.st().vbOn===true;}));
 ck('marquee has no third-party embed',(await page.evaluate(()=>document.querySelectorAll('iframe,embed,object').length))===0);
+// v1.79: THE PROVENANCE DESK — desk builds lazily, briefing fires, and the whole vantage
+// chain walks through to the restorative ending. Dwell timers are primed (headless rAF ~1fps).
+ck('provenance desk built with 3 terrain-derived frames',await poll(()=>{const q=window.__paudc;
+  return q.PVD.deskX!==0&&q.st().pvdPanelN===3;},9000));
+await page.evaluate(()=>{const q=window.__paudc;q.setPvdMsgT(9e9);q.P.x=q.PVD.deskX;q.P.z=q.PVD.deskZ;q.P.v=0;q.setPvdT(9);});
+ck('provenance briefing fires from the desk',await poll(()=>window.__paudc.st().pvdStage>=1,9000));
+for(let i=0;i<3;i++){
+  await page.evaluate(()=>{const q=window.__paudc;const v=q.pvdVantages()[q.PVD.stage-1];
+    q.P.x=v.X;q.P.z=v.Z;q.P.v=0;q.setPvdT(9);});
+  ck('provenance frame '+(i+1)+' matches at its vantage',await poll(`window.__paudc.st().pvdStage>=${i+2}`,9000));}
+await page.evaluate(()=>{const q=window.__paudc;q.P.x=q.EYRIE.X;q.P.z=q.EYRIE.Z;q.P.v=0;q.setPvdT(9);});
+ck('provenance resolves restoratively at the Eyrie',await poll(()=>window.__paudc.st().pvdDone===true,9000));
 
 console.log('\nPAGE ERRORS:',errors.length,errors.join(' | ').slice(0,240));
 ck('zero page errors across the sweep',errors.length===0);

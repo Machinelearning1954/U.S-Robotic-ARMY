@@ -100,3 +100,11 @@ kept because `tod: NaN` was independently real.
 **Still outstanding (not code):** `game/army.html` embeds third-party social posts (9 references) and
 **must not ship**; the remote AI-generated `.glb` is opt-in only (`?mesh=1`) and needs provenance
 settled before it appears in a sold build.
+
+**v1.79 note — declined source, original replacement:** a request to integrate GitHub
+repositories tied to leaked footage of another studio's game (and analysis/mirrors thereof) was
+declined outright: third-party game IP plus stolen-provenance material, incompatible with a
+sellable build. No repo was fetched, cloned, or referenced. The shipped feature, THE PROVENANCE
+DESK, is 100% original: an in-fiction vantage-matching investigation whose "mystery frames" are
+generated at runtime from the game's own terrain heightfield. Invented names only ("PATOO",
+"the Glasswing"); no real people, brands, or other-game references.
