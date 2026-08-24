@@ -628,3 +628,32 @@ each shipped with real regressions — both mine, both caught by the review, bot
 surface, and the swimmer must all rise together, then release cleanly) and a buoyancy axis-
 convention check — and no longer hardcodes the chromium build path or the sea-level literal,
 so it runs on a fresh clone. Sweep: **22/22, zero page errors, zero external requests.**
+
+## v1.80 — LOCKSTEP 30: the console-style cinematic tier
+
+**Source & boundary:** the request described an "RTX 5060 preset" with a 30 FPS cap, SSR, SMAA
+and "DLSS-style upscale," referencing commits and zips that do not exist in this repository —
+nothing was imported (never push unseen code). The GPU product name and the vendor upscaler
+name are out (Rule Zero, as in v1.21 and v1.77), and SSR/SMAA remain impossible in this build
+(no ShaderPass/SMAAPass — the documented engine ceiling). What was real and worth building is
+the console idea underneath: **lock the framerate at 30 so every frame gets an even 33 ms
+budget, then spend that budget on image.** A locked 30 with even pacing reads smoother than an
+uneven 45.
+
+**What shipped:**
+- **LOCKSTEP 30** — a fourth Z-key tier (ADAPTIVE → MAX → OVERKILL → LOCKSTEP 30): a real
+  frame gate at the top of `tick()` (skip rAF callbacks until the 33 ms slot opens), film grade
+  forced on (restored on exit), 4K shadows, bloom +0.22, deep draw at native resolution.
+- **FRAME CAP** — a new graphics-panel row (OFF / 30 / 60) so the pacing lock is also available
+  as a standalone setting, independent of the tier.
+- **Perf HUD integration** — the FPS chip shows `🔒30` under a cap, "healthy" recolors to mean
+  *on the cap* rather than *near 60*, and the tier badge knows the new mode.
+- **Auto-degrade interaction, by construction:** dt measures the gated interval, so a healthy
+  locked frame (~33 ms) sits under the 40 ms slow-frame threshold — the cap can never trigger
+  the adaptive downscaler. Genuine slowness (render cost blowing the 33 ms budget) still
+  degrades, which is what keeps the lock honest on weak hardware. Nothing needed disabling.
+
+**Verification:** state contract covered headlessly (cap + forced grade on entry; clean release
++ grade restore on exit; panel row bites and clears) — pacing itself is unobservable at the
+harness's ~1 fps rAF throttle and is a 3-line gate. Sweep: **31/31, zero page errors, zero
+external requests.**

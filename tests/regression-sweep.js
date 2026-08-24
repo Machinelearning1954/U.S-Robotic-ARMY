@@ -57,6 +57,20 @@ ck('graphics settings actually bite',off===0&&(await page.evaluate(()=>window.__
 await page.evaluate(()=>window.__paudc.togglePerfHud(true));
 await sleep(3500);
 ck('benchmark reports whole-frame cost',(await page.evaluate(()=>window.__paudc.st().benchCalls))>20);
+// v1.80: LOCKSTEP 30 — the console-style cinematic tier. Pacing itself can't be measured at
+// headless ~1fps, so this verifies the state contract: cap + forced grade on entry, clean
+// release + grade restore on exit, and the standalone FRAME CAP panel row.
+const lk=await page.evaluate(()=>{const q=window.__paudc;
+  q.setGrade(false,true);
+  q.setGfxMode(3);const a=q.st();
+  q.setGfxMode(0);const b=q.st();
+  q.setGrade(true,true);
+  return{capA:a.fpsCap,lockA:a.lockstep,gradeA:a.grade,capB:b.fpsCap,lockB:b.lockstep,gradeB:b.grade};});
+ck('LOCKSTEP 30 locks the cap and forces the film grade',lk.capA===30&&lk.lockA===true&&lk.gradeA===true,JSON.stringify(lk));
+ck('leaving LOCKSTEP releases the cap and restores the grade',lk.capB===0&&lk.lockB===false&&lk.gradeB===false,JSON.stringify(lk));
+ck('FRAME CAP panel setting bites and clears',await page.evaluate(()=>{const q=window.__paudc;
+  q.GFXCFG.cap=1;q.applyGfxCfg();const on=q.st().fpsCap===30;
+  q.GFXCFG.cap=0;q.applyGfxCfg();return on&&q.st().fpsCap===0;}));
 
 // F. RECENT FEATURES STILL ALIVE
 ck('surge machine runs',await page.evaluate(()=>{const q=window.__paudc;const r=q.startSurge();q.surge.t=99;return r===true;}));
