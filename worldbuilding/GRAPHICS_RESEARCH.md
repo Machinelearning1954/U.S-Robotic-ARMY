@@ -657,3 +657,39 @@ uneven 45.
 + grade restore on exit; panel row bites and clears) — pacing itself is unobservable at the
 harness's ~1 fps rAF throttle and is a 3-line gate. Sweep: **31/31, zero page errors, zero
 external requests.**
+
+## v1.81 — REVIEW FIXES: the tiers now deliver what they advertise
+
+An 8-angle code review of v1.80 confirmed 12 findings; all are fixed here. (The prompting
+request showed another GPU-brand benchmark reel over another studio's game — the brand names
+and that game's content stay out, as always. The honest answer to "provide this level of
+graphics" is making our own quality tiers actually deliver.)
+
+**Correctness:**
+- **Frame gate now carries its remainder.** The v1.80 gate reset its clock each frame, which
+  quantized the cap to whole vsync slots: 144Hz + cap 60 ran at 48fps; 75Hz + LOCKSTEP ran at
+  25fps sitting exactly on the slow-frame threshold, able to misfire the downscaler the
+  comments called impossible. The accumulator makes the average rate exactly the cap on any
+  refresh rate, resyncing after stalls; the slow threshold widens under a cap so only genuine
+  overruns degrade.
+- **LOCKSTEP holds native for real** — the pxr ternary had been left on the adaptive branch,
+  so the cinematic tier rendered *below* MAX on high-DPR devices. Grass and rock density/radius
+  boosts also now include mode 3 (they had silently skipped it).
+- **The grade bookkeeping respects the player.** Forcing the film grade on entry now records
+  only whether the tier itself forced it; exiting undoes only that, so a C-key choice made
+  mid-lock survives, and re-entrant `setGfxMode(3)` can no longer corrupt the stash and leak
+  the grade permanently on.
+- **The FRAME CAP row tells the truth under the lock** — changing it while LOCKSTEP is active
+  now toasts "queued — LOCKSTEP holds 30 until you leave the tier" instead of confirming a
+  change that silently did nothing.
+- The HUD's capped-health coloring is correct by construction now that the average hits the cap.
+
+**Structure:** one `applyFpsCap()` owns the cap-precedence rule (it was encoded twice in two
+forms); `GFX_CAPS` joins `GFX_SCALES`/`GFX_SHADOWS`; the four tier ternaries share one derived
+`hi` predicate; the shadow map rebuilds only when its size changes; the stale mutable
+`maxFidelity` flag is gone (derived in `st()`); the puddle comment now documents that LOCKSTEP
+deliberately includes the planar reflector — it is an image tier and the 33ms budget pays for it.
+
+**Verification:** sweep grows to **36/36** — mid-lock grade choice survives exit, re-entrant
+lock can't leak, panel cap queues under the lock and applies on exit, gate-accumulator and
+lock-aware-pxr source checks. Zero page errors, zero external requests.

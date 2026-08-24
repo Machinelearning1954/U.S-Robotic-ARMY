@@ -71,6 +71,23 @@ ck('leaving LOCKSTEP releases the cap and restores the grade',lk.capB===0&&lk.lo
 ck('FRAME CAP panel setting bites and clears',await page.evaluate(()=>{const q=window.__paudc;
   q.GFXCFG.cap=1;q.applyGfxCfg();const on=q.st().fpsCap===30;
   q.GFXCFG.cap=0;q.applyGfxCfg();return on&&q.st().fpsCap===0;}));
+// v1.81 review fixes: the grade bookkeeping must respect the player and survive re-entry,
+// and the cap-precedence rule must queue panel changes under the lock, applying them on exit.
+const src=fs.readFileSync(require('path').resolve(__dirname,'../game/3d.html'),'utf8');
+const lk2=await page.evaluate(()=>{const q=window.__paudc;
+  q.setGrade(true,true);q.setGfxMode(3);q.setGrade(false,true);q.setGfxMode(0);const gA=q.st().grade;
+  q.setGrade(false,true);q.setGfxMode(3);q.setGfxMode(3);q.setGfxMode(0);const gB=q.st().grade;
+  q.setGfxMode(3);q.GFXCFG.cap=2;q.applyGfxCfg();const capIn=q.st().fpsCap;
+  q.setGfxMode(0);const capOut=q.st().fpsCap;
+  q.GFXCFG.cap=0;q.applyGfxCfg();q.setGrade(true,true);
+  return{gA,gB,capIn,capOut};});
+ck('mid-lock grade choice survives exiting the tier',lk2.gA===false,JSON.stringify(lk2));
+ck('re-entrant LOCKSTEP cannot leak the forced grade',lk2.gB===false,JSON.stringify(lk2));
+ck('panel cap queues under the lock, applies on exit',lk2.capIn===30&&lk2.capOut===60,JSON.stringify(lk2));
+ck('frame gate carries its remainder (accumulator, not reset)',
+  /_capNext=\(t-_capNext>step\*2\)\?t\+step:_capNext\+step/.test(src));
+ck('LOCKSTEP holds native resolution (pxr is lock-aware)',
+  /pxr=over\?Math\.min\(devicePixelRatio\*1\.6,3\.5\):hi\?Math\.min\(devicePixelRatio,2\.5\)/.test(src));
 
 // F. RECENT FEATURES STILL ALIVE
 ck('surge machine runs',await page.evaluate(()=>{const q=window.__paudc;const r=q.startSurge();q.surge.t=99;return r===true;}));
@@ -88,8 +105,7 @@ ck('surge lets go cleanly',await page.evaluate(()=>{const q=window.__paudc;
   return q.st().seaLevel===q.SEA_BASE&&q.st().surgeH===0;}));
 // v1.78: buoyancy axis convention — pitch must live on rotation.z (the fore-aft axis every other
 // tilt in the game uses), roll on rotation.x. Source-level check, since heaving a hull onto a
-// specific wave slope isn't reachable from a throttled headless frame.
-const src=fs.readFileSync(require('path').resolve(__dirname,'../game/3d.html'),'utf8');
+// specific wave slope isn't reachable from a throttled headless frame. (src is read in section E.)
 ck('buoyancy pitch rides rotation.z, roll rides rotation.x',
   /cur\.g\.rotation\.z=buoyPitch;cur\.g\.rotation\.x=buoyRoll/.test(src));
 ck('wrist scout launches',await page.evaluate(()=>{const q=window.__paudc;q.P.x=-60;q.P.z=95;return q.launchScout()!==false;}));
