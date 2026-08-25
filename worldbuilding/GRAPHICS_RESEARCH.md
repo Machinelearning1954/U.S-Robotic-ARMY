@@ -693,3 +693,65 @@ deliberately includes the planar reflector — it is an image tier and the 33ms 
 **Verification:** sweep grows to **36/36** — mid-lock grade choice survives exit, re-entrant
 lock can't leak, panel cap queues under the lock and applies on exit, gate-accumulator and
 lock-aware-pxr source checks. Zero page errors, zero external requests.
+## v2.00 — ENGINE SWAP: full three.js r180 + PBR (branch `claude/engine-pbr-upgrade`)
+
+The ceiling documented in v1.61 was the stripped bundle itself. It has been **replaced**.
+
+### What changed
+
+The inlined 564 KB stripped bundle is gone; in its place is **three.js r180 (MIT), full
+build + addons**, bundled with esbuild into a single 868 KB inline IIFE — so the file is
+still **one self-contained HTML with no external assets**. Now available for the first
+time: `MeshStandardMaterial` (PBR), `PMREMGenerator` (IBL), `ShaderPass`, `SSAOPass`,
+`SMAAPass`, `TAARenderPass`, `BokehPass`, `Sky`, `Water`, `CSM`.
+
+### What was built on it
+
+- **Procedural normal maps (4).** A height field is drawn in canvas then **Sobel-filtered
+  into a tangent-space normal map** at runtime — concrete (with panel seams), brushed
+  metal, sand (grain + wind ripples) and stucco. This is the surface-relief that flat
+  primitives could never have, and no texture is downloaded to get it.
+- **PBR conversion, deliberately scoped (92 materials).** Vehicle bodywork becomes
+  metallic-flake paint (metalness 0.45, roughness 0.22, metal normal map) with a real
+  **environment map**, so bodywork mirrors sky and catches highlights. Building walls get
+  concrete PBR with normal-mapped relief.
+- **Image-based lighting**, generated from our *own* sky (not a stock HDR) via
+  `PMREMGenerator`, applied **per-material rather than as `scene.environment`**.
+- **SSAO** wired to the OVERKILL tier.
+
+### Three real bugs this shook out — each caught by measurement, not by eye
+
+1. **Physically-correct lighting.** r165 removed legacy lights, so every intensity in this
+   file (authored against the old model) was wrong. Fixed with a compat layer: `decay=0`
+   on all punctual lights plus an `LGAIN` re-gain, **tuned against a measured baseline**
+   (mean world luminance of the pre-swap build = **31.0**; after tuning = **32.6**, ~5%).
+2. **Converting everything blew the exposure out** (luminance 165 vs 31 — a near-white
+   frame). Grass and terrain dominate the frame and respond very differently as PBR, and a
+   global `scene.environment` double-counts with the hemisphere light. Fixed by scoping the
+   conversion to vehicles + walls and applying the env map per-material.
+3. **The wall classifier caught the world itself.** "Any box wider than 10 units" also
+   matched the **ground and water planes**, which are hundreds of units across — turning
+   the terrain into bright concrete. Now: boxes only, bounded under 60 units.
+
+### Status
+
+Boots clean (**0 page errors**) and the **full regression sweep passes with 0 failures**
+(vehicles, afterburner, derby, palaver, audio, photo, save/load). Kept on a **separate
+branch** — `claude/port-antonio-base-design-lvd49n` is untouched and shippable.
+
+**Honest caveat:** this unlocks the *capability* tier (PBR, IBL, SSAO, and now TAA/DoF/
+SSR/`Water`/`CSM` are all possible). It does **not** by itself make the game look like a
+AAA title — the remaining gap is still **assets and animation**: 3,289 meshes built from
+1,865 boxes / 702 cylinders / 547 spheres, and NPCs with no skeleton. The engine is no
+longer the limiting factor; the art is.
+## v2.00 MERGED — the engine swap lands on the main line
+
+The parked `claude/engine-pbr-upgrade` branch (based at v1.64) is now merged into the main
+branch on top of v1.82 — 20 releases of features carried across. Six conflict hunks, all
+resolved by keeping BOTH sides: every v1.65–v1.82 feature intact, plus the full three.js r180
+bundle, the LGAIN light-compat layer, the deferred PBR pass (96 materials converted at first
+run: metalness/roughness, 4 procedural normal maps, image-based lighting from a sky painted at
+runtime, correct sRGB), and SSAO now enabled at OVERKILL *and* LOCKSTEP (the 33ms budget pays
+for it). Verified on the merged build: boots with zero errors on r180, full sweep 40/40, and
+noon frame luminance 169→183 — the gentle lift of real reflections, not the exposure blow-out
+the LGAIN tuning was built to prevent.
