@@ -112,6 +112,15 @@ ck('wrist scout launches',await page.evaluate(()=>{const q=window.__paudc;q.P.x=
 await page.evaluate(()=>window.__paudc.launchScout());
 ck('beach volley serves',await page.evaluate(()=>{const q=window.__paudc;q.vbServe();return q.st().vbOn===true;}));
 ck('marquee has no third-party embed',(await page.evaluate(()=>document.querySelectorAll('iframe,embed,object').length))===0);
+// v1.82: the 6D RIDE — overlay canvas alive, spray lands on the glass, the 6 key toggles it.
+ck('6D ride on by default with overlay canvas',await page.evaluate(()=>{const q=window.__paudc;
+  return q.st().sixD===true&&!!q.sixdCanvas();}));
+await page.evaluate(()=>window.__paudc.sprayGlass(10,2));
+ck('sea spray beads on the glass',await poll(()=>window.__paudc.st().sixDrops>0,6000));
+await page.keyboard.press('6');
+ck('6 key turns the ride off',await poll(()=>window.__paudc.st().sixD===false,4000));
+await page.keyboard.press('6');
+ck('6 key turns it back on',await poll(()=>window.__paudc.st().sixD===true,4000));
 // v1.79: THE PROVENANCE DESK — desk builds lazily, briefing fires, and the whole vantage
 // chain walks through to the restorative ending. Dwell timers are primed (headless rAF ~1fps).
 ck('provenance desk built with 3 terrain-derived frames',await poll(()=>{const q=window.__paudc;

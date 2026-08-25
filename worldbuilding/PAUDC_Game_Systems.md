@@ -1232,3 +1232,20 @@ before the player did anything, and would have silently downgraded that vehicle 
 once the link rotted. The box-jeep fallback always existed, so the remote mesh is now
 **opt-in only** (`?mesh=1`). *Verified: the default build issues zero external requests.*
 Provenance for any AI-generated mesh must be settled before it ships in a sold build.
+
+## v1.82 — THE 6D RIDE (toggle: 6, on by default)
+
+"Make it 6D," counted honestly — no fake physics dimensions, no pseudo-science, just the
+fairground-ride sense of the word:
+
+1–3. **Space** — the island itself.
+4. **Living time** — the day/night cycle everything already breathes with.
+5. **Motion you feel** — haptic rumble through the phone's vibration motor (silently absent on
+   desktop): hard impacts (sharp decel), hitting the water, and the surge announcing itself in
+   slow pulses as it rises.
+6. **Atmosphere on the glass** — the screen is a windshield: wind streaks pull past above
+   ~70 km/h (photo mode excluded), and sea spray beads up and slides down the glass on dives,
+   splashdowns, and bow spray. 2D overlay canvas, pooled droplets (cap 90), cleared when off.
+
+Verification: overlay canvas alive, spray lands, the 6 key toggles both ways — sweep 40/40,
+zero page errors, zero external requests.
