@@ -56,7 +56,7 @@
 <div class="hud" id="prog"></div><div class="hud" id="clout"></div><div class="hud" id="tele"></div><div class="hud" id="toast"></div>
 <div class="hud" id="arrow"></div><div class="hud" id="dist"></div>
 <div class="hud" id="keys"><b>WASD</b> · <b>F</b> foot · <b>E</b> board · <b>V</b> POV · <b>R</b> storm · <b>T</b> static · <b>N</b> time · <b>G</b> dazzler · <b>K</b> swarm · <b>H</b> haul · <b>L</b> drone · <b>O</b> dominoes/shift · <b>`</b> cheats · <b>Z</b> max-gfx · <b>I</b> cam-drone · <b>X</b> sky-rig · <b>SPACE</b> dive · <b>B</b> hover · <b>M</b> map · <b>0</b> sound · <b>9</b> photo · <b>,</b> fps · <b>Q</b>/<b>C</b> gfx</div>
-<div class="hud" id="fine">Fictional game world · PAUDC 3D v2.02 · 6D RIDE · PAD DECK · STREET TALK · auto-saves</div>
+<div class="hud" id="fine">Fictional game world · PAUDC 3D v2.03 · 6D RIDE · PAD DECK · STREET TALK · auto-saves</div>
 <div id="vig"></div><div id="whisper"></div><div id="cine"></div><canvas id="grain" width="160" height="90"></canvas>
 <div id="scan"><i></i></div>
 <div id="statMeter"><canvas id="statMeterC" width="180" height="120"></canvas><div id="statMeterLabel">CALM</div></div>
@@ -10210,12 +10210,15 @@ function buildEnvironment(){
   try{
     const pm=new THREE.PMREMGenerator(renderer);pm.compileEquirectangularShader();
     // paint an equirect of our own sky/ground so reflections match the world, not a stock HDR
-    const c=document.createElement('canvas');c.width=256;c.height=128;const g=c.getContext('2d');
+    const c=document.createElement('canvas');c.width=512;c.height=256;const g=c.getContext('2d'); // v2.03: 2x res — crisper reflections
     const sky=scene.background&&scene.background.getHexString?('#'+scene.background.getHexString()):'#7fb6d9';
-    const grd=g.createLinearGradient(0,0,0,128);
+    const grd=g.createLinearGradient(0,0,0,256);
     grd.addColorStop(0,'#cfe6f5');grd.addColorStop(0.48,sky);grd.addColorStop(0.52,'#3f4a44');grd.addColorStop(1,'#20261f');
-    g.fillStyle=grd;g.fillRect(0,0,256,128);
-    g.fillStyle='rgba(255,246,214,0.95)';g.beginPath();g.arc(190,34,11,0,6.28);g.fill(); // sun
+    g.fillStyle=grd;g.fillRect(0,0,512,256);
+    // a soft horizon cloud band so reflections read as a real sky, not a flat gradient
+    for(let i=0;i<10;i++){g.fillStyle='rgba(255,255,255,'+(0.05+Math.random()*0.06).toFixed(3)+')';
+      g.beginPath();g.ellipse((i*57+20)%512,40+Math.random()*54,26+Math.random()*30,7+Math.random()*5,0,0,6.28);g.fill();}
+    g.fillStyle='rgba(255,246,214,0.95)';g.beginPath();g.arc(380,68,20,0,6.28);g.fill(); // sun
     const eq=new THREE.CanvasTexture(c);eq.mapping=THREE.EquirectangularReflectionMapping;eq.colorSpace=THREE.SRGBColorSpace;
     envRT=pm.fromEquirectangular(eq);   // applied per-material, NOT as scene.environment:
     // a global environment double-counts with the hemisphere light and blows the exposure out.   // a kiss of sky bounce, not a washout
@@ -10249,11 +10252,11 @@ function upgradeWorldToPBR(){
       const col=m.color?m.color.getHex():0xffffff;
       const s=new THREE.MeshStandardMaterial({color:col,map:m.map||null,transparent:!!m.transparent,opacity:m.opacity,side:m.side});
       if(s.map)s.map.colorSpace=THREE.SRGBColorSpace;   // colour maps are sRGB; this was previously wrong
-      if(isVeh){s.metalness=0.45;s.roughness=0.22;s.normalMap=NM.metal;s.normalScale.set(0.35,0.35);if(envRT)s.envMap=envRT.texture;}
-      else if(big){s.metalness=0.04;s.roughness=0.88;s.normalMap=NM.concrete;s.normalScale.set(0.9,0.9);
+      if(isVeh){s.metalness=0.5;s.roughness=0.18;s.normalMap=NM.metal;s.normalScale.set(0.35,0.35);if(envRT)s.envMap=envRT.texture;} // v2.03: glossier lacquer
+      else if(big){s.metalness=0.04;s.roughness=0.86;s.normalMap=NM.concrete;s.normalScale.set(0.9,0.9);if(envRT)s.envMap=envRT.texture;
         if(s.normalMap)s.normalMap.repeat.set(3,3);}
       else{s.metalness=0.05;s.roughness=0.78;}
-      s.envMapIntensity=isVeh?0.85:0;
+      s.envMapIntensity=isVeh?1.0:(big?0.10:0); // v2.03: a faint sky sheen on walls, strong on paint
       cache.set(key,s);pbrConverted++;return s;});
     o.material=Array.isArray(o.material)?out:out[0];
   });

@@ -755,3 +755,14 @@ runtime, correct sRGB), and SSAO now enabled at OVERKILL *and* LOCKSTEP (the 33m
 for it). Verified on the merged build: boots with zero errors on r180, full sweep 40/40, and
 noon frame luminance 169→183 — the gentle lift of real reflections, not the exposure blow-out
 the LGAIN tuning was built to prevent.
+
+## v2.03 — PBR fidelity tune (single-file intact)
+
+A conservative sharpening of the v2.00 PBR pass, all generated in-code:
+- Environment map doubled to 512×256 with a soft horizon cloud band, so reflections read as a
+  real sky rather than a flat gradient.
+- Vehicles: glossier lacquer (roughness 0.22→0.18, metalness 0.45→0.5, envMapIntensity 0.85→1.0).
+- Walls: a faint sky sheen (envMapIntensity 0→0.10) so concrete catches the light instead of
+  reading dead-matte.
+Verified: noon frame luminance 181 (vs 183 pre-tune — crisper, not blown out), sweep 47/47, zero
+external requests. The game is still one self-contained file.
