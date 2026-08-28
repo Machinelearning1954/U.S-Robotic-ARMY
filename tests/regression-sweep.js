@@ -147,6 +147,14 @@ ck('provenance resolves restoratively at the Eyrie',await poll(()=>window.__paud
 // v2.01: THE PAD DECK — no gamepad exists headlessly, so the deck must idle safely.
 ck('pad deck idles safely with no controller',await page.evaluate(()=>{const q=window.__paudc;
   return q.st().padOn===false&&q.st().padSeen===false;}));
+// v2.02: STREET TALK — baked-in dialogue bank is populated, and a line surfaces over a nearby
+// neighbour while on foot (the whole point: the island now speaks, with zero network calls).
+ck('street-talk dialogue bank baked in',(await page.evaluate(()=>window.__paudc.st().streetTalkLines))>=40);
+ck('a line surfaces over a nearby neighbour on foot',await poll(()=>{const q=window.__paudc;
+  if(q.st().veh!==undefined&&!q.st().onFoot)return false;
+  const pd=q.peds.find(p=>p.g&&p.g.visible);if(!pd)return false;
+  q.P.x=pd.g.position.x+4;q.P.z=pd.g.position.z;q.setStCd(0);
+  return q.st().streetTalking||q.st().streetTalkSeen;},9000));
 
 console.log('\nPAGE ERRORS:',errors.length,errors.join(' | ').slice(0,240));
 ck('zero page errors across the sweep',errors.length===0);

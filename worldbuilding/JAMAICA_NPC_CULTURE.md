@@ -231,3 +231,28 @@ no skeleton, so photoreal figures would slide around frozen — *worse* than sty
 that move correctly. It would also have reintroduced external binary assets (the very thing
 fixed in v1.63) and unresolved likeness provenance for a game intended for sale. Motion,
 not resolution, is what makes people read as people.
+
+## v2.02 — STREET TALK: the island finds its voice
+
+**Source & boundary:** the request was to integrate a Hugging Face large language model
+(GLM-5.3-Flash) to "make the game better / optimise it." Declined as an integration: an LLM is
+multi-gigabyte weights needing server or heavy-download inference, so shipping one inside the
+single self-contained file would break the ZERO-external-requests guarantee that makes the game
+sellable — and a text model cannot optimise a renderer regardless. What an LLM genuinely does is
+*write*, so that capability was used the only way that fits: the dialogue was generated at
+authoring time and **baked in as static data** — no download, no server, no runtime dependency,
+self-containment fully intact.
+
+**What it adds:** the island was visually alive but silent. Now, on foot, people you pass float
+an overheard line in a speech bubble over their head — projected to screen from the speaker's
+world position. Lines are original, patois-flavoured (consistent with the established NPC voice),
+warm and communal, and the pool is composed to fit context: a generic bank, plus the current
+time slice (morning/day/evening/night), plus rain lines when it's wet, plus district-specific
+colour (weighted) for the ten zones. Overheard, not shouted — it only triggers between ~2 and
+14 m, never for someone right on top of you, and never in photo mode. First overheard line +5.
+
+**Doctrine:** every line is warm or practical — never a threat, never a real person or brand.
+Consistent with the surveillance/community doctrine: the island talks WITH you.
+
+Verification: dialogue bank populated (60+ lines), a line surfaces over a nearby neighbour on
+foot. Sweep 47/47, zero page errors, zero external requests.
