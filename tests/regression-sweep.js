@@ -150,6 +150,8 @@ ck('pad deck idles safely with no controller',await page.evaluate(()=>{const q=w
 // v2.02: STREET TALK — baked-in dialogue bank is populated, and a line surfaces over a nearby
 // neighbour while on foot (the whole point: the island now speaks, with zero network calls).
 ck('street-talk dialogue bank baked in',(await page.evaluate(()=>window.__paudc.st().streetTalkLines))>=40);
+// v2.04: SMAA edge antialiasing is in the composer stack on desktop tier (headless UA = desktop).
+ck('SMAA antialiasing pass active',(await page.evaluate(()=>window.__paudc.st().smaaOn))===true);
 ck('a line surfaces over a nearby neighbour on foot',await poll(()=>{const q=window.__paudc;
   if(q.st().veh!==undefined&&!q.st().onFoot)return false;
   const pd=q.peds.find(p=>p.g&&p.g.visible);if(!pd)return false;

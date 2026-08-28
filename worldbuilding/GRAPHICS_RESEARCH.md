@@ -766,3 +766,14 @@ A conservative sharpening of the v2.00 PBR pass, all generated in-code:
   reading dead-matte.
 Verified: noon frame luminance 181 (vs 183 pre-tune — crisper, not blown out), sweep 47/47, zero
 external requests. The game is still one self-contained file.
+
+## v2.04 — SMAA edge antialiasing (diagnosed the gap, closed it)
+
+Applied a "find the biggest gap first" pass to the renderer instead of piling on effects. The
+diagnosis: the composer stack was RenderPass → Bloom → OutputPass, so the renderer's MSAA was
+discarded the moment post-processing ran — every thin edge (railings, poles, palm fronds, wires,
+the neon skyline) crawled and shimmered. Edge aliasing in the composed image is the single most
+visible "not-AAA" tell, and the full r180 engine (v2.00) ships SMAAPass, which the old stripped
+bundle never had. Added SMAAPass before OutputPass on desktop tier (TIER>=1); low-end mobile
+keeps its render-scale budget for framerate. Cheap morphological pass, no exposure impact:
+noon luminance 175 (vs 181), sweep 48/48, still one self-contained file, zero external requests.
