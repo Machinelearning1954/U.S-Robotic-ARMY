@@ -35,6 +35,17 @@ const seaBase=await page.evaluate(()=>window.__paudc.SEA_BASE);
 ck('sea starts at the ordinary tideline',typeof seaBase==='number'&&Math.abs(s.seaLevel-seaBase)<1e-9,'seaLevel='+s.seaLevel+' base='+seaBase);
 ck('sea has wave layers + depth tint',s.waveLayers>=3&&s.seaTinted===true,'layers='+s.waveLayers);
 
+// B2. NEIGHBOURHOOD WATCH (v2.01) — must run while still aboard the starting ride: buzz a
+// visible ped at speed and the BII watch rises once, then holds for the cooldown.
+const nwSetup=await page.evaluate(()=>{const q=window.__paudc;const pd=q.peds.find(p=>p.g&&p.g.visible);
+  if(!pd)return false;q.bii(0);q.setNwT(0);q.P.x=pd.g.position.x+2;q.P.z=pd.g.position.z;return true;});
+ck('a visible neighbour found',nwSetup===true);
+ck('buzzing the crowd gets called in (BII watch rises)',await poll(()=>{const q=window.__paudc;
+  q.P.v=30;const pd=q.peds.find(p=>p.g&&p.g.visible);if(pd){q.P.x=pd.g.position.x+2;q.P.z=pd.g.position.z;}
+  return q.st().nwCd>0&&q.st().watch>0;},9000)); // nwCd>0 proves THIS system fired, not the speeding detector
+ck('one call per cooldown, not a heat spiral',(await page.evaluate(()=>window.__paudc.st().nwCd))>20);
+await page.evaluate(()=>{const q=window.__paudc;q.bii(0);q.P.v=0;});
+
 // C. ON FOOT + SWIMMING
 await page.keyboard.press('f');
 ck('can get out on foot',await poll(()=>window.__paudc.st().onFoot,9000));
@@ -133,6 +144,9 @@ for(let i=0;i<3;i++){
   ck('provenance frame '+(i+1)+' matches at its vantage',await poll(`window.__paudc.st().pvdStage>=${i+2}`,9000));}
 await page.evaluate(()=>{const q=window.__paudc;q.P.x=q.EYRIE.X;q.P.z=q.EYRIE.Z;q.P.v=0;q.setPvdT(9);});
 ck('provenance resolves restoratively at the Eyrie',await poll(()=>window.__paudc.st().pvdDone===true,9000));
+// v2.01: THE PAD DECK — no gamepad exists headlessly, so the deck must idle safely.
+ck('pad deck idles safely with no controller',await page.evaluate(()=>{const q=window.__paudc;
+  return q.st().padOn===false&&q.st().padSeen===false;}));
 
 console.log('\nPAGE ERRORS:',errors.length,errors.join(' | ').slice(0,240));
 ck('zero page errors across the sweep',errors.length===0);

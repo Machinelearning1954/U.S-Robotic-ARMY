@@ -1249,3 +1249,29 @@ fairground-ride sense of the word:
 
 Verification: overlay canvas alive, spray lands, the 6 key toggles both ways — sweep 40/40,
 zero page errors, zero external requests.
+
+## v2.01 — THE PAD DECK + NEIGHBOURHOOD WATCH
+
+**Source & boundary:** the request named a console brand and another studio's game, and came
+bundled with a "drop" containing weapons (a wrench melee slot), six-star wanted levels, that
+game's actual protagonist, its death screen, and leak-cycle branding. All of it declined:
+weapons break the non-lethal floor permanently; leak-derived content and brand names are Rule
+Zero. Phantom commits again — nothing existed to merge. What was honestly keepable:
+
+**THE PAD DECK** — what a console really puts in your hands is a controller. Standard
+cross-vendor Gamepad API, no brand names: left stick steers, right trigger drives, left
+trigger brakes, A interact / B foot / X hold-to-dive / Y ride-cam / stick-click sprint,
+d-pad time·fps·tier, face buttons dispatch real key events so every existing handler just
+works. Rumble rides the same 6D feel channel as the phone motor — impacts, splashdowns and
+the surge land in your palms. The pad only writes controls while actually touched, so the
+keyboard never fights it.
+
+**NEIGHBOURHOOD WATCH** — the island's answer to "bystanders report crimes": no crimes, no
+heat meter, no wanted stars. But recklessness exists, and so do neighbours: pass within 7 m
+of people at over ~36 km/h and somebody calls it in — the BII extends an invitation through
+the existing watch system (capped at 5, cooling on its own, one call per 30 s). Community
+accountability pointed at the invitation doctrine. We trace driving, not drivers.
+
+Verification: pad idles safely with no controller present; the call-in fires (proven via its
+own cooldown state, isolated from the speeding detector) and cannot spiral. Sweep 45/45,
+zero page errors, zero external requests.
